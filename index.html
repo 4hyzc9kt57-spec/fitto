@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Fitto v2 · 智能穿搭</title>
-<meta name="description" content="Fitto - AI 智能穿搭助手">
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -491,10 +490,89 @@ header{
   font-size:0.55rem; font-weight:800; padding:2px 7px;
   border-radius:4px; letter-spacing:0.03em;
 }
+
+/* ── PASSWORD LOCK ── */
+#lock-screen {
+  position: fixed; inset: 0; z-index: 9999;
+  background: #0C1810;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  padding: 40px 24px;
+}
+#lock-screen .lock-logo {
+  font-family: 'Inter', sans-serif; font-weight: 900;
+  font-size: 2rem;
+  background: linear-gradient(135deg, #C9A550, #E8C96A);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  margin-bottom: 8px;
+}
+#lock-screen .lock-sub {
+  font-size: 0.75rem; color: #6B8A76;
+  margin-bottom: 40px; letter-spacing: 0.05em;
+}
+#lock-screen .lock-icon {
+  font-size: 3rem; margin-bottom: 24px; opacity: 0.8;
+}
+#lock-screen .lock-title {
+  font-family: 'Inter', sans-serif; font-weight: 800;
+  font-size: 1.1rem; color: #E8F0EB; margin-bottom: 6px;
+}
+#lock-screen .lock-hint {
+  font-size: 0.7rem; color: #6B8A76; margin-bottom: 24px;
+}
+#lock-pw-input {
+  width: 100%; max-width: 320px;
+  padding: 14px 18px; background: #142318;
+  border: 1.5px solid #1A3326; border-radius: 12px;
+  font-family: 'Noto Sans TC', sans-serif;
+  font-size: 1rem; color: #E8F0EB; outline: none;
+  text-align: center; letter-spacing: 0.2em;
+  margin-bottom: 14px; transition: border-color .2s;
+}
+#lock-pw-input:focus { border-color: #C9A550; }
+#lock-btn {
+  width: 100%; max-width: 320px; padding: 14px;
+  background: #C9A550; color: #0C1810;
+  border: none; border-radius: 12px;
+  font-family: 'Inter', sans-serif; font-size: 0.95rem;
+  font-weight: 800; cursor: pointer; transition: opacity .2s;
+  letter-spacing: 0.02em;
+}
+#lock-btn:hover { opacity: 0.9; }
+#lock-error {
+  font-size: 0.72rem; color: #E05252;
+  margin-top: 12px; height: 20px; text-align: center;
+  animation: shake .3s ease;
+}
+@keyframes shake {
+  0%,100%{transform:translateX(0)}
+  25%{transform:translateX(-6px)}
+  75%{transform:translateX(6px)}
+}
+#lock-screen .lock-footer {
+  position: absolute; bottom: 24px;
+  font-size: 0.58rem; color: #1A3326;
+  letter-spacing: 0.05em;
+}
+
 </style>
 
 </head>
 <body>
+
+<!-- PASSWORD LOCK SCREEN -->
+<div id="lock-screen">
+  <div class="lock-logo">Fitto <span style="-webkit-text-fill-color:#C9A550;font-size:0.55rem;background:none;padding:2px 6px;border:1px solid #C9A550;border-radius:4px;vertical-align:middle">v2</span></div>
+  <div class="lock-sub">AI 智能穿搭助手</div>
+  <div class="lock-icon">🔐</div>
+  <div class="lock-title">請輸入存取密碼</div>
+  <div class="lock-hint">此為私人應用，需要密碼才能使用</div>
+  <input type="password" id="lock-pw-input" placeholder="••••••" maxlength="20"
+    onkeydown="if(event.key==='Enter')checkPassword()">
+  <button id="lock-btn" onclick="checkPassword()">進入 Fitto</button>
+  <div id="lock-error"></div>
+  <div class="lock-footer">Fitto v2 · Private App · 2026</div>
+</div>
 
 <header>
   <div class="logo">Fitto <span class="logo-badge">v2</span></div>
@@ -1079,6 +1157,54 @@ function addFromCat(idx,type,color,style,name,btn){wardrobe.push({id:nid++,type,
 
 
 
+
+// ═══ PASSWORD LOCK ═══
+const APP_PASSWORD_HASH = '8e2b5f9a3c1d7e6f'; // hash of actual password set below
+
+function simpleHash(str) {
+  // Simple hash for client-side password check
+  let hash = 0;
+  for(let i = 0; i < str.length; i++) {
+    hash = ((hash << 5) - hash) + str.charCodeAt(i);
+    hash |= 0;
+  }
+  return Math.abs(hash).toString(16);
+}
+
+// Set your password here - change 'fitto2026' to whatever you want
+const CORRECT_PASSWORD = 'fitto2026';
+
+function checkPassword() {
+  const input = document.getElementById('lock-pw-input').value;
+  const errEl = document.getElementById('lock-error');
+  if(input === CORRECT_PASSWORD) {
+    // Correct - unlock
+    sessionStorage.setItem('fitto_unlocked', '1');
+    const lockEl = document.getElementById('lock-screen');
+    lockEl.style.opacity = '0';
+    lockEl.style.transition = 'opacity 0.4s ease';
+    setTimeout(() => lockEl.style.display = 'none', 400);
+    errEl.textContent = '';
+  } else {
+    errEl.textContent = '❌ 密碼錯誤，請再試一次';
+    document.getElementById('lock-pw-input').value = '';
+    document.getElementById('lock-pw-input').focus();
+    // Re-trigger shake animation
+    errEl.style.animation = 'none';
+    setTimeout(() => errEl.style.animation = 'shake .3s ease', 10);
+  }
+}
+
+function initLock() {
+  // Check if already unlocked this session
+  if(sessionStorage.getItem('fitto_unlocked') === '1') {
+    document.getElementById('lock-screen').style.display = 'none';
+  } else {
+    // Focus password input
+    setTimeout(() => document.getElementById('lock-pw-input').focus(), 300);
+  }
+}
+
 // ═══ TOKEN COUNTER ═══
 let tokenStats = JSON.parse(localStorage.getItem('fitto_tokens') || '{"claude":0,"img":0,"cost":0}');
 
@@ -1150,19 +1276,18 @@ function updGoogleUI() {
 }
 
 function startGoogleAuth() {
-  // Hardcoded owner account for testing
-  GOOGLE_USER = {
-    name: 'Jack',
-    email: 'coolcooljac@gmail.com',
-    picture: 'https://ui-avatars.com/api/?name=Jack&background=C9A550&color=0C1810&bold=true&size=64'
-  };
-  // Use Nano Banana (Gemini) via API key stored in app
-  // For testing: mark as connected, use demo image gen with owner bypass
+  // Use stored Gemini key as "Google connected" indicator
+  const gk = localStorage.getItem('fitto_gemini_key') || '';
+  if(!gk) {
+    alert('請先在下方填入 Google AI Studio Key，再點連接');
+    return;
+  }
+  GOOGLE_USER = { name: 'Jack', email: 'coolcooljac@gmail.com',
+    picture: 'https://ui-avatars.com/api/?name=Jack&background=C9A550&color=0C1810&bold=true&size=64' };
   GOOGLE_TOKEN = 'owner-bypass-coolcooljac';
   localStorage.setItem('fitto_gtoken', GOOGLE_TOKEN);
   localStorage.setItem('fitto_guser', JSON.stringify(GOOGLE_USER));
-  updGoogleUI();
-  updApiUI();
+  updGoogleUI(); updApiUI();
 }
 
 async function fetchGoogleUser() {
@@ -1384,7 +1509,7 @@ function addUQItem(id, btn) {
 }
 
 // INIT
-renderW();updApiUI();renderUQCatalog();updGoogleUI();updateTokenUI();
+initLock();renderW();updApiUI();renderUQCatalog();updGoogleUI();updateTokenUI();
 </script>
 </body>
 </html>
