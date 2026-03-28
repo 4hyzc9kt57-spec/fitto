@@ -597,6 +597,23 @@ body{background:var(--bg);color:var(--ink);}
 .pf label{display:block;font-size:.6rem;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase;}
 .pf input,.pf select{width:100%;padding:9px 11px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);font-size:.8rem;color:var(--ink);outline:none;-webkit-appearance:none;appearance:none;}
 
+
+/* ── SHARE BAR (Threads style) ── */
+.share-bar{display:flex;gap:8px;margin-top:10px;padding:10px 0 4px;border-top:1px solid rgba(255,255,255,.08)}
+.shr-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;background:none;border:none;cursor:pointer;border-radius:14px;transition:background .15s;color:var(--ink2)}
+.shr-btn:active{background:rgba(255,255,255,.08)}
+.shr-btn span{font-size:.58rem;font-weight:600;letter-spacing:.01em}
+.shr-fb{color:#1877F2}
+.shr-ig{color:#C13584}
+.shr-save{color:var(--green)}
+
+/* ── TREND TOGGLE ── */
+.trend-toggle{position:relative;width:44px;height:26px;flex-shrink:0}
+.trend-toggle input{opacity:0;width:0;height:0}
+.trend-knob{position:absolute;inset:0;background:var(--border2);border-radius:13px;cursor:pointer;transition:background .25s}
+.trend-knob::before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:white;border-radius:50%;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.trend-toggle input:checked + .trend-knob{background:var(--gold)}
+.trend-toggle input:checked + .trend-knob::before{transform:translateX(18px)}
 </style>
 
 </head>
@@ -686,8 +703,36 @@ body{background:var(--bg);color:var(--ink);}
     <div class="ctrl-row">
       <select id="socc" class="ctrl-sel"><option>日常上班</option><option>週末休閒</option><option>約會</option><option>混合</option></select>
       <select id="ssea" class="ctrl-sel"><option>🌸 春季</option><option>☀️ 夏季</option><option>🍂 秋季</option><option>❄️ 冬季</option></select>
-      <select id="ssty" class="ctrl-sel"><option>簡約低調</option><option>時尚有型</option><option>舒適優先</option><option>專業正式</option></select>
     </div>
+    <details style="margin-bottom:10px">
+      <summary style="cursor:pointer;font-size:.65rem;font-weight:800;color:var(--gold);letter-spacing:.06em;list-style:none;display:flex;align-items:center;gap:5px">
+        <span>▸</span> AI 搭配挑選原則
+      </summary>
+      <div style="background:var(--surface2);border-left:3px solid var(--gold);border-radius:0 0 8px 8px;padding:10px 12px;margin-top:4px;font-size:.7rem;color:var(--ink2);line-height:1.7">
+        ① 色彩和諧：主色搭配中性色，避免超過 3 種色系<br>
+        ② 場合適配：依日常/休閒/正式調整正式程度<br>
+        ③ 季節感：布料厚薄與色調符合當季氣候<br>
+        ④ 單品輪替：同一件衣物一週不重複穿
+      </div>
+    </details>
+
+    <!-- 潮流開關 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;margin-bottom:10px">
+      <div>
+        <div style="font-size:.78rem;font-weight:800;color:var(--ink)">✨ 融入當季潮流</div>
+        <div style="font-size:.62rem;color:var(--muted);margin-top:2px">AI 即時搜尋時尚雜誌，優先推薦流行單品與配色</div>
+      </div>
+      <label class="trend-toggle">
+        <input type="checkbox" id="trend-on">
+        <span class="trend-knob"></span>
+      </label>
+    </div>
+    <!-- 潮流資訊預覽（生成後顯示） -->
+    <div id="trend-info" style="display:none;background:linear-gradient(135deg,var(--surface2),var(--surface3));border:1px solid var(--border2);border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:.7rem;color:var(--ink2);line-height:1.7">
+      <div style="font-size:.62rem;font-weight:800;color:var(--gold);letter-spacing:.06em;margin-bottom:5px">🔍 本次參考潮流</div>
+      <div id="trend-text"></div>
+    </div>
+
     <button class="btn-gen" id="bgen" onclick="genOutfit()">
       <div class="spinner"></div>✦ 生成本週搭配
     </button>
@@ -941,18 +986,15 @@ body{background:var(--bg);color:var(--ink);}
       <label>我的名字</label>
       <input type="text" class="api-inp" id="name-inp" placeholder="輸入你的名字…" maxlength="20">
     </div>
-    <div style="font-size:.62rem;font-weight:800;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">🎨 模特兒設定</div>
+    <div style="font-size:.62rem;font-weight:800;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">👤 基本資料</div>
     <div class="profile-grid">
       <div class="pf"><label>身高 (cm)</label><input type="number" id="p-height" value="175" min="150" max="200"></div>
       <div class="pf"><label>體重 (kg)</label><input type="number" id="p-weight" value="65" min="40" max="120"></div>
-      <div class="pf"><label>性別</label><select id="p-gender"><option value="male">男性</option><option value="female">女性</option></select></div>
-      <div class="pf"><label>拍攝角度</label><select id="p-angle"><option value="full body front view">全身正面</option><option value="three-quarter view">四分之三側</option><option value="upper body portrait">上半身</option></select></div>
+      <div class="pf" style="grid-column:1/-1"><label>性別</label><select id="p-gender"><option value="male">男性</option><option value="female">女性</option></select></div>
     </div>
-    <div class="pf" style="margin-bottom:14px"><label>模特兒風格</label>
-      <select id="p-face">
-        <optgroup label="👨 帥哥"><option value="handsome Asian male model with warm sunny smile">☀️ 陽光型</option><option value="Korean male model sharp features K-fashion">🌙 韓風型</option><option value="rugged handsome male model strong jawline masculine">⚡ 粗獷型</option></optgroup>
-        <optgroup label="👩 美女"><option value="beautiful Korean female model K-beauty makeup">🌸 韓風型</option><option value="Japanese female model cute natural beauty">🌺 日系型</option><option value="sophisticated mature Asian female model confident">👑 御姐型</option></optgroup>
-      </select>
+    <div style="background:var(--surface2);border-left:3px solid var(--gold);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:.7rem;color:var(--ink2);line-height:1.7">
+      <b style="color:var(--gold);font-size:.65rem;letter-spacing:.06em">🪄 頭像即模特兒</b><br>
+      穿搭圖片會依你在<b>商店</b>購買並使用中的頭像來生成人物外型，不需額外設定。
     </div>
     <button class="btn-p" onclick="saveName()" style="margin-bottom:10px">儲存設定</button>
     <button class="btn-ghost" style="width:100%" onclick="closeModal('name-ov')">取消</button>
@@ -1140,8 +1182,7 @@ function openNameModal() {
   if(p.h) document.getElementById('p-height').value = p.h;
   if(p.w) document.getElementById('p-weight').value = p.w;
   if(p.g) document.getElementById('p-gender').value = p.g;
-  if(p.f) document.getElementById('p-face').value = p.f;
-  if(p.a) document.getElementById('p-angle').value = p.a;
+
   document.getElementById('name-ov').classList.add('show');
 }
 
@@ -1152,9 +1193,7 @@ function saveName() {
   var prof = {
     h: document.getElementById('p-height').value,
     w: document.getElementById('p-weight').value,
-    g: document.getElementById('p-gender').value,
-    f: document.getElementById('p-face').value,
-    a: document.getElementById('p-angle').value
+    g: document.getElementById('p-gender').value
   };
   localStorage.setItem('fitto_profile', JSON.stringify(prof));
   updateBanner();
@@ -1168,8 +1207,7 @@ function closeModal(id) {
 function getProfile() {
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
   return {
-    h: p.h || '175', w: p.w || '65', g: p.g || 'male',
-    f: p.f || 'handsome Asian male model', a: p.a || 'full body front view'
+    h: p.h || '175', w: p.w || '65', g: p.g || 'male'
   };
 }
 
@@ -1520,13 +1558,48 @@ function confirmScan(){
 }
 
 // GENERATE
+async function fetchTrend(sea) {
+  const seaLabel = sea.replace(/[🌸☀️🍂❄️]\s*/,'');
+  const year = new Date().getFullYear();
+  const prompt = `今是${year}年${seaLabel}季。請用繁體中文簡要列出目前最流行的5個穿搭趨勢（包含流行單品、色系、廓形），每項一行，格式：「趨勢名：簡短說明」。只列清單，不要加前言。`;
+  const raw = await geminiText(prompt, 300);
+  return raw.trim();
+}
+
 async function genOutfit(){
   if(wardrobe.length<3){document.getElementById('wfew').classList.add('show');return}
   document.getElementById('wfew').classList.remove('show');
   const btn=document.getElementById('bgen');btn.classList.add('loading');btn.disabled=true;
-  const occ=document.getElementById('socc').value,sea=document.getElementById('ssea').value,sty=document.getElementById('ssty').value;
+  const occ=document.getElementById('socc').value,sea=document.getElementById('ssea').value;
+  const trendOn = document.getElementById('trend-on').checked;
+  const trendInfoEl = document.getElementById('trend-info');
+  const trendTextEl = document.getElementById('trend-text');
+
+  // 隱藏舊潮流資訊
+  trendInfoEl.style.display = 'none';
+  trendTextEl.textContent = '';
+
+  let trendContext = '';
+  if(trendOn) {
+    btn.querySelector('.spinner').style.display = 'block';
+    try {
+      const trendRaw = await fetchTrend(sea);
+      trendContext = trendRaw;
+      // 顯示潮流資訊卡
+      trendTextEl.innerHTML = trendRaw.split('\n').map(l=>
+        l.trim() ? `<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05)">• ${l.replace(/^[·•\-\d.]+\s*/,'')}</div>` : ''
+      ).join('');
+      trendInfoEl.style.display = 'block';
+    } catch(e) {
+      trendContext = '';
+    }
+  }
+
   const wj=JSON.stringify(wardrobe.map(i=>({id:i.id,type:i.type,color:i.color,style:i.style,...(i.note?{note:i.note}:{})})));
-  const prompt=`你是專業穿搭顧問。衣櫃：${wj}\n為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合、${sty}風格生成工作日（週一到週五）5天搭配計劃。只回JSON，不要加任何說明：{"title":"主題","days":[{"day":"週一","outfit":"搭配描述","tip":"建議"},{"day":"週二","outfit":"搭配描述","tip":"建議"},{"day":"週三","outfit":"搭配描述","tip":"建議"},{"day":"週四","outfit":"搭配描述","tip":"建議"},{"day":"週五","outfit":"搭配描述","tip":"建議"}],"overall_note":"整體建議2句"}`;
+  const trendSection = trendContext
+    ? `\n\n【當季流行趨勢參考】\n${trendContext}\n以上趨勢若衣櫃內有對應單品請優先選用；若無，可在tip中建議補充哪類單品。`
+    : '';
+  const prompt=`你是專業穿搭顧問。衣櫃：${wj}\n為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合生成工作日（週一到週五）5天搭配計劃。${trendSection}\n只回JSON，不要加任何說明：{"title":"主題","days":[{"day":"週一","outfit":"搭配描述","tip":"建議"},{"day":"週二","outfit":"搭配描述","tip":"建議"},{"day":"週三","outfit":"搭配描述","tip":"建議"},{"day":"週四","outfit":"搭配描述","tip":"建議"},{"day":"週五","outfit":"搭配描述","tip":"建議"}],"overall_note":"整體建議2句"}`;
   try{
     const raw = await geminiText(prompt, 1000);
     const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
@@ -1638,14 +1711,28 @@ async function genImg(idx, outfit, occ, sea) {
       lastRes.days[idx].imgSrc = imgSrc;
     }
 
+    const escapedSrc = imgSrc;
+    const debugId = 'dbg-'+idx;
     box.innerHTML = `<div class="outfit-img-wrap">
-      <img src="${imgSrc}" class="outfit-img" alt="穿搭示意圖" onclick="openImgFull('${imgSrc}')">
+      <img src="${imgSrc}" class="outfit-img" alt="穿搭示意圖" onclick="openImgFull(this.src)" style="cursor:zoom-in">
       <div class="img-cost-note">🪙 -1</div>
-      <div class="img-debug" style="font-size:.55rem;color:rgba(255,255,255,.3);padding:4px 6px;line-height:1.4;word-break:break-all">[DEBUG] ${imgPrompt.substring(0,120)}…</div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px">
-        <button onclick="shareToFB('${outfit.replace(/'/g,"\'")}')" style="padding:7px 4px;background:#1877F2;border:none;border-radius:8px;color:white;font-size:.65rem;font-weight:700;cursor:pointer;">📘 FB</button>
-        <button onclick="shareToIG('${imgSrc}')" style="padding:7px 4px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);border:none;border-radius:8px;color:white;font-size:.65rem;font-weight:700;cursor:pointer;">📷 IG</button>
-        <button onclick="saveImgLocal('${imgSrc}','outfit_${idx}')" style="padding:7px 4px;background:#2A8A4A;border:none;border-radius:8px;color:white;font-size:.65rem;font-weight:700;cursor:pointer;">💾 儲存</button>
+      <details style="margin:6px 0;font-size:.62rem;color:var(--muted)">
+        <summary style="cursor:pointer;color:var(--gold);font-weight:700;list-style:none">▸ 查看生成 Prompt</summary>
+        <div id="${debugId}" style="margin-top:6px;padding:8px;background:rgba(0,0,0,.3);border-radius:8px;line-height:1.6;word-break:break-all;white-space:pre-wrap;font-size:.6rem;color:#ccc;user-select:all">${imgPrompt}</div>
+      </details>
+      <div class="share-bar">
+        <button class="shr-btn shr-fb" onclick="shareToFB('${outfit.replace(/'/g,"\\'")}')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07z"/></svg>
+          <span>Facebook</span>
+        </button>
+        <button class="shr-btn shr-ig" onclick="shareToIG('${imgSrc}')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+          <span>Instagram</span>
+        </button>
+        <button class="shr-btn shr-save" onclick="saveImgLocal('${imgSrc}','fitto_${idx}')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>儲存相片</span>
+        </button>
       </div>
     </div>`;
 
@@ -1676,9 +1763,15 @@ function saveImgLocal(src, name) {
 
 function openImgFull(url) {
   const ov=document.createElement('div');
-  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.9);z-index:999;display:flex;align-items:center;justify-content:center;cursor:pointer';
-  ov.innerHTML=`<img src="${url}" style="max-width:95%;max-height:95%;border-radius:12px">`;
-  ov.onclick=()=>document.body.removeChild(ov);
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px';
+  ov.innerHTML=`
+    <img src="${url}" style="max-width:96%;max-height:78vh;border-radius:14px;object-fit:contain">
+    <div style="display:flex;gap:12px">
+      <button onclick="saveImgLocal('${url}','fitto_outfit');event.stopPropagation()" style="padding:10px 22px;background:white;color:#111;border:none;border-radius:20px;font-weight:700;font-size:.82rem;cursor:pointer">💾 儲存到手機</button>
+      <button onclick="document.body.removeChild(this.closest('[style*=fixed]'))" style="padding:10px 22px;background:rgba(255,255,255,.15);color:white;border:none;border-radius:20px;font-weight:700;font-size:.82rem;cursor:pointer">✕ 關閉</button>
+    </div>
+    <div style="font-size:.6rem;color:rgba(255,255,255,.3)">點擊圖片外區域關閉</div>`;
+  ov.addEventListener('click', function(e){ if(e.target===ov) document.body.removeChild(ov); });
   document.body.appendChild(ov);
 }
 
@@ -1701,7 +1794,7 @@ function renderSaved(){
         ${(s.days||[]).map(d=>`
           <div class="sp">
             <div class="spd">${d.day}</div>
-            ${d.imgSrc ? `<img src="${d.imgSrc}" style="width:100%;border-radius:6px;margin:4px 0;object-fit:cover;max-height:100px">` : ''}
+            ${d.imgSrc ? `<img src="${d.imgSrc}" style="width:100%;border-radius:6px;margin:4px 0;object-fit:cover;max-height:100px;cursor:zoom-in" onclick="openImgFull(this.src)">` : ''}
             <div class="spo">${d.outfit}</div>
           </div>`).join('')}
       </div>
