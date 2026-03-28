@@ -1090,13 +1090,13 @@ function buyExpansion(add, cost) {
 function buyAvatar(emoji, cost, btnId) {
   if(ownedAvatars.indexOf(emoji) >= 0) {
     userAvatar = emoji; saveProgress(); updateCoinUI(); updateBanner();
+    renderShop();
     return;
   }
   if(!spendCoin(cost,'購買頭像')) return;
   ownedAvatars.push(emoji); userAvatar = emoji;
   saveProgress(); updateCoinUI(); updateBanner();
-  var btn = document.getElementById(btnId);
-  if(btn) { btn.textContent = '✓ 使用中'; btn.disabled = true; }
+  renderShop();
 }
 
 // ═══ NAV ═══
@@ -1258,14 +1258,29 @@ function checkAutoMissions() {
 
 function renderShop() {
   updateCoinUI();
-  // Update avatar buttons based owned state
   var avatarMap = {'btn-sun':'☀️','btn-kr':'🌙','btn-rg':'⚡','btn-kg':'🌸','btn-jp':'🌺','btn-qu':'👑','btn-st':'⭐'};
+  var costMap   = {'btn-sun':23,'btn-kr':30,'btn-rg':38,'btn-kg':30,'btn-jp':23,'btn-qu':38,'btn-st':15};
   for(var bid in avatarMap) {
     var emoji = avatarMap[bid];
     var btn = document.getElementById(bid);
-    if(btn && ownedAvatars.indexOf(emoji) >= 0) {
-      var label = userAvatar === emoji ? '✓ 使用中' : '✓ 已擁有';
-      btn.outerHTML = '<div class="si-owned">' + label + '</div>';
+    if(!btn) continue;
+    if(ownedAvatars.indexOf(emoji) >= 0) {
+      if(userAvatar === emoji) {
+        btn.textContent = '✓ 使用中';
+        btn.className = 'si-owned';
+        btn.disabled = true;
+        btn.onclick = null;
+      } else {
+        btn.textContent = '切換使用';
+        btn.className = 'si-price';
+        btn.disabled = false;
+        btn.onclick = (function(e, b){ return function(){ buyAvatar(e, 0, b); }; })(emoji, bid);
+      }
+    } else {
+      btn.textContent = '🪙 ' + costMap[bid] + '枚';
+      btn.className = 'si-price';
+      btn.disabled = false;
+      btn.onclick = (function(e, c, b){ return function(){ buyAvatar(e, c, b); }; })(emoji, costMap[bid], bid);
     }
   }
 }
@@ -1381,6 +1396,7 @@ function sv(name,btn){goNav(name);}
 
 // WARDROBE
 function addItem(data){
+  if(wardrobe.length >= wardrobeLimit){ showLimitAlert(); return; }
   let item;
   if(data){ item=data; }
   else {
@@ -1466,6 +1482,7 @@ async function aiScan(){
 }
 function fillScan(r){const s=(id,v)=>{const e=document.getElementById(id);if([...e.options].find(o=>o.value===v))e.value=v};s('st',r.type);s('sc2',r.color);s('ss',r.style);document.getElementById('sn').value=r.note||'';document.getElementById('sres').classList.add('show')}
 function confirmScan(){
+  if(wardrobe.length >= wardrobeLimit){ showLimitAlert(); closeScan(); return; }
   const item={id:nid++,type:document.getElementById('st').value,color:document.getElementById('sc2').value,style:document.getElementById('ss').value,note:document.getElementById('sn').value.trim(),hasPhoto:!!scanB64};
   if(scanB64){
     // Compress image via canvas before storing
@@ -1561,7 +1578,7 @@ async function genImg(idx, outfit, occ, sea) {
 
     const key = localStorage.getItem('fitto_gemini_key') || '';
     if(!key) throw new Error('請先設定 Gemini Key');
-    const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-preview-image-generation:generateContent?key=' + key;
+    const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=' + key;
     const res = await fetch(endpoint, {
       method:'POST', headers:{'Content-Type':'application/json'},
       body:JSON.stringify({contents:[{role:'user',parts:[{text:imgPrompt}]}],generationConfig:{responseModalities:['TEXT','IMAGE']}})
@@ -1628,7 +1645,7 @@ function renderCatItems(items){
   document.getElementById('catitems').innerHTML=items.map((i,idx)=>`<div class="cit"><div class="cit-info"><strong>${i.name}</strong><span>${i.type} · ${i.color} · ${i.style} · ${i.desc}</span></div><button class="btn-ca" onclick="addFromCat(${idx},'${i.type}','${i.color}','${i.style}','${i.name.replace(/'/g,"\\'")}',this)">加入衣櫃</button></div>`).join('');
   document.getElementById('catres').classList.add('show');
 }
-function addFromCat(idx,type,color,style,name,btn){wardrobe.push({id:nid++,type,color,style,note:name});persist();renderW();btn.textContent='✅ 已加入';btn.className='btn-ca added';btn.disabled=true}
+function addFromCat(idx,type,color,style,name,btn){if(wardrobe.length>=wardrobeLimit){showLimitAlert();return;}wardrobe.push({id:nid++,type,color,style,note:name});persist();renderW();btn.textContent='✅ 已加入';btn.className='btn-ca added';btn.disabled=true}
 
 
 
@@ -1802,6 +1819,7 @@ function renderUQCatalog() {
 function addUQItem(id, btn) {
   const item = UQ_CATALOG.find(i=>i.id===id);
   if(!item || addedUQIds.has(id)) return;
+  if(wardrobe.length >= wardrobeLimit){ showLimitAlert(); return; }
   wardrobe.push({id:nid++, type:item.type, color:item.color, style:item.style, note:item.name});
   addedUQIds.add(id);
   persist(); renderW();
