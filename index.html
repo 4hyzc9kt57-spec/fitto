@@ -1339,7 +1339,8 @@ async function geminiGenImage(prompt, refImages = []) {
   const apiKey = geminiKey;
   if(!apiKey) throw new Error('請先在設定填入 Google AI Studio Key');
 
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
+  // gemini-2.0-flash-exp supports image generation on free tier
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
 
   // Build parts array - add reference images if provided
   const textParts = [{ text: prompt }];
