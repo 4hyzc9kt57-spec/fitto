@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto v2 · 智能穿搭</title>
+<title>Fitto v3 · 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -491,105 +491,162 @@ header{
   border-radius:4px; letter-spacing:0.03em;
 }
 
-/* ── PASSWORD LOCK ── */
-#lock-screen {
-  position: fixed; inset: 0; z-index: 9999;
-  background: #0C1810;
-  display: flex; flex-direction: column;
-  align-items: center; justify-content: center;
-  padding: 40px 24px;
-}
-#lock-screen .lock-logo {
-  font-family: 'Inter', sans-serif; font-weight: 900;
-  font-size: 2rem;
-  background: linear-gradient(135deg, #C9A550, #E8C96A);
-  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-  margin-bottom: 8px;
-}
-#lock-screen .lock-sub {
-  font-size: 0.75rem; color: #6B8A76;
-  margin-bottom: 40px; letter-spacing: 0.05em;
-}
-#lock-screen .lock-icon {
-  font-size: 3rem; margin-bottom: 24px; opacity: 0.8;
-}
-#lock-screen .lock-title {
-  font-family: 'Inter', sans-serif; font-weight: 800;
-  font-size: 1.1rem; color: #E8F0EB; margin-bottom: 6px;
-}
-#lock-screen .lock-hint {
-  font-size: 0.7rem; color: #6B8A76; margin-bottom: 24px;
-}
-#lock-pw-input {
-  width: 100%; max-width: 320px;
-  padding: 14px 18px; background: #142318;
-  border: 1.5px solid #1A3326; border-radius: 12px;
-  font-family: 'Noto Sans TC', sans-serif;
-  font-size: 1rem; color: #E8F0EB; outline: none;
-  text-align: center; letter-spacing: 0.2em;
-  margin-bottom: 14px; transition: border-color .2s;
-}
-#lock-pw-input:focus { border-color: #C9A550; }
-#lock-btn {
-  width: 100%; max-width: 320px; padding: 14px;
-  background: #C9A550; color: #0C1810;
-  border: none; border-radius: 12px;
-  font-family: 'Inter', sans-serif; font-size: 0.95rem;
-  font-weight: 800; cursor: pointer; transition: opacity .2s;
-  letter-spacing: 0.02em;
-}
-#lock-btn:hover { opacity: 0.9; }
-#lock-error {
-  font-size: 0.72rem; color: #E05252;
-  margin-top: 12px; height: 20px; text-align: center;
-  animation: shake .3s ease;
-}
-@keyframes shake {
-  0%,100%{transform:translateX(0)}
-  25%{transform:translateX(-6px)}
-  75%{transform:translateX(6px)}
-}
-#lock-screen .lock-footer {
-  position: absolute; bottom: 24px;
-  font-size: 0.58rem; color: #1A3326;
-  letter-spacing: 0.05em;
-}
+/* ── LOCK SCREEN ── */
+#lock-screen{position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#1A1205 0%,#2E1E08 50%,#1A1205 100%);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;}
+.lock-logo{font-family:'Nunito',sans-serif;font-weight:900;font-size:2rem;background:linear-gradient(135deg,#8A5C20,#C9904A,#F0C060);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
+.lock-sub{font-size:0.75rem;color:rgba(255,255,255,.4);margin-bottom:40px;letter-spacing:.05em;}
+.lock-icon{font-size:3rem;margin-bottom:20px;}
+.lock-title{font-family:'Nunito',sans-serif;font-weight:800;font-size:1.2rem;color:#F0F5F1;margin-bottom:8px;}
+.lock-hint{font-size:0.72rem;color:rgba(255,255,255,.4);margin-bottom:28px;text-align:center;line-height:1.6;}
+.lock-input{width:100%;max-width:320px;padding:14px 18px;background:rgba(255,255,255,.07);border:1.5px solid rgba(201,144,74,.3);border-radius:14px;font-size:1.1rem;color:white;outline:none;text-align:center;letter-spacing:.3em;margin-bottom:14px;transition:border-color .2s;}
+.lock-input:focus{border-color:rgba(201,144,74,.7);}
+.lock-btn{width:100%;max-width:320px;padding:14px;background:linear-gradient(135deg,#8A5C20,#C9904A);color:#FAF7F2;border:none;border-radius:14px;font-family:'Nunito',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;margin-bottom:12px;}
+.lock-error{font-size:0.72rem;color:#E05252;margin-top:4px;display:none;text-align:center;}
+.lock-error.show{display:block;animation:shake .3s ease;}
+@keyframes shake{0%,100%{transform:translateX(0)}25%{transform:translateX(-6px)}75%{transform:translateX(6px)}}
+.lock-footer{position:absolute;bottom:24px;font-size:0.58rem;color:rgba(255,255,255,.2);}
+
+/* ── WELCOME BANNER ── */
+.welcome-banner{background:linear-gradient(135deg,#8A5C20,#C9904A,#8A7A5A);border-radius:var(--r);padding:20px 18px;margin-bottom:14px;position:relative;overflow:hidden;min-height:110px;}
+.wb-greeting{font-size:0.72rem;color:rgba(255,255,255,.75);margin-bottom:4px;font-weight:600;}
+.wb-name{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.6rem;color:#FFFFFF;letter-spacing:-0.02em;margin-bottom:8px;line-height:1.1;}
+.wb-sub{font-size:0.7rem;color:rgba(255,255,255,.7);line-height:1.5;}
+.wb-avatar{position:absolute;right:16px;top:50%;transform:translateY(-50%);width:56px;height:56px;border-radius:50%;border:2.5px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:1.8rem;cursor:pointer;}
+.wb-stats{display:flex;gap:14px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.2);}
+.wb-stat{text-align:center;}
+.wb-stat .wsn{font-family:'Nunito',sans-serif;font-weight:800;font-size:1.2rem;color:#FFE8C0;}
+.wb-stat .wsl{font-size:0.55rem;color:rgba(255,255,255,.65);letter-spacing:.05em;text-transform:uppercase;}
+.name-edit-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:3px 10px;font-size:0.62rem;color:white;cursor:pointer;margin-left:8px;vertical-align:middle;}
+
+/* ── FEATURE CARDS ── */
+.feature-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.feature-card{background:#FFFFFF;border:1px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.feature-card:hover{border-color:var(--gold);transform:translateY(-2px);box-shadow:var(--sh);}
+.feature-card .fc-icon{font-size:1.8rem;margin-bottom:8px;display:block;}
+.feature-card .fc-title{font-weight:800;font-size:0.88rem;color:var(--ink);margin-bottom:3px;}
+.feature-card .fc-sub{font-size:0.65rem;color:var(--muted);line-height:1.4;}
+.feature-card .fc-badge{position:absolute;top:10px;right:10px;background:var(--p1l);border-radius:8px;padding:2px 7px;font-size:0.6rem;font-weight:800;color:var(--gold);}
+
+/* ── COIN BAR ── */
+.coin-bar{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#F5E8C8,#EDD9A3);border:1px solid #D4A055;border-radius:20px;padding:5px 12px;cursor:pointer;transition:all .2s;}
+.coin-icon{font-size:1rem;}
+.coin-amt{font-family:'Nunito',sans-serif;font-weight:800;font-size:0.85rem;color:#7A4F10;}
+.coin-lbl{font-size:0.58rem;color:#9A7030;font-weight:600;}
+
+/* ── CAT FILTER TABS ── */
+.cat-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:none;}
+.cat-tabs::-webkit-scrollbar{display:none;}
+.cat-tab-btn{flex:0 0 auto;padding:6px 14px;background:#F5F0E8;border:1px solid var(--border);border-radius:20px;font-size:0.7rem;font-weight:700;color:var(--muted);cursor:pointer;transition:all .2s;white-space:nowrap;}
+.cat-tab-btn.active{background:var(--gold);color:#FAF7F2;border-color:var(--gold);}
+
+/* ── WARDROBE LIMIT BAR ── */
+.limit-bar{display:flex;justify-content:space-between;align-items:center;background:#F5F0E8;border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:0.7rem;}
+.limit-bar .lb-label{color:var(--muted);font-weight:600;}
+.limit-bar .lb-val{font-family:'Nunito',sans-serif;font-weight:800;color:var(--gold);}
+.limit-bar .lb-btn{background:var(--gold);color:#FAF7F2;border:none;border-radius:8px;padding:4px 10px;font-size:0.65rem;font-weight:800;cursor:pointer;}
+
+/* ── SHOP VIEW ── */
+.shop-banner{background:linear-gradient(135deg,#1A1008,#3A2010,#5A3A18);border-radius:var(--r);padding:20px;margin-bottom:14px;text-align:center;position:relative;overflow:hidden;}
+.shop-banner h2{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.3rem;color:#FFD98A;margin-bottom:6px;}
+.shop-banner p{font-size:0.72rem;color:rgba(255,220,140,.7);}
+.shop-coin-display{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border-radius:20px;padding:6px 16px;margin-top:10px;}
+.shop-coin-display .scd-amt{font-family:'Nunito',sans-serif;font-weight:900;font-size:1.4rem;color:#FFD98A;}
+.shop-coin-display .scd-lbl{font-size:0.65rem;color:rgba(255,220,140,.7);}
+.shop-sec-title{font-size:0.62rem;font-weight:800;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin:14px 0 10px;display:flex;align-items:center;gap:6px;}
+.shop-sec-title::after{content:'';flex:1;height:1px;background:var(--border);}
+.shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.shop-item{background:#FFFFFF;border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center;transition:all .2s;position:relative;overflow:hidden;}
+.shop-item:hover{border-color:var(--gold);transform:translateY(-2px);}
+.shop-item.featured{border-color:var(--gold);background:linear-gradient(135deg,#FFF8EE,#FFF2DC);}
+.shop-item .si-icon{font-size:2.2rem;margin-bottom:8px;display:block;}
+.shop-item .si-name{font-weight:800;font-size:0.85rem;color:var(--ink);margin-bottom:3px;}
+.shop-item .si-desc{font-size:0.62rem;color:var(--muted);margin-bottom:10px;line-height:1.4;}
+.shop-item .si-badge{position:absolute;top:8px;right:8px;background:var(--gold);color:#FAF7F2;font-size:0.5rem;font-weight:800;padding:2px 6px;border-radius:4px;}
+.si-price{display:inline-flex;align-items:center;gap:4px;background:linear-gradient(135deg,#8A5C20,#C9904A);color:#FAF7F2;border:none;border-radius:10px;padding:6px 14px;font-size:0.72rem;font-weight:800;cursor:pointer;width:100%;justify-content:center;transition:all .2s;}
+.si-price:hover{opacity:.9;}
+.si-price:disabled{background:#D4C9B5;color:#9A8E7E;cursor:not-allowed;}
+.si-owned{background:#F0F5F0;color:var(--p2);border:1px solid var(--p2);border-radius:10px;padding:6px 14px;font-size:0.72rem;font-weight:800;width:100%;text-align:center;}
+
+/* ── SHARE CARD ── */
+.share-card{background:#0A0A0A;border-radius:16px;padding:20px;margin-bottom:14px;position:relative;overflow:hidden;}
+.share-logo{font-family:'Nunito',sans-serif;font-weight:900;font-size:1rem;background:linear-gradient(135deg,#C9904A,#F0C060);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:14px;}
+.share-outfit-name{font-size:0.65rem;color:rgba(255,255,255,.4);margin-bottom:4px;letter-spacing:.1em;text-transform:uppercase;}
+.share-outfit-text{font-family:'Nunito',sans-serif;font-weight:800;font-size:1.1rem;color:white;margin-bottom:6px;line-height:1.3;}
+.share-meta-txt{font-size:0.65rem;color:rgba(255,255,255,.4);margin-bottom:14px;}
+.share-img-prev{width:100%;border-radius:10px;background:#1A1A1A;min-height:140px;display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.2);font-size:0.75rem;overflow:hidden;margin-bottom:14px;}
+.share-img-prev img{width:100%;border-radius:10px;}
+.share-footer2{display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);}
+.share-footer2 .sf-tag{font-size:0.6rem;color:rgba(255,255,255,.25);}
+.share-footer2 .sf-brand{font-size:0.65rem;color:rgba(180,130,50,.5);font-weight:700;}
+.share-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;}
+.btn-share{padding:11px;border:none;border-radius:12px;font-family:'Nunito',sans-serif;font-weight:800;font-size:0.8rem;cursor:pointer;transition:all .2s;}
+.btn-share.primary{background:linear-gradient(135deg,#8A5C20,#C9904A);color:#FAF7F2;}
+.btn-share.secondary{background:#F5F0E8;color:var(--ink);border:1px solid var(--border);}
+
+/* ── PROFILE CARD (in styling view) ── */
+.profile-card{background:#FFFFFF;border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;}
+.profile-title{font-size:0.62rem;font-weight:800;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:12px;}
+.profile-row{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;}
+.profile-row2{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+.pf label{display:block;font-size:0.6rem;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase;}
+.pf input,.pf select{width:100%;padding:8px 10px;background:#FAF7F2;border:1px solid var(--border);border-radius:var(--r-sm);font-size:0.8rem;color:var(--ink);outline:none;-webkit-appearance:none;appearance:none;}
+.pf input:focus,.pf select:focus{border-color:var(--gold);}
 
 </style>
 
 </head>
 <body>
 
-<!-- PASSWORD LOCK SCREEN -->
-<div id="lock-screen">
-  <div class="lock-logo">Fitto <span style="-webkit-text-fill-color:#C9A550;font-size:0.55rem;background:none;padding:2px 6px;border:1px solid #C9A550;border-radius:4px;vertical-align:middle">v2</span></div>
-  <div class="lock-sub">AI 智能穿搭助手</div>
-  <div class="lock-icon">🔐</div>
-  <div class="lock-title">請輸入存取密碼</div>
-  <div class="lock-hint">此為私人應用，需要密碼才能使用</div>
-  <input type="password" id="lock-pw-input" placeholder="••••••" maxlength="20"
-    onkeydown="if(event.key==='Enter')checkPassword()">
-  <button id="lock-btn" onclick="checkPassword()">進入 Fitto</button>
-  <div id="lock-error"></div>
-  <div class="lock-footer">Fitto v2 · Private App · 2026</div>
-</div>
-
 <header>
-  <div class="logo">Fitto <span class="logo-badge">v2</span></div>
-  <div class="api-pill" onclick="openApiModal()">
-    <div class="dot" id="api-dot"></div>
-    <span id="api-st">設定 API Key</span>
+  <div class="logo">Fitto <span class="logo-badge">v3</span></div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <div class="coin-bar" onclick="sv('shop',document.querySelectorAll('.nb')[4])">
+      <span class="coin-icon">🪙</span>
+      <span class="coin-amt" id="hdr-coins">10</span>
+      <span class="coin-lbl">金幣</span>
+    </div>
+    <div class="api-pill" onclick="openApiModal()">
+      <div class="dot" id="api-dot"></div>
+      <span id="api-st">設定</span>
+    </div>
   </div>
 </header>
 
 <!-- ① 衣櫃 -->
 <div class="view active" id="view-wardrobe">
-  <div class="phd"><h1>我的衣櫃</h1><p>建立個人服裝資料庫</p></div>
-  <div class="stats-row">
-    <div class="sc"><div class="sn" id="cnt-a">0</div><div class="sl">全部</div></div>
-    <div class="sc"><div class="sn" id="cnt-t">0</div><div class="sl">上衣</div></div>
-    <div class="sc"><div class="sn" id="cnt-b">0</div><div class="sl">下身</div></div>
-    <div class="sc"><div class="sn" id="cnt-o">0</div><div class="sl">外套</div></div>
+  <div class="welcome-banner">
+    <div class="wb-greeting" id="wb-greeting">你好 👋</div>
+    <div class="wb-name" id="wb-name">Jack <button class="name-edit-btn" onclick="openNameModal()">✏️</button></div>
+    <div class="wb-sub">今天穿什麼好呢？<br>你的衣櫃已準備好為你搭配</div>
+    <div class="wb-avatar" id="wb-avatar" onclick="sv('shop',document.querySelectorAll('.nb')[4])" style="overflow:hidden;padding:0">👤</div>
+    <div class="wb-stats">
+      <div class="wb-stat"><div class="wsn" id="cnt-a">0</div><div class="wsl">全部</div></div>
+      <div class="wb-stat"><div class="wsn" id="cnt-t">0</div><div class="wsl">上衣</div></div>
+      <div class="wb-stat"><div class="wsn" id="cnt-b">0</div><div class="wsl">下身</div></div>
+      <div class="wb-stat"><div class="wsn" id="cnt-o">0</div><div class="wsl">外套</div></div>
+    </div>
+  </div>
+  <div class="feature-row">
+    <div class="feature-card" onclick="sv('styling',document.querySelectorAll('.nb')[1])">
+      <span class="fc-icon">✨</span>
+      <div class="fc-title">本週搭配</div>
+      <div class="fc-sub">AI 規劃工作日穿著</div>
+      <div class="fc-badge">AI</div>
+    </div>
+    <div class="feature-card" onclick="sv('catalog',document.querySelectorAll('.nb')[3])">
+      <span class="fc-icon">📋</span>
+      <div class="fc-title">UNIQLO 型錄</div>
+      <div class="fc-sub">2026 春夏精選</div>
+      <div class="fc-badge">新</div>
+    </div>
+  </div>
+  <div class="limit-bar">
+    <span class="lb-label">衣櫃容量</span>
+    <span><span class="lb-val" id="wardrobe-used">0</span> / <span id="wardrobe-max">10</span> 件</span>
+    <button class="lb-btn" onclick="sv('shop',document.querySelectorAll('.nb')[4])">🪙 擴充</button>
+  </div>
+  <div class="cat-tabs" id="cat-tabs">
+    <button class="cat-tab-btn active" onclick="filterWardrobeBy('全部',this)">全部</button>
   </div>
   <div class="photo-btns">
     <div class="pb" onclick="openScan('camera')"><span class="pbi">📷</span><p>拍照辨識</p><small>開啟相機掃描</small></div>
@@ -631,6 +688,10 @@ header{
       <select id="socc" class="ctrl-sel"><option>日常上班</option><option>週末休閒</option><option>約會</option><option>混合</option></select>
       <select id="ssea" class="ctrl-sel"><option>🌸 春季</option><option>☀️ 夏季</option><option>🍂 秋季</option><option>❄️ 冬季</option></select>
       <select id="ssty" class="ctrl-sel"><option>簡約低調</option><option>時尚有型</option><option>舒適優先</option><option>專業正式</option></select>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;font-size:0.7rem;">
+      <span style="color:var(--muted)">Gemini 全程處理 · 1枚金幣/圖</span>
+      <span id="daily-free-badge" style="font-weight:700;color:var(--green)">🎁 今日免費 3 次</span>
     </div>
     <button class="btn-gen" id="bgen" onclick="genOutfit()">
       <div class="spinner"></div>✦ 生成本週搭配
@@ -721,8 +782,130 @@ header{
       <span class="tf-val" id="tf-last" style="font-size:0.62rem;color:var(--muted)">—</span>
     </div>
     <div class="tf-reset" onclick="event.stopPropagation();resetTokenCount()">↺ 重置計數</div>
-    <div style="font-size:0.5rem;color:var(--border2);text-align:center;margin-top:3px;letter-spacing:0.05em">Fitto v2 · 2026.03</div>
+    <div style="font-size:0.5rem;color:var(--border2);text-align:center;margin-top:3px;letter-spacing:0.05em">Fitto v3 · 2026.03</div>
   </div>
+</div>
+
+<!-- SHOP VIEW -->
+<div class="view" id="view-shop">
+  <div class="shop-banner">
+    <h2>🪙 Fitto 商店</h2>
+    <p>用金幣解鎖更多功能</p>
+    <div class="shop-coin-display">
+      <span class="scd-amt" id="shop-coins">10</span>
+      <span class="scd-lbl">🪙 我的金幣</span>
+    </div>
+  </div>
+  <div class="shop-sec-title">💰 購買金幣</div>
+  <div style="background:#F5EDD8;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:0.68rem;color:#7A5020;line-height:1.6">
+    🎁 每日免費生圖 <strong>3 次</strong>（自動補充）<br>
+    💡 免費用完後：1枚金幣 = 1張圖 · 連續登入7天送5枚
+  </div>
+  <div class="shop-grid">
+    <div class="shop-item">
+      <span class="si-icon">🪙</span>
+      <div class="si-name">30 金幣</div>
+      <div class="si-desc">入門試用包<br>NT$1.97/枚</div>
+      <button class="si-price" onclick="buyCoins(30,'NT$59')">NT$59</button>
+    </div>
+    <div class="shop-item featured">
+      <div class="si-badge">最划算</div>
+      <span class="si-icon">💰</span>
+      <div class="si-name">80 金幣</div>
+      <div class="si-desc">標準包<br>NT$1.74/枚</div>
+      <button class="si-price" onclick="buyCoins(80,'NT$139')">NT$139</button>
+    </div>
+    <div class="shop-item">
+      <span class="si-icon">💎</span>
+      <div class="si-name">200 金幣</div>
+      <div class="si-desc">大量包<br>NT$1.50/枚</div>
+      <button class="si-price" onclick="buyCoins(200,'NT$299')">NT$299</button>
+    </div>
+    <div class="shop-item">
+      <span class="si-icon">👑</span>
+      <div class="si-name">月卡無限</div>
+      <div class="si-desc">每日 5 枚<br>共 150 枚/月</div>
+      <button class="si-price" onclick="buyCoins(150,'NT$149/月')">NT$149/月</button>
+    </div>
+  </div>
+  <div class="shop-sec-title">👗 衣櫃擴充</div>
+  <div class="shop-grid">
+    <div class="shop-item">
+      <span class="si-icon">📦</span>
+      <div class="si-name">+10 件空間</div>
+      <div class="si-desc">容量擴充到20件<br>🪙 50枚</div>
+      <button class="si-price" id="btn-exp10" onclick="buyExpansion(10,50)">🪙 30枚</button>
+    </div>
+    <div class="shop-item">
+      <span class="si-icon">🏠</span>
+      <div class="si-name">+30 件空間</div>
+      <div class="si-desc">大幅擴充到40件<br>🪙 120枚</div>
+      <button class="si-price" id="btn-exp30" onclick="buyExpansion(30,120)">🪙 50枚</button>
+    </div>
+  </div>
+  <div class="shop-sec-title">👨 帥哥頭像</div>
+  <div class="shop-grid">
+    <div class="shop-item" id="av-sun">
+      <div class="si-badge">帥哥</div>
+      <div style="width:64px;height:64px;border-radius:50%;overflow:hidden;margin:0 auto 8px;border:2px solid #D4A055"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="si-name">陽光型男</div>
+      <div class="si-desc">暖心笑容<br>鄰家型帥哥</div>
+      <button class="si-price" id="btn-av-sun" onclick="buyAvatar('☀️',23,'btn-av-sun')">🪙 23枚</button>
+    </div>
+    <div class="shop-item" id="av-kr">
+      <div class="si-badge">熱門</div>
+      <div style="width:64px;height:64px;border-radius:50%;overflow:hidden;margin:0 auto 8px;border:2px solid #D4A055"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="si-name">韓風男神</div>
+      <div class="si-desc">K-Style 精緻臉龐<br>歐爸感十足</div>
+      <button class="si-price" id="btn-av-kr" onclick="buyAvatar('🌙',30,'btn-av-kr')">🪙 30枚</button>
+    </div>
+    <div class="shop-item" id="av-rg">
+      <div class="si-badge">VIP</div>
+      <div style="width:64px;height:64px;border-radius:50%;overflow:hidden;margin:0 auto 8px;border:2px solid #D4A055"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="si-name">粗獷型男</div>
+      <div class="si-desc">硬派線條<br>男子氣概滿點</div>
+      <button class="si-price" id="btn-av-rg" onclick="buyAvatar('⚡',38,'btn-av-rg')">🪙 38枚</button>
+    </div>
+    <div class="shop-item">
+      <span class="si-icon">😊</span>
+      <div class="si-name">預設頭像</div>
+      <div class="si-desc">基本款永久免費</div>
+      <div class="si-owned">✓ 已擁有</div>
+    </div>
+  </div>
+  <div class="shop-sec-title">👩 美女頭像</div>
+  <div class="shop-grid">
+    <div class="shop-item" id="av-kgirl">
+      <div class="si-badge">熱門</div>
+      <span class="si-icon">🌸</span>
+      <div class="si-name">韓系女神</div>
+      <div class="si-desc">K-Beauty 妝容<br>時尚品味一流</div>
+      <button class="si-price" id="btn-av-kgirl" onclick="buyAvatar('🌸',30,'btn-av-kgirl')">🪙 30枚</button>
+    </div>
+    <div class="shop-item" id="av-jp">
+      <span class="si-icon">🌺</span>
+      <div class="si-name">日系女孩</div>
+      <div class="si-desc">清純自然系<br>療癒感十足</div>
+      <button class="si-price" id="btn-av-jp" onclick="buyAvatar('🌺',23,'btn-av-jp')">🪙 23枚</button>
+    </div>
+    <div class="shop-item" id="av-queen">
+      <div class="si-badge">VIP</div>
+      <span class="si-icon">👑</span>
+      <div class="si-name">御姐女王</div>
+      <div class="si-desc">成熟自信氣場<br>時尚女強人</div>
+      <button class="si-price" id="btn-av-queen" onclick="buyAvatar('👑',38,'btn-av-queen')">🪙 38枚</button>
+    </div>
+    <div class="shop-item" id="av-star">
+      <span class="si-icon">⭐</span>
+      <div class="si-name">時尚達人</div>
+      <div class="si-desc">百變造型師<br>穿搭專家</div>
+      <button class="si-price" id="btn-av-star" onclick="buyAvatar('⭐',15,'btn-av-star')">🪙 15枚</button>
+    </div>
+  </div>
+  <div class="shop-sec-title">🎯 任務中心</div>
+  <div style="font-size:0.7rem;color:var(--muted);margin-bottom:10px;line-height:1.5">完成任務免費獲得金幣 🪙</div>
+  <div id="mission-list"></div>
+  <div style="font-size:0.62rem;color:var(--muted);text-align:center;padding:12px 0 4px;line-height:1.6">目前為展示模式，正式上線後接入付費系統</div>
 </div>
 
 <!-- BOTTOM NAV -->
@@ -731,6 +914,7 @@ header{
   <button class="nb" onclick="sv('styling',this)"><span class="ni">✨</span><span class="nl">搭配</span></button>
   <button class="nb" onclick="sv('saved',this);renderSaved()"><span class="ni">🔖</span><span class="nl">收藏</span></button>
   <button class="nb" onclick="sv('catalog',this)"><span class="ni">📋</span><span class="nl">型錄</span></button>
+  <button class="nb" onclick="sv('shop',this)"><span class="ni">🪙</span><span class="nl">商店</span></button>
 </nav>
 
 <!-- SCAN MODAL -->
@@ -833,7 +1017,550 @@ header{
   </div>
 </div>
 
+<!-- LOCK SCREEN -->
+<div id="lock-screen">
+  <div class="lock-logo">Fitto</div>
+  <div class="lock-sub">AI 智能穿搭助手</div>
+  <div class="lock-icon">🔐</div>
+  <div class="lock-title">請輸入存取密碼</div>
+  <div class="lock-hint">此為私人應用<br>保護你的 API Key 不被濫用</div>
+  <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
+  <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
+  <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
+  <div class="lock-footer">Fitto v3 · Private App · 2026</div>
+</div>
+
+<!-- NAME MODAL -->
+<div class="overlay" id="name-ov">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle">👤 個人設定</div>
+    <div class="fg" style="margin-bottom:12px">
+      <label>我的名字</label>
+      <input type="text" class="api-inp" id="name-inp" placeholder="輸入你的名字…" maxlength="20">
+    </div>
+    <div style="font-size:0.62rem;font-weight:800;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:10px;">🎨 模特兒設定</div>
+    <div class="fr" style="margin-bottom:10px">
+      <div class="fg"><label>身高 (cm)</label><input type="number" class="api-inp" id="p-height" placeholder="175" value="175" min="150" max="200" style="padding:9px 11px;margin:0"></div>
+      <div class="fg"><label>體重 (kg)</label><input type="number" class="api-inp" id="p-weight" placeholder="65" value="65" min="40" max="120" style="padding:9px 11px;margin:0"></div>
+    </div>
+    <div class="fr" style="margin-bottom:10px">
+      <div class="fg"><label>性別</label>
+        <select class="api-inp" id="p-gender" style="padding:9px 11px;margin:0">
+          <option value="male">男性</option>
+          <option value="female">女性</option>
+        </select>
+      </div>
+      <div class="fg"><label>拍攝角度</label>
+        <select class="api-inp" id="p-angle" style="padding:9px 11px;margin:0">
+          <option value="full body front view">全身正面</option>
+          <option value="three-quarter view">四分之三側</option>
+          <option value="upper body portrait">上半身</option>
+        </select>
+      </div>
+    </div>
+    <div class="fg" style="margin-bottom:14px"><label>模特兒風格</label>
+      <select class="api-inp" id="p-face" style="padding:9px 11px;margin:0">
+        <optgroup label="👨 帥哥">
+          <option value="handsome Asian male model with warm sunny smile, bright eyes, casual style">☀️ 帥哥·陽光型</option>
+          <option value="Korean male model, sharp features, trendy K-fashion style, soft skin">🇰🇷 帥哥·韓風型</option>
+          <option value="rugged handsome male model, strong jawline, masculine look, athletic build">💪 帥哥·粗獷型</option>
+        </optgroup>
+        <optgroup label="👩 美女">
+          <option value="beautiful Korean female model, trendy K-beauty makeup, elegant look">🇰🇷 美女·韓風型</option>
+          <option value="Japanese female model, cute fresh look, natural beauty, soft features">🇯🇵 美女·日系型</option>
+          <option value="sophisticated mature Asian female model, confident elegant look">👑 美女·御姐型</option>
+        </optgroup>
+      </select>
+    </div>
+    <button class="btn-p" onclick="saveName()" style="margin-bottom:10px">儲存設定</button>
+    <button class="btn-ghost" style="width:100%" onclick="document.getElementById('name-ov').classList.remove('show')">取消</button>
+  </div>
+</div>
+
+<!-- SHARE MODAL -->
+<div class="overlay" id="share-ov">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle">↗ 分享穿搭</div>
+    <div class="share-card">
+      <div class="share-logo">Fitto AI 穿搭</div>
+      <div class="share-outfit-name" id="sh-day">今日搭配</div>
+      <div class="share-outfit-text" id="sh-outfit">—</div>
+      <div class="share-meta-txt" id="sh-meta">春季 · 日常上班</div>
+      <div class="share-img-prev" id="sh-img"><span>生成示意圖後分享效果更好</span></div>
+      <div class="share-footer2">
+        <span class="sf-tag">#Fitto穿搭 #AI時尚</span>
+        <span class="sf-brand">fitto.app</span>
+      </div>
+    </div>
+    <div class="share-btns">
+      <button class="btn-share primary" onclick="doNativeShare()">↗ iOS 分享</button>
+      <button class="btn-share secondary" onclick="doCopyShare()">📋 複製文字</button>
+    </div>
+    <div style="margin-top:10px"><button class="btn-ghost" style="width:100%" onclick="document.getElementById('share-ov').classList.remove('show')">關閉</button></div>
+  </div>
+</div>
+
 <script>
+// ═══ FASHION POSES ═══
+const FASHION_POSES = [
+  'standing with one hand in pocket, slight hip tilt, confident gaze',
+  'leaning against white wall, arms crossed loosely, editorial look',
+  'mid-stride walking pose, natural movement, dynamic energy',
+  'looking over shoulder, body angled 45 degrees, fashion editorial',
+  'sitting on minimal stool, legs crossed, hands on knee, magazine cover pose',
+  'one hand touching collar, slight head tilt, high fashion vogue pose',
+  'standing with both hands in pockets, relaxed cool stance',
+  'turning back slightly, glancing over shoulder, mysterious editorial',
+  'arms slightly away from body, confident power pose, fashion week style',
+  'candid natural laugh, hand through hair, lifestyle magazine vibe',
+];
+
+function getRandomPose() {
+  return FASHION_POSES[Math.floor(Math.random() * FASHION_POSES.length)];
+}
+
+// ═══ GEMINI UNIFIED API ═══
+const GEMINI_TEXT_MODEL = 'gemini-2.5-flash-preview-05-20';
+
+async function geminiText(prompt, maxTokens=800) {
+  const key = localStorage.getItem('fitto_gemini_key') || '';
+  if(!key) throw new Error('請先設定 Google AI Studio Key');
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL}:generateContent?key=${key}`,
+    { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents:[{role:'user',parts:[{text:prompt}]}],
+        generationConfig:{maxOutputTokens:maxTokens,temperature:0.7}
+      })
+    }
+  );
+  const d = await res.json();
+  if(d.error) throw new Error(d.error.message);
+  addTokenUsage(d.usageMetadata?.promptTokenCount||0, d.usageMetadata?.candidatesTokenCount||0, 'gemini_text');
+  return d.candidates[0].content.parts[0].text.trim();
+}
+
+async function geminiVision(prompt, b64img, mimeType='image/jpeg') {
+  const key = localStorage.getItem('fitto_gemini_key') || '';
+  if(!key) throw new Error('請先設定 Google AI Studio Key');
+  const res = await fetch(
+    `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_TEXT_MODEL}:generateContent?key=${key}`,
+    { method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents:[{role:'user',parts:[
+          {inlineData:{mimeType,data:b64img}},
+          {text:prompt}
+        ]}],
+        generationConfig:{maxOutputTokens:300,temperature:0.3}
+      })
+    }
+  );
+  const d = await res.json();
+  if(d.error) throw new Error(d.error.message);
+  addTokenUsage(d.usageMetadata?.promptTokenCount||0, d.usageMetadata?.candidatesTokenCount||0, 'gemini_text');
+  return d.candidates[0].content.parts[0].text.trim();
+}
+
+
+// ═══ AVATAR IMAGES ═══
+const AVATAR_IMGS = {
+  '⚡': 'data:image/jpeg;base64,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',
+  '☀️': 'data:image/jpeg;base64,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',
+  '🌙': 'data:image/jpeg;base64,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',
+};
+const AVATAR_FACE_PROMPTS = {
+  '⚡': 'rugged handsome Asian male model, strong jawline, dark short hair, masculine confident look',
+  '☀️': 'warm sunny smiling Asian male model, bright charming smile, casual friendly look',
+  '🌙': 'Korean male model, clean fresh face, soft features, K-drama style, gentle smile',
+  '🌸': 'beautiful Korean female model, K-beauty makeup, elegant sophisticated look',
+  '🌺': 'cute Japanese female model, natural fresh look, soft features, sweet expression',
+  '👑': 'mature confident Asian female model, strong elegant presence, fashion-forward look',
+  '⭐': 'stylish Asian model, trendy fashion look, confident pose',
+  '😊': 'friendly Asian model, neutral pleasant look',
+};
+
+function getAvatarImg(emoji) {
+  return AVATAR_IMGS[emoji] || null;
+}
+
+function getAvatarFacePrompt(emoji) {
+  return AVATAR_FACE_PROMPTS[emoji] || 'handsome Asian model, attractive look';
+}
+
+
+// ═══ WARDROBE LIMIT ALERT ═══
+function showLimitAlert() {
+  // Show a toast then jump to shop
+  const toast = document.createElement('div');
+  toast.innerHTML = '👗 衣櫃已滿！前往商店擴充';
+  toast.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#2C2416;color:#FFE8C0;padding:12px 20px;border-radius:12px;font-size:0.82rem;font-weight:700;z-index:9997;box-shadow:0 4px 16px rgba(0,0,0,.3);white-space:nowrap;';
+  document.body.appendChild(toast);
+  setTimeout(() => {
+    document.body.removeChild(toast);
+    sv('shop', document.querySelectorAll('.nb')[4]);
+  }, 1200);
+}
+
+// ═══ MISSIONS SYSTEM ═══
+function getMissions() {
+  return JSON.parse(localStorage.getItem('fitto_missions') || JSON.stringify({
+    daily_login: { done: false, reward: 3, label: '每日登入', icon: '📅', type: 'daily' },
+    share_ig: { done: false, reward: 10, label: 'IG 分享穿搭', icon: '📸', type: 'one_time' },
+    share_fb: { done: false, reward: 10, label: 'FB 分享穿搭', icon: '👥', type: 'one_time' },
+    invite_friend: { done: false, reward: 20, label: '介紹好友使用', icon: '🤝', type: 'one_time' },
+    gen_5: { done: false, reward: 5, label: '生成 5 張穿搭圖', icon: '🎨', type: 'one_time' },
+    fill_wardrobe: { done: false, reward: 5, label: '加入 5 件衣物', icon: '👔', type: 'one_time' },
+    watch_ad: { done: false, reward: 3, label: '看廣告得金幣', icon: '📺', type: 'daily', coming_soon: true },
+  }));
+}
+
+function saveMissions(m) {
+  // Reset daily missions each day
+  const key = 'fitto_mission_date';
+  const today = new Date().toISOString().slice(0,10);
+  if(localStorage.getItem(key) !== today) {
+    const fresh = getMissions();
+    // Reset daily type missions
+    Object.keys(fresh).forEach(k => { if(fresh[k].type==='daily') fresh[k].done=false; });
+    localStorage.setItem(key, today);
+    localStorage.setItem('fitto_missions', JSON.stringify(fresh));
+    return fresh;
+  }
+  localStorage.setItem('fitto_missions', JSON.stringify(m));
+  return m;
+}
+
+function claimMission(key) {
+  const m = getMissions();
+  if(m[key]?.done) return;
+  if(m[key]?.coming_soon) {
+    alert('📺 廣告功能即將推出！敬請期待');
+    return;
+  }
+  // Special handling for share missions
+  if(key === 'share_ig' || key === 'share_fb') {
+    const platform = key === 'share_ig' ? 'Instagram' : 'Facebook';
+    const txt = encodeURIComponent('我在用 Fitto AI 幫我規劃每週穿搭！#Fitto穿搭 #AI時尚 https://4hyzc9kt57-spec.github.io/fitto');
+    const url = key === 'share_ig'
+      ? 'https://www.instagram.com/'
+      : `https://www.facebook.com/sharer/sharer.php?u=https://4hyzc9kt57-spec.github.io/fitto&quote=${txt}`;
+    window.open(url, '_blank');
+    // Award after 2s (trust user)
+    setTimeout(() => {
+      m[key].done = true;
+      saveMissions(m);
+      coins += m[key].reward;
+      saveProgress(); updateCoinUI();
+      showCoinAnim(m[key].reward);
+      renderMissions();
+    }, 2000);
+    return;
+  }
+  if(key === 'invite_friend') {
+    const link = 'https://4hyzc9kt57-spec.github.io/fitto';
+    if(navigator.share) {
+      navigator.share({ title:'Fitto AI 穿搭', text:'推薦你試試這個 AI 穿搭 App！', url: link });
+    } else {
+      navigator.clipboard.writeText(link).then(() => alert('✅ 邀請連結已複製！傳給朋友後回來領取獎勵'));
+    }
+    setTimeout(() => {
+      m[key].done = true;
+      saveMissions(m);
+      coins += m[key].reward;
+      saveProgress(); updateCoinUI();
+      showCoinAnim(m[key].reward);
+      renderMissions();
+    }, 3000);
+    return;
+  }
+  // Normal claim
+  m[key].done = true;
+  saveMissions(m);
+  coins += m[key].reward;
+  saveProgress(); updateCoinUI();
+  showCoinAnim(m[key].reward);
+  renderMissions();
+}
+
+function checkAutoMissions() {
+  const m = getMissions();
+  let changed = false;
+  // Check gen_5
+  if(!m.gen_5.done) {
+    const imgCount = parseInt(localStorage.getItem('fitto_total_imgs')||'0');
+    if(imgCount >= 5) { m.gen_5.done=true; coins+=m.gen_5.reward; changed=true; showCoinAnim(5); }
+  }
+  // Check fill_wardrobe
+  if(!m.fill_wardrobe.done && wardrobe.length >= 5) {
+    m.fill_wardrobe.done=true; coins+=m.fill_wardrobe.reward; changed=true; showCoinAnim(5);
+  }
+  if(changed) { saveMissions(m); saveProgress(); updateCoinUI(); renderMissions(); }
+}
+
+function renderMissions() {
+  const el = document.getElementById('mission-list');
+  if(!el) return;
+  const m = getMissions();
+  el.innerHTML = Object.entries(m).map(([k,v]) => {
+    const done = v.done;
+    const soon = v.coming_soon;
+    const typeLabel = v.type==='daily' ? '<span style="font-size:.55rem;background:#E8F0EA;color:#4A7A58;padding:1px 5px;border-radius:4px;font-weight:700">每日</span>' : '';
+    return `<div style="display:flex;align-items:center;gap:10px;padding:11px 12px;background:${done?'#F5F0E8':'#FFFFFF'};border:1px solid ${done?'#D4C9B5':'var(--border)'};border-radius:12px;margin-bottom:8px;">
+      <span style="font-size:1.4rem">${v.icon}</span>
+      <div style="flex:1;min-width:0">
+        <div style="font-weight:700;font-size:0.82rem;color:${done?'var(--muted)':'var(--ink)'};">${v.label} ${typeLabel}</div>
+        <div style="font-size:0.62rem;color:var(--muted)">完成得 ${v.reward} 枚金幣</div>
+      </div>
+      ${done
+        ? '<div style="font-size:.72rem;color:var(--green);font-weight:700">✓ 已領取</div>'
+        : soon
+          ? `<button onclick="claimMission('${k}')" style="background:#F5F0E8;color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:.68rem;font-weight:700;cursor:pointer;">即將推出</button>`
+          : `<button onclick="claimMission('${k}')" style="background:linear-gradient(135deg,#8A5C20,#C9904A);color:#FAF7F2;border:none;border-radius:8px;padding:5px 10px;font-size:.68rem;font-weight:700;cursor:pointer;">領取 🪙</button>`
+      }
+    </div>`;
+  }).join('');
+}
+
+
+// ═══ DAILY FREE IMAGES ═══
+const FREE_PER_DAY = 3; // 每日免費次數
+
+function getTodayKey() {
+  return 'fitto_daily_' + new Date().toISOString().slice(0,10);
+}
+
+function getDailyUsed() {
+  return parseInt(localStorage.getItem(getTodayKey()) || '0');
+}
+
+function useDailyFree() {
+  const used = getDailyUsed();
+  if(used >= FREE_PER_DAY) return false;
+  localStorage.setItem(getTodayKey(), String(used + 1));
+  return true;
+}
+
+function getDailyRemaining() {
+  return Math.max(0, FREE_PER_DAY - getDailyUsed());
+}
+
+function checkAndSpendForImage() {
+  // Try free daily first
+  if(useDailyFree()) {
+    const remaining = getDailyRemaining();
+    const tl = document.getElementById('tf-last');
+    if(tl) tl.textContent = '🎁 免費生圖（今日剩 '+remaining+' 次）';
+    updateDailyUI();
+    return true;
+  }
+  // Fall back to coins
+  return spendCoin(1, '生成穿搭圖');
+}
+
+function updateDailyUI() {
+  const remaining = getDailyRemaining();
+  const el = document.getElementById('daily-free-badge');
+  if(el) {
+    el.textContent = remaining > 0 ? '🎁 今日免費 '+remaining+' 次' : '免費次數已用完';
+    el.style.color = remaining > 0 ? 'var(--green)' : 'var(--muted)';
+  }
+}
+
+function claimDailyLogin() {
+  const lastLogin = localStorage.getItem('fitto_last_login');
+  const today = new Date().toISOString().slice(0,10);
+  if(lastLogin === today) return; // already claimed
+  localStorage.setItem('fitto_last_login', today);
+  // Show welcome back message
+  if(lastLogin) { // not first time
+    const streak = parseInt(localStorage.getItem('fitto_streak')||'0') + 1;
+    localStorage.setItem('fitto_streak', String(streak));
+    // Bonus coins for streaks
+    if(streak % 7 === 0) {
+      coins += 5;
+      saveProgress();
+      updateCoinUI();
+      showCoinAnim(5);
+      setTimeout(()=>alert('🎉 連續登入 '+streak+' 天！獲得 5 枚獎勵金幣！'), 500);
+    }
+  }
+}
+
+
+
+// ═══ LOCK ═══
+const APP_PW='fitto2026';
+function checkPw(){
+  const pw=document.getElementById('lock-pw').value;
+  const err=document.getElementById('lock-err');
+  if(pw===APP_PW){
+    sessionStorage.setItem('fk','1');
+    const ls=document.getElementById('lock-screen');
+    ls.style.transition='opacity .4s';ls.style.opacity='0';
+    setTimeout(()=>ls.style.display='none',400);
+    err.classList.remove('show');
+  } else {
+    err.classList.remove('show');void err.offsetWidth;
+    err.classList.add('show');
+    document.getElementById('lock-pw').value='';
+  }
+}
+(function(){if(sessionStorage.getItem('fk')==='1'){const ls=document.getElementById('lock-screen');if(ls)ls.style.display='none';}})();
+
+// ═══ NAME ═══
+let USER_NAME=localStorage.getItem('fitto_name')||'Jack';
+function getGreeting(){const h=new Date().getHours();if(h<6)return'深夜了 🌙';if(h<10)return'早安 ☀️';if(h<12)return'上午好 🌤';if(h<14)return'午安 ☀️';if(h<18)return'下午好 🌈';if(h<21)return'晚安 🌆';return'夜深了 🌙';}
+function updateBanner(){
+  const ne=document.getElementById('wb-name');
+  const ge=document.getElementById('wb-greeting');
+  if(ne) ne.innerHTML=USER_NAME+' <button class="name-edit-btn" onclick="openNameModal()">✏️</button>';
+  if(ge) ge.textContent=getGreeting();
+  const av=document.getElementById('wb-avatar');
+  if(av) av.textContent=userAvatar;
+}
+function openNameModal(){document.getElementById('name-inp').value=USER_NAME;document.getElementById('name-ov').classList.add('show');}
+function saveName(){
+  const n=document.getElementById('name-inp').value.trim();
+  if(!n)return;
+  USER_NAME=n;localStorage.setItem('fitto_name',n);
+  // Save profile settings
+  const h=document.getElementById('p-height')?.value||'175';
+  const w=document.getElementById('p-weight')?.value||'65';
+  const g=document.getElementById('p-gender')?.value||'male';
+  const f=document.getElementById('p-face')?.value||'';
+  const a=document.getElementById('p-angle')?.value||'full body front view';
+  localStorage.setItem('fitto_profile',JSON.stringify({h,w,g,f,a}));
+  updateBanner();document.getElementById('name-ov').classList.remove('show');
+}
+function loadProfile(){
+  const p=JSON.parse(localStorage.getItem('fitto_profile')||'{}');
+  if(p.h){const el=document.getElementById('p-height');if(el)el.value=p.h;}
+  if(p.w){const el=document.getElementById('p-weight');if(el)el.value=p.w;}
+  if(p.g){const el=document.getElementById('p-gender');if(el)el.value=p.g;}
+  if(p.f){const el=document.getElementById('p-face');if(el)el.value=p.f;}
+  if(p.a){const el=document.getElementById('p-angle');if(el)el.value=p.a;}
+}
+function getProfile(){
+  const p=JSON.parse(localStorage.getItem('fitto_profile')||'{}');
+  return {h:p.h||'175',w:p.w||'65',g:p.g||'male',f:p.f||'handsome Asian male model, chiseled jawline, stylish hair',a:p.a||'full body front view'};
+}
+
+// ═══ COINS ═══
+let coins=parseInt(localStorage.getItem('fitto_coins')||'100');
+let wardrobeLimit=parseInt(localStorage.getItem('fitto_wlimit')||'10');
+let userAvatar=localStorage.getItem('fitto_avatar')||'👤';
+let ownedAvatars=JSON.parse(localStorage.getItem('fitto_ownedav')||'["👤"]');
+let activeCatFilter='全部';
+
+function saveProgress(){
+  localStorage.setItem('fitto_coins',String(coins));
+  localStorage.setItem('fitto_wlimit',String(wardrobeLimit));
+  localStorage.setItem('fitto_avatar',userAvatar);
+  localStorage.setItem('fitto_ownedav',JSON.stringify(ownedAvatars));
+}
+
+function updateCoinUI(){
+  const hc=document.getElementById('hdr-coins');if(hc)hc.textContent=coins;
+  const sc=document.getElementById('shop-coins');if(sc)sc.textContent=coins;
+  const av=document.getElementById('wb-avatar');
+  if(av){
+    const img=getAvatarImg(userAvatar);
+    if(img){av.innerHTML=`<img src="${img}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;}
+    else{av.textContent=userAvatar;}
+  }
+  const wu=document.getElementById('wardrobe-used');if(wu)wu.textContent=wardrobe.length;
+  const wm=document.getElementById('wardrobe-max');if(wm)wm.textContent=wardrobeLimit;
+}
+
+function spendCoin(amt,reason){
+  if(coins<amt){alert('金幣不足！需要 '+amt+' 枚，目前 '+coins+' 枚。\n前往商店購買更多金幣 🪙');return false;}
+  coins-=amt;saveProgress();updateCoinUI();
+  const tl=document.getElementById('tf-last');if(tl)tl.textContent='🪙 -'+amt+' ('+reason+')';
+  return true;
+}
+
+function buyCoins(amt,price){
+  if(!confirm('購買 '+amt+' 金幣 ('+price+')\n（目前展示模式，將直接獲得金幣）\n確定繼續？'))return;
+  coins+=amt;saveProgress();updateCoinUI();
+  showCoinAnim(amt);
+}
+
+function showCoinAnim(amt){
+  const el=document.createElement('div');
+  el.textContent='+'+amt+' 🪙';
+  el.style.cssText="position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-family:Nunito,sans-serif;font-weight:900;font-size:2rem;color:#C9904A;background:rgba(255,248,235,.97);border:2px solid #C9904A;border-radius:16px;padding:16px 28px;z-index:9998;box-shadow:0 8px 32px rgba(180,130,50,.3)";
+  document.body.appendChild(el);
+  setTimeout(()=>{el.style.transition='opacity .5s';el.style.opacity='0';setTimeout(()=>document.body.removeChild(el),500);},1500);
+}
+
+function buyExpansion(add,cost){
+  if(!spendCoin(cost,'衣櫃擴充'))return;
+  wardrobeLimit+=add;saveProgress();updateCoinUI();
+  alert('✅ 衣櫃已擴充！現在可存放 '+wardrobeLimit+' 件衣物');
+}
+
+function buyAvatar(emoji,cost,btnId){
+  if(ownedAvatars.includes(emoji)){userAvatar=emoji;saveProgress();updateCoinUI();updateBanner();return;}
+  if(!spendCoin(cost,'購買頭像'))return;
+  ownedAvatars.push(emoji);userAvatar=emoji;saveProgress();updateCoinUI();updateBanner();
+  const btn=document.getElementById(btnId);
+  if(btn)btn.outerHTML='<div class="si-owned">✓ 使用中</div>';
+}
+
+// ═══ WARDROBE FILTER ═══
+const CAT_MAP={'上衣':['上衣','T恤','襯衫','毛衣'],'外套':['外套','夾克'],'下身':['褲子','牛仔褲','裙子','洋裝'],'鞋子':['鞋子'],'配件':['配件']};
+
+function filterWardrobeBy(cat,btn){
+  activeCatFilter=cat;
+  document.querySelectorAll('.cat-tab-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderW();
+}
+
+function refreshCatTabs(){
+  const tabs=document.getElementById('cat-tabs');if(!tabs)return;
+  const existing=new Set();
+  wardrobe.forEach(i=>{for(const[g,ts]of Object.entries(CAT_MAP)){if(ts.includes(i.type)){existing.add(g);break;}}});
+  const allA=activeCatFilter==='全部'?' active':'';
+  tabs.innerHTML=`<button class="cat-tab-btn${allA}" onclick="filterWardrobeBy('全部',this)">全部</button>`;
+  existing.forEach(cat=>{
+    const a=activeCatFilter===cat?' active':'';
+    tabs.innerHTML+=`<button class="cat-tab-btn${a}" onclick="filterWardrobeBy('${cat}',this)">${cat}</button>`;
+  });
+}
+
+// ═══ SHARE ═══
+let lastShare={};
+function openShareModal(day,outfit,meta,imgSrc){
+  document.getElementById('sh-day').textContent=day;
+  document.getElementById('sh-outfit').textContent=outfit;
+  document.getElementById('sh-meta').textContent=meta;
+  const ip=document.getElementById('sh-img');
+  ip.innerHTML=imgSrc?`<img src="${imgSrc}">`:'<span>生成示意圖後分享效果更好</span>';
+  lastShare={day,outfit,meta,imgSrc};
+  document.getElementById('share-ov').classList.add('show');
+}
+async function doNativeShare(){
+  const txt=`${lastShare.day||'今日搭配'}
+${lastShare.outfit||''}
+${lastShare.meta||''}
+
+#Fitto穿搭 #AI時尚
+https://4hyzc9kt57-spec.github.io/fitto`;
+  if(navigator.share){try{await navigator.share({title:'Fitto 穿搭',text:txt});}catch(e){if(e.name!=='AbortError')doCopyShare();}}
+  else doCopyShare();
+}
+async function doCopyShare(){
+  const txt=`Fitto AI 穿搭
+${lastShare.outfit||''}
+${lastShare.meta||''}
+#Fitto穿搭
+https://4hyzc9kt57-spec.github.io/fitto`;
+  try{await navigator.clipboard.writeText(txt);alert('✅ 已複製到剪貼簿！');}catch(e){alert('請手動複製');}
+}
+
 const COLORS={'白色':'#F8F8F8','黑色':'#2C2C2C','米白':'#F0E6D3','灰色':'#9E9E9E','深藍':'#1A237E','淺藍':'#90CAF9','卡其':'#C8A96E','棕色':'#6D4C41','紅色':'#EF5350','粉色':'#F48FB1','綠色':'#66BB6A','花紋/條紋':'repeating-linear-gradient(45deg,#ddd,#ddd 4px,#bbb 4px,#bbb 8px)'};
 const EMOJIS={'上衣':'👕','T恤':'👕','襯衫':'👔','毛衣':'🧶','外套':'🧥','夾克':'🧥','褲子':'👖','牛仔褲':'👖','裙子':'👗','洋裝':'👗','鞋子':'👟','配件':'👜'};
 const TOPS=['上衣','T恤','襯衫','毛衣'],BTMS=['褲子','牛仔褲','裙子','洋裝'],OUTS=['外套','夾克'];
@@ -858,11 +1585,10 @@ function updApiUI(){
   s.textContent = both ? '兩個 Key 已設定' : API_KEY ? 'Claude Key 已設定' : hasImg ? 'Google 已連接' : '設定 API Key';
 }
 function openApiModal(){
-  document.getElementById('api-inp').value=API_KEY;
   const gk=localStorage.getItem('fitto_gemini_key')||'';
-  document.getElementById('gemini-key-inp').value=gk;
+  const inp=document.getElementById('gemini-key-inp');
+  if(inp) inp.value=gk;
   document.getElementById('api-ov').classList.add('show');
-  updGoogleUI();
 }
 function saveKey(){
   API_KEY=document.getElementById('api-inp').value.trim();
@@ -877,9 +1603,13 @@ function sv(name,btn){document.querySelectorAll('.view').forEach(v=>v.classList.
 
 // WARDROBE
 function addItem(data){
+  if(wardrobe.length>=wardrobeLimit){
+    showLimitAlert();
+    return;
+  }
   let item;
-  if(data){ item=data; }
-  else {
+  if(data){item=data;}
+  else{
     item={id:nid++,type:document.getElementById('it').value,color:document.getElementById('ic').value,style:document.getElementById('is').value,note:document.getElementById('in').value.trim()};
     document.getElementById('in').value='';
   }
@@ -903,10 +1633,14 @@ function renderW(){
   const g=document.getElementById('cgrid');
   let ct=0,cb=0,co=0;
   g.innerHTML='';
-  if(!wardrobe.length){
-    g.innerHTML='<div class="empty"><div class="ei">👗</div><p>衣櫃還是空的<br>拍照或手動新增第一件衣服！</p></div>';
+  refreshCatTabs();
+  updateCoinUI();
+  // Filter by category
+  const display=activeCatFilter==='全部'?wardrobe:wardrobe.filter(i=>(CAT_MAP[activeCatFilter]||[]).includes(i.type));
+  if(!display.length){
+    g.innerHTML='<div class="empty"><div class="ei">'+(wardrobe.length?'🔍':'👗')+'</div><p>'+(wardrobe.length?'這個分類還沒有衣物':'衣櫃還是空的<br>拍照或手動新增第一件衣服！')+'</p></div>';
   } else {
-    wardrobe.forEach(i=>{
+    display.forEach(i=>{
       if(TOPS.includes(i.type))ct++;if(BTMS.includes(i.type))cb++;if(OUTS.includes(i.type))co++;
       const bg=COLORS[i.color]||'#1A3326', em=EMOJIS[i.type]||'👗';
       const card=document.createElement('div'); card.className='cc';
@@ -933,10 +1667,17 @@ function renderW(){
       g.appendChild(card);
     });
   }
+  // Count ALL wardrobe items for stats
+  let _ct=0,_cb=0,_co=0;
+  wardrobe.forEach(i=>{
+    if(['上衣','T恤','襯衫','毛衣'].includes(i.type))_ct++;
+    if(['褲子','牛仔褲','裙子','洋裝'].includes(i.type))_cb++;
+    if(['外套','夾克'].includes(i.type))_co++;
+  });
   document.getElementById('cnt-a').textContent=wardrobe.length;
-  document.getElementById('cnt-t').textContent=ct;
-  document.getElementById('cnt-b').textContent=cb;
-  document.getElementById('cnt-o').textContent=co;
+  document.getElementById('cnt-t').textContent=_ct;
+  document.getElementById('cnt-b').textContent=_cb;
+  document.getElementById('cnt-o').textContent=_co;
 }
 
 // SCAN
@@ -948,12 +1689,11 @@ async function aiScan(){
   if(!scanB64)return;
   const ind=document.getElementById('scaning'),res=document.getElementById('sres');
   ind.classList.add('show');res.classList.remove('show');
-  if(!API_KEY){await new Promise(r=>setTimeout(r,1000));ind.classList.remove('show');fillScan({type:'上衣',color:'白色',style:'休閒',note:'（示範）'});return}
+  const gemKey = localStorage.getItem('fitto_gemini_key')||'';
+  if(!gemKey){await new Promise(r=>setTimeout(r,1000));ind.classList.remove('show');fillScan({type:'上衣',color:'白色',style:'休閒',note:'（示範）'});return}
   try{
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:200,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:scanB64}},{type:'text',text:'辨識衣物只回JSON：{"type":"上衣/T恤/襯衫/毛衣/外套/夾克/褲子/牛仔褲/裙子/洋裝/鞋子/配件","color":"白色/黑色/米白/灰色/深藍/淺藍/卡其/棕色/紅色/粉色/綠色/花紋/條紋","style":"休閒/正式/商務/運動/韓系/簡約/街頭","note":"10字內"}'}]}]})});
-    const d=await r.json();
-    if(d.usage) addTokenUsage(d.usage.input_tokens||0, d.usage.output_tokens||0, 'claude');
-    fillScan(JSON.parse(d.content[0].text.replace(/```json|```/g,'').trim()));
+    const raw = await geminiVision('辨識衣物只回JSON：{"type":"上衣/T恤/襯衫/毛衣/外套/夾克/褲子/牛仔褲/裙子/洋裝/鞋子/配件","color":"白色/黑色/米白/灰色/深藍/淺藍/卡其/棕色/紅色/粉色/綠色/花紋/條紋","style":"休閒/正式/商務/運動/韓系/簡約/街頭","note":"10字內"}', scanB64);
+    fillScan(JSON.parse(raw.replace(/```json|```/g,'').trim()));
   }catch(e){fillScan({type:'T恤',color:'白色',style:'休閒',note:''})}
   finally{ind.classList.remove('show')}
 }
@@ -988,13 +1728,12 @@ async function genOutfit(){
   const wj=JSON.stringify(wardrobe.map(i=>({id:i.id,type:i.type,color:i.color,style:i.style,...(i.note?{note:i.note}:{})})));
   const prompt=`你是專業穿搭顧問。衣櫃：${wj}\n為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合、${sty}風格生成工作日（週一到週五）5天搭配計劃。只回JSON，不要加任何說明：{"title":"主題","days":[{"day":"週一","outfit":"搭配描述","tip":"建議"},{"day":"週二","outfit":"搭配描述","tip":"建議"},{"day":"週三","outfit":"搭配描述","tip":"建議"},{"day":"週四","outfit":"搭配描述","tip":"建議"},{"day":"週五","outfit":"搭配描述","tip":"建議"}],"overall_note":"整體建議2句"}`;
   try{
-    if(!API_KEY)throw new Error('no-key');
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:1000,messages:[{role:'user',content:prompt}]})});
-    const d=await r.json();
-    const parsed=JSON.parse(d.content[0].text.replace(/```json|```/g,'').trim());
-    renderRes(parsed,d.usage?.input_tokens||0,d.usage?.output_tokens||0,occ,sea);
+    const raw = await geminiText(prompt, 1000);
+    const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    renderRes(parsed, 0, 0, occ, sea);
   }catch(e){
-    renderRes({title:'示範：都市工作週',days:[{day:'週一',outfit:'白色襯衫＋深藍褲',tip:'清爽開啟新的一週'},{day:'週二',outfit:'米白上衣＋卡其褲',tip:'暖色系讓氣色更好'},{day:'週三',outfit:'黑色T恤＋牛仔褲',tip:'百搭基本款不出錯'},{day:'週四',outfit:'灰色毛衣＋深藍褲',tip:'週末前輕鬆過渡'},{day:'週五',outfit:'白色上衣＋裙子',tip:'Happy Friday！'}],overall_note:'中性色系為主，適合多種辦公場合。\n（示範模式—請設定 API Key 取得真實建議）'},0,0,occ,sea,true);
+    const isNoKey = e.message.includes('Key') || e.message.includes('key');
+    renderRes({title:'示範：都市工作週',days:[{day:'週一',outfit:'白色襯衫＋深藍褲',tip:'清爽開啟新的一週'},{day:'週二',outfit:'米白上衣＋卡其褲',tip:'暖色系讓氣色更好'},{day:'週三',outfit:'黑色T恤＋牛仔褲',tip:'百搭基本款不出錯'},{day:'週四',outfit:'灰色毛衣＋深藍褲',tip:'週末前輕鬆過渡'},{day:'週五',outfit:'白色上衣＋裙子',tip:'Happy Friday！'}],overall_note:'中性色系為主，適合多種辦公場合。\n（'+(isNoKey?'請設定 Google AI Key':'示範模式')+'）'},0,0,occ,sea,true);
   }finally{btn.classList.remove('loading');btn.disabled=false}
 }
 function renderRes(r,it,ot,occ,sea,isDemo=false){
@@ -1002,11 +1741,11 @@ function renderRes(r,it,ot,occ,sea,isDemo=false){
   document.getElementById('rmeta').textContent=`${sea.replace(/[🌸☀️🍂❄️]\s*/,'')} · ${occ}`;
   // Token badge: show Claude + image cost estimate
   const claudeTok=it+ot;
-  const imgCost=localStorage.getItem('fitto_gemini_key')?'Gemini ~NT$1.2':'Demo';
+  const imgCost=GOOGLE_TOKEN?'Gemini ✓':'Demo';
   document.getElementById('rtok').innerHTML=isDemo
     ? '示範模式'
-    : `<span style="display:block">${claudeTok} tok</span><span style="font-size:0.6rem;color:var(--muted)">生圖:${imgCost}</span>`;
-  if(!isDemo) addTokenUsage(it, ot, 'claude');
+    : `<span style="display:block">${claudeTok} tok</span><span style="font-size:0.6rem;color:var(--muted)">圖片:${imgCost}</span>`;
+  if(!isDemo) // tokens tracked in geminiText helper
 
   document.getElementById('wscroll').innerHTML=(r.days||[]).map((d,idx)=>`
     <div class="dc" id="dc-${idx}">
@@ -1040,37 +1779,26 @@ async function genImg(idx, outfit, occ, sea) {
   const box = document.getElementById('imgbox-'+idx);
   box.innerHTML = '<div class="img-loading"><div class="img-spinner"></div><span>生成中…</span></div>';
 
-  // Demo mode - no Gemini key
-  const geminiKeyCheck = localStorage.getItem('fitto_gemini_key') || '';
-  if(!geminiKeyCheck) {
-    await new Promise(r=>setTimeout(r,1000));
+  // Demo mode - no Google login
+  if(!GOOGLE_TOKEN) {
+    await new Promise(r=>setTimeout(r,1500));
     const demoUrl = DEMO_IMGS[idx % DEMO_IMGS.length];
     box.innerHTML = `
       <div class="outfit-img-wrap">
         <img src="${demoUrl}" class="outfit-img" alt="穿搭示意圖">
         <div class="img-demo-badge">Demo</div>
-        <div class="img-cost-note">在設定填入 Google AI Key 即可真實生圖</div>
+        <div class="img-cost-note">用 Google 帳號登入即可真實生成</div>
       </div>`;
     return;
   }
 
   try {
-    // Step 1: Build image prompt (use Claude if available, else build directly)
-    let imgPrompt = '';
-    if(API_KEY) {
-      const pr = await fetch('https://api.anthropic.com/v1/messages',{
-        method:'POST',
-        headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},
-        body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:100,
-          messages:[{role:'user',content:`Write an English image generation prompt (max 50 words) starting with "Generate a fashion flat lay image of:". Outfit: ${outfit}, ${sea} season, ${occ}. Include: clean white background, soft studio lighting, top-down view, no people. Output only the prompt.`}]
-        })
-      });
-      const pd = await pr.json();
-      if(pd.usage) addTokenUsage(pd.usage.input_tokens||0, pd.usage.output_tokens||0, 'claude');
-      imgPrompt = pd.content[0].text.trim();
-    } else {
-      imgPrompt = `Generate a fashion flat lay image showing: ${outfit}. Style: ${sea} season, ${occ}. Clean white background, soft studio lighting, top-down view, no people, professional clothing photography.`;
-    }
+    // Build flat-lay image prompt via Gemini
+    let imgPrompt = `Generate a fashion flat lay image showing: ${outfit}. Style: ${sea} season, ${occ}. Clean white background, soft studio lighting, top-down view, no people, professional clothing photography.`;
+    try {
+      const ep = await geminiText(`Write a 50-word English prompt for a fashion flat lay photo. Outfit: ${outfit}, ${sea}, ${occ}. Clean white background, top-down view, no people. Start with "Generate a fashion flat lay:". Output prompt only.`, 80);
+      if(ep) imgPrompt = ep;
+    } catch(e) {}
 
     // Step 2: Collect reference images from wardrobe for this outfit
     // Match outfit keywords against wardrobe items with photos
@@ -1106,7 +1834,7 @@ async function genImg(idx, outfit, occ, sea) {
       </div>`;
 
   } catch(e) {
-    const safe = e.message.substring(0,50).replace(/'/g,"\'");
+    if(e.message==='COIN_SPENT'){box.innerHTML='';return;}
     box.innerHTML = `<div class="img-error">⚠️ 生成失敗<br><span>${e.message.substring(0,50)}</span><br><button class="btn-gen-img" onclick="genImg(${idx},'${outfit.replace(/'/g,"\'")}','${occ}','${sea}')">重試</button></div>`;
   }
 }
@@ -1140,11 +1868,8 @@ async function scanCat(){
   const btn=document.getElementById('bcatscan');btn.disabled=true;btn.textContent='⏳ AI 分析中…';
   let items=[];
   try{
-    if(!API_KEY)throw new Error('no-key');
-    const r=await fetch('https://api.anthropic.com/v1/messages',{method:'POST',headers:{'Content-Type':'application/json','x-api-key':API_KEY,'anthropic-version':'2023-06-01','anthropic-dangerous-direct-browser-access':'true'},body:JSON.stringify({model:'claude-haiku-4-5-20251001',max_tokens:600,messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:'image/jpeg',data:catB64}},{type:'text',text:'分析服裝型錄找出所有服裝單品。只回JSON陣列：[{"name":"單品名","type":"種類","color":"主色","style":"風格","desc":"10字描述"},...最多8項]'}]}]})});
-    const d=await r.json();
-    if(d.usage) addTokenUsage(d.usage.input_tokens||0, d.usage.output_tokens||0, 'claude');
-    items=JSON.parse(d.content[0].text.replace(/```json|```/g,'').trim());
+    const raw = await geminiVision('分析服裝型錄找出所有服裝單品。只回JSON陣列：[{"name":"單品名","type":"種類","color":"主色","style":"風格","desc":"10字描述"},...最多8項]', catB64);
+    items=JSON.parse(raw.replace(/```json|```/g,'').trim());
   }catch(e){items=[{name:'白色寬版T恤',type:'T恤',color:'白色',style:'休閒',desc:'棉質素色'},{name:'深藍直筒褲',type:'褲子',color:'深藍',style:'商務',desc:'挺版顯瘦'},{name:'米色輕薄外套',type:'外套',color:'米白',style:'簡約',desc:'春秋適穿'},{name:'條紋針織衫',type:'毛衣',color:'花紋/條紋',style:'韓系',desc:'橫條紋設計'}]}
   finally{btn.disabled=false;btn.textContent='🔍 AI 分析型錄'}
   renderCatItems(items);
@@ -1153,58 +1878,22 @@ function renderCatItems(items){
   document.getElementById('catitems').innerHTML=items.map((i,idx)=>`<div class="cit"><div class="cit-info"><strong>${i.name}</strong><span>${i.type} · ${i.color} · ${i.style} · ${i.desc}</span></div><button class="btn-ca" onclick="addFromCat(${idx},'${i.type}','${i.color}','${i.style}','${i.name.replace(/'/g,"\\'")}',this)">加入衣櫃</button></div>`).join('');
   document.getElementById('catres').classList.add('show');
 }
-function addFromCat(idx,type,color,style,name,btn){wardrobe.push({id:nid++,type,color,style,note:name});persist();renderW();btn.textContent='✅ 已加入';btn.className='btn-ca added';btn.disabled=true}
-
-
-
-
-
-// ═══ PASSWORD LOCK ═══
-const APP_PASSWORD_HASH = '8e2b5f9a3c1d7e6f'; // hash of actual password set below
-
-function simpleHash(str) {
-  // Simple hash for client-side password check
-  let hash = 0;
-  for(let i = 0; i < str.length; i++) {
-    hash = ((hash << 5) - hash) + str.charCodeAt(i);
-    hash |= 0;
+function addFromCat(idx,type,color,style,name,btn){
+  if(wardrobe.length>=wardrobeLimit){
+    showLimitAlert();
+    return;
   }
-  return Math.abs(hash).toString(16);
+  wardrobe.push({id:nid++,type,color,style,note:name});
+  // Track added catalog items persistently
+  let added=JSON.parse(localStorage.getItem('fitto_cat_added')||'[]');
+  if(!added.includes(idx+'_'+name))added.push(idx+'_'+name);
+  localStorage.setItem('fitto_cat_added',JSON.stringify(added));
+  persist();renderW();
+  btn.textContent='✅ 已加入';btn.className='btn-ca added';btn.disabled=true;
 }
 
-// Set your password here - change 'fitto2026' to whatever you want
-const CORRECT_PASSWORD = 'fitto2026';
 
-function checkPassword() {
-  const input = document.getElementById('lock-pw-input').value;
-  const errEl = document.getElementById('lock-error');
-  if(input === CORRECT_PASSWORD) {
-    // Correct - unlock
-    sessionStorage.setItem('fitto_unlocked', '1');
-    const lockEl = document.getElementById('lock-screen');
-    lockEl.style.opacity = '0';
-    lockEl.style.transition = 'opacity 0.4s ease';
-    setTimeout(() => lockEl.style.display = 'none', 400);
-    errEl.textContent = '';
-  } else {
-    errEl.textContent = '❌ 密碼錯誤，請再試一次';
-    document.getElementById('lock-pw-input').value = '';
-    document.getElementById('lock-pw-input').focus();
-    // Re-trigger shake animation
-    errEl.style.animation = 'none';
-    setTimeout(() => errEl.style.animation = 'shake .3s ease', 10);
-  }
-}
 
-function initLock() {
-  // Check if already unlocked this session
-  if(sessionStorage.getItem('fitto_unlocked') === '1') {
-    document.getElementById('lock-screen').style.display = 'none';
-  } else {
-    // Focus password input
-    setTimeout(() => document.getElementById('lock-pw-input').focus(), 300);
-  }
-}
 
 // ═══ TOKEN COUNTER ═══
 let tokenStats = JSON.parse(localStorage.getItem('fitto_tokens') || '{"claude":0,"img":0,"cost":0}');
@@ -1277,18 +1966,19 @@ function updGoogleUI() {
 }
 
 function startGoogleAuth() {
-  // Use stored Gemini key as "Google connected" indicator
-  const gk = localStorage.getItem('fitto_gemini_key') || '';
-  if(!gk) {
-    alert('請先在下方填入 Google AI Studio Key，再點連接');
-    return;
-  }
-  GOOGLE_USER = { name: 'Jack', email: 'coolcooljac@gmail.com',
-    picture: 'https://ui-avatars.com/api/?name=Jack&background=C9A550&color=0C1810&bold=true&size=64' };
+  // Hardcoded owner account for testing
+  GOOGLE_USER = {
+    name: 'Jack',
+    email: 'coolcooljac@gmail.com',
+    picture: 'https://ui-avatars.com/api/?name=Jack&background=C9A550&color=0C1810&bold=true&size=64'
+  };
+  // Use Nano Banana (Gemini) via API key stored in app
+  // For testing: mark as connected, use demo image gen with owner bypass
   GOOGLE_TOKEN = 'owner-bypass-coolcooljac';
   localStorage.setItem('fitto_gtoken', GOOGLE_TOKEN);
   localStorage.setItem('fitto_guser', JSON.stringify(GOOGLE_USER));
-  updGoogleUI(); updApiUI();
+  updGoogleUI();
+  updApiUI();
 }
 
 async function fetchGoogleUser() {
@@ -1336,11 +2026,11 @@ async function geminiGenImage(prompt, refImages = []) {
     return 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svg)));
   }
 
-  // Gemini 2.5 Flash Image API call
-  if(!geminiKey) throw new Error('請先在設定填入 Google AI Studio Key');
+  // Real Gemini Imagen API call (Nano Banana = gemini-2.5-flash-image)
+  const apiKey = geminiKey;
+  if(!apiKey) throw new Error('請先在設定填入 Google AI Studio Key');
 
-  // gemini-2.5-flash-image = Nano Banana (paid tier)
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${geminiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=${apiKey}`;
 
   // Build parts array - add reference images if provided
   const textParts = [{ text: prompt }];
@@ -1510,7 +2200,7 @@ function addUQItem(id, btn) {
 }
 
 // INIT
-initLock();renderW();updApiUI();renderUQCatalog();updGoogleUI();updateTokenUI();
+renderW();updApiUI();renderUQCatalog();updGoogleUI();updateTokenUI();updateBanner();updateCoinUI();loadProfile();claimDailyLogin();updateDailyUI();checkAutoMissions();setTimeout(renderMissions,500);
 </script>
 </body>
 </html>
