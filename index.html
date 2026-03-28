@@ -1173,6 +1173,22 @@ function getProfile() {
   };
 }
 
+// 頭像 emoji → 圖片生成用的人物描述
+var AVATAR_PROMPT_MAP = {
+  '👤': 'Asian person',
+  '☀️': 'handsome young Asian man with warm smile, clean-cut appearance, sunny vibe',
+  '🌙': 'handsome Korean-style Asian man, sharp jawline, K-pop idol look',
+  '⚡': 'rugged Asian man, strong features, street-style edge',
+  '🌸': 'beautiful Korean-style Asian woman, soft features, K-beauty look',
+  '🌺': 'cute Japanese-style Asian woman, natural beauty, fresh-faced',
+  '👑': 'elegant mature Asian woman, sophisticated, confident beauty',
+  '⭐': 'stylish Asian woman, fashionable, versatile trendy look',
+};
+
+function getAvatarPromptDesc() {
+  return AVATAR_PROMPT_MAP[userAvatar] || 'Asian person';
+}
+
 // ═══ CAT FILTER ═══
 var CAT_MAP = {'上衣':['上衣','T恤','襯衫','毛衣'],'外套':['外套','夾克'],'下身':['褲子','牛仔褲','裙子','洋裝'],'鞋子':['鞋子'],'配件':['配件']};
 
@@ -1563,25 +1579,43 @@ async function genImg(idx, outfit, occ, sea) {
   box.innerHTML = '<div class="img-loading"><div class="img-spinner"></div><span>生成中…</span></div>';
   if(!checkAndSpend()){return;}
 
-
-
   try {
     const prof = getProfile();
-    const bmi = (parseFloat(prof.w) / ((parseFloat(prof.h)/100)**2)).toFixed(1);
-    const body = bmi < 18.5 ? 'slim lean' : bmi < 25 ? 'athletic fit' : 'muscular built';
-    const pose = getRandomPose();
-    let imgPrompt = `Professional high fashion magazine photography, ${prof.f}, ${prof.h}cm ${body} physique, pose: ${pose}, wearing: ${outfit}. ${sea} season, ${occ} occasion. Clean studio white background, dramatic soft lighting, Vogue editorial style, ultra sharp, 8K.`;
-    try {
-      const ep = await geminiText('Write 60-word English Vogue fashion photo prompt. Model: '+prof.f+', '+prof.h+'cm '+body+', pose: '+pose+'. Wearing: '+outfit+'. Season: '+sea+', '+occ+'. High fashion editorial, dramatic studio lighting. Output prompt only.', 80);
-      if(ep) imgPrompt = ep;
-    } catch(e2) {}
+    const avatarDesc = getAvatarPromptDesc();
+    const seasonMap = {'春':'spring','夏':'summer','秋':'autumn','冬':'winter'};
+    const seaEn = seasonMap[sea] || sea;
+    const occEn = occ;
+
+    // 核心提示詞：聚焦服裝，人物由頭像決定
+    const imgPrompt = `Fashion lookbook photo. Person: ${avatarDesc}. Outfit: ${outfit}. Season: ${seaEn}, occasion: ${occEn}. Natural standing pose, neutral background, soft natural lighting, full outfit visible, high quality fashion photo.`;
+
+    console.log('[Fitto DEBUG] imgPrompt:', imgPrompt);
+    console.log('[Fitto DEBUG] avatar:', userAvatar, '|', avatarDesc);
+    console.log('[Fitto DEBUG] outfit:', outfit, '| occ:', occ, '| sea:', sea);
 
     const key = localStorage.getItem('fitto_gemini_key') || '';
     if(!key) throw new Error('請先設定 Gemini Key');
+
+    // 嘗試取得頭像 reference image
+    const avatarPhotoMap = {'☀️':'sunny','🌙':'korean','⚡':'rugged'};
+    const photoKey = avatarPhotoMap[userAvatar];
+    const refB64 = photoKey && AVATAR_IMGS[photoKey] ? AVATAR_IMGS[photoKey].split(',')[1] : null;
+
+    let requestParts;
+    if(refB64) {
+      // 有 reference image：傳入頭像圖片 + 提示詞
+      requestParts = [
+        {inlineData:{mimeType:'image/jpeg', data:refB64}},
+        {text: 'Use this person as reference for face and appearance. ' + imgPrompt}
+      ];
+    } else {
+      requestParts = [{text: imgPrompt}];
+    }
+
     const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=' + key;
     const res = await fetch(endpoint, {
       method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{role:'user',parts:[{text:imgPrompt}]}],generationConfig:{responseModalities:['TEXT','IMAGE']}})
+      body:JSON.stringify({contents:[{role:'user',parts:requestParts}],generationConfig:{responseModalities:['TEXT','IMAGE']}})
     });
     const d = await res.json();
     if(d.error) throw new Error(d.error.message || ('Error ' + d.error.code));
@@ -1597,13 +1631,47 @@ async function genImg(idx, outfit, occ, sea) {
     const tc = parseInt(localStorage.getItem('fitto_total_imgs')||'0') + 1;
     localStorage.setItem('fitto_total_imgs', String(tc));
     checkAutoMissions();
-    const metaTxt = (sea||'').replace(/[🌸☀️🍂❄️]\s*/,'') + ' · ' + (occ||'');
-    box.innerHTML = `<div class="outfit-img-wrap"><img src="${imgSrc}" class="outfit-img" alt="穿搭示意圖" onclick="openImgFull('${imgSrc}')"><div class="img-cost-note">Nano Banana 🪙 -1</div><button onclick="openShareModal('搭配','${outfit.replace(/'/g,"\\'")}','${metaTxt}','${imgSrc}')" style="width:100%;margin-top:6px;padding:7px;background:rgba(20,20,20,.8);border:1px solid rgba(255,255,255,.15);border-radius:8px;color:white;font-size:.68rem;font-weight:700;cursor:pointer;">↗ 分享這套搭配</button></div>`;
+    const metaTxt = (sea||'') + ' · ' + (occ||'');
+
+    // 儲存圖片供收藏用
+    if(lastRes && lastRes.days && lastRes.days[idx]) {
+      lastRes.days[idx].imgSrc = imgSrc;
+    }
+
+    box.innerHTML = `<div class="outfit-img-wrap">
+      <img src="${imgSrc}" class="outfit-img" alt="穿搭示意圖" onclick="openImgFull('${imgSrc}')">
+      <div class="img-cost-note">🪙 -1</div>
+      <div class="img-debug" style="font-size:.55rem;color:rgba(255,255,255,.3);padding:4px 6px;line-height:1.4;word-break:break-all">[DEBUG] ${imgPrompt.substring(0,120)}…</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;margin-top:8px">
+        <button onclick="shareToFB('${outfit.replace(/'/g,"\'")}')" style="padding:7px 4px;background:#1877F2;border:none;border-radius:8px;color:white;font-size:.65rem;font-weight:700;cursor:pointer;">📘 FB</button>
+        <button onclick="shareToIG('${imgSrc}')" style="padding:7px 4px;background:linear-gradient(45deg,#f09433,#e6683c,#dc2743,#cc2366,#bc1888);border:none;border-radius:8px;color:white;font-size:.65rem;font-weight:700;cursor:pointer;">📷 IG</button>
+        <button onclick="saveImgLocal('${imgSrc}','outfit_${idx}')" style="padding:7px 4px;background:#2A8A4A;border:none;border-radius:8px;color:white;font-size:.65rem;font-weight:700;cursor:pointer;">💾 儲存</button>
+      </div>
+    </div>`;
 
   } catch(e) {
-    const safe = e.message.substring(0,50).replace(/'/g,"\'");
-    box.innerHTML = `<div class="img-error">⚠️ 生成失敗<br><span>${e.message.substring(0,50)}</span><br><button class="btn-gen-img" onclick="genImg(${idx},'${outfit.replace(/'/g,"\'")}','${occ}','${sea}')">重試</button></div>`;
+    box.innerHTML = `<div class="img-error">⚠️ 生成失敗<br><span>${e.message.substring(0,80)}</span><br><button class="btn-gen-img" onclick="genImg(${idx},'${outfit.replace(/'/g,"\'")}','${occ}','${sea}')">重試</button></div>`;
   }
+}
+
+// 分享功能
+function shareToFB(outfit) {
+  var url = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent('https://4hyzc9kt57-spec.github.io/fitto') + '&quote=' + encodeURIComponent('今日穿搭：' + outfit + ' #Fitto穿搭');
+  window.open(url, '_blank');
+}
+function shareToIG(imgSrc) {
+  // IG 不支援直接帶圖分享，先儲存再提示
+  saveImgLocal(imgSrc, 'fitto_outfit');
+  showToast('📷 圖片已儲存，請至 IG 上傳！');
+}
+function saveImgLocal(src, name) {
+  var a = document.createElement('a');
+  a.href = src;
+  a.download = (name || 'fitto_outfit') + '.jpg';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast('💾 圖片已儲存！');
 }
 
 function openImgFull(url) {
@@ -1617,6 +1685,7 @@ function openImgFull(url) {
 // SAVE
 function saveOutfit(){
   if(!lastRes)return;
+  // lastRes.days[n].imgSrc 已由 genImg 寫入
   saved.unshift({...lastRes,sid:Date.now()});persist();
   const b=document.getElementById('bsave');b.textContent='✅ 已收藏！';
   setTimeout(()=>b.textContent='🔖 收藏這週工作搭配',2000);
@@ -1624,7 +1693,19 @@ function saveOutfit(){
 function renderSaved(){
   const w=document.getElementById('saved-wrap');
   if(!saved.length){w.innerHTML=`<div class="empty"><div class="ei">🔖</div><p>還沒收藏的搭配<br>先去生成一週計劃吧！</p></div>`;return}
-  w.innerHTML=`<div class="saved-list">${saved.map(s=>`<div class="si"><div class="si-hd"><h3>${s.title}</h3><button class="btn-dls" onclick="delSaved(${s.sid})">刪除</button></div><div class="si-meta">${s.at||''} · ${(s.sea||'').replace(/[🌸☀️🍂❄️]\s*/,'')} · ${s.occ||''}</div><div class="si-prev">${(s.days||[]).map(d=>`<div class="sp"><div class="spd">${d.day}</div><div class="spo">${d.outfit}</div></div>`).join('')}</div></div>`).join('')}</div>`;
+  w.innerHTML=`<div class="saved-list">${saved.map(s=>`
+    <div class="si">
+      <div class="si-hd"><h3>${s.title}</h3><button class="btn-dls" onclick="delSaved(${s.sid})">刪除</button></div>
+      <div class="si-meta">${s.at||''} · ${(s.sea||'').replace(/[🌸☀️🍂❄️]\s*/,'')} · ${s.occ||''}</div>
+      <div class="si-prev">
+        ${(s.days||[]).map(d=>`
+          <div class="sp">
+            <div class="spd">${d.day}</div>
+            ${d.imgSrc ? `<img src="${d.imgSrc}" style="width:100%;border-radius:6px;margin:4px 0;object-fit:cover;max-height:100px">` : ''}
+            <div class="spo">${d.outfit}</div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('')}</div>`;
 }
 function delSaved(sid){saved=saved.filter(s=>s.sid!==sid);persist();renderSaved()}
 
