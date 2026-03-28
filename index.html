@@ -1002,10 +1002,10 @@ function renderRes(r,it,ot,occ,sea,isDemo=false){
   document.getElementById('rmeta').textContent=`${sea.replace(/[🌸☀️🍂❄️]\s*/,'')} · ${occ}`;
   // Token badge: show Claude + image cost estimate
   const claudeTok=it+ot;
-  const imgCost=GOOGLE_TOKEN?'Gemini ✓':'Demo';
+  const imgCost=localStorage.getItem('fitto_gemini_key')?'Gemini ~NT$1.2':'Demo';
   document.getElementById('rtok').innerHTML=isDemo
     ? '示範模式'
-    : `<span style="display:block">${claudeTok} tok</span><span style="font-size:0.6rem;color:var(--muted)">圖片:${imgCost}</span>`;
+    : `<span style="display:block">${claudeTok} tok</span><span style="font-size:0.6rem;color:var(--muted)">生圖:${imgCost}</span>`;
   if(!isDemo) addTokenUsage(it, ot, 'claude');
 
   document.getElementById('wscroll').innerHTML=(r.days||[]).map((d,idx)=>`
@@ -1040,15 +1040,16 @@ async function genImg(idx, outfit, occ, sea) {
   const box = document.getElementById('imgbox-'+idx);
   box.innerHTML = '<div class="img-loading"><div class="img-spinner"></div><span>生成中…</span></div>';
 
-  // Demo mode - no Google login
-  if(!GOOGLE_TOKEN) {
-    await new Promise(r=>setTimeout(r,1500));
+  // Demo mode - no Gemini key
+  const geminiKeyCheck = localStorage.getItem('fitto_gemini_key') || '';
+  if(!geminiKeyCheck) {
+    await new Promise(r=>setTimeout(r,1000));
     const demoUrl = DEMO_IMGS[idx % DEMO_IMGS.length];
     box.innerHTML = `
       <div class="outfit-img-wrap">
         <img src="${demoUrl}" class="outfit-img" alt="穿搭示意圖">
         <div class="img-demo-badge">Demo</div>
-        <div class="img-cost-note">用 Google 帳號登入即可真實生成</div>
+        <div class="img-cost-note">在設定填入 Google AI Key 即可真實生圖</div>
       </div>`;
     return;
   }
@@ -1340,7 +1341,7 @@ async function geminiGenImage(prompt, refImages = []) {
   if(!apiKey) throw new Error('請先在設定填入 Google AI Studio Key');
 
   // gemini-2.0-flash-exp supports image generation on free tier
-  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp-image-generation:generateContent?key=${apiKey}`;
+  const endpoint = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-exp:generateContent?key=${apiKey}`;
 
   // Build parts array - add reference images if provided
   const textParts = [{ text: prompt }];
