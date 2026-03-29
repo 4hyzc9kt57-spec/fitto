@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto · AI 智能穿搭</title>
+<title>Fitto v8 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -614,16 +614,37 @@ body{background:var(--bg);color:var(--ink);}
 .trend-knob::before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:white;border-radius:50%;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
 .trend-toggle input:checked + .trend-knob{background:var(--gold)}
 .trend-toggle input:checked + .trend-knob::before{transform:translateX(18px)}
+
+/* ── API LOG ── */
+#tf-log {
+  max-height: 120px;
+  overflow-y: auto;
+  margin-top: 6px;
+  scrollbar-width: none;
+}
+#tf-log::-webkit-scrollbar { display: none; }
+.tf-log-entry {
+  font-size: 0.55rem;
+  font-family: 'Inter', monospace;
+  line-height: 1.6;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  word-break: break-all;
+}
+.tf-log-entry.ok   { color: #4CAF7D; }
+.tf-log-entry.err  { color: #E05252; }
+.tf-log-entry.info { color: #9AB8A8; }
+.tf-log-entry.prompt { color: #C9A550; }
 </style>
 
 </head>
 <body>
 
 <header>
-  <div class="logo">Fitto <span class="logo-badge">v3</span></div>
+  <div class="logo">Fitto <span class="logo-badge">v8</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
-      <span>🪙</span><span class="coin-amt" id="hdr-coins">100</span><span class="coin-lbl">金幣</span>
+      <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
     </div>
     <div class="api-pill" onclick="openApiModal()">
       <div class="dot" id="api-dot"></div>
@@ -676,9 +697,9 @@ body{background:var(--bg);color:var(--ink);}
         <option>裙子</option><option>洋裝</option><option>鞋子</option><option>配件</option>
       </select></div>
       <div class="fg"><label>顏色</label><select id="ic">
-        <option>白色</option><option>黑色</option><option>米白</option><option>灰色</option>
-        <option>深藍</option><option>淺藍</option><option>卡其</option><option>棕色</option>
-        <option>紅色</option><option>粉色</option><option>綠色</option><option>花紋/條紋</option>
+        <option>白色</option><option>米白</option><option>淺灰</option><option>灰色</option><option>深灰</option><option>黑色</option>
+        <option>淺藍</option><option>深藍</option><option>卡其</option><option>棕色</option>
+        <option>紅色</option><option>酒紅</option><option>粉色</option><option>綠色</option><option>橄欖綠</option><option>花紋/條紋</option>
       </select></div>
     </div>
     <div class="fr">
@@ -800,13 +821,13 @@ body{background:var(--bg);color:var(--ink);}
 <!-- FLOATING TOKEN COUNTER -->
 <div id="token-float" onclick="toggleTokenFloat()">
   <div class="tf-title">
-    <span>⚡ API 用量</span>
+    <span>Gemini 用量</span>
     <span id="tf-toggle" style="font-size:0.7rem">▾</span>
   </div>
   <div class="tf-rows">
     <div class="tf-row">
-      <span class="tf-label">Claude Tokens</span>
-      <span class="tf-val gold" id="tf-claude">0</span>
+      <span class="tf-label">文字 Tokens</span>
+      <span class="tf-val gold" id="tf-text">0</span>
     </div>
     <div class="tf-row">
       <span class="tf-label">圖片生成</span>
@@ -814,15 +835,20 @@ body{background:var(--bg);color:var(--ink);}
     </div>
     <div class="tf-divider"></div>
     <div class="tf-row">
-      <span class="tf-label">估計費用</span>
-      <span class="tf-val" id="tf-cost">$0.0000</span>
+      <span class="tf-label">累計費用</span>
+      <span class="tf-val" id="tf-cost">NT$0.00</span>
     </div>
     <div class="tf-row">
       <span class="tf-label">本次操作</span>
       <span class="tf-val" id="tf-last" style="font-size:0.62rem;color:var(--muted)">—</span>
     </div>
-    <div class="tf-reset" onclick="event.stopPropagation();resetTokenCount()">↺ 重置計數</div>
-    <div style="font-size:0.5rem;color:var(--border2);text-align:center;margin-top:3px;letter-spacing:0.05em">Fitto v1 · 2026.03</div>
+    <div class="tf-divider"></div>
+    <div style="font-size:0.55rem;font-weight:800;color:var(--muted);letter-spacing:0.06em;margin-bottom:3px">LOG</div>
+    <div id="tf-log"></div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px">
+      <div class="tf-reset" onclick="event.stopPropagation();resetTokenCount()">↺ 重置</div>
+      <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;align-self:center">Fitto v8 · 2026.03</div>
+    </div>
   </div>
 </div>
 
@@ -830,46 +856,46 @@ body{background:var(--bg);color:var(--ink);}
 <div class="view" id="view-shop">
   <div class="shop-banner">
     <h2>🪙 Fitto 商店</h2><p>用金幣解鎖更多功能</p>
-    <div class="scd"><span class="scd-amt" id="shop-coins">100</span><span class="scd-lbl">🪙 我的金幣</span></div>
+    <div class="scd"><span class="scd-amt" id="shop-coins">5</span><span class="scd-lbl">🪙 我的金幣</span></div>
   </div>
   <div style="background:#F5EDD8;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.68rem;color:#7A5020;line-height:1.6">
     🎁 每日免費生圖 <strong>3 次</strong>（自動補充）<br>
-    💡 免費用完後：1枚金幣 = 1張圖 · 連續登入7天送5枚
+    💡 每日 1 次免費生圖 · 用完後 1 金幣 = 1 張圖
   </div>
   <div class="shop-sec">💰 購買金幣</div>
   <div class="shop-grid">
-    <div class="shop-item"><span class="si-icon">🪙</span><div class="si-name">30 金幣</div><div class="si-desc">入門包<br>NT$1.97/枚</div><button class="si-price" onclick="buyCoins(30,'NT$59')">NT$59</button></div>
-    <div class="shop-item featured"><div class="si-badge">划算</div><span class="si-icon">💰</span><div class="si-name">80 金幣</div><div class="si-desc">標準包<br>NT$1.74/枚</div><button class="si-price" onclick="buyCoins(80,'NT$139')">NT$139</button></div>
-    <div class="shop-item"><span class="si-icon">💎</span><div class="si-name">200 金幣</div><div class="si-desc">大量包<br>NT$1.50/枚</div><button class="si-price" onclick="buyCoins(200,'NT$299')">NT$299</button></div>
-    <div class="shop-item"><span class="si-icon">👑</span><div class="si-name">月卡 150 枚</div><div class="si-desc">每日5枚<br>30天</div><button class="si-price" onclick="buyCoins(150,'NT$149/月')">NT$149/月</button></div>
+    <div class="shop-item"><span class="si-icon">🪙</span><div class="si-name">30 金幣</div><div class="si-desc">入門包<br>NT$4.3/枚</div><button class="si-price" onclick="buyCoins(30,'NT$129')">NT$129</button></div>
+    <div class="shop-item featured"><div class="si-badge">最划算</div><span class="si-icon">💰</span><div class="si-name">80 金幣</div><div class="si-desc">標準包<br>NT$3.7/枚</div><button class="si-price" onclick="buyCoins(80,'NT$299')">NT$299</button></div>
+    <div class="shop-item"><span class="si-icon">💎</span><div class="si-name">200 金幣</div><div class="si-desc">大量包<br>NT$3.5/枚</div><button class="si-price" onclick="buyCoins(200,'NT$699')">NT$699</button></div>
+    <div class="shop-item"><span class="si-icon">👑</span><div class="si-name">月卡 100 枚</div><div class="si-desc">每月固定<br>NT$2.5/枚</div><button class="si-price" onclick="buyCoins(100,'NT$249/月')">NT$249/月</button></div>
   </div>
   <div class="shop-sec">👗 衣櫃擴充</div>
   <div class="shop-grid">
-    <div class="shop-item"><span class="si-icon">📦</span><div class="si-name">+10 件空間</div><div class="si-desc">容量到20件</div><button class="si-price" onclick="buyExpansion(10,50)">🪙 50枚</button></div>
-    <div class="shop-item"><span class="si-icon">🏠</span><div class="si-name">+30 件空間</div><div class="si-desc">大幅擴充40件</div><button class="si-price" onclick="buyExpansion(30,120)">🪙 120枚</button></div>
+    <div class="shop-item"><span class="si-icon">📦</span><div class="si-name">+10 件空間</div><div class="si-desc">容量到20件</div><button class="si-price" onclick="buyExpansion(10,30)">🪙 30枚</button></div>
+    <div class="shop-item"><span class="si-icon">🏠</span><div class="si-name">+30 件空間</div><div class="si-desc">大幅擴充40件</div><button class="si-price" onclick="buyExpansion(30,80)">🪙 80枚</button></div>
   </div>
   <div class="shop-sec">👨 帥哥頭像</div>
   <div class="shop-grid">
     <div class="shop-item"><div class="si-badge">帥哥</div>
       <div style="width:60px;height:60px;border-radius:50%;overflow:hidden;margin:0 auto 8px;border:2px solid #D4A055"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="si-name">陽光型男</div><div class="si-desc">暖心笑容</div>
-      <button class="si-price" id="btn-sun" onclick="buyAvatar('☀️',23,'btn-sun')">🪙 23枚</button></div>
+      <button class="si-price" id="btn-sun" onclick="buyAvatar('☀️',15,'btn-sun')">🪙 15枚</button></div>
     <div class="shop-item"><div class="si-badge">熱門</div>
       <div style="width:60px;height:60px;border-radius:50%;overflow:hidden;margin:0 auto 8px;border:2px solid #D4A055"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="si-name">韓風男神</div><div class="si-desc">K-Style歐爸</div>
-      <button class="si-price" id="btn-kr" onclick="buyAvatar('🌙',30,'btn-kr')">🪙 30枚</button></div>
+      <button class="si-price" id="btn-kr" onclick="buyAvatar('🌙',20,'btn-kr')">🪙 20枚</button></div>
     <div class="shop-item"><div class="si-badge">VIP</div>
       <div style="width:60px;height:60px;border-radius:50%;overflow:hidden;margin:0 auto 8px;border:2px solid #D4A055"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:cover"></div>
       <div class="si-name">粗獷型男</div><div class="si-desc">硬派男子氣</div>
-      <button class="si-price" id="btn-rg" onclick="buyAvatar('⚡',38,'btn-rg')">🪙 38枚</button></div>
+      <button class="si-price" id="btn-rg" onclick="buyAvatar('⚡',25,'btn-rg')">🪙 25枚</button></div>
     <div class="shop-item"><span class="si-icon">😊</span><div class="si-name">預設頭像</div><div class="si-desc">永久免費</div><div class="si-owned">✓ 已擁有</div></div>
   </div>
   <div class="shop-sec">👩 美女頭像</div>
   <div class="shop-grid">
-    <div class="shop-item"><div class="si-badge">熱門</div><span class="si-icon">🌸</span><div class="si-name">韓系女神</div><div class="si-desc">K-Beauty</div><button class="si-price" id="btn-kg" onclick="buyAvatar('🌸',30,'btn-kg')">🪙 30枚</button></div>
-    <div class="shop-item"><span class="si-icon">🌺</span><div class="si-name">日系女孩</div><div class="si-desc">清純自然</div><button class="si-price" id="btn-jp" onclick="buyAvatar('🌺',23,'btn-jp')">🪙 23枚</button></div>
-    <div class="shop-item"><div class="si-badge">VIP</div><span class="si-icon">👑</span><div class="si-name">御姐女王</div><div class="si-desc">成熟自信</div><button class="si-price" id="btn-qu" onclick="buyAvatar('👑',38,'btn-qu')">🪙 38枚</button></div>
-    <div class="shop-item"><span class="si-icon">⭐</span><div class="si-name">時尚達人</div><div class="si-desc">百變造型</div><button class="si-price" id="btn-st" onclick="buyAvatar('⭐',15,'btn-st')">🪙 15枚</button></div>
+    <div class="shop-item"><div class="si-badge">熱門</div><span class="si-icon">🌸</span><div class="si-name">韓系女神</div><div class="si-desc">K-Beauty</div><button class="si-price" id="btn-kg" onclick="buyAvatar('🌸',20,'btn-kg')">🪙 20枚</button></div>
+    <div class="shop-item"><span class="si-icon">🌺</span><div class="si-name">日系女孩</div><div class="si-desc">清純自然</div><button class="si-price" id="btn-jp" onclick="buyAvatar('🌺',15,'btn-jp')">🪙 15枚</button></div>
+    <div class="shop-item"><div class="si-badge">VIP</div><span class="si-icon">👑</span><div class="si-name">御姐女王</div><div class="si-desc">成熟自信</div><button class="si-price" id="btn-qu" onclick="buyAvatar('👑',25,'btn-qu')">🪙 25枚</button></div>
+    <div class="shop-item"><span class="si-icon">⭐</span><div class="si-name">時尚達人</div><div class="si-desc">百變造型</div><button class="si-price" id="btn-st" onclick="buyAvatar('⭐',12,'btn-st')">🪙 12枚</button></div>
   </div>
   <div class="shop-sec">🎯 任務中心</div>
   <div id="mission-list"></div>
@@ -906,9 +932,9 @@ body{background:var(--bg);color:var(--ink);}
         <option>裙子</option><option>洋裝</option><option>鞋子</option><option>配件</option>
       </select></div>
       <div class="fg"><label>顏色</label><select id="sc2">
-        <option>白色</option><option>黑色</option><option>米白</option><option>灰色</option>
-        <option>深藍</option><option>淺藍</option><option>卡其</option><option>棕色</option>
-        <option>紅色</option><option>粉色</option><option>綠色</option><option>花紋/條紋</option>
+        <option>白色</option><option>米白</option><option>淺灰</option><option>灰色</option><option>深灰</option><option>黑色</option>
+        <option>淺藍</option><option>深藍</option><option>卡其</option><option>棕色</option>
+        <option>紅色</option><option>酒紅</option><option>粉色</option><option>綠色</option><option>橄欖綠</option><option>花紋/條紋</option>
       </select></div></div>
       <div class="fr"><div class="fg"><label>風格</label><select id="ss">
         <option>休閒</option><option>正式</option><option>商務</option><option>運動</option><option>韓系</option><option>簡約</option><option>街頭</option>
@@ -932,9 +958,9 @@ body{background:var(--bg);color:var(--ink);}
       <option>裙子</option><option>洋裝</option><option>鞋子</option><option>配件</option>
     </select></div>
     <div class="fg"><label>顏色</label><select id="ec">
-      <option>白色</option><option>黑色</option><option>米白</option><option>灰色</option>
-      <option>深藍</option><option>淺藍</option><option>卡其</option><option>棕色</option>
-      <option>紅色</option><option>粉色</option><option>綠色</option><option>花紋/條紋</option>
+      <option>白色</option><option>米白</option><option>淺灰</option><option>灰色</option><option>深灰</option><option>黑色</option>
+      <option>淺藍</option><option>深藍</option><option>卡其</option><option>棕色</option>
+      <option>紅色</option><option>酒紅</option><option>粉色</option><option>綠色</option><option>橄欖綠</option><option>花紋/條紋</option>
     </select></div></div>
     <div class="fr"><div class="fg"><label>風格</label><select id="es">
       <option>休閒</option><option>正式</option><option>商務</option><option>運動</option><option>韓系</option><option>簡約</option><option>街頭</option>
@@ -974,7 +1000,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-  <div class="lock-footer">Fitto v3 · Private App · 2026</div>
+  <div class="lock-footer">Fitto v8 · Gemini Powered · 2026.03</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -1046,7 +1072,7 @@ function checkPw() {
 }
 
 // ═══ COINS ═══
-var coins = parseInt(localStorage.getItem('fitto_coins') || '100');
+var coins = parseInt(localStorage.getItem('fitto_coins') || '5');
 var wardrobeLimit = parseInt(localStorage.getItem('fitto_wlimit') || '10');
 var userAvatar = localStorage.getItem('fitto_avatar') || '👤';
 var ownedAvatars = JSON.parse(localStorage.getItem('fitto_ownedav') || '["👤"]');
@@ -1313,7 +1339,7 @@ function checkAutoMissions() {
 function renderShop() {
   updateCoinUI();
   var avatarMap = {'btn-sun':'☀️','btn-kr':'🌙','btn-rg':'⚡','btn-kg':'🌸','btn-jp':'🌺','btn-qu':'👑','btn-st':'⭐'};
-  var costMap   = {'btn-sun':23,'btn-kr':30,'btn-rg':38,'btn-kg':30,'btn-jp':23,'btn-qu':38,'btn-st':15};
+  var costMap   = {'btn-sun':15,'btn-kr':20,'btn-rg':25,'btn-kg':20,'btn-jp':15,'btn-qu':25,'btn-st':12};
   for(var bid in avatarMap) {
     var emoji = avatarMap[bid];
     var btn = document.getElementById(bid);
@@ -1356,7 +1382,7 @@ function renderMissions() {
 }
 
 // ═══ DAILY FREE ═══
-var FREE_PER_DAY = 3;
+var FREE_PER_DAY = 1;
 function getDailyUsed() { return parseInt(localStorage.getItem('fitto_daily_' + new Date().toISOString().slice(0,10)) || '0'); }
 function useDailyFree() {
   var used = getDailyUsed();
@@ -1406,29 +1432,38 @@ async function geminiText(prompt, maxTokens) {
   maxTokens = maxTokens || 800;
   var key = localStorage.getItem('fitto_gemini_key') || '';
   if(!key) throw new Error('請先設定 Gemini Key');
+  var preview = prompt.replace(/[\n\r]/g,' ').substring(0, 60);
+  apiLog('→ 文字請求: ' + preview + '…', 'prompt');
   var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
     method:'POST', headers:{'Content-Type':'application/json'},
     body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens,temperature:0.7}})
   });
   var d = await res.json();
-  if(d.error) throw new Error(d.error.message || 'Gemini error');
+  if(d.error) {
+    apiLog('✗ 錯誤: ' + (d.error.message||'').substring(0,50), 'err');
+    throw new Error(d.error.message || 'Gemini error');
+  }
   addTokenUsage((d.usageMetadata||{}).promptTokenCount||0,(d.usageMetadata||{}).candidatesTokenCount||0,'gemini_text');
   return d.candidates[0].content.parts[0].text.trim();
 }
 async function geminiVision(prompt, b64) {
   var key = localStorage.getItem('fitto_gemini_key') || '';
   if(!key) throw new Error('請先設定 Gemini Key');
+  apiLog('→ 圖片辨識: ' + prompt.substring(0,40) + '…', 'prompt');
   var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
     method:'POST', headers:{'Content-Type':'application/json'},
     body:JSON.stringify({contents:[{role:'user',parts:[{inlineData:{mimeType:'image/jpeg',data:b64}},{text:prompt}]}],generationConfig:{maxOutputTokens:300,temperature:0.3}})
   });
   var d = await res.json();
-  if(d.error) throw new Error(d.error.message || 'Gemini error');
+  if(d.error) {
+    apiLog('✗ 錯誤: ' + (d.error.message||'').substring(0,50), 'err');
+    throw new Error(d.error.message || 'Gemini error');
+  }
   addTokenUsage((d.usageMetadata||{}).promptTokenCount||0,(d.usageMetadata||{}).candidatesTokenCount||0,'gemini_text');
   return d.candidates[0].content.parts[0].text.trim();
 }
 
-const COLORS={'白色':'#F8F8F8','黑色':'#2C2C2C','米白':'#F0E6D3','灰色':'#9E9E9E','深藍':'#1A237E','淺藍':'#90CAF9','卡其':'#C8A96E','棕色':'#6D4C41','紅色':'#EF5350','粉色':'#F48FB1','綠色':'#66BB6A','花紋/條紋':'repeating-linear-gradient(45deg,#ddd,#ddd 4px,#bbb 4px,#bbb 8px)'};
+const COLORS={'白色':'#F8F8F8','米白':'#F0E6D3','淺灰':'#D0D0D0','灰色':'#9E9E9E','深灰':'#4A4A4A','黑色':'#2C2C2C','淺藍':'#90CAF9','深藍':'#1A237E','卡其':'#C8A96E','棕色':'#6D4C41','紅色':'#EF5350','酒紅':'#7B1C2E','粉色':'#F48FB1','綠色':'#66BB6A','橄欖綠':'#6B7A3A','花紋/條紋':'repeating-linear-gradient(45deg,#ddd,#ddd 4px,#bbb 4px,#bbb 8px)'};
 const EMOJIS={'上衣':'👕','T恤':'👕','襯衫':'👔','毛衣':'🧶','外套':'🧥','夾克':'🧥','褲子':'👖','牛仔褲':'👖','裙子':'👗','洋裝':'👗','鞋子':'👟','配件':'👜'};
 const TOPS=['上衣','T恤','襯衫','毛衣'],BTMS=['褲子','牛仔褲','裙子','洋裝'],OUTS=['外套','夾克'];
 
@@ -1529,9 +1564,13 @@ async function aiScan(){
   const gk = localStorage.getItem('fitto_gemini_key')||'';
   if(!gk){await new Promise(r=>setTimeout(r,800));ind.classList.remove('show');fillScan({type:'上衣',color:'白色',style:'休閒',note:'（示範）'});return}
   try{
-    const raw = await geminiVision('辨識衣物只回JSON：{"type":"上衣/T恤/襯衫/毛衣/外套/夾克/褲子/牛仔褲/裙子/洋裝/鞋子/配件","color":"白色/黑色/米白/灰色/深藍/淺藍/卡其/棕色/紅色/粉色/綠色/花紋/條紋","style":"休閒/正式/商務/運動/韓系/簡約/街頭","note":"10字內"}', scanB64);
+    const raw = await geminiVision('仔細觀察這件衣服，只回JSON不要其他文字：{"type":"上衣/T恤/襯衫/毛衣/外套/夾克/褲子/牛仔褲/裙子/洋裝/鞋子/配件","color":"白色/米白/淺灰/灰色/深灰/黑色/淺藍/深藍/卡其/棕色/紅色/酒紅/粉色/綠色/橄欖綠/花紋/條紋","style":"休閒/正式/商務/運動/韓系/簡約/街頭","note":"品牌或特徵10字內"}\n顏色判斷規則：深灰色或炭灰選deep gray=深灰；淺灰選淺灰；白色只在非常確定時選白色。', scanB64);
     fillScan(JSON.parse(raw.replace(/```json|```/g,'').trim()));
-  }catch(e){fillScan({type:'T恤',color:'白色',style:'休閒',note:''})}
+  }catch(e){
+    apiLog('✗ 衣物辨識失敗: ' + (e.message||'').substring(0,50), 'err');
+    showToast('⚠️ 辨識失敗：' + (e.message||'未知錯誤').substring(0,30));
+    fillScan({type:'T恤',color:'白色',style:'休閒',note:'辨識失敗，請手動修改'});
+  }
   finally{ind.classList.remove('show')}
 }
 function fillScan(r){const s=(id,v)=>{const e=document.getElementById(id);if([...e.options].find(o=>o.value===v))e.value=v};s('st',r.type);s('sc2',r.color);s('ss',r.style);document.getElementById('sn').value=r.note||'';document.getElementById('sres').classList.add('show')}
@@ -1605,6 +1644,7 @@ async function genOutfit(){
     const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
     renderRes(parsed, 0, 0, occ, sea);
   }catch(e){
+    apiLog('✗ 搭配生成失敗: ' + (e.message||'').substring(0,60), 'err');
     renderRes({title:'示範：都市工作週',days:[{day:'週一',outfit:'白色襯衫＋深藍褲',tip:'清爽開啟新的一週'},{day:'週二',outfit:'米白上衣＋卡其褲',tip:'暖色系讓氣色更好'},{day:'週三',outfit:'黑色T恤＋牛仔褲',tip:'百搭基本款不出錯'},{day:'週四',outfit:'灰色毛衣＋深藍褲',tip:'週末前輕鬆過渡'},{day:'週五',outfit:'白色上衣＋裙子',tip:'Happy Friday！'}],overall_note:'中性色系為主，適合多種辦公場合。\n（示範模式—請設定 API Key 取得真實建議）'},0,0,occ,sea,true);
   }finally{btn.classList.remove('loading');btn.disabled=false}
 }
@@ -1617,7 +1657,7 @@ function renderRes(r,it,ot,occ,sea,isDemo=false){
   document.getElementById('rtok').innerHTML=isDemo
     ? '示範模式'
     : `<span style="display:block">${claudeTok} tok</span><span style="font-size:0.6rem;color:var(--muted)">圖片:${imgCost}</span>`;
-  if(!isDemo) addTokenUsage(it, ot, 'claude');
+  if(!isDemo) addTokenUsage(it, ot, 'gemini_text');
 
   document.getElementById('wscroll').innerHTML=(r.days||[]).map((d,idx)=>`
     <div class="dc" id="dc-${idx}">
@@ -1636,6 +1676,28 @@ function renderRes(r,it,ot,occ,sea,isDemo=false){
   lastRes={...r,occ,sea,at:new Date().toLocaleDateString('zh-TW')};
 }
 
+
+// ═══ 衣物 REFERENCE 查找 ═══
+function findOutfitRefs(outfitText) {
+  // 從 outfit 描述文字反查衣櫃中有縮圖的單品，最多回傳 2 件
+  var refs = [];
+  var checked = new Set();
+  wardrobe.forEach(function(item) {
+    if(refs.length >= 2) return;
+    if(!item.thumb || !item.hasPhoto) return;
+    if(checked.has(item.id)) return;
+    // 用顏色 + 種類去 match outfit 文字
+    var keywords = [item.color, item.type, item.note].filter(Boolean);
+    var matched = keywords.some(function(kw) {
+      return kw && outfitText.indexOf(kw) !== -1;
+    });
+    if(matched) {
+      refs.push(item);
+      checked.add(item.id);
+    }
+  });
+  return refs;
+}
 // Demo outfit images (SVG placeholders matching outfit colors)
 const DEMO_IMGS = [
   'https://placehold.co/280x360/1A3326/C9A550?text=👗+Demo+Look',
@@ -1662,28 +1724,52 @@ async function genImg(idx, outfit, occ, sea) {
     // 核心提示詞：聚焦服裝，人物由頭像決定
     const imgPrompt = `Fashion lookbook photo. Person: ${avatarDesc}. Outfit: ${outfit}. Season: ${seaEn}, occasion: ${occEn}. Natural standing pose, neutral background, soft natural lighting, full outfit visible, high quality fashion photo.`;
 
-    console.log('[Fitto DEBUG] imgPrompt:', imgPrompt);
-    console.log('[Fitto DEBUG] avatar:', userAvatar, '|', avatarDesc);
-    console.log('[Fitto DEBUG] outfit:', outfit, '| occ:', occ, '| sea:', sea);
+    apiLog('→ 生圖: ' + imgPrompt.substring(0, 60) + '…', 'prompt');
+    apiLog('  頭像:' + userAvatar + ' 服裝:' + outfit.substring(0,20), 'info');
 
     const key = localStorage.getItem('fitto_gemini_key') || '';
     if(!key) throw new Error('請先設定 Gemini Key');
 
-    // 嘗試取得頭像 reference image
+    // 頭像 reference
     const avatarPhotoMap = {'☀️':'sunny','🌙':'korean','⚡':'rugged'};
     const photoKey = avatarPhotoMap[userAvatar];
-    const refB64 = photoKey && AVATAR_IMGS[photoKey] ? AVATAR_IMGS[photoKey].split(',')[1] : null;
+    const avatarRefB64 = photoKey && AVATAR_IMGS[photoKey] ? AVATAR_IMGS[photoKey].split(',')[1] : null;
 
-    let requestParts;
-    if(refB64) {
-      // 有 reference image：傳入頭像圖片 + 提示詞
-      requestParts = [
-        {inlineData:{mimeType:'image/jpeg', data:refB64}},
-        {text: 'Use this person as reference for face and appearance. ' + imgPrompt}
-      ];
-    } else {
-      requestParts = [{text: imgPrompt}];
+    // 衣物 reference：從衣櫃找有照片的單品
+    const outfitRefs = findOutfitRefs(outfit);
+    const hasClothRef = outfitRefs.length > 0;
+
+    // 組合 requestParts
+    let requestParts = [];
+    let refNote = '';
+
+    if(avatarRefB64) {
+      requestParts.push({inlineData:{mimeType:'image/jpeg', data:avatarRefB64}});
+      refNote += '人物ref ';
     }
+    outfitRefs.forEach(function(item, i) {
+      // thumb 是 data:image/jpeg;base64,xxxx 格式
+      const b64 = item.thumb.split(',')[1];
+      if(b64) {
+        requestParts.push({inlineData:{mimeType:'image/jpeg', data:b64}});
+        refNote += '衣物ref(' + item.color + item.type + ') ';
+      }
+    });
+
+    // 組合 prompt，有衣物 ref 時加入指示
+    let finalPrompt = imgPrompt;
+    if(avatarRefB64 && hasClothRef) {
+      finalPrompt = 'Image 1 is the person reference (use for face/appearance). Images 2+ are the actual clothing items to wear. ' + imgPrompt + ' The person must wear the exact clothing shown in the reference images.';
+    } else if(avatarRefB64) {
+      finalPrompt = 'Use the person in Image 1 as reference for face and appearance. ' + imgPrompt;
+    } else if(hasClothRef) {
+      finalPrompt = 'The person must wear the exact clothing items shown in the reference images. ' + imgPrompt;
+    }
+
+    requestParts.push({text: finalPrompt});
+
+    if(refNote) apiLog('  refs: ' + refNote.trim(), 'info');
+    if(hasClothRef) apiLog('  衣物ref ' + outfitRefs.length + '件: ' + outfitRefs.map(function(i){return i.color+i.type}).join(', '), 'ok');
 
     const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=' + key;
     const res = await fetch(endpoint, {
@@ -1713,7 +1799,11 @@ async function genImg(idx, outfit, occ, sea) {
 
     const escapedSrc = imgSrc;
     const debugId = 'dbg-'+idx;
+    const refBadgeHtml = hasClothRef
+      ? `<div style="font-size:.58rem;color:var(--green);font-weight:700;margin-bottom:4px">✓ 使用衣物照片 × ${outfitRefs.length}</div>`
+      : `<div style="font-size:.58rem;color:var(--muted);margin-bottom:4px">— 無衣物照片（文字描述）</div>`;
     box.innerHTML = `<div class="outfit-img-wrap">
+      ${refBadgeHtml}
       <img src="${imgSrc}" class="outfit-img" alt="穿搭示意圖" onclick="openImgFull(this.src)" style="cursor:zoom-in">
       <div class="img-cost-note">🪙 -1</div>
       <details style="margin:6px 0;font-size:.62rem;color:var(--muted)">
@@ -1737,6 +1827,7 @@ async function genImg(idx, outfit, occ, sea) {
     </div>`;
 
   } catch(e) {
+    apiLog('✗ 生圖失敗: ' + (e.message||'').substring(0,50), 'err');
     box.innerHTML = `<div class="img-error">⚠️ 生成失敗<br><span>${e.message.substring(0,80)}</span><br><button class="btn-gen-img" onclick="genImg(${idx},'${outfit.replace(/'/g,"\'")}','${occ}','${sea}')">重試</button></div>`;
   }
 }
@@ -1824,39 +1915,65 @@ function addFromCat(idx,type,color,style,name,btn){if(wardrobe.length>=wardrobeL
 
 
 
+
+// ═══ API LOG ═══
+var apiLogs = [];
+function apiLog(msg, type) {
+  type = type || 'info';
+  var now = new Date();
+  var ts = now.getHours().toString().padStart(2,'0') + ':' +
+            now.getMinutes().toString().padStart(2,'0') + ':' +
+            now.getSeconds().toString().padStart(2,'0');
+  var entry = {ts: ts, msg: msg, type: type};
+  apiLogs.unshift(entry);
+  if(apiLogs.length > 30) apiLogs.pop();
+  var el = document.getElementById('tf-log');
+  if(!el) return;
+  el.innerHTML = apiLogs.map(function(e){
+    return '<div class="tf-log-entry ' + e.type + '">' +
+           '<span style="opacity:.5">' + e.ts + '</span> ' + e.msg + '</div>';
+  }).join('');
+}
 // ═══ TOKEN COUNTER ═══
-let tokenStats = JSON.parse(localStorage.getItem('fitto_tokens') || '{"claude":0,"img":0,"cost":0}');
+let tokenStats = JSON.parse(localStorage.getItem('fitto_tokens') || '{"text":0,"img":0,"cost_twd":0}');
+const USD_TO_TWD = 32;  // 匯率
 
 function saveTokenStats() {
   localStorage.setItem('fitto_tokens', JSON.stringify(tokenStats));
 }
 
-function addTokenUsage(inputTok, outputTok, type='claude') {
-  if(type === 'claude') {
-    tokenStats.claude += (inputTok + outputTok);
-    // Haiku 4.5: $1/MTok input, $5/MTok output
-    tokenStats.cost += (inputTok * 0.000001) + (outputTok * 0.000005);
-    const last = `Claude +${inputTok+outputTok} tok`;
-    document.getElementById('tf-last').textContent = last;
+function addTokenUsage(inputTok, outputTok, type='gemini_text') {
+  if(type === 'gemini_text' || type === 'claude') {
+    const usd = (inputTok * 0.0000003) + (outputTok * 0.0000025);
+    tokenStats.text = (tokenStats.text || 0) + (inputTok + outputTok);
+    tokenStats.cost_twd = (tokenStats.cost_twd || 0) + (usd * USD_TO_TWD);
+    const totalTok = inputTok + outputTok;
+    const twd = (usd * USD_TO_TWD).toFixed(4);
+    document.getElementById('tf-last').textContent = totalTok > 0 ? `文字 +${totalTok} tok` : '文字請求';
+    apiLog('✓ 文字 in:' + inputTok + ' out:' + outputTok + ' NT$' + twd, 'ok');
   } else if(type === 'gemini_img') {
     tokenStats.img += 1;
-    // Gemini Flash image - free tier, minimal cost estimate
-    tokenStats.cost += 0.002;
-    document.getElementById('tf-last').textContent = 'Gemini +1 張';
+    tokenStats.cost_twd = (tokenStats.cost_twd || 0) + (0.039 * USD_TO_TWD);
+    document.getElementById('tf-last').textContent = `圖片 +1 張 (NT$${(0.039*USD_TO_TWD).toFixed(2)})`;
+    apiLog('✓ 圖片生成 NT$' + (0.039*USD_TO_TWD).toFixed(2), 'ok');
   }
   saveTokenStats();
   updateTokenUI();
 }
 
 function updateTokenUI() {
-  document.getElementById('tf-claude').textContent = tokenStats.claude.toLocaleString();
+  const textEl = document.getElementById('tf-text');
+  if(textEl) textEl.textContent = (tokenStats.text || 0).toLocaleString() + ' tok';
   document.getElementById('tf-img').textContent = tokenStats.img + ' 張';
-  document.getElementById('tf-cost').textContent = '$' + tokenStats.cost.toFixed(4);
+  document.getElementById('tf-cost').textContent = 'NT$' + (tokenStats.cost_twd || 0).toFixed(2);
 }
 
 function resetTokenCount() {
   if(!confirm('確定要重置所有 Token 計數？')) return;
-  tokenStats = {claude:0, img:0, cost:0};
+  tokenStats = {text:0, img:0, cost_twd:0};
+  apiLogs = [];
+  var logEl = document.getElementById('tf-log');
+  if(logEl) logEl.innerHTML = '';
   saveTokenStats(); updateTokenUI();
   document.getElementById('tf-last').textContent = '已重置';
 }
@@ -1945,7 +2062,7 @@ const LINE_BADGE = {
 };
 const GENDER_COLOR = {'女裝':'#F48FB1','男裝':'#90CAF9'};
 const TYPE_EMOJI = {'上衣':'👕','T恤':'👕','襯衫':'👔','毛衣':'🧶','外套':'🧥','夾克':'🧥','褲子':'👖','牛仔褲':'👖','裙子':'👗','洋裝':'👗','鞋子':'👟','配件':'👜'};
-const BG_COLOR = {'白色':'#F5F5F5','黑色':'#333','米白':'#F0E6D3','灰色':'#9E9E9E','深藍':'#1A237E','淺藍':'#90CAF9','卡其':'#C8A96E','棕色':'#6D4C41','紅色':'#EF5350','粉色':'#F48FB1','綠色':'#66BB6A','花紋/條紋':'repeating-linear-gradient(45deg,#ddd,#ddd 4px,#bbb 4px,#bbb 8px)'};
+const BG_COLOR = {'白色':'#F5F5F5','米白':'#F0E6D3','淺灰':'#D0D0D0','灰色':'#9E9E9E','深灰':'#4A4A4A','黑色':'#333','淺藍':'#90CAF9','深藍':'#1A237E','卡其':'#C8A96E','棕色':'#6D4C41','紅色':'#EF5350','酒紅':'#7B1C2E','粉色':'#F48FB1','綠色':'#66BB6A','橄欖綠':'#6B7A3A','花紋/條紋':'repeating-linear-gradient(45deg,#ddd,#ddd 4px,#bbb 4px,#bbb 8px)'};
 
 function renderUQCatalog() {
   const list = document.getElementById('uq-list');
