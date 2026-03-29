@@ -1446,13 +1446,14 @@ async function geminiText(prompt, maxTokens) {
   addTokenUsage((d.usageMetadata||{}).promptTokenCount||0,(d.usageMetadata||{}).candidatesTokenCount||0,'gemini_text');
   return d.candidates[0].content.parts[0].text.trim();
 }
-async function geminiVision(prompt, b64) {
+async function geminiVision(prompt, b64, mime) {
+  mime = mime || 'image/jpeg';
   var key = localStorage.getItem('fitto_gemini_key') || '';
   if(!key) throw new Error('請先設定 Gemini Key');
-  apiLog('→ 圖片辨識: ' + prompt.substring(0,40) + '…', 'prompt');
+  apiLog('→ 圖片辨識 [' + mime + ']: ' + prompt.substring(0,40) + '…', 'prompt');
   var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({contents:[{role:'user',parts:[{inlineData:{mimeType:'image/jpeg',data:b64}},{text:prompt}]}],generationConfig:{maxOutputTokens:300,temperature:0.3}})
+    body:JSON.stringify({contents:[{role:'user',parts:[{inlineData:{mimeType:mime,data:b64}},{text:prompt}]}],generationConfig:{maxOutputTokens:300,temperature:0.3}})
   });
   var d = await res.json();
   if(d.error) {
@@ -1470,7 +1471,7 @@ const TOPS=['上衣','T恤','襯衫','毛衣'],BTMS=['褲子','牛仔褲','裙�
 let wardrobe=JSON.parse(localStorage.getItem('fitto_w')||'[]');
 let saved=JSON.parse(localStorage.getItem('fitto_s')||'[]');
 let nid=parseInt(localStorage.getItem('fitto_id')||'1');
-let scanB64=null,catB64=null,lastRes=null;
+let scanB64=null,scanMime="image/jpeg",catB64=null,catMime="image/jpeg",lastRes=null;
 
 
 const persist=()=>{localStorage.setItem('fitto_w',JSON.stringify(wardrobe));localStorage.setItem('fitto_s',JSON.stringify(saved));localStorage.setItem('fitto_id',String(nid))};
@@ -1555,7 +1556,20 @@ function renderW(){
 // SCAN
 function openScan(m){scanB64=null;document.getElementById('pbox').innerHTML=`<div class="ph"><span>👗</span><p>拍照或選圖</p></div>`;document.getElementById('sres').classList.remove('show');document.getElementById('scaning').classList.remove('show');document.getElementById('scan-ov').classList.add('show');if(m==='camera')setTimeout(()=>document.getElementById('scam').click(),100)}
 function closeScan(){document.getElementById('scan-ov').classList.remove('show')}
-function handleScan(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{const url=ev.target.result;document.getElementById('pbox').innerHTML=`<img src="${url}">`;scanB64=url.split(',')[1];document.getElementById('sres').classList.remove('show');aiScan()};r.readAsDataURL(f);e.target.value=''}
+function handleScan(e){
+  const f=e.target.files[0];if(!f)return;
+  scanMime = f.type || 'image/jpeg'; // 記錄實際 mimeType
+  const r=new FileReader();
+  r.onload=ev=>{
+    const url=ev.target.result;
+    document.getElementById('pbox').innerHTML=`<img src="${url}">`;
+    scanB64=url.split(',')[1];
+    document.getElementById('sres').classList.remove('show');
+    aiScan();
+  };
+  r.readAsDataURL(f);
+  e.target.value='';
+}
 
 async function aiScan(){
   if(!scanB64)return;
@@ -1564,7 +1578,7 @@ async function aiScan(){
   const gk = localStorage.getItem('fitto_gemini_key')||'';
   if(!gk){await new Promise(r=>setTimeout(r,800));ind.classList.remove('show');fillScan({type:'上衣',color:'白色',style:'休閒',note:'（示範）'});return}
   try{
-    const raw = await geminiVision('仔細觀察這件衣服，只回JSON不要其他文字：{"type":"上衣/T恤/襯衫/毛衣/外套/夾克/褲子/牛仔褲/裙子/洋裝/鞋子/配件","color":"白色/米白/淺灰/灰色/深灰/黑色/淺藍/深藍/卡其/棕色/紅色/酒紅/粉色/綠色/橄欖綠/花紋/條紋","style":"休閒/正式/商務/運動/韓系/簡約/街頭","note":"品牌或特徵10字內"}\n顏色判斷規則：深灰色或炭灰選deep gray=深灰；淺灰選淺灰；白色只在非常確定時選白色。', scanB64);
+    const raw = await geminiVision('仔細觀察這件衣服，只回JSON不要其他文字：{"type":"上衣/T恤/襯衫/毛衣/外套/夾克/褲子/牛仔褲/裙子/洋裝/鞋子/配件","color":"白色/米白/淺灰/灰色/深灰/黑色/淺藍/深藍/卡其/棕色/紅色/酒紅/粉色/綠色/橄欖綠/花紋/條紋","style":"休閒/正式/商務/運動/韓系/簡約/街頭","note":"品牌或特徵10字內"}\n顏色判斷規則：深灰色或炭灰選deep gray=深灰；淺灰選淺灰；白色只在非常確定時選白色。', scanB64, scanMime);
     fillScan(JSON.parse(raw.replace(/```json|```/g,'').trim()));
   }catch(e){
     apiLog('✗ 衣物辨識失敗: ' + (e.message||'').substring(0,50), 'err');
@@ -1894,13 +1908,25 @@ function renderSaved(){
 function delSaved(sid){saved=saved.filter(s=>s.sid!==sid);persist();renderSaved()}
 
 // CATALOG
-function handleCat(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{catB64=ev.target.result.split(',')[1];const img=document.getElementById('cat-preview');img.src=ev.target.result;img.style.display='block';document.getElementById('cat-btn-wrap').style.display='block';document.getElementById('catres').classList.remove('show')};r.readAsDataURL(f);e.target.value=''}
+function handleCat(e){
+  const f=e.target.files[0];if(!f)return;
+  catMime = f.type || 'image/jpeg';
+  const r=new FileReader();
+  r.onload=ev=>{
+    catB64=ev.target.result.split(',')[1];
+    const img=document.getElementById('cat-preview');
+    img.src=ev.target.result;img.style.display='block';
+    document.getElementById('cat-btn-wrap').style.display='block';
+    document.getElementById('catres').classList.remove('show');
+  };
+  r.readAsDataURL(f);e.target.value='';
+}
 async function scanCat(){
   if(!catB64)return;
   const btn=document.getElementById('bcatscan');btn.disabled=true;btn.textContent='⏳ AI 分析中…';
   let items=[];
   try{
-    const raw = await geminiVision('分析服裝型錄找出所有服裝單品。只回JSON陣列：[{"name":"單品名","type":"種類","color":"主色","style":"風格","desc":"10字描述"},...最多8項]', catB64);
+    const raw = await geminiVision('分析服裝型錄找出所有服裝單品。只回JSON陣列：[{"name":"單品名","type":"種類","color":"主色","style":"風格","desc":"10字描述"},...最多8項]', catB64, catMime);
     items=JSON.parse(raw.replace(/```json|```/g,'').trim());
   }catch(e){items=[{name:'白色寬版T恤',type:'T恤',color:'白色',style:'休閒',desc:'棉質素色'},{name:'深藍直筒褲',type:'褲子',color:'深藍',style:'商務',desc:'挺版顯瘦'},{name:'米色輕薄外套',type:'外套',color:'米白',style:'簡約',desc:'春秋適穿'},{name:'條紋針織衫',type:'毛衣',color:'花紋/條紋',style:'韓系',desc:'橫條紋設計'}]}
   finally{btn.disabled=false;btn.textContent='🔍 AI 分析型錄'}
