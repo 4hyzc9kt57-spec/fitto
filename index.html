@@ -653,7 +653,7 @@ body{background:var(--bg);color:var(--ink);}
 </header>
 
 <!-- ① 衣櫃 -->
-<div class="view active" id="view-wardrobe">
+<div class="view" id="view-wardrobe">
   <div class="welcome-banner">
     <div class="wb-greeting" id="wb-greeting">晚安 🌆</div>
     <div class="wb-name" id="wb-name">Jack <button class="name-edit-btn" onclick="openNameModal()">✏️</button></div>
@@ -712,7 +712,7 @@ body{background:var(--bg);color:var(--ink);}
 </div>
 
 <!-- ② 搭配 -->
-<div class="view" id="view-styling">
+<div class="view active" id="view-styling">
   <div class="phd"><h1>工作日搭配</h1><p>AI 規劃週一到週五穿著</p></div>
   <div class="warn" id="wfew">⚠️ 請先到「衣櫃」新增至少 3 件衣物再生成搭配</div>
   <div class="card">
@@ -769,7 +769,7 @@ body{background:var(--bg);color:var(--ink);}
 <!-- ③ 收藏 -->
 <div class="view" id="view-saved">
   <div class="phd"><h1>收藏搭配</h1><p>你儲存的穿搭計劃</p></div>
-  <div id="saved-wrap"></div>
+  <div id="saved-wrap"><div class="empty"><div class="ei">🔖</div><p>還沒收藏的搭配<br>先去生成一週計劃吧！</p></div></div>
 </div>
 
 <!-- ④ 型錄 -->
@@ -1294,7 +1294,7 @@ body{background:var(--bg);color:var(--ink);}
 </div>
 
 <!-- FLOATING TOKEN COUNTER -->
-<div id="token-float" onclick="toggleTokenFloat()">
+<div id="token-float" onclick="toggleTokenFloat()" class="">
   <div class="tf-title">
     <span>Gemini 用量</span>
     <span id="tf-toggle" style="font-size:0.7rem">▾</span>
@@ -1319,7 +1319,7 @@ body{background:var(--bg);color:var(--ink);}
     </div>
     <div class="tf-divider"></div>
     <div style="font-size:0.55rem;font-weight:800;color:var(--muted);letter-spacing:0.06em;margin-bottom:3px">LOG</div>
-    <div id="tf-log"></div>
+    <div id="tf-log"><div class="tf-log-entry ok"><span style="opacity:.5">19:32:21</span> ✓ 部署成功: 4b92a28</div></div>
     <div style="display:flex;justify-content:space-between;margin-top:6px">
       <div class="tf-reset" onclick="event.stopPropagation();resetTokenCount()">↺ 重置</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
@@ -1380,8 +1380,8 @@ body{background:var(--bg);color:var(--ink);}
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button class="nb active" onclick="goNav('wardrobe')"><span class="ni">👗</span><span class="nl">衣櫃</span></button>
-  <button class="nb" onclick="goNav('styling')"><span class="ni">✨</span><span class="nl">搭配</span></button>
+  <button class="nb" onclick="goNav('wardrobe')"><span class="ni">👗</span><span class="nl">衣櫃</span></button>
+  <button class="nb active" onclick="goNav('styling')"><span class="ni">✨</span><span class="nl">搭配</span></button>
   <button class="nb" onclick="goNav('saved')"><span class="ni">🔖</span><span class="nl">收藏</span></button>
   <button class="nb" onclick="goNav('catalog')"><span class="ni">📋</span><span class="nl">型錄</span></button>
   <button class="nb" onclick="goNav('shop')"><span class="ni">🪙</span><span class="nl">商店</span></button>
@@ -1514,7 +1514,7 @@ body{background:var(--bg);color:var(--ink);}
       <input type="password" class="api-inp" id="deploy-token" placeholder="ghp_xxxxxxxx" autocomplete="off">
       <div style="font-size:.6rem;color:var(--muted);margin-top:4px">只需填一次，儲存在本機</div>
     </div>
-    <div id="deploy-status" style="font-size:.72rem;color:var(--muted);text-align:center;padding:8px 0;min-height:24px">② 編碼中…</div>
+    <div id="deploy-status" style="font-size: 0.72rem; color: var(--muted); text-align: center; padding: 8px 0px; min-height: 24px;">② 編碼中…</div>
     <button class="btn-p" id="deploy-btn" onclick="doDeploy()" style="margin-bottom:10px" disabled="">⏳ 部署中…</button>
     <button class="btn-ghost" onclick="closeModal('deploy-ov')">取消</button>
   </div>
