@@ -2219,6 +2219,7 @@ async function genImg(idx, outfit, occ, sea) {
     const avatarPhotoMap = {'☀️':'sunny','🌙':'korean','⚡':'rugged'};
     const photoKey = avatarPhotoMap[userAvatar];
     const avatarRefB64 = photoKey && AVATAR_IMGS[photoKey] ? AVATAR_IMGS[photoKey].split(',')[1] : null;
+    if(!avatarRefB64) throw new Error('缺少固定人物 reference，請先選擇可用頭像');
 
     // 衣物 reference：從衣櫃找有照片的單品
     const outfitRefs = findOutfitRefs(outfit);
@@ -2228,6 +2229,10 @@ async function genImg(idx, outfit, occ, sea) {
     let requestParts = [];
     let refNote = '';
 
+    if(avatarRefB64) {
+      requestParts.push({inlineData:{mimeType:'image/jpeg', data:avatarRefB64}});
+      refNote += '人物ref ';
+    }
     outfitRefs.slice(0,1).forEach(function(item) {
       // thumb 是 data:image/jpeg;base64,xxxx 格式
       const b64 = item.thumb.split(',')[1];
@@ -2237,15 +2242,19 @@ async function genImg(idx, outfit, occ, sea) {
       }
     });
 
-    // 組合 prompt，預設只帶 1 張衣物 ref 以加快速度
-    let finalPrompt = imgPrompt;
+    // 組合 prompt：人物 reference 必帶，衣物只帶 1 張以平衡速度
+    let finalPrompt;
     if(hasClothRef) {
-      finalPrompt = 'Use the clothing item in Image 1 as the outfit reference. ' + imgPrompt;
+      finalPrompt = 'Image 1 is the fixed person reference. Keep the exact same face, hairstyle, body identity, and overall appearance across all generations. Image 2 is the clothing reference. The final image must keep the same person and wear the referenced outfit. ' + imgPrompt;
+    } else {
+      finalPrompt = 'Image 1 is the fixed person reference. Keep the exact same face, hairstyle, body identity, and overall appearance across all generations. ' + imgPrompt;
+      apiLog('  衣物ref: 無，改用文字描述', 'info');
     }
 
     requestParts.push({text: finalPrompt});
 
     if(refNote) apiLog('  refs: ' + refNote.trim(), 'info');
+    if(avatarRefB64) apiLog('  人物ref: 固定頭像', 'ok');
     if(hasClothRef) apiLog('  衣物ref 1件: ' + outfitRefs.slice(0,1).map(function(i){return i.color+i.type}).join(', '), 'ok');
 
     const imageResult = await requestGeminiImage(requestParts, key);
