@@ -1448,82 +1448,40 @@ var POSES = ['standing with one hand in pocket, slight hip tilt, confident gaze'
 function getRandomPose() { return POSES[Math.floor(Math.random()*POSES.length)]; }
 
 
-function getCandidateText(data) {
-  var candidates = (data && data.candidates) || [];
-  if(!candidates.length) {
-    if(data && data.promptFeedback && data.promptFeedback.blockReason) {
-      throw new Error('Gemini blocked: ' + data.promptFeedback.blockReason);
-    }
-    throw new Error('Gemini ??????');
-  }
-
-  var candidate = candidates[0];
-  if(candidate.finishReason === 'SAFETY') throw new Error('Gemini ?????????');
-
-  var parts = (((candidate || {}).content || {}).parts) || [];
-  var text = parts.map(function(part){
-    return typeof part.text === 'string' ? part.text : '';
-  }).join('
-').trim();
-
-  if(!text) throw new Error('Gemini ?????');
-  return text;
-}
-
-function extractJsonBlock(raw) {
-  var cleaned = String(raw || '').replace(/```json/gi,'').replace(/```/g,'').trim();
-  var jsonStart = cleaned.indexOf('{');
-  var jsonEnd = cleaned.lastIndexOf('}');
-  if(jsonStart === -1 || jsonEnd === -1 || jsonEnd < jsonStart) {
-    throw new Error('???????? JSON');
-  }
-  return cleaned.substring(jsonStart, jsonEnd + 1);
-}
-
-async function requestGemini(parts, maxTokens, options) {
-  options = options || {};
+async function geminiText(prompt, maxTokens) {
+  maxTokens = maxTokens || 800;
   var key = localStorage.getItem('fitto_gemini_key') || '';
-  if(!key) throw new Error('???? Gemini Key');
-
-  var payload = {
-    contents:[{role:'user',parts:parts}],
-    generationConfig:{
-      maxOutputTokens:maxTokens || 800,
-      temperature: options.temperature == null ? 0.4 : options.temperature
-    }
-  };
-
-  if(options.responseMimeType) payload.generationConfig.responseMimeType = options.responseMimeType;
-
+  if(!key) throw new Error('請先設定 Gemini Key');
+  var preview = prompt.replace(/[\n\r]/g,' ').substring(0, 60);
+  apiLog('→ 文字請求: ' + preview + '…', 'prompt');
   var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify(payload)
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens,temperature:0.7}})
   });
-
-  var d = await res.json().catch(function(){ return {}; });
-  if(!res.ok || d.error) {
-    var message = (d && d.error && d.error.message) || ('HTTP ' + res.status);
-    apiLog('? Gemini ??: ' + String(message).substring(0,80), 'err');
-    throw new Error(message);
+  var d = await res.json();
+  if(d.error) {
+    apiLog('✗ 錯誤: ' + (d.error.message||'').substring(0,50), 'err');
+    throw new Error(d.error.message || 'Gemini error');
   }
-
   addTokenUsage((d.usageMetadata||{}).promptTokenCount||0,(d.usageMetadata||{}).candidatesTokenCount||0,'gemini_text');
-  return getCandidateText(d);
+  return d.candidates[0].content.parts[0].text.trim();
 }
-
-async function geminiText(prompt, maxTokens, options) {
-  var preview = String(prompt || '').replace(/[
-
-]/g,' ').substring(0, 60);
-  apiLog('? ????: ' + preview + '?', 'prompt');
-  return requestGemini([{text:prompt}], maxTokens || 800, options);
-}
-
 async function geminiVision(prompt, b64, mime) {
   mime = mime || 'image/jpeg';
-  apiLog('? ???? [' + mime + ']: ' + String(prompt || '').substring(0,40) + '?', 'prompt');
-  return requestGemini([{inlineData:{mimeType:mime,data:b64}},{text:prompt}], 300, {temperature:0.3});
+  var key = localStorage.getItem('fitto_gemini_key') || '';
+  if(!key) throw new Error('請先設定 Gemini Key');
+  apiLog('→ 圖片辨識 [' + mime + ']: ' + prompt.substring(0,40) + '…', 'prompt');
+  var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{role:'user',parts:[{inlineData:{mimeType:mime,data:b64}},{text:prompt}]}],generationConfig:{maxOutputTokens:300,temperature:0.3}})
+  });
+  var d = await res.json();
+  if(d.error) {
+    apiLog('✗ 錯誤: ' + (d.error.message||'').substring(0,50), 'err');
+    throw new Error(d.error.message || 'Gemini error');
+  }
+  addTokenUsage((d.usageMetadata||{}).promptTokenCount||0,(d.usageMetadata||{}).candidatesTokenCount||0,'gemini_text');
+  return d.candidates[0].content.parts[0].text.trim();
 }
 
 const COLORS={'白色':'#F8F8F8','米白':'#F0E6D3','淺灰':'#D0D0D0','灰色':'#9E9E9E','深灰':'#4A4A4A','黑色':'#2C2C2C','淺藍':'#90CAF9','深藍':'#1A237E','卡其':'#C8A96E','棕色':'#6D4C41','紅色':'#EF5350','酒紅':'#7B1C2E','粉色':'#F48FB1','綠色':'#66BB6A','橄欖綠':'#6B7A3A','花紋/條紋':'repeating-linear-gradient(45deg,#ddd,#ddd 4px,#bbb 4px,#bbb 8px)'};
@@ -1673,30 +1631,12 @@ function confirmScan(){
 }
 
 // GENERATE
-function normalizeSeasonLabel(sea) {
-  return String(sea || '').replace(/[????????]\s*/g,'').trim();
-}
-
 async function fetchTrend(sea) {
-  const seaLabel = normalizeSeasonLabel(sea);
+  const seaLabel = sea.replace(/[🌸☀️🍂❄️]\s*/,'');
   const year = new Date().getFullYear();
-  const prompt = `???${year}????????????${seaLabel}???????5????????????????????????????????????`;
+  const prompt = `今是${year}年${seaLabel}季。請用繁體中文簡要列出目前最流行的5個穿搭趨勢（包含流行單品、色系、廓形），每項一行，格式：「趨勢名：簡短說明」。只列清單，不要加前言。`;
   const raw = await geminiText(prompt, 300);
   return raw.trim();
-}
-
-function getDemoWeekPlan() {
-  return {
-    title:'????????',
-    days:[
-      {day:'??', outfit:'????????', tip:'????????'},
-      {day:'??', outfit:'????????', tip:'????????'},
-      {day:'??', outfit:'??T?????', tip:'????????'},
-      {day:'??', outfit:'????????', tip:'???????'},
-      {day:'??', outfit:'???????', tip:'Happy Friday?'}
-    ],
-    overall_note:'???????????? Gemini Key ???????????????????????'
-  };
 }
 
 async function genOutfit(){
@@ -1707,72 +1647,63 @@ async function genOutfit(){
   const trendOn = document.getElementById('trend-on').checked;
   const trendInfoEl = document.getElementById('trend-info');
   const trendTextEl = document.getElementById('trend-text');
-  const spinner = btn.querySelector('.spinner');
 
+  // 隱藏舊潮流資訊
   trendInfoEl.style.display = 'none';
   trendTextEl.textContent = '';
 
   let trendContext = '';
   if(trendOn) {
-    if(spinner) spinner.style.display = 'block';
+    btn.querySelector('.spinner').style.display = 'block';
     try {
       const trendRaw = await fetchTrend(sea);
-      trendContext = trendRaw.trim();
-      trendTextEl.innerHTML = trendContext.split('
-').map(function(line){
-        const cleaned = line.trim();
-        return cleaned ? `<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05)">? ${cleaned.replace(/^[??\-\d.]+\s*/,'')}</div>` : '';
-      }).join('');
-      if(trendContext) trendInfoEl.style.display = 'block';
+      trendContext = trendRaw;
+      // 顯示潮流資訊卡
+      trendTextEl.innerHTML = trendRaw.split('\n').map(l=>
+        l.trim() ? `<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05)">• ${l.replace(/^[·•\-\d.]+\s*/,'')}</div>` : ''
+      ).join('');
+      trendInfoEl.style.display = 'block';
     } catch(e) {
-      apiLog('? ??????: ' + (e.message||'').substring(0,80), 'err');
       trendContext = '';
     }
   }
 
-  const wardrobePayload = wardrobe.map(function(i){
-    return {id:i.id,type:i.type,color:i.color,style:i.style,note:i.note||''};
-  });
+  const wj=JSON.stringify(wardrobe.map(i=>({id:i.id,type:i.type,color:i.color,style:i.style,...(i.note?{note:i.note}:{})})));
   const trendSection = trendContext
-    ? `
-
-??????????
-${trendContext}
-???????????????????? tip ????????`
+    ? `\n\n【當季流行趨勢參考】\n${trendContext}\n以上趨勢若衣櫃內有對應單品請優先選用；若無，可在tip中建議補充哪類單品。`
     : '';
-  const prompt = `?????????
-?? JSON?${JSON.stringify(wardrobePayload)}
-???????????${normalizeSeasonLabel(sea)}??${occ}???????????5??????????????????????????????????${trendSection}
-??? JSON????????? Markdown??????{"title":"??","days":[{"day":"??","outfit":"????","tip":"??"},{"day":"??","outfit":"????","tip":"??"},{"day":"??","outfit":"????","tip":"??"},{"day":"??","outfit":"????","tip":"??"},{"day":"??","outfit":"????","tip":"??"}],"overall_note":"????2?"}`;
-
+  const prompt=`你是專業穿搭顧問。衣櫃：${wj}\n為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合生成工作日（週一到週五）5天搭配計劃。${trendSection}\n只回JSON，不要加任何說明：{"title":"主題","days":[{"day":"週一","outfit":"搭配描述","tip":"建議"},{"day":"週二","outfit":"搭配描述","tip":"建議"},{"day":"週三","outfit":"搭配描述","tip":"建議"},{"day":"週四","outfit":"搭配描述","tip":"建議"},{"day":"週五","outfit":"搭配描述","tip":"建議"}],"overall_note":"整體建議2句"}`;
   try{
-    const raw = await geminiText(prompt, 1000, {responseMimeType:'application/json', temperature:0.5});
-    const parsed = JSON.parse(extractJsonBlock(raw));
-    apiLog('? ??????', 'ok');
+    const raw = await geminiText(prompt, 1000);
+    // 先清除 code block 標記，再擷取 { } 之間的 JSON
+    const cleaned = raw.replace(/```json/g,'').replace(/```/g,'').trim();
+    const jsonStart = cleaned.indexOf('{');
+    const jsonEnd = cleaned.lastIndexOf('}');
+    if(jsonStart === -1 || jsonEnd === -1) throw new Error('回應中找不到 JSON：' + raw.substring(0,80));
+    const jsonStr = cleaned.substring(jsonStart, jsonEnd + 1);
+    apiLog('  JSON擷取: ' + jsonStr.substring(0,40) + '…', 'info');
+    const parsed = JSON.parse(jsonStr);
     renderRes(parsed, 0, 0, occ, sea);
   }catch(e){
-    apiLog('? ??????: ' + (e.message||'').substring(0,80), 'err');
-    showToast('?? ' + (e.message||'????').substring(0,40));
-    renderRes(getDemoWeekPlan(),0,0,occ,sea,true);
-  }finally{
-    if(spinner) spinner.style.display = '';
-    btn.classList.remove('loading');
-    btn.disabled=false;
-  }
+    apiLog('✗ 搭配生成失敗: ' + (e.message||'').substring(0,80), 'err');
+    showToast('⚠️ ' + (e.message||'生成失敗').substring(0,40));
+    renderRes({title:'示範：都市工作週',days:[{day:'週一',outfit:'白色襯衫＋深藍褲',tip:'清爽開啟新的一週'},{day:'週二',outfit:'米白上衣＋卡其褲',tip:'暖色系讓氣色更好'},{day:'週三',outfit:'黑色T恤＋牛仔褲',tip:'百搭基本款不出錯'},{day:'週四',outfit:'灰色毛衣＋深藍褲',tip:'週末前輕鬆過渡'},{day:'週五',outfit:'白色上衣＋裙子',tip:'Happy Friday！'}],overall_note:'中性色系為主，適合多種辦公場合。\n（示範模式—請設定 API Key 取得真實建議）'},0,0,occ,sea,true);
+  }finally{btn.classList.remove('loading');btn.disabled=false}
 }
 function renderRes(r,it,ot,occ,sea,isDemo=false){
-  document.getElementById('rtitle').textContent=r.title||'????';
-  const seaClean = normalizeSeasonLabel(sea);
-  document.getElementById('rmeta').textContent=`${seaClean} ? ${occ}`;
+  document.getElementById('rtitle').textContent=r.title||'本週搭配';
+  const seaClean = sea.replace(/[🌸☀️🍂❄️]\s*/,'');
+  document.getElementById('rmeta').textContent=`${seaClean} · ${occ}`;
+  // Token badge: show Claude + image cost estimate
   const claudeTok=it+ot;
-  const imgCost=localStorage.getItem('fitto_gemini_key')?'Gemini ?':'?? Key';
+  const imgCost=localStorage.getItem('fitto_gemini_key')?'Gemini ✓':'未設 Key';
   document.getElementById('rtok').innerHTML=isDemo
-    ? '????'
-    : `<span style="display:block">${claudeTok} tok</span><span style="font-size:0.6rem;color:var(--muted)">??:${imgCost}</span>`;
+    ? '示範模式'
+    : `<span style="display:block">${claudeTok} tok</span><span style="font-size:0.6rem;color:var(--muted)">圖片:${imgCost}</span>`;
+  if(!isDemo) addTokenUsage(it, ot, 'gemini_text');
 
-  window._fittoOutfits = (r.days||[]).map(function(d){
-    return {outfit:d.outfit, occ:occ, sea:seaClean};
-  });
+  // 把 outfit 資料存在 window 物件，避免特殊字符塞進 onclick 字串出錯
+  window._fittoOutfits = (r.days||[]).map(d=>({outfit:d.outfit, occ:occ, sea:seaClean}));
 
   document.getElementById('wscroll').innerHTML=(r.days||[]).map((d,idx)=>`
     <div class="dc" id="dc-${idx}">
@@ -1781,7 +1712,7 @@ function renderRes(r,it,ot,occ,sea,isDemo=false){
       <div class="dt">${d.tip}</div>
       <div class="img-box" id="imgbox-${idx}">
         <button class="btn-gen-img" onclick="genImgSafe(${idx})">
-          ?? ?????
+          🎨 生成示意圖
         </button>
       </div>
     </div>`).join('');
@@ -1790,7 +1721,6 @@ function renderRes(r,it,ot,occ,sea,isDemo=false){
   document.getElementById('rcard').classList.add('show');
   lastRes={...r,occ,sea,at:new Date().toLocaleDateString('zh-TW')};
 }
-
 
 
 // ═══ 衣物 REFERENCE 查找 ═══
