@@ -1850,6 +1850,83 @@ function explainGeminiError(message) {
   }
   return 'Gemini 暫時未成功回傳：' + msg.substring(0,80) + '。所以先提供衣櫃實搭版建議。';
 }
+function extractJsonObject(text) {
+  const cleaned = String(text || '').replace(/```json/gi,'').replace(/```/g,'').trim();
+  const start = cleaned.indexOf('{');
+  if(start === -1) return '';
+
+  let depth = 0;
+  let inString = false;
+  let escaped = false;
+  for(let i = start; i < cleaned.length; i++) {
+    const ch = cleaned[i];
+    if(inString) {
+      if(escaped) escaped = false;
+      else if(ch === '\\') escaped = true;
+      else if(ch === '"') inString = false;
+      continue;
+    }
+    if(ch === '"') {
+      inString = true;
+      continue;
+    }
+    if(ch === '{') depth++;
+    if(ch === '}') {
+      depth--;
+      if(depth === 0) return cleaned.slice(start, i + 1);
+    }
+  }
+  return '';
+}
+function normalizeWeekPlanShape(parsed) {
+  if(!parsed || typeof parsed !== 'object') throw new Error('Gemini 回傳格式不是物件');
+  if(!Array.isArray(parsed.days)) throw new Error('Gemini 回傳缺少 days 陣列');
+
+  const defaultDays = ['週一','週二','週三','週四','週五'];
+  const days = parsed.days.slice(0, 5).map(function(item, index) {
+    return {
+      day: item && item.day ? item.day : defaultDays[index],
+      outfit: item && item.outfit ? item.outfit : '請重新生成',
+      tip: item && item.tip ? item.tip : '請依衣櫃現有單品微調'
+    };
+  });
+  while(days.length < 5) {
+    const index = days.length;
+    days.push({day: defaultDays[index], outfit: '請重新生成', tip: '請依衣櫃現有單品微調'});
+  }
+
+  return {
+    title: parsed.title || '本週搭配',
+    days: days,
+    overall_note: parsed.overall_note || '已依 Gemini 回應整理成可顯示格式。'
+  };
+}
+async function requestWeekPlanJson(prompt) {
+  const variants = [
+    prompt,
+    prompt + '\n請務必輸出完整結尾，不要省略右大括號，不要使用 markdown code block。',
+    '請只輸出完整 JSON，且一定要包含 title、days(5筆)、overall_note。days 固定週一到週五。衣櫃資料：' + prompt.split('衣櫃：')[1]
+  ];
+
+  let lastError = null;
+  for(let i = 0; i < variants.length; i++) {
+    const raw = await geminiText(variants[i], i === 2 ? 700 : 1000);
+    const jsonStr = extractJsonObject(raw);
+    if(!jsonStr) {
+      lastError = new Error('Gemini 回應不完整，找不到完整 JSON 結尾：' + String(raw || '').substring(0,80));
+      apiLog('✗ JSON 不完整，第' + (i + 1) + '次重試', 'err');
+      continue;
+    }
+    try {
+      apiLog('  JSON擷取: ' + jsonStr.substring(0,40) + '…', 'info');
+      return normalizeWeekPlanShape(JSON.parse(jsonStr));
+    } catch(err) {
+      lastError = err;
+      apiLog('✗ JSON 解析失敗，第' + (i + 1) + '次重試: ' + (err.message||'').substring(0,50), 'err');
+    }
+  }
+  throw lastError || new Error('Gemini 回應不完整');
+}
 
 async function genOutfit(){
   if(wardrobe.length<3){document.getElementById('wfew').classList.add('show');return}
@@ -1886,15 +1963,7 @@ async function genOutfit(){
     : '';
   const prompt=`你是專業穿搭顧問。衣櫃：${wj}\n為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合生成工作日（週一到週五）5天搭配計劃。${trendSection}\n只回JSON，不要加任何說明：{"title":"主題","days":[{"day":"週一","outfit":"搭配描述","tip":"建議"},{"day":"週二","outfit":"搭配描述","tip":"建議"},{"day":"週三","outfit":"搭配描述","tip":"建議"},{"day":"週四","outfit":"搭配描述","tip":"建議"},{"day":"週五","outfit":"搭配描述","tip":"建議"}],"overall_note":"整體建議2句"}`;
   try{
-    const raw = await geminiText(prompt, 1000);
-    // 先清除 code block 標記，再擷取 { } 之間的 JSON
-    const cleaned = raw.replace(/```json/g,'').replace(/```/g,'').trim();
-    const jsonStart = cleaned.indexOf('{');
-    const jsonEnd = cleaned.lastIndexOf('}');
-    if(jsonStart === -1 || jsonEnd === -1) throw new Error('回應中找不到 JSON：' + raw.substring(0,80));
-    const jsonStr = cleaned.substring(jsonStart, jsonEnd + 1);
-    apiLog('  JSON擷取: ' + jsonStr.substring(0,40) + '…', 'info');
-    const parsed = JSON.parse(jsonStr);
+    const parsed = await requestWeekPlanJson(prompt);
     renderRes(parsed, 0, 0, occ, sea);
   }catch(e){
     apiLog('✗ 搭配生成失敗: ' + (e.message||'').substring(0,80), 'err');
