@@ -1598,14 +1598,42 @@ async function aiScan(){
   const gk = localStorage.getItem('fitto_gemini_key')||'';
   if(!gk){await new Promise(r=>setTimeout(r,800));ind.classList.remove('show');fillScan({type:'上衣',color:'白色',style:'休閒',note:'（示範）'});return}
   try{
-    const raw = await geminiVision('仔細觀察這件衣服，只回JSON不要其他文字：{"type":"上衣/T恤/襯衫/毛衣/外套/夾克/褲子/牛仔褲/裙子/洋裝/鞋子/配件","color":"白色/米白/淺灰/灰色/深灰/黑色/淺藍/深藍/卡其/棕色/紅色/酒紅/粉色/綠色/橄欖綠/花紋/條紋","style":"休閒/正式/商務/運動/韓系/簡約/街頭","note":"品牌或特徵10字內"}\n顏色判斷規則：深灰色或炭灰選deep gray=深灰；淺灰選淺灰；白色只在非常確定時選白色。', scanB64, scanMime);
-    fillScan(JSON.parse(raw.replace(/```json|```/g,'').trim()));
+    const raw = await geminiVision('仔細觀察這件衣服，只回JSON不要其他文字：{"type":"上衣/T恤/襯衫/毛衣/外套/夾克/褲子/牛仔褲/裙子/洋裝/鞋子/配件","color":"白色/米白/淺灰/灰色/深灰/黑色/淺藍/深藍/卡其/棕色/紅色/酒紅/粉色/綠色/橄欖綠/花紋/條紋","style":"休閒/正式/商務/運動/韓系/簡約/街頭","note":"品牌或特徵10字內"}\n種類判斷規則：只要材質或外觀明顯是 denim / jeans / 牛仔布，下身一律優先選「牛仔褲」，不要只回「褲子」。\n顏色判斷規則：深灰色或炭灰選deep gray=深灰；淺灰選淺灰；白色只在非常確定時選白色。', scanB64, scanMime);
+    fillScan(normalizeScanResult(JSON.parse(raw.replace(/```json|```/g,'').trim())));
   }catch(e){
     apiLog('✗ 衣物辨識失敗: ' + (e.message||'').substring(0,50), 'err');
     showToast('⚠️ 辨識失敗：' + (e.message||'未知錯誤').substring(0,30));
     fillScan({type:'T恤',color:'白色',style:'休閒',note:'辨識失敗，請手動修改'});
   }
   finally{ind.classList.remove('show')}
+}
+function normalizeScanResult(r){
+  r = r || {};
+  const rawType = String(r.type || '').trim();
+  const rawNote = String(r.note || '').trim();
+  const clue = (rawType + ' ' + rawNote).toLowerCase();
+
+  let type = rawType;
+  if(/jeans|denim|牛仔/.test(clue)) type = '牛仔褲';
+  else if(/t-?shirt|tee|短袖t|t恤/.test(clue)) type = 'T恤';
+  else if(/shirt|襯衫/.test(clue)) type = '襯衫';
+  else if(/sweater|knit|毛衣|針織/.test(clue)) type = '毛衣';
+  else if(/jacket|coat|外套|夾克/.test(clue)) type = rawType === '夾克' ? '夾克' : '外套';
+  else if(/skirt|裙/.test(clue)) type = '裙子';
+  else if(/dress|洋裝/.test(clue)) type = '洋裝';
+  else if(/shoe|sneaker|loafer|靴|鞋/.test(clue)) type = '鞋子';
+  else if(/bag|belt|cap|hat|accessor|帽|包|皮帶|配件/.test(clue)) type = '配件';
+  else if(/pants|trouser|slacks|褲/.test(clue)) type = '褲子';
+
+  const allowedTypes = ['上衣','T恤','襯衫','毛衣','外套','夾克','褲子','牛仔褲','裙子','洋裝','鞋子','配件'];
+  if(allowedTypes.indexOf(type) === -1) type = '上衣';
+
+  return {
+    type: type,
+    color: r.color || '白色',
+    style: r.style || '休閒',
+    note: rawNote
+  };
 }
 function fillScan(r){const s=(id,v)=>{const e=document.getElementById(id);if([...e.options].find(o=>o.value===v))e.value=v};s('st',r.type);s('sc2',r.color);s('ss',r.style);document.getElementById('sn').value=r.note||'';document.getElementById('sres').classList.add('show')}
 function confirmScan(){
