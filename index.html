@@ -1467,7 +1467,7 @@ async function geminiText(prompt, maxTokens) {
   return d.candidates[0].content.parts[0].text.trim();
 }
 async function geminiJson(prompt, maxTokens) {
-  maxTokens = maxTokens || 900;
+  maxTokens = maxTokens || 1400;
   var key = localStorage.getItem('fitto_gemini_key') || '';
   if(!key) throw new Error('請先設定 Gemini Key');
   apiLog('→ JSON請求: ' + String(prompt || '').replace(/[\n\r]/g,' ').substring(0, 60) + '…', 'prompt');
@@ -1929,6 +1929,13 @@ function normalizeWeekPlanShape(parsed) {
     overall_note: parsed.overall_note || '已依 Gemini 回應整理成可顯示格式。'
   };
 }
+function buildWardrobePromptText() {
+  return wardrobe.slice(0, 24).map(function(item, index) {
+    var parts = [item.type, item.color, item.style];
+    if(item.note) parts.push(item.note);
+    return (index + 1) + '.' + parts.filter(Boolean).join('/');
+  }).join('；');
+}
 async function requestWeekPlanJson(prompt) {
   const variants = [
     prompt,
@@ -1938,7 +1945,7 @@ async function requestWeekPlanJson(prompt) {
 
   let lastError = null;
   for(let i = 0; i < variants.length; i++) {
-    const raw = await geminiJson(variants[i], i === 2 ? 700 : 1000);
+    const raw = await geminiJson(variants[i], i === 2 ? 1100 : 1400);
     const jsonStr = extractJsonObject(raw);
     if(!jsonStr) {
       lastError = new Error('Gemini 回應不完整，找不到完整 JSON 結尾：' + String(raw || '').substring(0,80));
@@ -1985,11 +1992,11 @@ async function genOutfit(){
     }
   }
 
-  const wj=JSON.stringify(wardrobe.map(i=>({id:i.id,type:i.type,color:i.color,style:i.style,...(i.note?{note:i.note}:{})})));
+  const wj=buildWardrobePromptText();
   const trendSection = trendContext
     ? `\n\n【當季流行趨勢參考】\n${trendContext}\n以上趨勢若衣櫃內有對應單品請優先選用；若無，可在tip中建議補充哪類單品。`
     : '';
-  const prompt=`你是專業穿搭顧問。衣櫃：${wj}\n為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合生成工作日（週一到週五）5天搭配計劃。${trendSection}\n只回JSON，不要加任何說明：{"title":"主題","days":[{"day":"週一","outfit":"搭配描述","tip":"建議"},{"day":"週二","outfit":"搭配描述","tip":"建議"},{"day":"週三","outfit":"搭配描述","tip":"建議"},{"day":"週四","outfit":"搭配描述","tip":"建議"},{"day":"週五","outfit":"搭配描述","tip":"建議"}],"overall_note":"整體建議2句"}`;
+  const prompt=`你是專業穿搭顧問。衣櫃清單：${wj}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合生成週一到週五共5天搭配。${trendSection}\n請務必輸出完整 JSON，不要 markdown，不要前言。每一天都要有 day、outfit、tip；outfit 與 tip 請精簡。格式：{"title":"主題","days":[{"day":"週一","outfit":"搭配描述","tip":"建議"},{"day":"週二","outfit":"搭配描述","tip":"建議"},{"day":"週三","outfit":"搭配描述","tip":"建議"},{"day":"週四","outfit":"搭配描述","tip":"建議"},{"day":"週五","outfit":"搭配描述","tip":"建議"}],"overall_note":"整體建議2句"}`;
   try{
     const parsed = await requestWeekPlanJson(prompt);
     renderRes(parsed, 0, 0, occ, sea);
