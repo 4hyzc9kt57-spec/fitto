@@ -1964,15 +1964,9 @@ async function requestWeekPlanJson(prompt) {
   throw lastError || new Error('Gemini 回應不完整');
 }
 async function requestSingleDayPlan(basePrompt, dayLabel) {
-  const prompt = `${basePrompt}\n現在只生成${dayLabel}這一天。請只輸出合法 JSON 物件，不要 markdown，不要前言，不要解釋：{"day":"${dayLabel}","outfit":"搭配描述","tip":"建議"}\n規則：outfit 請控制在 18 字內，tip 請控制在 16 字內。`;
-  const raw = await geminiJson(prompt, 450);
-  const jsonStr = extractJsonObject(raw);
-  let parsed;
-  if(jsonStr) {
-    parsed = JSON.parse(jsonStr);
-  } else {
-    parsed = parseSingleDayFallback(raw, dayLabel);
-  }
+  const prompt = `${basePrompt}\n現在只生成${dayLabel}這一天。\n請不要回 JSON、不要 markdown、不要前言、不要解釋。\n只用這一行格式回覆：搭配描述|建議\n規則：1. 左邊是 outfit，右邊是 tip。2. outfit 請控制在 18 字內。3. tip 請控制在 16 字內。4. 不要輸出 day 欄位。`;
+  const raw = await geminiText(prompt, 220);
+  const parsed = parseSingleDayFallback(raw, dayLabel);
   return {
     day: parsed.day || dayLabel,
     outfit: parsed.outfit || '請重新生成',
@@ -1996,21 +1990,29 @@ function parseSingleDayFallback(raw, dayLabel) {
   if(lines.length >= 2) {
     return {
       day: dayLabel,
-      outfit: lines[0].replace(/^outfit[:：]\s*/i,''),
-      tip: lines[1].replace(/^tip[:：]\s*/i,'')
+      outfit: lines[0].replace(/^(outfit|搭配)[:：]\s*/i,''),
+      tip: lines[1].replace(/^(tip|建議)[:：]\s*/i,'')
     };
   }
 
-  const m = text.match(/outfit[:：]\s*(.+?)\s+tip[:：]\s*(.+)$/i);
+  const m = text.match(/(outfit|搭配)[:：]\s*(.+?)\s+(tip|建議)[:：]\s*(.+)$/i);
   if(m) {
     return {
       day: dayLabel,
-      outfit: m[1].trim(),
-      tip: m[2].trim()
+      outfit: m[2].trim(),
+      tip: m[4].trim()
     };
   }
 
-  throw new Error(`${dayLabel} 有回應但格式不是系統需要的 JSON`);
+  if(text.length <= 24) {
+    return {
+      day: dayLabel,
+      outfit: text,
+      tip: '請依衣櫃現有單品微調'
+    };
+  }
+
+  throw new Error(`${dayLabel} 有回應但格式不是系統需要的文字格式`);
 }
 async function requestWeekPlanByDays(basePrompt) {
   const dayLabels = ['週一','週二','週三','週四','週五'];
