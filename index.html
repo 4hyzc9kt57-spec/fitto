@@ -1821,13 +1821,34 @@ function buildWardrobeWeekPlan(occ, sea, reason) {
   });
 
   let note = `這次先依照你衣櫃裡現有單品，為${seaClean}季的${occ}場合排出 5 天穿搭。`;
-  if(reason) note += '\nGemini 暫時沒有成功回傳，所以先提供衣櫃實搭版建議。';
+  if(reason) note += '\n' + reason;
 
   return {
     title: '本週衣櫃實搭',
     days: planDays,
     overall_note: note
   };
+}
+function explainGeminiError(message) {
+  const msg = String(message || '').trim();
+  const lower = msg.toLowerCase();
+  if(!msg) return 'Gemini 沒有成功回傳，所以先提供衣櫃實搭版建議。';
+  if(/api key not valid|invalid api key|permission denied|forbidden|unauthorized|請先設定 gemini key/i.test(lower)) {
+    return 'Gemini 無法使用：API Key 無效、缺少權限，或尚未設定 Key，所以先提供衣櫃實搭版建議。';
+  }
+  if(/quota|rate limit|resource has been exhausted|429/i.test(lower)) {
+    return 'Gemini 無法使用：目前配額不足或請求過多，所以先提供衣櫃實搭版建議。';
+  }
+  if(/json|回應中找不到/i.test(msg)) {
+    return 'Gemini 有回應，但格式不是系統需要的 JSON，所以先提供衣櫃實搭版建議。';
+  }
+  if(/network|failed to fetch|fetch/i.test(lower)) {
+    return 'Gemini 無法使用：網路或 API 連線異常，所以先提供衣櫃實搭版建議。';
+  }
+  if(/safety|內容被安全過濾/i.test(msg)) {
+    return 'Gemini 無法使用：回應被安全機制攔下，所以先提供衣櫃實搭版建議。';
+  }
+  return 'Gemini 暫時未成功回傳：' + msg.substring(0,80) + '。所以先提供衣櫃實搭版建議。';
 }
 
 async function genOutfit(){
@@ -1878,7 +1899,7 @@ async function genOutfit(){
   }catch(e){
     apiLog('✗ 搭配生成失敗: ' + (e.message||'').substring(0,80), 'err');
     showToast('⚠️ ' + (e.message||'生成失敗').substring(0,40));
-    renderRes(buildWardrobeWeekPlan(occ, sea, e && e.message),0,0,occ,sea,false,'衣櫃排列');
+    renderRes(buildWardrobeWeekPlan(occ, sea, explainGeminiError(e && e.message)),0,0,occ,sea,false,'衣櫃排列');
   }finally{btn.classList.remove('loading');btn.disabled=false}
 }
 function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
