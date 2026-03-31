@@ -1908,10 +1908,11 @@ function extractJsonObject(text) {
 }
 function normalizeWeekPlanShape(parsed) {
   if(!parsed || typeof parsed !== 'object') throw new Error('Gemini 回傳格式不是物件');
-  if(!Array.isArray(parsed.days)) throw new Error('Gemini 回傳缺少 days 陣列');
+  var rawDays = Array.isArray(parsed.days) ? parsed.days : (Array.isArray(parsed) ? parsed : null);
+  if(!rawDays) throw new Error('Gemini 回傳缺少 days 陣列');
 
   const defaultDays = ['週一','週二','週三','週四','週五'];
-  const days = parsed.days.slice(0, 5).map(function(item, index) {
+  const days = rawDays.slice(0, 5).map(function(item, index) {
     return {
       day: item && item.day ? item.day : defaultDays[index],
       outfit: item && item.outfit ? item.outfit : '請重新生成',
@@ -1940,7 +1941,7 @@ async function requestWeekPlanJson(prompt) {
   const variants = [
     prompt,
     prompt + '\n請務必輸出完整結尾，不要省略右大括號，不要使用 markdown code block。',
-    '請只輸出完整 JSON，且一定要包含 title、days(5筆)、overall_note。days 固定週一到週五。衣櫃資料：' + prompt.split('衣櫃：')[1]
+    prompt + '\n若內容太長，請只輸出 5 筆 days 陣列 JSON，其他欄位全部省略。'
   ];
 
   let lastError = null;
@@ -1996,9 +1997,11 @@ async function genOutfit(){
   const trendSection = trendContext
     ? `\n\n【當季流行趨勢參考】\n${trendContext}\n以上趨勢若衣櫃內有對應單品請優先選用；若無，可在tip中建議補充哪類單品。`
     : '';
-  const prompt=`你是專業穿搭顧問。衣櫃清單：${wj}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合生成週一到週五共5天搭配。${trendSection}\n請務必輸出完整 JSON，不要 markdown，不要前言。每一天都要有 day、outfit、tip；outfit 與 tip 請精簡。格式：{"title":"主題","days":[{"day":"週一","outfit":"搭配描述","tip":"建議"},{"day":"週二","outfit":"搭配描述","tip":"建議"},{"day":"週三","outfit":"搭配描述","tip":"建議"},{"day":"週四","outfit":"搭配描述","tip":"建議"},{"day":"週五","outfit":"搭配描述","tip":"建議"}],"overall_note":"整體建議2句"}`;
+  const prompt=`你是專業穿搭顧問。衣櫃清單：${wj}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合生成週一到週五共5天搭配。${trendSection}\n請只輸出最小合法 JSON 陣列，不要 markdown，不要前言，不要解釋：[{"day":"週一","outfit":"搭配描述","tip":"建議"},{"day":"週二","outfit":"搭配描述","tip":"建議"},{"day":"週三","outfit":"搭配描述","tip":"建議"},{"day":"週四","outfit":"搭配描述","tip":"建議"},{"day":"週五","outfit":"搭配描述","tip":"建議"}]\n規則：1. 必須剛好 5 筆。2. outfit 請控制在 18 字內。3. tip 請控制在 16 字內。4. 不要輸出 title、overall_note、說明文字。`;
   try{
     const parsed = await requestWeekPlanJson(prompt);
+    parsed.title = '本週搭配';
+    parsed.overall_note = trendContext ? '已結合當季潮流與衣櫃現有單品整理。' : '已依衣櫃現有單品整理。';
     renderRes(parsed, 0, 0, occ, sea);
   }catch(e){
     apiLog('✗ 搭配生成失敗: ' + (e.message||'').substring(0,80), 'err');
