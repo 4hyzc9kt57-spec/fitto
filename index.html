@@ -1,8 +1,9 @@
 <!DOCTYPE html>
-<html lang="zh-TW"><head>
+<html lang="zh-TW">
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto v8 · AI 智能穿搭</title>
+<title>Fitto v11 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -640,25 +641,25 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-  <div class="logo">Fitto <span class="logo-badge">v8</span></div>
+  <div class="logo">Fitto <span class="logo-badge">v11</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
     </div>
     <div class="api-pill" onclick="openApiModal()">
       <div class="dot" id="api-dot"></div>
-      <span id="api-st">設定 Gemini Key</span>
+      <span id="api-st">設定</span>
     </div>
   </div>
 </header>
 
 <!-- ① 衣櫃 -->
-<div class="view" id="view-wardrobe">
+<div class="view active" id="view-wardrobe">
   <div class="welcome-banner">
-    <div class="wb-greeting" id="wb-greeting">晚安 🌆</div>
+    <div class="wb-greeting" id="wb-greeting">你好 👋</div>
     <div class="wb-name" id="wb-name">Jack <button class="name-edit-btn" onclick="openNameModal()">✏️</button></div>
     <div class="wb-sub">今天穿什麼好呢？你的衣櫃已準備好</div>
-    <div class="wb-avatar" id="wb-avatar" onclick="goShop()"><span style="font-size:1.6rem">👤</span></div>
+    <div class="wb-avatar" id="wb-avatar" onclick="goShop()">👤</div>
     <div class="wb-stats">
       <div class="wb-stat"><div class="wsn" id="cnt-a">0</div><div class="wsl">全部</div></div>
       <div class="wb-stat"><div class="wsn" id="cnt-t">0</div><div class="wsl">上衣</div></div>
@@ -681,7 +682,9 @@ body{background:var(--bg);color:var(--ink);}
     <span><span class="lb-val" id="w-used">0</span> / <span id="w-max">10</span> 件</span>
     <button class="lb-btn" onclick="goShop()">🪙 擴充</button>
   </div>
-  <div class="cat-tabs" id="cat-tabs"><button class="cat-tab-btn active" onclick="setCatFilter('全部',this)">全部</button></div>
+  <div class="cat-tabs" id="cat-tabs">
+    <button class="cat-tab-btn active" onclick="setCatFilter('全部',this)">全部</button>
+  </div>
   <div class="photo-btns">
     <div class="pb" onclick="openScan('camera')"><span class="pbi">📷</span><p>拍照辨識</p><small>開啟相機掃描</small></div>
     <div class="pb" onclick="openScan('upload')"><span class="pbi">🖼️</span><p>上傳照片</p><small>從相簿選圖</small></div>
@@ -708,11 +711,13 @@ body{background:var(--bg);color:var(--ink);}
     <button class="btn-p" onclick="addItem()">＋ 手動新增</button>
   </div>
   <div class="sec-label">服裝列表</div>
-  <div class="clothes-grid" id="cgrid"><div class="empty"><div class="ei">👗</div><p>衣櫃還是空的<br>拍照或手動新增第一件衣服！</p></div></div>
+  <div class="clothes-grid" id="cgrid">
+    <div class="empty" id="empty0"><div class="ei">👗</div><p>衣櫃還是空的<br>拍照或手動新增第一件衣服！</p></div>
+  </div>
 </div>
 
 <!-- ② 搭配 -->
-<div class="view active" id="view-styling">
+<div class="view" id="view-styling">
   <div class="phd"><h1>工作日搭配</h1><p>AI 規劃週一到週五穿著</p></div>
   <div class="warn" id="wfew">⚠️ 請先到「衣櫃」新增至少 3 件衣物再生成搭配</div>
   <div class="card">
@@ -769,7 +774,7 @@ body{background:var(--bg);color:var(--ink);}
 <!-- ③ 收藏 -->
 <div class="view" id="view-saved">
   <div class="phd"><h1>收藏搭配</h1><p>你儲存的穿搭計劃</p></div>
-  <div id="saved-wrap"><div class="empty"><div class="ei">🔖</div><p>還沒收藏的搭配<br>先去生成一週計劃吧！</p></div></div>
+  <div id="saved-wrap"></div>
 </div>
 
 <!-- ④ 型錄 -->
@@ -792,487 +797,7 @@ body{background:var(--bg);color:var(--ink);}
       <button class="cat-filter" onclick="filterCat('UNIQLO:C',this)">UNIQLO:C</button>
       <button class="cat-filter" onclick="filterCat('JW Anderson',this)">JW Anderson</button>
     </div>
-    <div id="uq-list">
-    <div class="uq-section">
-      <div class="uq-section-title">UNIQLO:C <span class="uq-badge badge-c">UNIQLO:C</span></div>
-      <div class="uq-grid">
-        <div class="uq-item" id="uqitem-uc1">
-            <div class="uq-icon" style="background:#F48FB1">👕</div>
-            <div class="uq-info">
-              <div class="uq-name">粉紫色緞面套裝上衣</div>
-              <div class="uq-meta">
-                <span>上衣</span>
-                <span>·</span>
-                <span>粉色</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">緞面質感，粉紫色調</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('uc1',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-uc2">
-            <div class="uq-icon" style="background:#90CAF9">👖</div>
-            <div class="uq-info">
-              <div class="uq-name">天藍色緞面套裝長褲</div>
-              <div class="uq-meta">
-                <span>褲子</span>
-                <span>·</span>
-                <span>淺藍</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">套裝款，同色系搭配</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('uc2',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-uc3">
-            <div class="uq-icon" style="background:#EF5350">🧶</div>
-            <div class="uq-info">
-              <div class="uq-name">紅色羅紋米蘭針織上衣</div>
-              <div class="uq-meta">
-                <span>毛衣</span>
-                <span>·</span>
-                <span>紅色</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">羅紋米蘭針織，亮紅色點綴</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('uc3',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-uc4">
-            <div class="uq-icon" style="background:#F5F5F5">👗</div>
-            <div class="uq-info">
-              <div class="uq-name">白色寬版棉質洋裝</div>
-              <div class="uq-meta">
-                <span>洋裝</span>
-                <span>·</span>
-                <span>白色</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">結構式袖型，附腰帶</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('uc4',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-uc5">
-            <div class="uq-icon" style="background:#F5F5F5">👕</div>
-            <div class="uq-info">
-              <div class="uq-name">黏膠纖維網眼T恤</div>
-              <div class="uq-meta">
-                <span>T恤</span>
-                <span>·</span>
-                <span>白色</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">透氣網眼材質，輕薄涼爽</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('uc5',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-uc6">
-            <div class="uq-icon" style="background:#F0E6D3">👜</div>
-            <div class="uq-info">
-              <div class="uq-name">UNIQLO:C 托特包</div>
-              <div class="uq-meta">
-                <span>配件</span>
-                <span>·</span>
-                <span>米白</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">超輕量設計，大容量</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('uc6',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-uc7">
-            <div class="uq-icon" style="background:#F5F5F5">👟</div>
-            <div class="uq-info">
-              <div class="uq-name">復古運動鞋</div>
-              <div class="uq-meta">
-                <span>鞋子</span>
-                <span>·</span>
-                <span>白色</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">經典復古廓形</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('uc7',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-uc8">
-            <div class="uq-icon" style="background:#F0E6D3">👟</div>
-            <div class="uq-info">
-              <div class="uq-name">帆船鞋</div>
-              <div class="uq-meta">
-                <span>鞋子</span>
-                <span>·</span>
-                <span>米白</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">天然皮革，百搭款</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('uc8',this)">加入衣櫃</button>
-          </div>
-      </div>
-    </div>
-    <div class="uq-section">
-      <div class="uq-section-title">JW Anderson <span class="uq-badge badge-jw">JW Anderson</span></div>
-      <div class="uq-grid">
-        <div class="uq-item" id="uqitem-jw1">
-            <div class="uq-icon" style="background:#F48FB1">👔</div>
-            <div class="uq-info">
-              <div class="uq-name">牛津布短袖襯衫（黃色）</div>
-              <div class="uq-meta">
-                <span>襯衫</span>
-                <span>·</span>
-                <span>粉色</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">直筒裁剪，6色可選</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('jw1',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-jw2">
-            <div class="uq-icon" style="background:#F48FB1">👔</div>
-            <div class="uq-info">
-              <div class="uq-name">牛津布短袖襯衫（粉色）</div>
-              <div class="uq-meta">
-                <span>襯衫</span>
-                <span>·</span>
-                <span>粉色</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">短版廓形，首次聯名款</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('jw2',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-jw3">
-            <div class="uq-icon" style="background:#F5F5F5">🧥</div>
-            <div class="uq-info">
-              <div class="uq-name">防風短版外套</div>
-              <div class="uq-meta">
-                <span>外套</span>
-                <span>·</span>
-                <span>白色</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">防潑水加工，可調節下擺</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('jw3',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-jw4">
-            <div class="uq-icon" style="background:#F5F5F5">👕</div>
-            <div class="uq-info">
-              <div class="uq-name">JWA LOGO棉質Polo衫（白）</div>
-              <div class="uq-meta">
-                <span>上衣</span>
-                <span>·</span>
-                <span>白色</span>
-                <span>·</span>
-                <span style="color:#90CAF9">男裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">棉質快乾，20色可選</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('jw4',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-jw5">
-            <div class="uq-icon" style="background:#1A237E">👕</div>
-            <div class="uq-info">
-              <div class="uq-name">JWA LOGO棉質Polo衫（藍）</div>
-              <div class="uq-meta">
-                <span>上衣</span>
-                <span>·</span>
-                <span>深藍</span>
-                <span>·</span>
-                <span style="color:#90CAF9">男裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">棉質快乾，JWA標誌</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('jw5',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-jw6">
-            <div class="uq-icon" style="background:#F5F5F5">👕</div>
-            <div class="uq-info">
-              <div class="uq-name">JWA設計T恤</div>
-              <div class="uq-meta">
-                <span>T恤</span>
-                <span>·</span>
-                <span>白色</span>
-                <span>·</span>
-                <span style="color:#90CAF9">男裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">設計師印花，10色</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('jw6',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-jw7">
-            <div class="uq-icon" style="background:#C8A96E">👖</div>
-            <div class="uq-info">
-              <div class="uq-name">棉麻工裝短褲</div>
-              <div class="uq-meta">
-                <span>褲子</span>
-                <span>·</span>
-                <span>卡其</span>
-                <span>·</span>
-                <span style="color:#90CAF9">男裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">棉麻混紡，多口袋</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('jw7',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-jw8">
-            <div class="uq-icon" style="background:#F0E6D3">🧥</div>
-            <div class="uq-info">
-              <div class="uq-name">中性拉鍊夾克</div>
-              <div class="uq-meta">
-                <span>夾克</span>
-                <span>·</span>
-                <span>米白</span>
-                <span>·</span>
-                <span style="color:#90CAF9">男裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">復古工裝風格，中性設計</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('jw8',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-jw9">
-            <div class="uq-icon" style="background:repeating-linear-gradient(45deg,#ddd,#ddd 4px,#bbb 4px,#bbb 8px)">👕</div>
-            <div class="uq-info">
-              <div class="uq-name">條紋針織短袖Polo</div>
-              <div class="uq-meta">
-                <span>上衣</span>
-                <span>·</span>
-                <span>花紋/條紋</span>
-                <span>·</span>
-                <span style="color:#90CAF9">男裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">英倫海軍風橫條紋</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('jw9',this)">加入衣櫃</button>
-          </div>
-      </div>
-    </div>
-    <div class="uq-section">
-      <div class="uq-section-title">LifeWear <span class="uq-badge badge-lw">LifeWear</span></div>
-      <div class="uq-grid">
-        <div class="uq-item" id="uqitem-lw1">
-            <div class="uq-icon" style="background:#F5F5F5">👕</div>
-            <div class="uq-info">
-              <div class="uq-name">AIRism棉質V領T恤</div>
-              <div class="uq-meta">
-                <span>T恤</span>
-                <span>·</span>
-                <span>白色</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">AIRism涼感技術</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('lw1',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-lw2">
-            <div class="uq-icon" style="background:#333">👕</div>
-            <div class="uq-info">
-              <div class="uq-name">AIRism棉質T恤（黑）</div>
-              <div class="uq-meta">
-                <span>T恤</span>
-                <span>·</span>
-                <span>黑色</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">AIRism涼感技術</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('lw2',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-lw3">
-            <div class="uq-icon" style="background:#F0E6D3">🧥</div>
-            <div class="uq-info">
-              <div class="uq-name">輕薄防曬外套</div>
-              <div class="uq-meta">
-                <span>外套</span>
-                <span>·</span>
-                <span>米白</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">UPF50+ 防曬，可折疊</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('lw3',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-lw4">
-            <div class="uq-icon" style="background:#F0E6D3">👖</div>
-            <div class="uq-info">
-              <div class="uq-name">亞麻混紡寬褲</div>
-              <div class="uq-meta">
-                <span>褲子</span>
-                <span>·</span>
-                <span>米白</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">透氣亞麻，鬆緊腰帶</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('lw4',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-lw5">
-            <div class="uq-icon" style="background:#90CAF9">👖</div>
-            <div class="uq-info">
-              <div class="uq-name">彈性牛仔寬褲</div>
-              <div class="uq-meta">
-                <span>牛仔褲</span>
-                <span>·</span>
-                <span>淺藍</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">Baggy Curve 新廓形</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('lw5',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-lw6">
-            <div class="uq-icon" style="background:#1A237E">👖</div>
-            <div class="uq-info">
-              <div class="uq-name">Baggy牛仔褲（深藍）</div>
-              <div class="uq-meta">
-                <span>牛仔褲</span>
-                <span>·</span>
-                <span>深藍</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">UNIQLO牛仔創新中心</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('lw6',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-lw7">
-            <div class="uq-icon" style="background:#F0E6D3">👗</div>
-            <div class="uq-info">
-              <div class="uq-name">縐褶雪紡長裙</div>
-              <div class="uq-meta">
-                <span>裙子</span>
-                <span>·</span>
-                <span>米白</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">輕盈縐褶，優雅飄逸</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('lw7',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-lw8">
-            <div class="uq-icon" style="background:#F0E6D3">👜</div>
-            <div class="uq-info">
-              <div class="uq-name">抗UV防曬帽</div>
-              <div class="uq-meta">
-                <span>配件</span>
-                <span>·</span>
-                <span>米白</span>
-                <span>·</span>
-                <span style="color:#F48FB1">女裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">UPF50+ 寬帽簷</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('lw8',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-lm1">
-            <div class="uq-icon" style="background:#F5F5F5">👕</div>
-            <div class="uq-info">
-              <div class="uq-name">AIRism棉質圓領T恤（白）</div>
-              <div class="uq-meta">
-                <span>T恤</span>
-                <span>·</span>
-                <span>白色</span>
-                <span>·</span>
-                <span style="color:#90CAF9">男裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">AIRism涼感，柔軟親膚</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('lm1',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-lm2">
-            <div class="uq-icon" style="background:#9E9E9E">👕</div>
-            <div class="uq-info">
-              <div class="uq-name">AIRism棉質T恤（灰）</div>
-              <div class="uq-meta">
-                <span>T恤</span>
-                <span>·</span>
-                <span>灰色</span>
-                <span>·</span>
-                <span style="color:#90CAF9">男裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">AIRism涼感技術</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('lm2',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-lm3">
-            <div class="uq-icon" style="background:#F0E6D3">👔</div>
-            <div class="uq-info">
-              <div class="uq-name">亞麻混紡寬版短袖襯衫</div>
-              <div class="uq-meta">
-                <span>襯衫</span>
-                <span>·</span>
-                <span>米白</span>
-                <span>·</span>
-                <span style="color:#90CAF9">男裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">亞麻透氣，寬鬆版型</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('lm3',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-lm4">
-            <div class="uq-icon" style="background:#9E9E9E">🧥</div>
-            <div class="uq-info">
-              <div class="uq-name">輕薄防曬外套（男）</div>
-              <div class="uq-meta">
-                <span>外套</span>
-                <span>·</span>
-                <span>灰色</span>
-                <span>·</span>
-                <span style="color:#90CAF9">男裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">UPF50+，極輕量</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('lm4',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-lm5">
-            <div class="uq-icon" style="background:#C8A96E">👖</div>
-            <div class="uq-info">
-              <div class="uq-name">棉麻錐形褲</div>
-              <div class="uq-meta">
-                <span>褲子</span>
-                <span>·</span>
-                <span>卡其</span>
-                <span>·</span>
-                <span style="color:#90CAF9">男裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">棉麻混紡，修身錐形</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('lm5',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-lm6">
-            <div class="uq-icon" style="background:#1A237E">👖</div>
-            <div class="uq-info">
-              <div class="uq-name">Baggy牛仔褲（男）</div>
-              <div class="uq-meta">
-                <span>牛仔褲</span>
-                <span>·</span>
-                <span>深藍</span>
-                <span>·</span>
-                <span style="color:#90CAF9">男裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">新寬鬆廓形，JW Anderson版</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('lm6',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-lm7">
-            <div class="uq-icon" style="background:#C8A96E">👖</div>
-            <div class="uq-info">
-              <div class="uq-name">快乾短褲</div>
-              <div class="uq-meta">
-                <span>褲子</span>
-                <span>·</span>
-                <span>卡其</span>
-                <span>·</span>
-                <span style="color:#90CAF9">男裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">Dry-EX速乾材質</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('lm7',this)">加入衣櫃</button>
-          </div><div class="uq-item" id="uqitem-lm8">
-            <div class="uq-icon" style="background:#333">👜</div>
-            <div class="uq-info">
-              <div class="uq-name">UV Protection太陽眼鏡</div>
-              <div class="uq-meta">
-                <span>配件</span>
-                <span>·</span>
-                <span>黑色</span>
-                <span>·</span>
-                <span style="color:#90CAF9">男裝</span>
-              </div>
-              <div class="uq-meta" style="margin-top:2px">UV400，25%藍光阻隔</div>
-            </div>
-            <button class="uq-add-btn" onclick="addUQItem('lm8',this)">加入衣櫃</button>
-          </div>
-      </div>
-    </div></div>
+    <div id="uq-list"></div>
   </div>
 
   <!-- Upload catalog -->
@@ -1294,7 +819,7 @@ body{background:var(--bg);color:var(--ink);}
 </div>
 
 <!-- FLOATING TOKEN COUNTER -->
-<div id="token-float" onclick="toggleTokenFloat()" class="">
+<div id="token-float" onclick="toggleTokenFloat()">
   <div class="tf-title">
     <span>Gemini 用量</span>
     <span id="tf-toggle" style="font-size:0.7rem">▾</span>
@@ -1302,7 +827,7 @@ body{background:var(--bg);color:var(--ink);}
   <div class="tf-rows">
     <div class="tf-row">
       <span class="tf-label">文字 Tokens</span>
-      <span class="tf-val gold" id="tf-text">0 tok</span>
+      <span class="tf-val gold" id="tf-text">0</span>
     </div>
     <div class="tf-row">
       <span class="tf-label">圖片生成</span>
@@ -1319,12 +844,13 @@ body{background:var(--bg);color:var(--ink);}
     </div>
     <div class="tf-divider"></div>
     <div style="font-size:0.55rem;font-weight:800;color:var(--muted);letter-spacing:0.06em;margin-bottom:3px">LOG</div>
-    <div id="tf-log"><div class="tf-log-entry ok"><span style="opacity:.5">19:32:21</span> ✓ 部署成功: 4b92a28</div></div>
+    <div id="tf-log"></div>
     <div style="display:flex;justify-content:space-between;margin-top:6px">
       <div class="tf-reset" onclick="event.stopPropagation();resetTokenCount()">↺ 重置</div>
+      <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto v8 · 2026.03</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto v11 · 2026.03</div>
   </div>
 </div>
 
@@ -1374,14 +900,14 @@ body{background:var(--bg);color:var(--ink);}
     <div class="shop-item"><span class="si-icon">⭐</span><div class="si-name">時尚達人</div><div class="si-desc">百變造型</div><button class="si-price" id="btn-st" onclick="buyAvatar('⭐',12,'btn-st')">🪙 12枚</button></div>
   </div>
   <div class="shop-sec">🎯 任務中心</div>
-  <div id="mission-list"><div class="mission-item"><span class="mi-icon">📅</span><div class="mi-info"><div class="mi-title">每日登入<span style="font-size:.55rem;background:#E8F0EA;color:#4A7A58;padding:1px 5px;border-radius:4px;font-weight:700;margin-left:4px">每日</span></div><div class="mi-sub">完成得 3 枚</div></div><button class="mi-btn" onclick="claimMission('daily_login')">領取 🪙</button></div><div class="mission-item"><span class="mi-icon">📸</span><div class="mi-info"><div class="mi-title">IG 分享穿搭</div><div class="mi-sub">完成得 3 枚</div></div><button class="mi-btn" onclick="claimMission('share_ig')">領取 🪙</button></div><div class="mission-item"><span class="mi-icon">👥</span><div class="mi-info"><div class="mi-title">FB 分享穿搭</div><div class="mi-sub">完成得 3 枚</div></div><button class="mi-btn" onclick="claimMission('share_fb')">領取 🪙</button></div><div class="mission-item"><span class="mi-icon">🤝</span><div class="mi-info"><div class="mi-title">介紹好友使用</div><div class="mi-sub">完成得 3 枚</div></div><button class="mi-btn" onclick="claimMission('invite')">領取 🪙</button></div><div class="mission-item"><span class="mi-icon">🎨</span><div class="mi-info"><div class="mi-title">生成 5 張穿搭圖</div><div class="mi-sub">完成得 5 枚</div></div><button class="mi-btn" onclick="claimMission('gen5')">領取 🪙</button></div><div class="mission-item"><span class="mi-icon">👔</span><div class="mi-info"><div class="mi-title">加入 5 件衣物</div><div class="mi-sub">完成得 5 枚</div></div><button class="mi-btn" onclick="claimMission('wardrobe5')">領取 🪙</button></div><div class="mission-item"><span class="mi-icon">📺</span><div class="mi-info"><div class="mi-title">看廣告得金幣</div><div class="mi-sub">完成得 3 枚</div></div><button class="mi-soon" onclick="claimMission('ad')">即將推出</button></div></div>
+  <div id="mission-list"></div>
   <div style="font-size:.62rem;color:var(--muted);text-align:center;padding:12px 0;line-height:1.6">目前為展示模式，正式上線後接入付費系統</div>
 </div>
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button class="nb" onclick="goNav('wardrobe')"><span class="ni">👗</span><span class="nl">衣櫃</span></button>
-  <button class="nb active" onclick="goNav('styling')"><span class="ni">✨</span><span class="nl">搭配</span></button>
+  <button class="nb active" onclick="goNav('wardrobe')"><span class="ni">👗</span><span class="nl">衣櫃</span></button>
+  <button class="nb" onclick="goNav('styling')"><span class="ni">✨</span><span class="nl">搭配</span></button>
   <button class="nb" onclick="goNav('saved')"><span class="ni">🔖</span><span class="nl">收藏</span></button>
   <button class="nb" onclick="goNav('catalog')"><span class="ni">📋</span><span class="nl">型錄</span></button>
   <button class="nb" onclick="goNav('shop')"><span class="ni">🪙</span><span class="nl">商店</span></button>
@@ -1467,7 +993,7 @@ body{background:var(--bg);color:var(--ink);}
 </div>
 
 <!-- LOCK SCREEN -->
-<div id="lock-screen" style="display: none;">
+<div id="lock-screen">
   <div class="lock-logo">Fitto</div>
   <div class="lock-sub">AI 智能穿搭助手</div>
   <div class="lock-icon">🔐</div>
@@ -1476,7 +1002,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-  <div class="lock-footer">Fitto v8 · Gemini Powered · 2026.03</div>
+  <div class="lock-footer">Fitto v11 · Gemini Powered · 2026.03</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -1505,7 +1031,7 @@ body{background:var(--bg);color:var(--ink);}
 
 
 <!-- DEPLOY MODAL -->
-<div class="overlay show" id="deploy-ov">
+<div class="overlay" id="deploy-ov">
   <div class="modal">
     <div class="mhandle"></div>
     <div class="mtitle">🚀 一鍵部署到 GitHub</div>
@@ -1514,8 +1040,8 @@ body{background:var(--bg);color:var(--ink);}
       <input type="password" class="api-inp" id="deploy-token" placeholder="ghp_xxxxxxxx" autocomplete="off">
       <div style="font-size:.6rem;color:var(--muted);margin-top:4px">只需填一次，儲存在本機</div>
     </div>
-    <div id="deploy-status" style="font-size: 0.72rem; color: var(--muted); text-align: center; padding: 8px 0px; min-height: 24px;">② 編碼中…</div>
-    <button class="btn-p" id="deploy-btn" onclick="doDeploy()" style="margin-bottom:10px" disabled="">⏳ 部署中…</button>
+    <div id="deploy-status" style="font-size:.72rem;color:var(--muted);text-align:center;padding:8px 0;min-height:24px"></div>
+    <button class="btn-p" id="deploy-btn" onclick="doDeploy()" style="margin-bottom:10px">🚀 立即部署</button>
     <button class="btn-ghost" onclick="closeModal('deploy-ov')">取消</button>
   </div>
 </div>
@@ -2148,10 +1674,17 @@ async function genOutfit(){
   const prompt=`你是專業穿搭顧問。衣櫃：${wj}\n為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合生成工作日（週一到週五）5天搭配計劃。${trendSection}\n只回JSON，不要加任何說明：{"title":"主題","days":[{"day":"週一","outfit":"搭配描述","tip":"建議"},{"day":"週二","outfit":"搭配描述","tip":"建議"},{"day":"週三","outfit":"搭配描述","tip":"建議"},{"day":"週四","outfit":"搭配描述","tip":"建議"},{"day":"週五","outfit":"搭配描述","tip":"建議"}],"overall_note":"整體建議2句"}`;
   try{
     const raw = await geminiText(prompt, 1000);
-    const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
+    // 擷取第一個 { 到最後一個 }，處理 Gemini thinking 模式前置文字
+    const jsonStart = raw.indexOf('{');
+    const jsonEnd = raw.lastIndexOf('}');
+    if(jsonStart === -1 || jsonEnd === -1) throw new Error('回應中找不到 JSON：' + raw.substring(0,80));
+    const jsonStr = raw.substring(jsonStart, jsonEnd + 1);
+    apiLog('  JSON擷取: ' + jsonStr.substring(0,40) + '…', 'info');
+    const parsed = JSON.parse(jsonStr);
     renderRes(parsed, 0, 0, occ, sea);
   }catch(e){
-    apiLog('✗ 搭配生成失敗: ' + (e.message||'').substring(0,60), 'err');
+    apiLog('✗ 搭配生成失敗: ' + (e.message||'').substring(0,80), 'err');
+    showToast('⚠️ ' + (e.message||'生成失敗').substring(0,40));
     renderRes({title:'示範：都市工作週',days:[{day:'週一',outfit:'白色襯衫＋深藍褲',tip:'清爽開啟新的一週'},{day:'週二',outfit:'米白上衣＋卡其褲',tip:'暖色系讓氣色更好'},{day:'週三',outfit:'黑色T恤＋牛仔褲',tip:'百搭基本款不出錯'},{day:'週四',outfit:'灰色毛衣＋深藍褲',tip:'週末前輕鬆過渡'},{day:'週五',outfit:'白色上衣＋裙子',tip:'Happy Friday！'}],overall_note:'中性色系為主，適合多種辦公場合。\n（示範模式—請設定 API Key 取得真實建議）'},0,0,occ,sea,true);
   }finally{btn.classList.remove('loading');btn.disabled=false}
 }
@@ -2481,6 +2014,32 @@ function downloadSource() {
   }
 }
 
+
+// ═══ 複製原始碼到剪貼簿 ═══
+function copySource() {
+  var src = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  if(navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(src).then(function(){
+      showToast('✅ 已複製！去 GitHub 網頁貼上');
+    }).catch(function(){ fallbackCopy(src); });
+  } else {
+    fallbackCopy(src);
+  }
+}
+function fallbackCopy(src) {
+  var ta = document.createElement('textarea');
+  ta.value = src;
+  ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try {
+    document.execCommand('copy');
+    showToast('✅ 已複製！去 GitHub 網頁貼上');
+  } catch(e) {
+    showToast('⚠️ 複製失敗，請用部署按鈕');
+  }
+  document.body.removeChild(ta);
+}
 // ═══ 一鍵部署 ═══
 function openDeploy() {
   var saved = localStorage.getItem('fitto_ghtoken') || '';
@@ -2497,63 +2056,82 @@ async function doDeploy() {
   var btn = document.getElementById('deploy-btn');
   var status = document.getElementById('deploy-status');
   btn.disabled = true;
-  btn.textContent = '⏳ 部署中…';
+  btn.textContent = '⏳ 準備中…';
   status.style.color = 'var(--muted)';
-  status.textContent = '① 取得現有檔案資訊…';
+  status.textContent = '產生部署工具…';
 
+  // 取得當前 HTML 原始碼
+  var src = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+
+  // 產生獨立的部署頁面（可在任何 https 環境執行）
+  var deployPage = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fitto Deploy</title>
+<style>
+body{font-family:-apple-system,sans-serif;background:#0a0a0a;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;box-sizing:border-box}
+h2{color:#C9A550;margin-bottom:8px}
+p{color:#888;font-size:.85rem;margin-bottom:24px;text-align:center}
+.status{font-size:.9rem;margin:16px 0;min-height:24px;text-align:center}
+.ok{color:#4CAF7D}.err{color:#E05252}.info{color:#C9A550}
+button{background:linear-gradient(135deg,#8A5C20,#C9904A);color:#fff;border:none;border-radius:14px;padding:14px 32px;font-size:1rem;font-weight:800;cursor:pointer;width:100%;max-width:320px}
+button:disabled{background:#333;cursor:not-allowed}
+</style>
+</head>
+<body>
+<h2>🚀 Fitto Deploy</h2>
+<p>點下方按鈕將 Fitto v11<br>部署到 GitHub Pages</p>
+<div class="status info" id="st">準備就緒</div>
+<button id="btn" onclick="deploy()">開始部署</button>
+<script>
+var TOKEN = '${token}';
+var SRC = decodeURIComponent(atob('${btoa(encodeURIComponent(src))}'));
+async function deploy() {
+  var btn = document.getElementById('btn');
+  var st = document.getElementById('st');
+  btn.disabled = true;
   try {
-    var headers = {
-      'Authorization': 'token ' + token,
-      'Accept': 'application/vnd.github.v3+json',
-      'Content-Type': 'application/json'
-    };
-    var apiUrl = 'https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html';
-
-    // Step 1: 取得 SHA
-    var r1 = await fetch(apiUrl, {headers: headers});
+    st.className='status info'; st.textContent='① 取得檔案資訊…';
+    var r1 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',
+      {headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json'}});
     var d1 = await r1.json();
-    if(!d1.sha) throw new Error('無法取得檔案 SHA：' + (d1.message||''));
-    var sha = d1.sha;
-    status.textContent = '② 編碼中…';
-
-    // Step 2: 取得當前 HTML
-    var src = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
-
-    // Step 3: Base64 編碼（使用 btoa + TextEncoder 處理中文）
-    var bytes = new TextEncoder().encode(src);
-    var binary = '';
-    bytes.forEach(function(b){ binary += String.fromCharCode(b); });
+    if(!d1.sha) throw new Error(d1.message||'無法取得 SHA');
+    st.textContent='② 編碼中…';
+    var bytes = new TextEncoder().encode(SRC);
+    var binary=''; bytes.forEach(function(b){binary+=String.fromCharCode(b)});
     var b64 = btoa(binary);
-    status.textContent = '③ 上傳到 GitHub…';
-
-    // Step 4: PUT
-    var r2 = await fetch(apiUrl, {
-      method: 'PUT',
-      headers: headers,
-      body: JSON.stringify({
-        message: 'Deploy Fitto v8 from App',
-        content: b64,
-        sha: sha,
-        branch: 'main'
-      })
+    st.textContent='③ 上傳到 GitHub…';
+    var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
+      method:'PUT',
+      headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
+      body:JSON.stringify({message:'Deploy Fitto v11',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
-    if(d2.commit) {
-      status.style.color = 'var(--green)';
-      status.textContent = '✅ 部署成功！約 30 秒後生效';
-      btn.textContent = '✅ 完成';
-      apiLog('✓ 部署成功: ' + d2.commit.sha.substring(0,7), 'ok');
-      setTimeout(function(){ closeModal('deploy-ov'); btn.disabled=false; btn.textContent='🚀 立即部署'; }, 2000);
+    if(d2.commit){
+      st.className='status ok'; st.textContent='✅ 部署成功！30秒後生效';
+      btn.textContent='✅ 完成';
     } else {
-      throw new Error(d2.message || '部署失敗');
+      throw new Error(d2.message||'部署失敗');
     }
   } catch(e) {
-    status.style.color = 'var(--red)';
-    status.textContent = '❌ ' + e.message.substring(0,60);
-    btn.disabled = false;
-    btn.textContent = '🚀 重試';
-    apiLog('✗ 部署失敗: ' + e.message.substring(0,50), 'err');
+    st.className='status err'; st.textContent='❌ '+e.message.substring(0,60);
+    btn.disabled=false; btn.textContent='重試';
   }
+}
+<\/script>
+</body>
+</html>`;
+
+  // 用 data URI 開新分頁，這個頁面是 https-ready 的獨立工具
+  var encoded = 'data:text/html;charset=utf-8,' + encodeURIComponent(deployPage);
+  status.textContent = '✅ 請在新分頁點「開始部署」';
+  status.style.color = 'var(--green)';
+  btn.disabled = false;
+  btn.textContent = '🚀 開啟部署工具';
+  btn.onclick = function() { window.open(encoded, '_blank'); };
+  window.open(encoded, '_blank');
 }
 
 // ═══ TOKEN COUNTER ═══
@@ -2756,6 +2334,5 @@ document.addEventListener('DOMContentLoaded', function() {
   } catch(e) { console.error('Init error:', e.message); }
 });
 </script>
-
-
-</body></html>
+</body>
+</html>
