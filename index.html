@@ -1639,6 +1639,72 @@ async function fetchTrend(sea) {
   return raw.trim();
 }
 
+function buildWardrobeWeekPlan(occ, sea, reason) {
+  const seaClean = sea.replace(/[🌸☀️🍂❄️]\s*/,'');
+  const tops = wardrobe.filter(i=>TOPS.includes(i.type));
+  const bottoms = wardrobe.filter(i=>BTMS.includes(i.type) && i.type !== '洋裝');
+  const dresses = wardrobe.filter(i=>i.type === '洋裝');
+  const outers = wardrobe.filter(i=>OUTS.includes(i.type));
+  const shoes = wardrobe.filter(i=>i.type === '鞋子');
+  const accessories = wardrobe.filter(i=>i.type === '配件');
+  const days = ['週一','週二','週三','週四','週五'];
+  const notes = [
+    '用衣櫃現有單品穩定開局，降低出錯率',
+    '把色系相近的單品放在一起，更容易穿得整齊',
+    '中段改用不同版型，讓一週看起來不重複',
+    '需要出門久一點時，可優先加外套提升層次',
+    '週五保留最舒服的一套，收尾也能有精神'
+  ];
+
+  function pick(list, index) {
+    if(!list.length) return null;
+    return list[index % list.length];
+  }
+
+  function itemLabel(item) {
+    if(!item) return '';
+    return item.color + item.type + (item.note ? '（' + item.note + '）' : '');
+  }
+
+  const planDays = days.map(function(day, index) {
+    const useDress = dresses.length && (!tops.length || !bottoms.length || index === 2);
+    const top = useDress ? null : pick(tops, index);
+    const bottom = useDress ? null : pick(bottoms, index + 1);
+    const dress = useDress ? pick(dresses, index) : null;
+    const outer = outers.length && (index === 0 || index === 3 || (seaClean.indexOf('秋') !== -1 || seaClean.indexOf('冬') !== -1))
+      ? pick(outers, index)
+      : null;
+    const shoe = pick(shoes, index);
+    const accessory = accessories.length && index % 2 === 1 ? pick(accessories, index) : null;
+    const parts = [];
+
+    if(dress) {
+      parts.push(itemLabel(dress));
+    } else {
+      if(top) parts.push(itemLabel(top));
+      if(bottom) parts.push(itemLabel(bottom));
+    }
+    if(outer) parts.push(itemLabel(outer));
+    if(shoe) parts.push(itemLabel(shoe));
+    if(accessory) parts.push(itemLabel(accessory));
+
+    return {
+      day: day,
+      outfit: parts.filter(Boolean).join('＋'),
+      tip: notes[index]
+    };
+  });
+
+  let note = `這次先依照你衣櫃裡現有單品，為${seaClean}季的${occ}場合排出 5 天穿搭。`;
+  if(reason) note += '\nGemini 暫時沒有成功回傳，所以先提供衣櫃實搭版建議。';
+
+  return {
+    title: '本週衣櫃實搭',
+    days: planDays,
+    overall_note: note
+  };
+}
+
 async function genOutfit(){
   if(wardrobe.length<3){document.getElementById('wfew').classList.add('show');return}
   document.getElementById('wfew').classList.remove('show');
@@ -1687,17 +1753,19 @@ async function genOutfit(){
   }catch(e){
     apiLog('✗ 搭配生成失敗: ' + (e.message||'').substring(0,80), 'err');
     showToast('⚠️ ' + (e.message||'生成失敗').substring(0,40));
-    renderRes({title:'示範：都市工作週',days:[{day:'週一',outfit:'白色襯衫＋深藍褲',tip:'清爽開啟新的一週'},{day:'週二',outfit:'米白上衣＋卡其褲',tip:'暖色系讓氣色更好'},{day:'週三',outfit:'黑色T恤＋牛仔褲',tip:'百搭基本款不出錯'},{day:'週四',outfit:'灰色毛衣＋深藍褲',tip:'週末前輕鬆過渡'},{day:'週五',outfit:'白色上衣＋裙子',tip:'Happy Friday！'}],overall_note:'中性色系為主，適合多種辦公場合。\n（示範模式—請設定 API Key 取得真實建議）'},0,0,occ,sea,true);
+    renderRes(buildWardrobeWeekPlan(occ, sea, e && e.message),0,0,occ,sea,false,'衣櫃排列');
   }finally{btn.classList.remove('loading');btn.disabled=false}
 }
-function renderRes(r,it,ot,occ,sea,isDemo=false){
+function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
   document.getElementById('rtitle').textContent=r.title||'本週搭配';
   const seaClean = sea.replace(/[🌸☀️🍂❄️]\s*/,'');
   document.getElementById('rmeta').textContent=`${seaClean} · ${occ}`;
   // Token badge: show Claude + image cost estimate
   const claudeTok=it+ot;
   const imgCost=localStorage.getItem('fitto_gemini_key')?'Gemini ✓':'未設 Key';
-  document.getElementById('rtok').innerHTML=isDemo
+  document.getElementById('rtok').innerHTML=sourceLabel
+    ? sourceLabel
+    : isDemo
     ? '示範模式'
     : `<span style="display:block">${claudeTok} tok</span><span style="font-size:0.6rem;color:var(--muted)">圖片:${imgCost}</span>`;
   if(!isDemo) addTokenUsage(it, ot, 'gemini_text');
