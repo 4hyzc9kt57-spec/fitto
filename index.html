@@ -1598,28 +1598,61 @@ async function aiScan(){
   const gk = localStorage.getItem('fitto_gemini_key')||'';
   if(!gk){await new Promise(r=>setTimeout(r,800));ind.classList.remove('show');fillScan({type:'上衣',color:'白色',style:'休閒',note:'（示範）'});return}
   try{
-    const raw = await geminiVision('仔細觀察這件衣服，只回JSON不要其他文字：{"type":"上衣/T恤/襯衫/毛衣/外套/夾克/褲子/牛仔褲/裙子/洋裝/鞋子/配件","color":"白色/米白/淺灰/灰色/深灰/黑色/淺藍/深藍/卡其/棕色/紅色/酒紅/粉色/綠色/橄欖綠/花紋/條紋","style":"休閒/正式/商務/運動/韓系/簡約/街頭","note":"品牌或特徵10字內"}\n種類判斷規則：只要材質或外觀明顯是 denim / jeans / 牛仔布，下身一律優先選「牛仔褲」，不要只回「褲子」。\n顏色判斷規則：深灰色或炭灰選deep gray=深灰；淺灰選淺灰；白色只在非常確定時選白色。', scanB64, scanMime);
-    const parsed = normalizeScanResult(parseScanResult(raw));
-    if(parsed.type === '褲子') {
-      parsed.type = await refinePantsType(parsed);
-    }
-    fillScan(parsed);
+    const type = await detectMainGarmentType();
+    const detail = normalizeScanResult(await detectGarmentDetails(type));
+    if(detail.type === '褲子') detail.type = await refinePantsType(detail);
+    fillScan(detail);
   }catch(e){
     apiLog('✗ 衣物辨識失敗，改走文字備援: ' + (e.message||'').substring(0,50), 'err');
     try {
-      const fallbackParsed = normalizeScanResult(await fallbackScanResult());
-      if(fallbackParsed.type === '褲子') {
-        fallbackParsed.type = await refinePantsType(fallbackParsed);
-      }
+      const fallbackType = await detectMainGarmentType(true);
+      const fallbackParsed = normalizeScanResult(await fallbackScanResult(fallbackType));
+      if(fallbackParsed.type === '褲子') fallbackParsed.type = await refinePantsType(fallbackParsed);
       showToast('⚠️ 已改用備援辨識，請再確認一次');
       fillScan(fallbackParsed);
     } catch(e2) {
       apiLog('✗ 備援辨識失敗: ' + (e2.message||'').substring(0,50), 'err');
-      showToast('⚠️ 辨識失敗：' + (e2.message||e.message||'未知錯誤').substring(0,30));
-      fillScan({type:'褲子',color:'深藍',style:'休閒',note:'辨識不穩，請手動確認'});
+      showToast('⚠️ AI 辨識不穩，先帶入可編輯預設');
+      fillScan({type:'褲子',color:'深藍',style:'休閒',note:'AI 未穩定辨識，請確認'});
     }
   }
   finally{ind.classList.remove('show')}
+}
+async function detectMainGarmentType(simpleMode){
+  const prompt = simpleMode
+    ? '請只回答一個最接近的種類，不要回答無法辨識。從這張照片選出畫面中央、面積最大、最清楚的單品種類，只能從這些選：上衣、T恤、襯衫、毛衣、外套、夾克、褲子、牛仔褲、裙子、洋裝、鞋子、配件。若畫面主體是穿在人身上的下身，且看起來像 jeans / denim / 牛仔布、五口袋、撞色車線、手插前口袋的牛仔褲姿勢，優先回答牛仔褲。'
+    : '請只回答一個種類，不要解釋。目標是找出照片裡畫面中央、面積最大、最清楚的主要單品。只能從這些選：上衣、T恤、襯衫、毛衣、外套、夾克、褲子、牛仔褲、裙子、洋裝、鞋子、配件。若主體是穿在人身上的下身，只要看起來像 jeans / denim / 牛仔布、五口袋、撞色車線、手插前口袋的牛仔褲姿勢，就回答牛仔褲，不要回答褲子。';
+  const raw = await geminiVision(prompt, scanB64, scanMime);
+  const result = normalizeScanType(raw);
+  if(!result) throw new Error('主體種類判斷失敗');
+  return result;
+}
+async function detectGarmentDetails(type){
+  const raw = await geminiVision('已知主要單品種類是「' + type + '」。請不要回 JSON，也不要說無法辨識。只用一行回答：種類|顏色|風格|備註。顏色只能是：白色、米白、淺灰、灰色、深灰、黑色、淺藍、深藍、卡其、棕色、紅色、酒紅、粉色、綠色、橄欖綠、花紋/條紋。風格只能是：休閒、正式、商務、運動、韓系、簡約、街頭。備註最多10字。', scanB64, scanMime);
+  return parsePipeScanResult(raw, type);
+}
+function normalizeScanType(raw){
+  const text = String(raw || '').replace(/```/g,'').trim();
+  const allowedTypes = ['上衣','T恤','襯衫','毛衣','外套','夾克','褲子','牛仔褲','裙子','洋裝','鞋子','配件'];
+  for(let i=0;i<allowedTypes.length;i++){
+    if(text.indexOf(allowedTypes[i]) !== -1) return allowedTypes[i];
+  }
+  if(/jeans|denim|牛仔/i.test(text)) return '牛仔褲';
+  if(/pants|trouser|slacks|褲/i.test(text)) return '褲子';
+  return '';
+}
+function parsePipeScanResult(raw, fallbackType){
+  const text = String(raw || '').replace(/```/g,'').trim();
+  if(/無法辨識|看不清|cannot determine|unable to identify/i.test(text)) {
+    throw new Error(text.substring(0,40));
+  }
+  const parts = text.split('|').map(function(part){ return part.trim(); });
+  return {
+    type: parts[0] || fallbackType || '上衣',
+    color: parts[1] || '深藍',
+    style: parts[2] || '休閒',
+    note: parts[3] || ''
+  };
 }
 function parseScanResult(raw){
   const text = String(raw || '').replace(/```json|```/g,'').trim();
@@ -1645,20 +1678,17 @@ function parseScanResult(raw){
   if(Object.keys(result).length) return result;
   throw new Error(text.substring(0,40) || '無法辨識');
 }
-async function fallbackScanResult(){
+async function fallbackScanResult(fallbackType){
   const raw = await geminiVision('請不要回答無法辨識，也不要回 JSON。請從這張照片猜最接近的衣物資訊，並且只用一行格式回答：種類|顏色|風格|備註。種類只能是：上衣、T恤、襯衫、毛衣、外套、夾克、褲子、牛仔褲、裙子、洋裝、鞋子、配件。若是 denim / jeans / 牛仔布下身，種類必須回答牛仔褲。', scanB64, scanMime);
   const text = String(raw || '').replace(/```/g,'').trim();
-  const parts = text.split('|').map(function(part){ return part.trim(); });
-  return {
-    type: parts[0] || '褲子',
-    color: parts[1] || '深藍',
-    style: parts[2] || '休閒',
-    note: parts[3] || '請手動確認'
-  };
+  if(/無法辨識|看不清|cannot determine|unable to identify/i.test(text)) {
+    throw new Error(text.substring(0,40));
+  }
+  return parsePipeScanResult(text, fallbackType || '上衣');
 }
 async function refinePantsType(parsed){
   try {
-    const answer = await geminiVision('請只回答一個詞：「牛仔褲」或「褲子」。判斷標準：如果這件下身單品明顯是丹寧材質、jeans、牛仔布、五口袋牛仔褲版型，就回答「牛仔褲」；否則回答「褲子」。不要解釋。', scanB64, scanMime);
+    const answer = await geminiVision('請只回答一個詞：「牛仔褲」或「褲子」。這是一張以下身為主的穿搭照。判斷標準：如果看得到丹寧材質、藍色牛仔刷色、五口袋、撞色車線、鉚釘、手插前口袋的牛仔褲姿勢，或整體版型像 jeans / denim，就回答「牛仔褲」；只有在非常明確不是牛仔布長褲時才回答「褲子」。不要解釋。', scanB64, scanMime);
     const normalized = String(answer || '').replace(/```json|```/g,'').trim();
     if(normalized.indexOf('牛仔褲') !== -1) {
       apiLog('✓ 二次判斷：褲子 → 牛仔褲', 'ok');
@@ -1676,10 +1706,12 @@ function normalizeScanResult(r){
   r = r || {};
   const rawType = String(r.type || '').trim();
   const rawNote = String(r.note || '').trim();
-  const clue = (rawType + ' ' + rawNote).toLowerCase();
+  const rawColor = String(r.color || '').trim();
+  const clue = (rawType + ' ' + rawNote + ' ' + rawColor).toLowerCase();
 
   let type = rawType;
   if(/jeans|denim|牛仔/.test(clue)) type = '牛仔褲';
+  else if(/淺藍|深藍/.test(rawColor) && /褲/.test(rawType + rawNote)) type = '牛仔褲';
   else if(/t-?shirt|tee|短袖t|t恤/.test(clue)) type = 'T恤';
   else if(/shirt|襯衫/.test(clue)) type = '襯衫';
   else if(/sweater|knit|毛衣|針織/.test(clue)) type = '毛衣';
