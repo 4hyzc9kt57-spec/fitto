@@ -1118,14 +1118,42 @@ function updateCoinUI() {
   if(wm) wm.textContent = wardrobeLimit;
   var av = document.getElementById('wb-avatar');
   if(av) {
-    var avatarPhotoMap = {'☀️':'sunny','🌙':'korean','⚡':'rugged'};
-    var photoKey = avatarPhotoMap[userAvatar];
-    if(photoKey && AVATAR_IMGS[photoKey]) {
-      av.innerHTML = '<img src="' + AVATAR_IMGS[photoKey] + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+    var avatarRef = getSelectedAvatarRefData();
+    if(avatarRef && avatarRef.src) {
+      av.innerHTML = '<img src="' + avatarRef.src + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
     } else {
       av.innerHTML = '<span style="font-size:1.6rem">' + userAvatar + '</span>';
     }
   }
+}
+function getAvatarButtonIdByEmoji(emoji) {
+  var map = {'☀️':'btn-sun','🌙':'btn-kr','⚡':'btn-rg','🌸':'btn-kg','🌺':'btn-jp','👑':'btn-qu','⭐':'btn-st'};
+  return map[emoji] || '';
+}
+function getSelectedAvatarRefData() {
+  var btnId = getAvatarButtonIdByEmoji(userAvatar);
+  if(btnId) {
+    var btn = document.getElementById(btnId);
+    var card = btn ? btn.closest('.shop-item') : null;
+    var img = card ? card.querySelector('img') : null;
+    if(img && img.src && img.src.indexOf('data:image') === 0) {
+      return {
+        src: img.src,
+        b64: img.src.split(',')[1] || '',
+        mimeType: (img.src.match(/^data:([^;]+);base64,/) || [])[1] || 'image/jpeg'
+      };
+    }
+  }
+  var avatarPhotoMap = {'☀️':'sunny','🌙':'korean','⚡':'rugged'};
+  var photoKey = avatarPhotoMap[userAvatar];
+  if(photoKey && AVATAR_IMGS[photoKey]) {
+    return {
+      src: AVATAR_IMGS[photoKey],
+      b64: AVATAR_IMGS[photoKey].split(',')[1] || '',
+      mimeType: (AVATAR_IMGS[photoKey].match(/^data:([^;]+);base64,/) || [])[1] || 'image/jpeg'
+    };
+  }
+  return null;
 }
 
 function spendCoin(amt, reason) {
@@ -2215,47 +2243,33 @@ async function genImg(idx, outfit, occ, sea) {
     apiLog('→ 生圖: ' + imgPrompt.substring(0, 60) + '…', 'prompt');
     apiLog('  頭像:' + userAvatar + ' 服裝:' + outfit.substring(0,20), 'info');
 
-    // 頭像 reference
-    const avatarPhotoMap = {'☀️':'sunny','🌙':'korean','⚡':'rugged'};
-    const photoKey = avatarPhotoMap[userAvatar];
-    const avatarRefB64 = photoKey && AVATAR_IMGS[photoKey] ? AVATAR_IMGS[photoKey].split(',')[1] : null;
+    // 頭像 reference：直接使用目前選中的商店頭像圖
+    const avatarRef = getSelectedAvatarRefData();
+    const avatarRefB64 = avatarRef && avatarRef.b64 ? avatarRef.b64 : null;
+    const avatarRefMime = avatarRef && avatarRef.mimeType ? avatarRef.mimeType : 'image/jpeg';
     if(!avatarRefB64) throw new Error('缺少固定人物 reference，請先選擇可用頭像');
 
-    // 衣物 reference：從衣櫃找有照片的單品
+    // 衣物改用文字描述，優先固定人物並提升速度
     const outfitRefs = findOutfitRefs(outfit);
-    const hasClothRef = outfitRefs.length > 0;
+    const hasClothRef = false;
 
     // 組合 requestParts
     let requestParts = [];
     let refNote = '';
 
     if(avatarRefB64) {
-      requestParts.push({inlineData:{mimeType:'image/jpeg', data:avatarRefB64}});
+      requestParts.push({inlineData:{mimeType:avatarRefMime, data:avatarRefB64}});
       refNote += '人物ref ';
     }
-    outfitRefs.slice(0,1).forEach(function(item) {
-      // thumb 是 data:image/jpeg;base64,xxxx 格式
-      const b64 = item.thumb.split(',')[1];
-      if(b64) {
-        requestParts.push({inlineData:{mimeType:'image/jpeg', data:b64}});
-        refNote += '衣物ref(' + item.color + item.type + ') ';
-      }
-    });
 
-    // 組合 prompt：人物 reference 必帶，衣物只帶 1 張以平衡速度
-    let finalPrompt;
-    if(hasClothRef) {
-      finalPrompt = 'Image 1 is the fixed person reference. Keep the exact same face, hairstyle, body identity, and overall appearance across all generations. Image 2 is the clothing reference. The final image must keep the same person and wear the referenced outfit. ' + imgPrompt;
-    } else {
-      finalPrompt = 'Image 1 is the fixed person reference. Keep the exact same face, hairstyle, body identity, and overall appearance across all generations. ' + imgPrompt;
-      apiLog('  衣物ref: 無，改用文字描述', 'info');
-    }
+    // 組合 prompt：只鎖人物，衣物全部用文字，避免人物跑掉並加快速度
+    let finalPrompt = 'Image 1 is the fixed person reference. Keep the exact same face, hairstyle, body identity, and overall appearance across all generations. Do not change the person. Only change the clothing according to the outfit description. ' + imgPrompt;
+    apiLog('  衣物ref: 關閉，改用文字描述', 'info');
 
     requestParts.push({text: finalPrompt});
 
     if(refNote) apiLog('  refs: ' + refNote.trim(), 'info');
     if(avatarRefB64) apiLog('  人物ref: 固定頭像', 'ok');
-    if(hasClothRef) apiLog('  衣物ref 1件: ' + outfitRefs.slice(0,1).map(function(i){return i.color+i.type}).join(', '), 'ok');
 
     const imageResult = await requestGeminiImage(requestParts, key);
     addTokenUsage(0,0,'gemini_img');
@@ -2274,9 +2288,7 @@ async function genImg(idx, outfit, occ, sea) {
 
     const escapedSrc = imgSrc;
     const debugId = 'dbg-'+idx;
-    const refBadgeHtml = hasClothRef
-      ? `<div style="font-size:.58rem;color:var(--green);font-weight:700;margin-bottom:4px">✓ 使用衣物照片 × ${outfitRefs.length}</div>`
-      : `<div style="font-size:.58rem;color:var(--muted);margin-bottom:4px">— 無衣物照片（文字描述）</div>`;
+    const refBadgeHtml = `<div style="font-size:.58rem;color:var(--gold);font-weight:700;margin-bottom:4px">✓ 固定人物 reference</div>`;
     box.innerHTML = `<div class="outfit-img-wrap">
       ${refBadgeHtml}
       <img src="${imgSrc}" class="outfit-img" alt="穿搭示意圖" onclick="openImgFull(this.src)" style="cursor:zoom-in">
