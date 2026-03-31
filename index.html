@@ -1077,7 +1077,7 @@ body{background:var(--bg);color:var(--ink);}
 // ═══ LOCK ═══
 const APP_PW = 'fitto2026';
 function checkPw() {
-  const pw = document.getElementById('lock-pw').value;
+  const pw = document.getElementById('lock-pw').value.trim();
   const err = document.getElementById('lock-err');
   if(pw === APP_PW) {
     sessionStorage.setItem('fk','1');
@@ -1514,7 +1514,8 @@ async function requestGemini(parts, maxTokens, options) {
 
 async function geminiText(prompt, maxTokens, options) {
   var preview = String(prompt || '').replace(/[
-]/g,' ').substring(0, 60);
+
+]/g,' ').substring(0, 60);
   apiLog('? ????: ' + preview + '?', 'prompt');
   return requestGemini([{text:prompt}], maxTokens || 800, options);
 }
