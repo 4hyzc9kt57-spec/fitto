@@ -1963,8 +1963,11 @@ async function requestWeekPlanJson(prompt) {
   }
   throw lastError || new Error('Gemini 回應不完整');
 }
-async function requestSingleDayPlan(basePrompt, dayLabel) {
-  const prompt = `${basePrompt}\n現在只生成${dayLabel}這一天。\n請不要回 JSON、不要 markdown、不要前言、不要解釋。\n只用這一行格式回覆：搭配描述|建議\n規則：1. 左邊是 outfit，右邊是 tip。2. outfit 請控制在 18 字內。3. tip 請控制在 16 字內。4. 不要輸出 day 欄位。`;
+async function requestSingleDayPlan(basePrompt, dayLabel, usedOutfits) {
+  const avoidText = usedOutfits && usedOutfits.length
+    ? `\n前面已使用的搭配：${usedOutfits.join('；')}\n今天必須和前面不同，至少更換主要上衣、下身或外套中的一項，不要重複相同組合。`
+    : '';
+  const prompt = `${basePrompt}${avoidText}\n現在只生成${dayLabel}這一天。\n請不要回 JSON、不要 markdown、不要前言、不要解釋。\n只用這一行格式回覆：搭配描述|建議\n規則：1. 左邊是 outfit，右邊是 tip。2. outfit 請控制在 18 字內。3. tip 請控制在 16 字內。4. 不要輸出 day 欄位。`;
   const raw = await geminiText(prompt, 220);
   const parsed = parseSingleDayFallback(raw, dayLabel);
   return {
@@ -2020,7 +2023,8 @@ async function requestWeekPlanByDays(basePrompt) {
   for(let i = 0; i < dayLabels.length; i++) {
     const dayLabel = dayLabels[i];
     apiLog('→ 分日生成: ' + dayLabel, 'info');
-    days.push(await requestSingleDayPlan(basePrompt, dayLabel));
+    const usedOutfits = days.map(function(item){ return item.outfit; }).filter(Boolean);
+    days.push(await requestSingleDayPlan(basePrompt, dayLabel, usedOutfits));
   }
   return {
     title: '本週搭配',
@@ -2205,8 +2209,8 @@ async function genImg(idx, outfit, occ, sea) {
     const seaEn = seasonMap[seaClean] || seaClean;
     const occEn = occ;
 
-    // 核心提示詞：聚焦服裝，人物由頭像決定
-    const imgPrompt = `Fashion lookbook photo. Person: ${avatarDesc}. Outfit: ${outfit}. Season: ${seaEn}, occasion: ${occEn}. Natural standing pose, neutral background, soft natural lighting, full outfit visible, high quality fashion photo.`;
+    // 核心提示詞：縮短 prompt 以提升速度
+    const imgPrompt = `Fashion lookbook photo, full outfit visible. Outfit: ${outfit}. Season: ${seaEn}. Occasion: ${occEn}. Neutral background, soft light, realistic.`;
 
     apiLog('→ 生圖: ' + imgPrompt.substring(0, 60) + '…', 'prompt');
     apiLog('  頭像:' + userAvatar + ' 服裝:' + outfit.substring(0,20), 'info');
@@ -2224,11 +2228,7 @@ async function genImg(idx, outfit, occ, sea) {
     let requestParts = [];
     let refNote = '';
 
-    if(avatarRefB64) {
-      requestParts.push({inlineData:{mimeType:'image/jpeg', data:avatarRefB64}});
-      refNote += '人物ref ';
-    }
-    outfitRefs.forEach(function(item, i) {
+    outfitRefs.slice(0,1).forEach(function(item) {
       // thumb 是 data:image/jpeg;base64,xxxx 格式
       const b64 = item.thumb.split(',')[1];
       if(b64) {
@@ -2237,20 +2237,16 @@ async function genImg(idx, outfit, occ, sea) {
       }
     });
 
-    // 組合 prompt，有衣物 ref 時加入指示
+    // 組合 prompt，預設只帶 1 張衣物 ref 以加快速度
     let finalPrompt = imgPrompt;
-    if(avatarRefB64 && hasClothRef) {
-      finalPrompt = 'Image 1 is the person reference (use for face/appearance). Images 2+ are the actual clothing items to wear. ' + imgPrompt + ' The person must wear the exact clothing shown in the reference images.';
-    } else if(avatarRefB64) {
-      finalPrompt = 'Use the person in Image 1 as reference for face and appearance. ' + imgPrompt;
-    } else if(hasClothRef) {
-      finalPrompt = 'The person must wear the exact clothing items shown in the reference images. ' + imgPrompt;
+    if(hasClothRef) {
+      finalPrompt = 'Use the clothing item in Image 1 as the outfit reference. ' + imgPrompt;
     }
 
     requestParts.push({text: finalPrompt});
 
     if(refNote) apiLog('  refs: ' + refNote.trim(), 'info');
-    if(hasClothRef) apiLog('  衣物ref ' + outfitRefs.length + '件: ' + outfitRefs.map(function(i){return i.color+i.type}).join(', '), 'ok');
+    if(hasClothRef) apiLog('  衣物ref 1件: ' + outfitRefs.slice(0,1).map(function(i){return i.color+i.type}).join(', '), 'ok');
 
     const imageResult = await requestGeminiImage(requestParts, key);
     addTokenUsage(0,0,'gemini_img');
