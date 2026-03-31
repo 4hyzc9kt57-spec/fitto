@@ -1963,6 +1963,32 @@ async function requestWeekPlanJson(prompt) {
   }
   throw lastError || new Error('Gemini 回應不完整');
 }
+async function requestSingleDayPlan(basePrompt, dayLabel) {
+  const prompt = `${basePrompt}\n現在只生成${dayLabel}這一天。請只輸出合法 JSON 物件，不要 markdown，不要前言，不要解釋：{"day":"${dayLabel}","outfit":"搭配描述","tip":"建議"}\n規則：outfit 請控制在 18 字內，tip 請控制在 16 字內。`;
+  const raw = await geminiJson(prompt, 450);
+  const jsonStr = extractJsonObject(raw);
+  if(!jsonStr) throw new Error(`${dayLabel} 找不到完整 JSON 結尾：` + String(raw || '').substring(0,80));
+  const parsed = JSON.parse(jsonStr);
+  return {
+    day: parsed.day || dayLabel,
+    outfit: parsed.outfit || '請重新生成',
+    tip: parsed.tip || '請依衣櫃現有單品微調'
+  };
+}
+async function requestWeekPlanByDays(basePrompt) {
+  const dayLabels = ['週一','週二','週三','週四','週五'];
+  const days = [];
+  for(let i = 0; i < dayLabels.length; i++) {
+    const dayLabel = dayLabels[i];
+    apiLog('→ 分日生成: ' + dayLabel, 'info');
+    days.push(await requestSingleDayPlan(basePrompt, dayLabel));
+  }
+  return {
+    title: '本週搭配',
+    days: days,
+    overall_note: '已依衣櫃現有單品逐日整理。'
+  };
+}
 
 async function genOutfit(){
   if(wardrobe.length<3){document.getElementById('wfew').classList.add('show');return}
@@ -1997,11 +2023,10 @@ async function genOutfit(){
   const trendSection = trendContext
     ? `\n\n【當季流行趨勢參考】\n${trendContext}\n以上趨勢若衣櫃內有對應單品請優先選用；若無，可在tip中建議補充哪類單品。`
     : '';
-  const prompt=`你是專業穿搭顧問。衣櫃清單：${wj}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合生成週一到週五共5天搭配。${trendSection}\n請只輸出最小合法 JSON 陣列，不要 markdown，不要前言，不要解釋：[{"day":"週一","outfit":"搭配描述","tip":"建議"},{"day":"週二","outfit":"搭配描述","tip":"建議"},{"day":"週三","outfit":"搭配描述","tip":"建議"},{"day":"週四","outfit":"搭配描述","tip":"建議"},{"day":"週五","outfit":"搭配描述","tip":"建議"}]\n規則：1. 必須剛好 5 筆。2. outfit 請控制在 18 字內。3. tip 請控制在 16 字內。4. 不要輸出 title、overall_note、說明文字。`;
+  const prompt=`你是專業穿搭顧問。衣櫃清單：${wj}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合規劃工作日搭配。${trendSection}\n請優先挑選衣櫃裡明確存在的單品名稱與顏色，不要虛構新品。回覆要精簡。`;
   try{
-    const parsed = await requestWeekPlanJson(prompt);
-    parsed.title = '本週搭配';
-    parsed.overall_note = trendContext ? '已結合當季潮流與衣櫃現有單品整理。' : '已依衣櫃現有單品整理。';
+    const parsed = await requestWeekPlanByDays(prompt);
+    parsed.overall_note = trendContext ? '已結合當季潮流與衣櫃現有單品逐日整理。' : '已依衣櫃現有單品逐日整理。';
     renderRes(parsed, 0, 0, occ, sea);
   }catch(e){
     apiLog('✗ 搭配生成失敗: ' + (e.message||'').substring(0,80), 'err');
