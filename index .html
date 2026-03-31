@@ -1,0 +1,2339 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Fitto v12 · AI 智能穿搭</title>
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
+:root{
+  --bg:#0C1810;
+  --surface:#142318;
+  --surface2:#1A2E20;
+  --surface3:#1F3526;
+  --gold:#C9A550;
+  --gold2:#E2BC6A;
+  --ink:#F0F5F1;
+  --ink2:#B8CFC0;
+  --muted:#6B8A76;
+  --border:#223328;
+  --border2:#2A4033;
+  --green:#3DAA6A;
+  --red:#E05252;
+  --tag-green-bg:#0F2E1A; --tag-green:#3DAA6A;
+  --tag-gold-bg:#2A2010;  --tag-gold:#C9A550;
+  --tag-blue-bg:#0F1E2E;  --tag-blue:#5B9BD5;
+  --r:14px; --r-sm:10px;
+  --sh:0 8px 32px rgba(0,0,0,0.5);
+}
+*{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+body{background:var(--bg);color:var(--ink);font-family:'Noto Sans TC','Inter',sans-serif;min-height:100vh;padding-bottom:72px;font-size:15px}
+
+/* ── HEADER ── */
+header{
+  background:var(--bg);
+  padding:14px 18px;
+  display:flex;justify-content:space-between;align-items:center;
+  position:sticky;top:0;z-index:100;
+  border-bottom:1px solid var(--border);
+}
+.logo{
+  font-family:'Inter',sans-serif;font-weight:800;font-size:1.25rem;
+  color:var(--gold);letter-spacing:-0.01em;
+  display:flex;align-items:center;gap:6px;
+}
+.logo-badge{
+  background:var(--gold);color:#0C1810;
+  font-size:0.55rem;font-weight:800;padding:2px 5px;border-radius:4px;
+  letter-spacing:0.05em;
+}
+.api-pill{
+  display:flex;align-items:center;gap:6px;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:20px;padding:6px 12px;cursor:pointer;
+  transition:border-color .2s;
+}
+.api-pill:hover{border-color:var(--gold)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--muted)}
+.dot.on{background:var(--green)}
+.api-pill span{font-size:0.68rem;color:var(--ink2);font-weight:600}
+
+/* ── BOTTOM NAV ── */
+.bottom-nav{
+  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  background:var(--surface);border-top:1px solid var(--border);
+  display:flex;padding:6px 0 max(6px,env(safe-area-inset-bottom));
+}
+.nb{flex:1;border:none;background:none;display:flex;flex-direction:column;align-items:center;gap:2px;padding:6px 0;cursor:pointer;transition:opacity .2s}
+.nb .ni{font-size:1.25rem;line-height:1}
+.nb .nl{font-size:0.6rem;color:var(--muted);font-weight:600;letter-spacing:0.02em}
+.nb.active .nl{color:var(--gold)}
+.nb.active .ni{filter:drop-shadow(0 0 4px rgba(201,165,80,0.6))}
+
+/* ── VIEWS ── */
+.view{display:none;padding:14px 16px;max-width:680px;margin:0 auto}
+.view.active{display:block;animation:fadeUp .2s ease}
+@keyframes fadeUp{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+
+/* ── PAGE HEADER ── */
+.phd{margin-bottom:16px}
+.phd h1{font-family:'Inter',sans-serif;font-weight:800;font-size:1.35rem;color:var(--ink);letter-spacing:-0.02em}
+.phd p{font-size:0.72rem;color:var(--muted);margin-top:2px}
+
+/* ── SECTION LABEL ── */
+.sec-label{
+  font-size:0.62rem;font-weight:700;color:var(--gold);
+  letter-spacing:0.12em;text-transform:uppercase;
+  margin-bottom:8px;display:flex;align-items:center;gap:6px;
+}
+.sec-label::after{content:'';flex:1;height:1px;background:var(--border)}
+
+/* ── STATS ROW ── */
+.stats-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:16px}
+.sc{
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:var(--r-sm);padding:10px 6px;text-align:center;
+}
+.sn{font-family:'Inter',sans-serif;font-weight:800;font-size:1.5rem;color:var(--gold);line-height:1}
+.sl{font-size:0.58rem;color:var(--muted);font-weight:600;margin-top:3px;letter-spacing:0.03em}
+
+/* ── PHOTO BTNS ── */
+.photo-btns{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px}
+.pb{
+  background:var(--surface2);border:1.5px dashed var(--border2);
+  border-radius:var(--r);padding:18px 12px;text-align:center;cursor:pointer;
+  transition:all .2s;
+}
+.pb:hover,.pb:active{border-color:var(--gold);background:var(--surface3)}
+.pb .pbi{font-size:1.6rem;display:block;margin-bottom:5px}
+.pb p{font-size:0.74rem;font-weight:700;color:var(--ink)}
+.pb small{font-size:0.6rem;color:var(--muted)}
+
+/* ── CARD ── */
+.card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);padding:14px;margin-bottom:12px;
+}
+
+/* ── FORM ── */
+.fr{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:10px}
+.fg label{display:block;font-size:0.6rem;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.06em}
+.fg select,.fg input{
+  width:100%;padding:9px 11px;
+  background:var(--bg);border:1px solid var(--border2);
+  border-radius:var(--r-sm);font-size:0.8rem;color:var(--ink);outline:none;
+  transition:border-color .2s;font-family:'Noto Sans TC',sans-serif;
+  -webkit-appearance:none;appearance:none;
+}
+.fg select:focus,.fg input:focus{border-color:var(--gold)}
+.fg input::placeholder{color:var(--muted)}
+
+/* ── BUTTONS ── */
+.btn-p{
+  width:100%;padding:12px;
+  background:var(--gold);color:#0C1810;
+  border:none;border-radius:var(--r-sm);
+  font-family:'Inter',sans-serif;font-size:0.88rem;font-weight:800;
+  cursor:pointer;transition:opacity .15s,transform .1s;letter-spacing:0.01em;
+}
+.btn-p:hover{opacity:.9}.btn-p:active{transform:scale(.98)}.btn-p:disabled{background:var(--surface3);color:var(--muted);cursor:not-allowed}
+
+.btn-ghost{
+  width:100%;padding:10px;
+  background:transparent;color:var(--ink2);
+  border:1px solid var(--border2);border-radius:var(--r-sm);
+  font-size:0.82rem;font-weight:600;cursor:pointer;transition:all .2s;
+}
+.btn-ghost:hover{border-color:var(--gold);color:var(--gold)}
+
+/* ── CLOTHES GRID ── */
+.clothes-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));gap:10px}
+.cc{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r);overflow:hidden;position:relative;
+  transition:border-color .2s,transform .2s;
+}
+.cc:hover{border-color:var(--border2);transform:translateY(-2px)}
+.ci{height:90px;display:flex;align-items:center;justify-content:center;font-size:2rem;overflow:hidden;position:relative}
+.ci img{width:100%;height:100%;object-fit:cover}
+.ci-overlay{position:absolute;inset:0;background:linear-gradient(to top,rgba(20,35,24,.7) 0%,transparent 50%)}
+.cb{padding:10px}
+.ctype{font-size:0.56rem;color:var(--muted);font-weight:700;text-transform:uppercase;letter-spacing:0.08em;margin-bottom:3px}
+.cname{font-weight:700;font-size:0.84rem;color:var(--ink)}
+.ctags{display:flex;gap:4px;flex-wrap:wrap;margin-top:5px}
+.ctag{font-size:0.55rem;padding:2px 7px;border-radius:4px;font-weight:700;letter-spacing:0.03em}
+.t-green{background:var(--tag-green-bg);color:var(--tag-green)}
+.t-gold{background:var(--tag-gold-bg);color:var(--tag-gold)}
+.t-blue{background:var(--tag-blue-bg);color:var(--tag-blue)}
+.t-muted{background:var(--surface3);color:var(--ink2)}
+
+.btn-del-c,.btn-edit-c{
+  position:absolute;top:6px;width:24px;height:24px;border-radius:50%;
+  border:none;font-size:0.7rem;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  opacity:0;transition:opacity .2s;
+  background:rgba(12,24,16,.8);backdrop-filter:blur(4px);
+}
+.btn-del-c{right:6px;color:var(--red)}
+.btn-edit-c{left:6px;color:var(--gold)}
+.cc:hover .btn-del-c,.cc:hover .btn-edit-c{opacity:1}
+
+/* ── EMPTY ── */
+.empty{text-align:center;padding:48px 20px;grid-column:1/-1}
+.empty .ei{font-size:3rem;margin-bottom:10px;opacity:.5}
+.empty p{font-size:0.8rem;line-height:1.8;color:var(--muted)}
+
+/* ── STYLING VIEW ── */
+.ctrl-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:12px}
+.ctrl-sel{
+  flex:1;min-width:110px;padding:9px 11px;
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:var(--r-sm);font-size:0.76rem;color:var(--ink);
+  outline:none;cursor:pointer;font-family:'Noto Sans TC',sans-serif;
+  -webkit-appearance:none;appearance:none;
+}
+.btn-gen{
+  width:100%;padding:14px;
+  background:var(--gold);color:#0C1810;
+  border:none;border-radius:var(--r-sm);
+  font-family:'Inter',sans-serif;font-size:0.95rem;font-weight:800;
+  cursor:pointer;transition:opacity .15s;
+  display:flex;align-items:center;justify-content:center;gap:8px;
+  margin-bottom:12px;letter-spacing:0.02em;
+}
+.btn-gen:hover{opacity:.9}.btn-gen:disabled{background:var(--surface3);color:var(--muted);cursor:not-allowed}
+.spinner{width:15px;height:15px;border:2px solid rgba(12,24,16,.3);border-top-color:#0C1810;border-radius:50%;animation:spin .7s linear infinite;display:none}
+.btn-gen.loading .spinner{display:block}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* ── RESULT CARD ── */
+.res-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;display:none}
+.res-card.show{display:block;animation:fadeUp .3s ease}
+.res-hd{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:12px;padding-bottom:10px;border-bottom:1px solid var(--border)}
+.res-hd h2{font-family:'Inter',sans-serif;font-weight:800;font-size:1rem;color:var(--ink)}
+.res-hd small{color:var(--muted);font-size:0.62rem;display:block;margin-top:3px}
+.tbadge{text-align:right}
+.tbadge .tv{font-family:'Inter',sans-serif;font-weight:800;color:var(--gold);font-size:0.9rem}
+.tbadge small{font-size:0.55rem;color:var(--muted)}
+
+.week-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:none}
+.week-scroll::-webkit-scrollbar{display:none}
+.dc{
+  flex:0 0 120px;
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:var(--r-sm);padding:10px;
+}
+.dn{font-family:'Inter',sans-serif;font-weight:800;font-size:0.65rem;color:var(--gold);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.08em}
+.do{font-size:0.75rem;line-height:1.5;font-weight:600;color:var(--ink)}
+.dt{font-size:0.62rem;color:var(--muted);margin-top:5px;line-height:1.4;padding-top:5px;border-top:1px solid var(--border)}
+
+.onote{
+  background:var(--surface2);border:1px solid var(--border2);border-left:3px solid var(--gold);
+  border-radius:var(--r-sm);padding:12px 14px;
+  font-size:0.78rem;line-height:1.7;color:var(--ink2);margin-bottom:12px;
+}
+
+.btn-save{
+  width:100%;padding:11px;
+  background:transparent;color:var(--green);
+  border:1px solid var(--green);border-radius:var(--r-sm);
+  font-size:0.82rem;font-weight:700;cursor:pointer;transition:all .2s;
+}
+.btn-save:hover{background:var(--green);color:#0C1810}
+
+/* ── SAVED VIEW ── */
+.si{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:10px;border-left:3px solid var(--gold)}
+.si-hd{display:flex;justify-content:space-between;align-items:center;margin-bottom:6px}
+.si-hd h3{font-family:'Inter',sans-serif;font-weight:800;font-size:0.9rem}
+.si-meta{font-size:0.62rem;color:var(--muted);margin-bottom:8px}
+.si-prev{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}
+.si-prev::-webkit-scrollbar{display:none}
+.sp{flex:0 0 85px;background:var(--surface2);border:1px solid var(--border);border-radius:8px;padding:7px}
+.spd{font-size:0.55rem;font-weight:800;color:var(--gold);margin-bottom:2px;letter-spacing:0.05em}
+.spo{font-size:0.62rem;line-height:1.4;color:var(--ink2)}
+.btn-dls{background:transparent;color:var(--muted);border:1px solid var(--border2);border-radius:6px;padding:4px 9px;font-size:0.65rem;font-weight:700;cursor:pointer;transition:all .2s}
+.btn-dls:hover{border-color:var(--red);color:var(--red)}
+
+/* ── CATALOG ── */
+.cat-up{
+  background:var(--surface);border:2px dashed var(--border2);
+  border-radius:var(--r);padding:36px 20px;text-align:center;
+  cursor:pointer;transition:all .2s;margin-bottom:12px;
+}
+.cat-up:hover{border-color:var(--gold);background:var(--surface2)}
+.cat-up .cui{font-size:2.5rem;margin-bottom:8px;opacity:.7}
+.cat-up h3{font-family:'Inter',sans-serif;font-weight:800;font-size:0.95rem;color:var(--ink);margin-bottom:4px}
+.cat-up p{font-size:0.72rem;color:var(--muted)}
+.cat-res{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;display:none}
+.cat-res.show{display:block;animation:fadeUp .3s ease}
+.cat-res h3{font-family:'Inter',sans-serif;font-weight:800;margin-bottom:10px;font-size:0.95rem}
+.cit{display:flex;justify-content:space-between;align-items:center;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:8px}
+.cit-info strong{font-size:0.84rem;display:block;margin-bottom:2px;color:var(--ink)}
+.cit-info span{font-size:0.68rem;color:var(--muted)}
+.btn-ca{background:var(--gold);color:#0C1810;border:none;border-radius:6px;padding:6px 12px;font-size:0.72rem;font-weight:800;cursor:pointer;transition:all .2s;white-space:nowrap}
+.btn-ca:hover{opacity:.85}.btn-ca.added{background:var(--green);color:#0C1810}
+
+/* ── WARN ── */
+.warn{background:var(--tag-gold-bg);border:1px solid var(--gold);border-radius:var(--r-sm);padding:10px 14px;font-size:0.74rem;color:var(--gold);margin-bottom:12px;display:none}
+.warn.show{display:block}
+
+/* ── MODAL ── */
+.overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;align-items:flex-end;justify-content:center;backdrop-filter:blur(2px)}
+.overlay.show{display:flex;animation:fadeIn .2s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.modal{
+  background:var(--surface);border-top:1px solid var(--border2);
+  border-radius:18px 18px 0 0;padding:20px 18px 32px;
+  width:100%;max-width:480px;max-height:90vh;overflow-y:auto;
+  animation:slideUp .25s ease;
+}
+@keyframes slideUp{from{transform:translateY(30px)}to{transform:translateY(0)}}
+.mhandle{width:36px;height:4px;border-radius:2px;background:var(--border2);margin:0 auto 18px}
+.mtitle{font-family:'Inter',sans-serif;font-weight:800;font-size:1rem;color:var(--ink);margin-bottom:14px}
+
+.pbox{
+  width:100%;height:180px;background:var(--bg);
+  border-radius:var(--r-sm);overflow:hidden;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:12px;border:1px solid var(--border);
+}
+.pbox img{width:100%;height:100%;object-fit:contain}
+.ph{text-align:center;color:var(--muted)}.ph span{font-size:2rem;display:block;margin-bottom:4px;opacity:.5}.ph p{font-size:0.7rem}
+.scan-btns2{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+
+.scanning{display:none;text-align:center;padding:14px;font-size:0.75rem;color:var(--gold);font-weight:600}
+.scanning.show{display:block}
+.dw span{display:inline-block;width:6px;height:6px;background:var(--gold);border-radius:50%;margin:0 3px;animation:bounce 1s infinite}
+.dw span:nth-child(2){animation-delay:.2s}.dw span:nth-child(3){animation-delay:.4s}
+@keyframes bounce{0%,100%{transform:translateY(0)}50%{transform:translateY(-6px)}}
+.sr{display:none}.sr.show{display:block;animation:fadeUp .3s ease}
+.sr-lbl{font-size:0.62rem;font-weight:700;color:var(--green);letter-spacing:0.08em;text-transform:uppercase;margin-bottom:8px}
+
+.api-inp{
+  width:100%;padding:10px 13px;background:var(--bg);
+  border:1px solid var(--border2);border-radius:var(--r-sm);
+  font-size:0.83rem;color:var(--ink);outline:none;margin-bottom:9px;
+  transition:border-color .2s;font-family:'Noto Sans TC',sans-serif;
+}
+.api-inp:focus{border-color:var(--gold)}
+.api-inp::placeholder{color:var(--muted)}
+.api-hint{font-size:0.67rem;color:var(--muted);margin-bottom:14px;line-height:1.6}
+
+@media(min-width:600px){
+  .view{padding:20px 24px}
+  header{padding:14px 24px}
+  .clothes-grid{grid-template-columns:repeat(auto-fill,minmax(155px,1fr))}
+}
+
+/* ── CATALOG TABS ── */
+.cat-tab{
+  flex:1;padding:9px;border:1px solid var(--border2);background:var(--surface);
+  border-radius:var(--r-sm);font-size:0.75rem;font-weight:700;cursor:pointer;
+  color:var(--muted);transition:all .2s;font-family:'Noto Sans TC',sans-serif;
+}
+.cat-tab.active{background:var(--gold);color:#0C1810;border-color:var(--gold)}
+.cat-filter{
+  padding:5px 12px;border:1px solid var(--border2);background:var(--surface);
+  border-radius:20px;font-size:0.68rem;font-weight:700;cursor:pointer;
+  color:var(--muted);transition:all .2s;font-family:'Noto Sans TC',sans-serif;
+}
+.cat-filter.active{background:var(--gold);color:#0C1810;border-color:var(--gold)}
+
+/* ── UQ ITEM CARD ── */
+.uq-section{margin-bottom:20px}
+.uq-section-title{
+  font-size:0.6rem;font-weight:800;color:var(--gold);
+  letter-spacing:0.12em;text-transform:uppercase;
+  margin-bottom:10px;display:flex;align-items:center;gap:8px;
+}
+.uq-section-title::after{content:'';flex:1;height:1px;background:var(--border)}
+.uq-grid{display:flex;flex-direction:column;gap:8px}
+.uq-item{
+  display:flex;align-items:center;gap:12px;
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--r-sm);padding:11px 12px;
+  transition:border-color .2s;
+}
+.uq-item:hover{border-color:var(--border2)}
+.uq-icon{
+  width:44px;height:44px;border-radius:8px;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;font-size:1.4rem;
+}
+.uq-info{flex:1;min-width:0}
+.uq-name{font-weight:700;font-size:0.84rem;color:var(--ink);margin-bottom:3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.uq-meta{font-size:0.65rem;color:var(--muted);display:flex;gap:6px;flex-wrap:wrap}
+.uq-badge{
+  font-size:0.55rem;padding:1px 6px;border-radius:3px;font-weight:700;
+  letter-spacing:0.04em;
+}
+.badge-c{background:var(--tag-blue-bg);color:var(--tag-blue)}
+.badge-jw{background:var(--tag-green-bg);color:var(--tag-green)}
+.badge-lw{background:var(--tag-gold-bg);color:var(--tag-gold)}
+.uq-add-btn{
+  background:var(--gold);color:#0C1810;border:none;
+  border-radius:7px;padding:6px 11px;font-size:0.7rem;font-weight:800;
+  cursor:pointer;white-space:nowrap;transition:all .2s;flex-shrink:0;
+}
+.uq-add-btn:hover{opacity:.85}
+.uq-add-btn.added{background:var(--green);color:#0C1810}
+
+
+/* ── IMAGE GENERATION ── */
+.btn-gen-img {
+  width:100%; margin-top:8px; padding:7px;
+  background:transparent; border:1px dashed var(--border2);
+  border-radius:8px; font-size:0.68rem; font-weight:700;
+  color:var(--muted); cursor:pointer; transition:all .2s;
+  font-family:'Noto Sans TC',sans-serif;
+}
+.btn-gen-img:hover { border-color:var(--gold); color:var(--gold); }
+
+.img-loading {
+  display:flex; flex-direction:column; align-items:center;
+  gap:8px; padding:16px 8px;
+}
+.img-spinner {
+  width:20px; height:20px;
+  border:2px solid var(--border2); border-top-color:var(--gold);
+  border-radius:50%; animation:spin .7s linear infinite;
+}
+.img-loading span { font-size:0.65rem; color:var(--muted); }
+
+.outfit-img-wrap { position:relative; margin-top:8px; }
+.outfit-img {
+  width:100%; border-radius:10px; cursor:pointer;
+  border:1px solid var(--border); display:block;
+  transition:transform .2s;
+}
+.outfit-img:hover { transform:scale(1.02); }
+.img-demo-badge {
+  position:absolute; top:6px; left:6px;
+  background:rgba(201,165,80,.9); color:#0C1810;
+  font-size:0.55rem; font-weight:800; padding:2px 7px;
+  border-radius:4px; letter-spacing:0.05em;
+}
+.img-cost-note {
+  font-size:0.58rem; color:var(--muted); text-align:center;
+  margin-top:5px;
+}
+.img-error {
+  margin-top:8px; padding:10px; text-align:center;
+  background:rgba(224,82,82,.1); border:1px solid rgba(224,82,82,.3);
+  border-radius:8px; font-size:0.65rem; color:var(--red); line-height:1.6;
+}
+
+/* Make day cards a bit taller for image */
+.dc { flex:0 0 140px; }
+
+
+/* ── GOOGLE SIGN IN ── */
+.g-btn {
+  display:flex; align-items:center; gap:10px;
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:10px; padding:11px 14px; cursor:pointer;
+  font-size:0.82rem; font-weight:700; color:var(--ink);
+  transition:all .2s; width:100%;
+}
+.g-btn:hover { border-color:#4285F4; background:var(--surface3); }
+.g-user-row {
+  display:flex; align-items:center; gap:8px;
+  background:var(--surface2); border:1px solid var(--border2);
+  border-radius:10px; padding:10px 12px;
+}
+
+/* ── FLOATING TOKEN COUNTER ── */
+#token-float {
+  position: fixed;
+  bottom: 88px;
+  right: 14px;
+  z-index: 150;
+  background: #0A1A12;
+  border: 1px solid var(--gold);
+  border-radius: 14px;
+  padding: 10px 13px;
+  min-width: 130px;
+  box-shadow: 0 4px 20px rgba(0,0,0,0.5);
+  cursor: pointer;
+  transition: transform .2s;
+  user-select: none;
+}
+#token-float:hover { transform: scale(1.03); }
+#token-float .tf-title {
+  font-size: 0.55rem; font-weight: 800; color: var(--gold);
+  letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 7px;
+  display: flex; align-items: center; justify-content: space-between;
+}
+#token-float .tf-row {
+  display: flex; justify-content: space-between; align-items: center;
+  margin-bottom: 4px;
+}
+#token-float .tf-label { font-size: 0.6rem; color: var(--muted); }
+#token-float .tf-val { font-family: 'Inter',sans-serif; font-weight: 800; font-size: 0.78rem; color: var(--ink); }
+#token-float .tf-val.gold { color: var(--gold); }
+#token-float .tf-val.green { color: var(--green); }
+#token-float .tf-divider { height:1px; background:var(--border); margin: 6px 0; }
+#token-float .tf-reset {
+  font-size: 0.55rem; color: var(--muted); text-align: center;
+  margin-top: 5px; cursor: pointer;
+}
+#token-float .tf-reset:hover { color: var(--red); }
+#token-float .tf-collapsed { display: none; }
+#token-float.collapsed { min-width: unset; padding: 8px 10px; }
+#token-float.collapsed .tf-rows { display: none; }
+#token-float.collapsed .tf-title { margin-bottom: 0; }
+
+
+.img-ref-badge {
+  position:absolute; bottom:28px; left:6px;
+  background:rgba(76,175,122,.9); color:#0C1810;
+  font-size:0.55rem; font-weight:800; padding:2px 7px;
+  border-radius:4px; letter-spacing:0.03em;
+}
+
+/* ── LOCK ── */
+#lock-screen{position:fixed;inset:0;z-index:9999;background:linear-gradient(160deg,#1A1205,#2E1E08,#1A1205);display:flex;flex-direction:column;align-items:center;justify-content:center;padding:40px 28px;text-align:center;}
+.lock-logo{font-family:'Inter',sans-serif;font-weight:900;font-size:2rem;background:linear-gradient(135deg,#8A5C20,#C9904A,#F0C060);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:6px;}
+.lock-sub{font-size:.75rem;color:rgba(255,255,255,.4);margin-bottom:36px;letter-spacing:.05em;}
+.lock-icon{font-size:3rem;margin-bottom:18px;}
+.lock-title{font-family:'Inter',sans-serif;font-weight:800;font-size:1.2rem;color:#F0F5F1;margin-bottom:8px;}
+.lock-hint{font-size:.72rem;color:rgba(255,255,255,.4);margin-bottom:24px;line-height:1.6;}
+.lock-input{width:100%;max-width:320px;padding:14px 18px;background:rgba(255,255,255,.07);border:1.5px solid rgba(201,144,74,.3);border-radius:14px;font-size:1.1rem;color:white;outline:none;text-align:center;letter-spacing:.3em;margin-bottom:14px;transition:border-color .2s;-webkit-appearance:none;}
+.lock-input:focus{border-color:rgba(201,144,74,.7);}
+.lock-btn{width:100%;max-width:320px;padding:14px;background:linear-gradient(135deg,#8A5C20,#C9904A);color:#FAF7F2;border:none;border-radius:14px;font-family:'Inter',sans-serif;font-size:1rem;font-weight:800;cursor:pointer;margin-bottom:12px;-webkit-appearance:none;}
+.lock-error{font-size:.72rem;color:#E05252;margin-top:4px;display:none;text-align:center;}
+.lock-error.show{display:block;}
+.lock-footer{position:absolute;bottom:24px;font-size:.58rem;color:rgba(255,255,255,.2);}
+
+/* ── WARM THEME ── */
+:root{--bg:#FAF7F2;--surface:#FFFFFF;--surface2:#F5F0E8;--gold:#B5823A;--gold2:#C9904A;--ink:#2C2416;--ink2:#5C4F3A;--muted:#9A8E7E;--border:#E8E0D0;--border2:#D4C9B5;--green:#5C8A6A;--red:#C05A5A;--r:16px;--r-sm:12px;--sh:0 4px 20px rgba(90,70,40,.10);}
+body{background:var(--bg);color:var(--ink);}
+
+/* ── WELCOME BANNER ── */
+.welcome-banner{background:linear-gradient(135deg,#8A5C20,#C9904A,#8A7A5A);border-radius:var(--r);padding:20px 18px;margin-bottom:14px;position:relative;overflow:hidden;}
+.wb-greeting{font-size:.72rem;color:rgba(255,255,255,.75);margin-bottom:4px;font-weight:600;}
+.wb-name{font-family:'Inter',sans-serif;font-weight:900;font-size:1.5rem;color:#FFF;margin-bottom:6px;line-height:1.1;}
+.wb-sub{font-size:.68rem;color:rgba(255,255,255,.7);line-height:1.5;}
+.wb-avatar{position:absolute;right:16px;top:50%;transform:translateY(-50%);width:54px;height:54px;border-radius:50%;border:2px solid rgba(255,255,255,.5);background:rgba(255,255,255,.15);display:flex;align-items:center;justify-content:center;font-size:1.6rem;cursor:pointer;overflow:hidden;}
+.wb-stats{display:flex;gap:14px;margin-top:12px;padding-top:12px;border-top:1px solid rgba(255,255,255,.2);}
+.wb-stat{text-align:center;}
+.wsn{font-family:'Inter',sans-serif;font-weight:800;font-size:1.1rem;color:#FFE8C0;}
+.wsl{font-size:.55rem;color:rgba(255,255,255,.65);text-transform:uppercase;letter-spacing:.05em;}
+.name-edit-btn{background:rgba(255,255,255,.2);border:1px solid rgba(255,255,255,.3);border-radius:20px;padding:3px 9px;font-size:.6rem;color:white;cursor:pointer;margin-left:6px;vertical-align:middle;}
+
+/* ── FEATURE CARDS ── */
+.feature-row{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.feature-card{background:#FFF;border:1px solid var(--border);border-radius:var(--r);padding:14px;cursor:pointer;transition:all .2s;position:relative;overflow:hidden;}
+.fc-icon{font-size:1.8rem;margin-bottom:8px;display:block;}
+.fc-title{font-weight:800;font-size:.88rem;color:var(--ink);margin-bottom:3px;}
+.fc-sub{font-size:.65rem;color:var(--muted);line-height:1.4;}
+.fc-badge{position:absolute;top:10px;right:10px;background:var(--surface2);border-radius:8px;padding:2px 7px;font-size:.6rem;font-weight:800;color:var(--gold);}
+
+/* ── COIN BAR ── */
+.coin-bar{display:flex;align-items:center;gap:6px;background:linear-gradient(135deg,#F5E8C8,#EDD9A3);border:1px solid #D4A055;border-radius:20px;padding:5px 12px;cursor:pointer;}
+.coin-amt{font-family:'Inter',sans-serif;font-weight:800;font-size:.85rem;color:#7A4F10;}
+.coin-lbl{font-size:.58rem;color:#9A7030;font-weight:600;}
+
+/* ── CAT FILTER TABS ── */
+.cat-tabs{display:flex;gap:6px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:none;}
+.cat-tabs::-webkit-scrollbar{display:none;}
+.cat-tab-btn{flex:0 0 auto;padding:6px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:20px;font-size:.7rem;font-weight:700;color:var(--muted);cursor:pointer;white-space:nowrap;}
+.cat-tab-btn.active{background:var(--gold);color:#FAF7F2;border-color:var(--gold);}
+
+/* ── LIMIT BAR ── */
+.limit-bar{display:flex;justify-content:space-between;align-items:center;background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:12px;font-size:.7rem;}
+.lb-label{color:var(--muted);font-weight:600;}
+.lb-val{font-family:'Inter',sans-serif;font-weight:800;color:var(--gold);}
+.lb-btn{background:var(--gold);color:#FAF7F2;border:none;border-radius:8px;padding:4px 10px;font-size:.65rem;font-weight:800;cursor:pointer;}
+
+/* ── SHOP ── */
+.shop-banner{background:linear-gradient(135deg,#1A1008,#3A2010,#5A3A18);border-radius:var(--r);padding:20px;margin-bottom:14px;text-align:center;}
+.shop-banner h2{font-family:'Inter',sans-serif;font-weight:900;font-size:1.2rem;color:#FFD98A;margin-bottom:6px;}
+.shop-banner p{font-size:.7rem;color:rgba(255,220,140,.7);}
+.scd{display:inline-flex;align-items:center;gap:8px;background:rgba(255,255,255,.1);border-radius:20px;padding:6px 16px;margin-top:10px;}
+.scd-amt{font-family:'Inter',sans-serif;font-weight:900;font-size:1.3rem;color:#FFD98A;}
+.scd-lbl{font-size:.65rem;color:rgba(255,220,140,.7);}
+.shop-sec{font-size:.62rem;font-weight:800;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin:14px 0 10px;display:flex;align-items:center;gap:6px;}
+.shop-sec::after{content:'';flex:1;height:1px;background:var(--border);}
+.shop-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:14px;}
+.shop-item{background:#FFF;border:1px solid var(--border);border-radius:var(--r);padding:14px;text-align:center;position:relative;overflow:hidden;}
+.shop-item.featured{border-color:var(--gold);background:linear-gradient(135deg,#FFF8EE,#FFF2DC);}
+.si-icon{font-size:2rem;margin-bottom:8px;display:block;}
+.si-name{font-weight:800;font-size:.85rem;color:var(--ink);margin-bottom:3px;}
+.si-desc{font-size:.62rem;color:var(--muted);margin-bottom:10px;line-height:1.4;}
+.si-badge{position:absolute;top:8px;right:8px;background:var(--gold);color:#FAF7F2;font-size:.5rem;font-weight:800;padding:2px 6px;border-radius:4px;}
+.si-price{display:flex;align-items:center;justify-content:center;gap:4px;background:linear-gradient(135deg,#8A5C20,#C9904A);color:#FAF7F2;border:none;border-radius:10px;padding:6px 14px;font-size:.72rem;font-weight:800;cursor:pointer;width:100%;}
+.si-owned{background:var(--surface2);color:var(--green);border:1px solid var(--green);border-radius:10px;padding:6px 14px;font-size:.72rem;font-weight:800;width:100%;text-align:center;}
+
+/* ── MISSION ── */
+.mission-item{display:flex;align-items:center;gap:10px;padding:11px 12px;background:#FFF;border:1px solid var(--border);border-radius:12px;margin-bottom:8px;}
+.mission-item.done{background:var(--surface2);border-color:var(--border2);}
+.mi-icon{font-size:1.4rem;flex-shrink:0;}
+.mi-info{flex:1;min-width:0;}
+.mi-title{font-weight:700;font-size:.82rem;}
+.mi-sub{font-size:.62rem;color:var(--muted);}
+.mi-btn{background:linear-gradient(135deg,#8A5C20,#C9904A);color:#FAF7F2;border:none;border-radius:8px;padding:5px 10px;font-size:.68rem;font-weight:800;cursor:pointer;white-space:nowrap;}
+.mi-done{font-size:.72rem;color:var(--green);font-weight:700;white-space:nowrap;}
+.mi-soon{background:var(--surface2);color:var(--muted);border:1px solid var(--border);border-radius:8px;padding:5px 10px;font-size:.68rem;font-weight:800;cursor:pointer;white-space:nowrap;}
+
+/* ── SHARE ── */
+.share-card{background:#0A0A0A;border-radius:16px;padding:20px;margin-bottom:14px;}
+.share-logo{font-family:'Inter',sans-serif;font-weight:900;font-size:1rem;background:linear-gradient(135deg,#C9904A,#F0C060);-webkit-background-clip:text;-webkit-text-fill-color:transparent;margin-bottom:14px;}
+.share-day{font-size:.65rem;color:rgba(255,255,255,.4);letter-spacing:.1em;text-transform:uppercase;}
+.share-outfit{font-family:'Inter',sans-serif;font-weight:800;font-size:1.05rem;color:white;margin:4px 0 6px;line-height:1.3;}
+.share-meta{font-size:.65rem;color:rgba(255,255,255,.4);margin-bottom:14px;}
+.share-img-prev{border-radius:10px;background:#1A1A1A;min-height:130px;display:flex;align-items:center;justify-content:center;overflow:hidden;margin-bottom:14px;}
+.share-img-prev img{width:100%;border-radius:10px;}
+.share-footer{display:flex;justify-content:space-between;padding-top:10px;border-top:1px solid rgba(255,255,255,.08);}
+.sf-tag{font-size:.6rem;color:rgba(255,255,255,.25);}
+.sf-brand{font-size:.65rem;color:rgba(180,130,50,.5);font-weight:700;}
+.share-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:10px;}
+.btn-share{padding:11px;border:none;border-radius:12px;font-family:'Inter',sans-serif;font-weight:800;font-size:.8rem;cursor:pointer;}
+.btn-share.primary{background:linear-gradient(135deg,#8A5C20,#C9904A);color:#FAF7F2;}
+.btn-share.secondary{background:var(--surface2);color:var(--ink);border:1px solid var(--border);}
+
+/* ── PROFILE IN MODAL ── */
+.profile-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:12px;}
+.pf label{display:block;font-size:.6rem;font-weight:700;color:var(--muted);margin-bottom:5px;text-transform:uppercase;}
+.pf input,.pf select{width:100%;padding:9px 11px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);font-size:.8rem;color:var(--ink);outline:none;-webkit-appearance:none;appearance:none;}
+
+
+/* ── SHARE BAR (Threads style) ── */
+.share-bar{display:flex;gap:8px;margin-top:10px;padding:10px 0 4px;border-top:1px solid rgba(255,255,255,.08)}
+.shr-btn{flex:1;display:flex;flex-direction:column;align-items:center;gap:4px;padding:10px 4px;background:none;border:none;cursor:pointer;border-radius:14px;transition:background .15s;color:var(--ink2)}
+.shr-btn:active{background:rgba(255,255,255,.08)}
+.shr-btn span{font-size:.58rem;font-weight:600;letter-spacing:.01em}
+.shr-fb{color:#1877F2}
+.shr-ig{color:#C13584}
+.shr-save{color:var(--green)}
+
+/* ── TREND TOGGLE ── */
+.trend-toggle{position:relative;width:44px;height:26px;flex-shrink:0}
+.trend-toggle input{opacity:0;width:0;height:0}
+.trend-knob{position:absolute;inset:0;background:var(--border2);border-radius:13px;cursor:pointer;transition:background .25s}
+.trend-knob::before{content:'';position:absolute;width:20px;height:20px;left:3px;top:3px;background:white;border-radius:50%;transition:transform .25s;box-shadow:0 1px 4px rgba(0,0,0,.3)}
+.trend-toggle input:checked + .trend-knob{background:var(--gold)}
+.trend-toggle input:checked + .trend-knob::before{transform:translateX(18px)}
+
+/* ── API LOG ── */
+#tf-log {
+  max-height: 120px;
+  overflow-y: auto;
+  margin-top: 6px;
+  scrollbar-width: none;
+}
+#tf-log::-webkit-scrollbar { display: none; }
+.tf-log-entry {
+  font-size: 0.55rem;
+  font-family: 'Inter', monospace;
+  line-height: 1.6;
+  padding: 2px 0;
+  border-bottom: 1px solid rgba(255,255,255,.04);
+  word-break: break-all;
+}
+.tf-log-entry.ok   { color: #4CAF7D; }
+.tf-log-entry.err  { color: #E05252; }
+.tf-log-entry.info { color: #9AB8A8; }
+.tf-log-entry.prompt { color: #C9A550; }
+</style>
+
+</head>
+<body>
+
+<header>
+  <div class="logo">Fitto <span class="logo-badge">v12</span></div>
+  <div style="display:flex;gap:8px;align-items:center">
+    <div class="coin-bar" onclick="goShop()">
+      <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
+    </div>
+    <div class="api-pill" onclick="openApiModal()">
+      <div class="dot" id="api-dot"></div>
+      <span id="api-st">設定</span>
+    </div>
+  </div>
+</header>
+
+<!-- ① 衣櫃 -->
+<div class="view active" id="view-wardrobe">
+  <div class="welcome-banner">
+    <div class="wb-greeting" id="wb-greeting">你好 👋</div>
+    <div class="wb-name" id="wb-name">Jack <button class="name-edit-btn" onclick="openNameModal()">✏️</button></div>
+    <div class="wb-sub">今天穿什麼好呢？你的衣櫃已準備好</div>
+    <div class="wb-avatar" id="wb-avatar" onclick="goShop()">👤</div>
+    <div class="wb-stats">
+      <div class="wb-stat"><div class="wsn" id="cnt-a">0</div><div class="wsl">全部</div></div>
+      <div class="wb-stat"><div class="wsn" id="cnt-t">0</div><div class="wsl">上衣</div></div>
+      <div class="wb-stat"><div class="wsn" id="cnt-b">0</div><div class="wsl">下身</div></div>
+      <div class="wb-stat"><div class="wsn" id="cnt-o">0</div><div class="wsl">外套</div></div>
+    </div>
+  </div>
+  <div class="feature-row">
+    <div class="feature-card" onclick="goNav('styling')">
+      <span class="fc-icon">✨</span><div class="fc-title">本週搭配</div>
+      <div class="fc-sub">AI 規劃工作日穿著</div><div class="fc-badge">AI</div>
+    </div>
+    <div class="feature-card" onclick="goNav('catalog')">
+      <span class="fc-icon">📋</span><div class="fc-title">UNIQLO 型錄</div>
+      <div class="fc-sub">2026 春夏精選</div><div class="fc-badge">新</div>
+    </div>
+  </div>
+  <div class="limit-bar">
+    <span class="lb-label">衣櫃容量</span>
+    <span><span class="lb-val" id="w-used">0</span> / <span id="w-max">10</span> 件</span>
+    <button class="lb-btn" onclick="goShop()">🪙 擴充</button>
+  </div>
+  <div class="cat-tabs" id="cat-tabs">
+    <button class="cat-tab-btn active" onclick="setCatFilter('全部',this)">全部</button>
+  </div>
+  <div class="photo-btns">
+    <div class="pb" onclick="openScan('camera')"><span class="pbi">📷</span><p>拍照辨識</p><small>開啟相機掃描</small></div>
+    <div class="pb" onclick="openScan('upload')"><span class="pbi">🖼️</span><p>上傳照片</p><small>從相簿選圖</small></div>
+  </div>
+  <div class="card">
+    <div class="fr">
+      <div class="fg"><label>種類</label><select id="it">
+        <option>上衣</option><option>T恤</option><option>襯衫</option><option>毛衣</option>
+        <option>外套</option><option>夾克</option><option>褲子</option><option>牛仔褲</option>
+        <option>裙子</option><option>洋裝</option><option>鞋子</option><option>配件</option>
+      </select></div>
+      <div class="fg"><label>顏色</label><select id="ic">
+        <option>白色</option><option>米白</option><option>淺灰</option><option>灰色</option><option>深灰</option><option>黑色</option>
+        <option>淺藍</option><option>深藍</option><option>卡其</option><option>棕色</option>
+        <option>紅色</option><option>酒紅</option><option>粉色</option><option>綠色</option><option>橄欖綠</option><option>花紋/條紋</option>
+      </select></div>
+    </div>
+    <div class="fr">
+      <div class="fg"><label>風格</label><select id="is">
+        <option>休閒</option><option>正式</option><option>商務</option><option>運動</option><option>韓系</option><option>簡約</option><option>街頭</option>
+      </select></div>
+      <div class="fg"><label>備註（選填）</label><input type="text" id="in" placeholder="品牌、材質…"></div>
+    </div>
+    <button class="btn-p" onclick="addItem()">＋ 手動新增</button>
+  </div>
+  <div class="sec-label">服裝列表</div>
+  <div class="clothes-grid" id="cgrid">
+    <div class="empty" id="empty0"><div class="ei">👗</div><p>衣櫃還是空的<br>拍照或手動新增第一件衣服！</p></div>
+  </div>
+</div>
+
+<!-- ② 搭配 -->
+<div class="view" id="view-styling">
+  <div class="phd"><h1>工作日搭配</h1><p>AI 規劃週一到週五穿著</p></div>
+  <div class="warn" id="wfew">⚠️ 請先到「衣櫃」新增至少 3 件衣物再生成搭配</div>
+  <div class="card">
+    <div class="ctrl-row">
+      <select id="socc" class="ctrl-sel"><option>日常上班</option><option>週末休閒</option><option>約會</option><option>混合</option></select>
+      <select id="ssea" class="ctrl-sel"><option>🌸 春季</option><option>☀️ 夏季</option><option>🍂 秋季</option><option>❄️ 冬季</option></select>
+    </div>
+    <details style="margin-bottom:10px">
+      <summary style="cursor:pointer;font-size:.65rem;font-weight:800;color:var(--gold);letter-spacing:.06em;list-style:none;display:flex;align-items:center;gap:5px">
+        <span>▸</span> AI 搭配挑選原則
+      </summary>
+      <div style="background:var(--surface2);border-left:3px solid var(--gold);border-radius:0 0 8px 8px;padding:10px 12px;margin-top:4px;font-size:.7rem;color:var(--ink2);line-height:1.7">
+        ① 色彩和諧：主色搭配中性色，避免超過 3 種色系<br>
+        ② 場合適配：依日常/休閒/正式調整正式程度<br>
+        ③ 季節感：布料厚薄與色調符合當季氣候<br>
+        ④ 單品輪替：同一件衣物一週不重複穿
+      </div>
+    </details>
+
+    <!-- 潮流開關 -->
+    <div style="display:flex;align-items:center;justify-content:space-between;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;margin-bottom:10px">
+      <div>
+        <div style="font-size:.78rem;font-weight:800;color:var(--ink)">✨ 融入當季潮流</div>
+        <div style="font-size:.62rem;color:var(--muted);margin-top:2px">AI 即時搜尋時尚雜誌，優先推薦流行單品與配色</div>
+      </div>
+      <label class="trend-toggle">
+        <input type="checkbox" id="trend-on">
+        <span class="trend-knob"></span>
+      </label>
+    </div>
+    <!-- 潮流資訊預覽（生成後顯示） -->
+    <div id="trend-info" style="display:none;background:linear-gradient(135deg,var(--surface2),var(--surface3));border:1px solid var(--border2);border-radius:10px;padding:10px 14px;margin-bottom:10px;font-size:.7rem;color:var(--ink2);line-height:1.7">
+      <div style="font-size:.62rem;font-weight:800;color:var(--gold);letter-spacing:.06em;margin-bottom:5px">🔍 本次參考潮流</div>
+      <div id="trend-text"></div>
+    </div>
+
+    <button class="btn-gen" id="bgen" onclick="genOutfit()">
+      <div class="spinner"></div>✦ 生成本週搭配
+    </button>
+  </div>
+  <div class="res-card" id="rcard">
+    <div class="res-hd">
+      <div><h2 id="rtitle">本週搭配</h2><small id="rmeta"></small></div>
+      <div class="tbadge"><div class="tv" id="rtok">—</div><small>Token</small></div>
+    </div>
+    <div class="week-scroll" id="wscroll"></div>
+    <div class="onote" id="onote"></div>
+    <div>
+      <button class="btn-save" id="bsave" onclick="saveOutfit()">🔖 收藏這週工作搭配</button>
+    </div>
+  </div>
+</div>
+
+<!-- ③ 收藏 -->
+<div class="view" id="view-saved">
+  <div class="phd"><h1>收藏搭配</h1><p>你儲存的穿搭計劃</p></div>
+  <div id="saved-wrap"></div>
+</div>
+
+<!-- ④ 型錄 -->
+<div class="view" id="view-catalog">
+  <div class="phd"><h1>型錄</h1><p>品牌春夏精選 · 一鍵加入衣櫃</p></div>
+
+  <!-- Tab switcher -->
+  <div style="display:flex;gap:8px;margin-bottom:16px">
+    <button class="cat-tab active" id="tab-uniqlo" onclick="switchCatTab('uniqlo')">UNIQLO 2026 春夏</button>
+    <button class="cat-tab" id="tab-upload" onclick="switchCatTab('upload')">上傳型錄圖片</button>
+  </div>
+
+  <!-- UNIQLO built-in catalog -->
+  <div id="cat-uniqlo">
+    <!-- Filter row -->
+    <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:14px">
+      <button class="cat-filter active" onclick="filterCat('all',this)">全部</button>
+      <button class="cat-filter" onclick="filterCat('女裝',this)">女裝</button>
+      <button class="cat-filter" onclick="filterCat('男裝',this)">男裝</button>
+      <button class="cat-filter" onclick="filterCat('UNIQLO:C',this)">UNIQLO:C</button>
+      <button class="cat-filter" onclick="filterCat('JW Anderson',this)">JW Anderson</button>
+    </div>
+    <div id="uq-list"></div>
+  </div>
+
+  <!-- Upload catalog -->
+  <div id="cat-upload-panel" style="display:none">
+    <div class="cat-up" onclick="document.getElementById('catf').click()">
+      <div class="cui">📄</div><h3>上傳型錄圖片</h3><p>JPG / PNG · AI 自動辨識服裝單品</p>
+    </div>
+    <input type="file" id="catf" accept="image/*" style="display:none" onchange="handleCat(event)">
+    <img id="cat-preview" style="width:100%;max-height:220px;object-fit:contain;border-radius:12px;margin-bottom:12px;border:1px solid var(--border);display:none">
+    <div id="cat-btn-wrap" style="display:none;margin-bottom:12px">
+      <button class="btn-p" id="bcatscan" onclick="scanCat()">🔍 AI 分析型錄</button>
+    </div>
+    <div class="cat-res" id="catres">
+      <h3>辨識結果</h3>
+      <p style="font-size:0.7rem;color:var(--muted);margin-bottom:10px">點「加入衣櫃」把喜歡的單品加進去</p>
+      <div class="cat-items" id="catitems"></div>
+    </div>
+  </div>
+</div>
+
+<!-- FLOATING TOKEN COUNTER -->
+<div id="token-float" onclick="toggleTokenFloat()">
+  <div class="tf-title">
+    <span>Gemini 用量</span>
+    <span id="tf-toggle" style="font-size:0.7rem">▾</span>
+  </div>
+  <div class="tf-rows">
+    <div class="tf-row">
+      <span class="tf-label">文字 Tokens</span>
+      <span class="tf-val gold" id="tf-text">0</span>
+    </div>
+    <div class="tf-row">
+      <span class="tf-label">圖片生成</span>
+      <span class="tf-val green" id="tf-img">0 張</span>
+    </div>
+    <div class="tf-divider"></div>
+    <div class="tf-row">
+      <span class="tf-label">累計費用</span>
+      <span class="tf-val" id="tf-cost">NT$0.00</span>
+    </div>
+    <div class="tf-row">
+      <span class="tf-label">本次操作</span>
+      <span class="tf-val" id="tf-last" style="font-size:0.62rem;color:var(--muted)">—</span>
+    </div>
+    <div class="tf-divider"></div>
+    <div style="font-size:0.55rem;font-weight:800;color:var(--muted);letter-spacing:0.06em;margin-bottom:3px">LOG</div>
+    <div id="tf-log"></div>
+    <div style="display:flex;justify-content:space-between;margin-top:6px">
+      <div class="tf-reset" onclick="event.stopPropagation();resetTokenCount()">↺ 重置</div>
+      <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
+      <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
+    </div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto v12 · 2026.03</div>
+  </div>
+</div>
+
+<!-- SHOP VIEW -->
+<div class="view" id="view-shop">
+  <div class="shop-banner">
+    <h2>🪙 Fitto 商店</h2><p>用金幣解鎖更多功能</p>
+    <div class="scd"><span class="scd-amt" id="shop-coins">5</span><span class="scd-lbl">🪙 我的金幣</span></div>
+  </div>
+  <div style="background:#F5EDD8;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.68rem;color:#7A5020;line-height:1.6">
+    🎁 每日免費生圖 <strong>3 次</strong>（自動補充）<br>
+    💡 每日 1 次免費生圖 · 用完後 1 金幣 = 1 張圖
+  </div>
+  <div class="shop-sec">💰 購買金幣</div>
+  <div class="shop-grid">
+    <div class="shop-item"><span class="si-icon">🪙</span><div class="si-name">30 金幣</div><div class="si-desc">入門包<br>NT$4.3/枚</div><button class="si-price" onclick="buyCoins(30,'NT$129')">NT$129</button></div>
+    <div class="shop-item featured"><div class="si-badge">最划算</div><span class="si-icon">💰</span><div class="si-name">80 金幣</div><div class="si-desc">標準包<br>NT$3.7/枚</div><button class="si-price" onclick="buyCoins(80,'NT$299')">NT$299</button></div>
+    <div class="shop-item"><span class="si-icon">💎</span><div class="si-name">200 金幣</div><div class="si-desc">大量包<br>NT$3.5/枚</div><button class="si-price" onclick="buyCoins(200,'NT$699')">NT$699</button></div>
+    <div class="shop-item"><span class="si-icon">👑</span><div class="si-name">月卡 100 枚</div><div class="si-desc">每月固定<br>NT$2.5/枚</div><button class="si-price" onclick="buyCoins(100,'NT$249/月')">NT$249/月</button></div>
+  </div>
+  <div class="shop-sec">👗 衣櫃擴充</div>
+  <div class="shop-grid">
+    <div class="shop-item"><span class="si-icon">📦</span><div class="si-name">+10 件空間</div><div class="si-desc">容量到20件</div><button class="si-price" onclick="buyExpansion(10,30)">🪙 30枚</button></div>
+    <div class="shop-item"><span class="si-icon">🏠</span><div class="si-name">+30 件空間</div><div class="si-desc">大幅擴充40件</div><button class="si-price" onclick="buyExpansion(30,80)">🪙 80枚</button></div>
+  </div>
+  <div class="shop-sec">👨 帥哥頭像</div>
+  <div class="shop-grid">
+    <div class="shop-item"><div class="si-badge">帥哥</div>
+      <div style="width:60px;height:60px;border-radius:50%;overflow:hidden;margin:0 auto 8px;border:2px solid #D4A055"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="si-name">陽光型男</div><div class="si-desc">暖心笑容</div>
+      <button class="si-price" id="btn-sun" onclick="buyAvatar('☀️',15,'btn-sun')">🪙 15枚</button></div>
+    <div class="shop-item"><div class="si-badge">熱門</div>
+      <div style="width:60px;height:60px;border-radius:50%;overflow:hidden;margin:0 auto 8px;border:2px solid #D4A055"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEBAYFBQUGBgYHCQ4JCQgICRINDQoOFRIWFhUSFBQXGiEcFxgfGRQUHScdHyIjJSUlFhwpLCgkKyEkJST/2wBDAQYGBgkICREJCREkGBQYJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCT/wAARCACgAKADASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD6WoopaoSQlLRRSGFFFFABRXmPj3476D4O1B9Kt4zqV/HxIscgVI2/ulvX19K83uP2odQjuGL6bZKgOdizMTj0z60AfQeu+ItN8O2TXmo3KQxDgbmAyfxrzLUP2mfCNnMUhS7uwDgtEny/mcfyrwj4mfFi68cywTSo0cCLsgtlbIL55Y/pXD219EHxdXkSMeMAZA+p6UXA+utD/aS8DapKsN7Nd6S7HAa6jzGf+BrnH416Xpuq2Gs2q3em3tve27dJYJA6/mK+ALqC3K/LMibuVkThW+oqvonifWfCWoi50rULzT50P+stpCufqvRhSuOx+iNFeJfBj9oBPF5XRvE7W9tqWMQ3anZHdexHRX9u9e2KQwBByD3piFooooAKSlooASilpKZItFFFIoKXFJiloAK8O/aA+NM/hSJvC/h2QJq9xHme7z/x6xnj5f8AbPPPb+Xt8rpDG0kjBEQFmY9FA5JNfBPxb8Tx+LfG+p6lZIY7e4mPlBjzsBwCc9M9ce9JgjEj1C3cGObfKWYtJMzEM5z1zVbU7ezZSbaR0kAzsc5DD2NAgjWFVMXnSPxkybfwHeuo8OfCXXdeQSC3aKJvu7/85qZTUdyowlLZHEszuFYE8Dap9M1B5htuI1BbuxHJr3/TP2eZFtcXV4ikjOAucGqd78AJIpCBcRmP+9isvrEO5r9Xn2PJtI1H7Wptb2FZIz/EDyv+FQahF9kcgMZEU4GeoHpXda78I73w7A+pWkwlEI3MmOCO/wCFcJqUvmyLK2cMNpPfjofqM4rSM1NXREoSg7SHafebH/dTFFJBx3Br6z/Z++Lc/iu1/wCEZ1lxJqNnCGhud3NxGOMN/tDjnuK+PlidSTkEjB6dRXV+BfHWoeB/EOn6xaHzvssgMsT9JojwR9cZH1wapaEH3/RVbTNQt9X0211G0ffb3UKTxN6qwBH86tVQhKKKKACkpaKACgCgUtABS0UUCGTwxXMEkMyb4pFKOv8AeUjBH5V+d/i3a2t3BiTyw0jEJ/cXcdq/gMV+iYOGB9Dmvgb4k6HL4e8e61ZXOGlhv5Tn+8pbch+mCDSY0dB8GfAcfiTVjqF4m62tcbVI+8a+n9M0uGBEVIwoA9K8v+BFkv8AYstyq4RmA6d69gtyABgV59X3p6no0VywViaW0QRgDHSsq9tkKYwOa15g/l5xWXJmVitTNIuDZw3iu3iXSL/co2iByffg18qaxB5OwDqOtfWXj23dPD98EHzuFQD1ywFfNXjPSntL+8iAY7GJ6ddrEEj/AICQa0wztdGeKV7M5KJiBsBBU9AeoqzpzoqtvIAHfPY81UiXLc+5FXtJRpJ41jYh2OwYGc88V2M4D74+Gli2nfD/AMPWzvvZbGJif94bvy5rpao6Dp40nQ9O08EsLW1ihyep2oB/Sr+KskSilNJQAlFBooGLS0gpaBBRRRQAGvjX9o+xEHxZ1STyyPNit5v94lAD+or7KHWvmb44+Hr3xE0Hi54tn2af7HOg5ygk/dt/MH61nOaTSfU1hTck5Lod14L0S48O+B7S3063SW7MKvtdtql2GSSfSq1xb/EKPdLZ3NmZDyQzDag9hiuzhiaOxjWIDcEAAPHauI8Rab4vurS8lg16Gxudym3hjYxxKoPIc/eYkdwRj0rhhLU75RuhNP8AE/je3mEGrLZToG+Z4hjj0xXXfbSLYXG3GQDk9q828E2fiNTHa6pqY1CcZ8yU88545AGeK9QvbdU0CVcAsoyPyqZSbZpGKSR5j461vW9RP2TRo433Fc5GTkEHj8q891P4a+Lb+Zru9nhDtkshyCa9L0q3vZLU3NtcpBKZtsjkZZI+5XgjcegzwOvNcuvhvxJHf3t1eeLrmcSACBUkf92R0JU5ByOo6ZJ6VUJWW6IqQu9mzgz8G9QEgmFxGicMAOSp9CK5vR9MltPF9vYrCzTJqMMXlj+IiQfzFe/6Vb6gIAdQZHcdWVdu73x2rgZvC6z/ABL1a8ZMrbCKeNMZDOyfLn2yD+lawrPW5hOgtFE+xT94ntk0lcv8Mb+fU/AWjXVy7PM8JDM3U4YgfoK6iuyMrpM45x5ZOPYKSlpKZIUlLSUDFpaSloEFFFFAwrzD4gaLPe6LqGh2uAHDSgd2KtvA/SvT6xdbsFM63JGVbg/7LY6iufExulJdDpws0pOL6lGw2TwRuBwyggfUVaubGB4gzxow/wBpc1RsnMHyPwV4qS+1MJbkE8CuRNHVZ9BqQW8SMYo1U5xkDFJqCA6dKvtVGC5ZbZryZZGhALbVBJx6471mXXjWzbS3Z4Li13HhbmMo+B7elJstRfQx/DjpDcyW5xkmuofTbd13mJCeucV5laeJ7e6nW4tLe4W4WfBDxldy9z9PevR7bVUmtFbPOOfaoXZmj7ox9Xt44VO1cV5V4rt72LxiZrLO64WKNto+6qAck9s5P5V6hqt2txJtB6VV8I+GH8Q+JpZbm2b7FHKskrkEBwn3V98nt6Zqopt2RF1H3n0PWPDunppWg6fZRoEWG3QYHrjJ/UmtGiivUWmh5Dd3cKDRSUxCGiiigYopaSloEFFFFABSOiSoUkUMp4IIyDS0tJoZzmtWUdpMnkoER1zgeo61gX0TyIAG4LDcT2Heux16383TnlH34f3g+ncflXKRzLPwOQetefiIcsj0MPO8SpbeMtA2tGurWm+I7HjEgLoR2K9RWZret+H7sqbqeN4gOhQ5JNaGo+GLOSUX9rBFHeKMGRVAZx6E/wCNZF9qV5aII5royEHd89uhIOOme9JWaOqFO+q/M5ybWPD1hGz/AGqO3RcnLjaoH16Vo6FqEWr6adQtZhJakMFkU/K+O49awLvQIteuUjvUe7h3ZPndOpPCjjua6O+lh0+0jtLVFjhRQqqowMVnK1tByjZiafbPe6hFCmSZJAn5mvb0QRosa8KoCgfSvLvhpZLe6w1y5GLaPzAP9onA/qa9SNdmGjaNzzsVK8rdgpKKK6TkCkoNIaYBRRRQMWlFNFKKBC0UZooAKKKM0AQ6gN1hcj1ib+VebTXDabMshH7h+p/un/Cu/wBX1axs4Xtp7y3juJo2EcLSAO/HZetco9mlxBtdQykdK4MXujuwmzLlpJFcwh0cEN6VT1HTbVm3OqsfesFrPUNJZ/sMm6L/AJ4v0/A9qw9T8cXFkSk9jOJOnUEfnWEZI6rPc3bqG3tlZwAD0Ark9Uv42lCg5x0ArLuPEV9qrErmJP1qqqt5hJJJ7k1Nh3PVvg/L5t3qTH/nkmB/wI16aTXkPwu1ax0i/uvt13b2kUsIUPPIEUtuGBk8ZNetpIkqB43V0YZDKQQfoRXo4f4EebiPjY6kNLSE1sYBmkoopjCikozQIWlFJRQMUUtYniHxjovhiItqV4iSYysC/NI34dvqa8g8V/HfUrrfBo0SafEQcSH5pSOmc9B+H507CPaNb8SaR4dh83VL+G2BGVVjl2+ijk15L41+O06nyPDUXlx7Tm4lUFyfYdB+PNeR32sXepTvLeTSzSN8xaQli3PqaoSSFWZAdwPzZzz707AezfDizt7vS5NfkZrjU76Zxc3Ejb3wG4QE9BjBx716Cg+XjpXh/wAK/FkGiX7aTfShLW8YGN2PCSdOT6HgfXFe3htq15VaDjN3PSpTUoKxVvIyRkVyfiC2t2TdKnzfTrXYTMu0k1ialDDOpLHgdqyZtFnnn2fDEhcDsKUW2DuIrYuLZHnCR8+tRXEOxtoHI7UDM65WKW2ktpo0lilUo6OMqw9CK4vw38QNY+FmtXen6BdtJpu8N9juSZIxnnAycj0yDn610niXUo9GtHdyPMI+Ve5NeSSM91PLNJuMjkmuvCxd2+hyYqSsl1Przwh8avDPiW2txdXA0u9lUborg4j3eiv0/PFd8GDqGUhlYZBByCPavg21uGQE5OR/npXd+EPip4h8KFFsrzda8FrafLwn6A9D7jFd1jiPrikrz7wh8aNB8SGO2vT/AGZesOkhzEx9n7fjXoCsGUMpBBGQQcgikIWkNBNJQBkeIfGOi+F4t+pXqRuekK/NIfw7fjXkXi346X94HttGiNjEQR5p5kP49B+FeYXuoTzu5nkkkZzyXbk/j3qjLuO4McBs4ye9WoiuWbzV7m+ld7qZpJZOSxOST7mqW8yMQMFgSaaSVDqTkdAcUxS2OW5HJJ9KYE5DnBVdw69OvvTEdUAR1O7t/T60gIK4R33Z6jrRI6KuXzvxxnvSGMlj2ZkK4yM4z15rvfCHxbu9IjjsNVje7tFGElBzLGv4/eH15964QS7htn69iOTUDsWySMqo6rUzgpKzKjNxd0fRNn450DVoQbbVLcsw+47bG/JsVDd39nKD+9Q59DXzo8iHI34IwAD/AEppmZVOJCuOSd5rleDXRnTHFtbo+gXvNNs4GmkuoUA7swFcNqfj6ygkl+zgzHJChe/4+lebNMrYMku7PdjnNCyxL8ioXJPXFOOEit3cUsVJ7Im1bUbvWbo3M5Lqegz8qiqTJuKlACOM5J59/pU7M7yhGRVjJJUDGKTckIIXDZHGeuK6kklZHM227sNgJDdvTd0qcSKqdCpB6YqInyyB944zjHbFKpwMZ+uaYi2lw8TKirgnqScZ78iu38HfF7XPCZjgjkF3YjhoJySo/wB09V/CvP8AbztUkEd27U7JJG3gnqR3oA+q/Cvxg8N+JdkLzGwum48uf7pPoG6fniu4zXxDFdyWxAVivcc/54r2L4OfEm9h1a30TVb1pLK4HlQ+a27ypO2CeQD0x7ipaA8sa4jlVN5ClcDgZyccVXkc9JjtQ/dzxn6VAGDwKxGG4APuD1+tOuySyyEbhndkCtCQ80fMoUHb3JwcUEKTg8ZOc1CshcgbiU6/dqWR/LkC7mwRkYNIB5Z2J2ZG3oAeR+HpSS7kAZsM5APXp/hSAhl3Ek+460jyD5VJXaOc46UWGMwc5ZT7Ad6Q5IPt27/lSlkLFieT601BkuASeeaQDZoS5zjkelQrEgU4IGTnBFWGkT5lPODwPT8Kiz298daAGMgAAVRyfxpyJtQkgZ/hJ9adsxyccnJpN7EEBQfegY2QHd8rMRwQSRTNpBCkkjGcVIVwA2Gz/DxxSLyMMMj0OKBDUUnO0t25Ip7kodmTk/kKNvzYJAHoe1ISpYAsDk/dBoAk4ClQwDdfc0zawAQHH+0OtRXLlWUqw9Og5qaLhM4VWxnP+FAxRkOqlTktx3/IU61u5I7tZkYx7CAu04wAeP1z+VXfC1/p1trkMmqxySRhlCNuG2Ns8Mw7jp+VN1u40+61m8k0y2eK2dmHzv8AK7Z++oxwM5OM+/HSgD//2Q==" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="si-name">韓風男神</div><div class="si-desc">K-Style歐爸</div>
+      <button class="si-price" id="btn-kr" onclick="buyAvatar('🌙',20,'btn-kr')">🪙 20枚</button></div>
+    <div class="shop-item"><div class="si-badge">VIP</div>
+      <div style="width:60px;height:60px;border-radius:50%;overflow:hidden;margin:0 auto 8px;border:2px solid #D4A055"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:cover"></div>
+      <div class="si-name">粗獷型男</div><div class="si-desc">硬派男子氣</div>
+      <button class="si-price" id="btn-rg" onclick="buyAvatar('⚡',25,'btn-rg')">🪙 25枚</button></div>
+    <div class="shop-item"><span class="si-icon">😊</span><div class="si-name">預設頭像</div><div class="si-desc">永久免費</div><div class="si-owned">✓ 已擁有</div></div>
+  </div>
+  <div class="shop-sec">👩 美女頭像</div>
+  <div class="shop-grid">
+    <div class="shop-item"><div class="si-badge">熱門</div><span class="si-icon">🌸</span><div class="si-name">韓系女神</div><div class="si-desc">K-Beauty</div><button class="si-price" id="btn-kg" onclick="buyAvatar('🌸',20,'btn-kg')">🪙 20枚</button></div>
+    <div class="shop-item"><span class="si-icon">🌺</span><div class="si-name">日系女孩</div><div class="si-desc">清純自然</div><button class="si-price" id="btn-jp" onclick="buyAvatar('🌺',15,'btn-jp')">🪙 15枚</button></div>
+    <div class="shop-item"><div class="si-badge">VIP</div><span class="si-icon">👑</span><div class="si-name">御姐女王</div><div class="si-desc">成熟自信</div><button class="si-price" id="btn-qu" onclick="buyAvatar('👑',25,'btn-qu')">🪙 25枚</button></div>
+    <div class="shop-item"><span class="si-icon">⭐</span><div class="si-name">時尚達人</div><div class="si-desc">百變造型</div><button class="si-price" id="btn-st" onclick="buyAvatar('⭐',12,'btn-st')">🪙 12枚</button></div>
+  </div>
+  <div class="shop-sec">🎯 任務中心</div>
+  <div id="mission-list"></div>
+  <div style="font-size:.62rem;color:var(--muted);text-align:center;padding:12px 0;line-height:1.6">目前為展示模式，正式上線後接入付費系統</div>
+</div>
+
+<!-- BOTTOM NAV -->
+<nav class="bottom-nav">
+  <button class="nb active" onclick="goNav('wardrobe')"><span class="ni">👗</span><span class="nl">衣櫃</span></button>
+  <button class="nb" onclick="goNav('styling')"><span class="ni">✨</span><span class="nl">搭配</span></button>
+  <button class="nb" onclick="goNav('saved')"><span class="ni">🔖</span><span class="nl">收藏</span></button>
+  <button class="nb" onclick="goNav('catalog')"><span class="ni">📋</span><span class="nl">型錄</span></button>
+  <button class="nb" onclick="goNav('shop')"><span class="ni">🪙</span><span class="nl">商店</span></button>
+</nav>
+
+<!-- SCAN MODAL -->
+<div class="overlay" id="scan-ov">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle">📷 AI 掃描衣物</div>
+    <div class="pbox" id="pbox"><div class="ph"><span>👗</span><p>拍照或選圖</p></div></div>
+    <div class="scan-btns2">
+      <div class="btn-ghost" onclick="document.getElementById('scam').click()">📷 相機</div>
+      <div class="btn-ghost" onclick="document.getElementById('sfile').click()">📁 相簿</div>
+    </div>
+    <input type="file" id="scam" accept="image/*" capture="environment" style="display:none" onchange="handleScan(event)">
+    <input type="file" id="sfile" accept="image/*" style="display:none" onchange="handleScan(event)">
+    <div class="scanning" id="scaning"><div style="margin-bottom:8px">AI 辨識中</div><div class="dw"><span></span><span></span><span></span></div></div>
+    <div class="sr" id="sres">
+      <div class="sr-lbl">● 辨識完成，可調整</div>
+      <div class="fr"><div class="fg"><label>種類</label><select id="st">
+        <option>上衣</option><option>T恤</option><option>襯衫</option><option>毛衣</option>
+        <option>外套</option><option>夾克</option><option>褲子</option><option>牛仔褲</option>
+        <option>裙子</option><option>洋裝</option><option>鞋子</option><option>配件</option>
+      </select></div>
+      <div class="fg"><label>顏色</label><select id="sc2">
+        <option>白色</option><option>米白</option><option>淺灰</option><option>灰色</option><option>深灰</option><option>黑色</option>
+        <option>淺藍</option><option>深藍</option><option>卡其</option><option>棕色</option>
+        <option>紅色</option><option>酒紅</option><option>粉色</option><option>綠色</option><option>橄欖綠</option><option>花紋/條紋</option>
+      </select></div></div>
+      <div class="fr"><div class="fg"><label>風格</label><select id="ss">
+        <option>休閒</option><option>正式</option><option>商務</option><option>運動</option><option>韓系</option><option>簡約</option><option>街頭</option>
+      </select></div>
+      <div class="fg"><label>備註</label><input type="text" id="sn" placeholder="品牌、材質…"></div></div>
+      <button class="btn-p" onclick="confirmScan()">＋ 加入衣櫃</button>
+    </div>
+    <div style="margin-top:10px"><button class="btn-ghost" style="width:100%" onclick="closeScan()">關閉</button></div>
+  </div>
+</div>
+
+<!-- EDIT MODAL -->
+<div class="overlay" id="edit-ov">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle">✏️ 編輯衣物</div>
+    <input type="hidden" id="eid">
+    <div class="fr"><div class="fg"><label>種類</label><select id="et">
+      <option>上衣</option><option>T恤</option><option>襯衫</option><option>毛衣</option>
+      <option>外套</option><option>夾克</option><option>褲子</option><option>牛仔褲</option>
+      <option>裙子</option><option>洋裝</option><option>鞋子</option><option>配件</option>
+    </select></div>
+    <div class="fg"><label>顏色</label><select id="ec">
+      <option>白色</option><option>米白</option><option>淺灰</option><option>灰色</option><option>深灰</option><option>黑色</option>
+      <option>淺藍</option><option>深藍</option><option>卡其</option><option>棕色</option>
+      <option>紅色</option><option>酒紅</option><option>粉色</option><option>綠色</option><option>橄欖綠</option><option>花紋/條紋</option>
+    </select></div></div>
+    <div class="fr"><div class="fg"><label>風格</label><select id="es">
+      <option>休閒</option><option>正式</option><option>商務</option><option>運動</option><option>韓系</option><option>簡約</option><option>街頭</option>
+    </select></div>
+    <div class="fg"><label>備註</label><input type="text" id="en" placeholder="品牌、材質…"></div></div>
+    <button class="btn-p" onclick="confirmEdit()" style="margin-bottom:10px">儲存變更</button>
+    <button class="btn-ghost" style="width:100%" onclick="document.getElementById('edit-ov').classList.remove('show')">取消</button>
+  </div>
+</div>
+
+<!-- API MODAL -->
+<div class="overlay" id="api-ov">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle">⚙️ 設定 Gemini Key</div>
+    <div style="background:#F5EDD8;border-radius:10px;padding:10px 12px;margin-bottom:14px;font-size:.68rem;color:#7A5020;line-height:1.6">
+      🔐 Key 僅存在你的瀏覽器，不會上傳伺服器<br>
+      ✅ 文字搭配 · 照片辨識 · 型錄分析 · 生圖 全用 Gemini
+    </div>
+    <div class="fg" style="margin-bottom:6px">
+      <label>Google AI Studio Key</label>
+      <input type="password" class="api-inp" id="gemini-key-inp" placeholder="AIzaSy…">
+      <div style="font-size:.62rem;color:var(--muted);margin-top:4px">到 <strong style="color:var(--gold)">aistudio.google.com</strong> 免費申請</div>
+    </div>
+    <button class="btn-p" onclick="saveKey()" style="margin-bottom:10px">儲存</button>
+    <button class="btn-ghost" style="width:100%" onclick="closeModal('api-ov')">取消</button>
+  </div>
+</div>
+
+<!-- LOCK SCREEN -->
+<div id="lock-screen">
+  <div class="lock-logo">Fitto</div>
+  <div class="lock-sub">AI 智能穿搭助手</div>
+  <div class="lock-icon">🔐</div>
+  <div class="lock-title">請輸入存取密碼</div>
+  <div class="lock-hint">此為私人應用<br>保護你的 API Key 不被濫用</div>
+  <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
+  <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
+  <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
+  <div class="lock-footer">Fitto v12 · Gemini Powered · 2026.03</div>
+</div>
+
+<!-- NAME MODAL -->
+<div class="overlay" id="name-ov">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle">👤 個人設定</div>
+    <div class="fg" style="margin-bottom:10px">
+      <label>我的名字</label>
+      <input type="text" class="api-inp" id="name-inp" placeholder="輸入你的名字…" maxlength="20">
+    </div>
+    <div style="font-size:.62rem;font-weight:800;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;margin-bottom:8px;">👤 基本資料</div>
+    <div class="profile-grid">
+      <div class="pf"><label>身高 (cm)</label><input type="number" id="p-height" value="175" min="150" max="200"></div>
+      <div class="pf"><label>體重 (kg)</label><input type="number" id="p-weight" value="65" min="40" max="120"></div>
+      <div class="pf" style="grid-column:1/-1"><label>性別</label><select id="p-gender"><option value="male">男性</option><option value="female">女性</option></select></div>
+    </div>
+    <div style="background:var(--surface2);border-left:3px solid var(--gold);border-radius:8px;padding:10px 12px;margin-bottom:14px;font-size:.7rem;color:var(--ink2);line-height:1.7">
+      <b style="color:var(--gold);font-size:.65rem;letter-spacing:.06em">🪄 頭像即模特兒</b><br>
+      穿搭圖片會依你在<b>商店</b>購買並使用中的頭像來生成人物外型，不需額外設定。
+    </div>
+    <button class="btn-p" onclick="saveName()" style="margin-bottom:10px">儲存設定</button>
+    <button class="btn-ghost" style="width:100%" onclick="closeModal('name-ov')">取消</button>
+  </div>
+</div>
+
+
+<!-- DEPLOY MODAL -->
+<div class="overlay" id="deploy-ov">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle">🚀 一鍵部署到 GitHub</div>
+    <div class="fg" style="margin-bottom:10px">
+      <label>GitHub Token</label>
+      <input type="password" class="api-inp" id="deploy-token" placeholder="ghp_xxxxxxxx" autocomplete="off">
+      <div style="font-size:.6rem;color:var(--muted);margin-top:4px">只需填一次，儲存在本機</div>
+    </div>
+    <div id="deploy-status" style="font-size:.72rem;color:var(--muted);text-align:center;padding:8px 0;min-height:24px"></div>
+    <button class="btn-p" id="deploy-btn" onclick="doDeploy()" style="margin-bottom:10px">🚀 立即部署</button>
+    <button class="btn-ghost" onclick="closeModal('deploy-ov')">取消</button>
+  </div>
+</div>
+
+<!-- SHARE MODAL -->
+<div class="overlay" id="share-ov">
+  <div class="modal">
+    <div class="mhandle"></div>
+    <div class="mtitle">↗ 分享穿搭</div>
+    <div class="share-card">
+      <div class="share-logo">Fitto AI 穿搭</div>
+      <div class="share-day" id="sh-day">今日搭配</div>
+      <div class="share-outfit" id="sh-outfit">—</div>
+      <div class="share-meta" id="sh-meta">春季 · 日常上班</div>
+      <div class="share-img-prev" id="sh-img"><span style="color:rgba(255,255,255,.2);font-size:.75rem">生成圖片後分享效果更好</span></div>
+      <div class="share-footer"><span class="sf-tag">#Fitto穿搭 #AI時尚</span><span class="sf-brand">fitto.app</span></div>
+    </div>
+    <div class="share-btns">
+      <button class="btn-share primary" onclick="doNativeShare()">↗ iOS 分享</button>
+      <button class="btn-share secondary" onclick="doCopyShare()">📋 複製</button>
+    </div>
+    <button class="btn-ghost" style="width:100%;margin-top:10px" onclick="closeModal('share-ov')">關閉</button>
+  </div>
+</div>
+
+<script>var AVATAR_IMGS = {
+  'rugged': 'data:image/jpeg;base64,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',
+  'sunny': 'data:image/jpeg;base64,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',
+  'korean': 'data:image/jpeg;base64,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',
+};
+
+// ═══ LOCK ═══
+const APP_PW = 'fitto2026';
+function checkPw() {
+  const pw = document.getElementById('lock-pw').value;
+  const err = document.getElementById('lock-err');
+  if(pw === APP_PW) {
+    sessionStorage.setItem('fk','1');
+    const ls = document.getElementById('lock-screen');
+    ls.style.transition = 'opacity .4s';
+    ls.style.opacity = '0';
+    setTimeout(function(){ ls.style.display = 'none'; }, 400);
+  } else {
+    err.style.display = 'block';
+    document.getElementById('lock-pw').value = '';
+  }
+}
+
+// ═══ COINS ═══
+var coins = parseInt(localStorage.getItem('fitto_coins') || '5');
+var wardrobeLimit = parseInt(localStorage.getItem('fitto_wlimit') || '10');
+var userAvatar = localStorage.getItem('fitto_avatar') || '👤';
+var ownedAvatars = JSON.parse(localStorage.getItem('fitto_ownedav') || '["👤"]');
+var activeCat = '全部';
+var USER_NAME = localStorage.getItem('fitto_name') || 'Jack';
+var lastShare = {};
+
+function saveProgress() {
+  localStorage.setItem('fitto_coins', String(coins));
+  localStorage.setItem('fitto_wlimit', String(wardrobeLimit));
+  localStorage.setItem('fitto_avatar', userAvatar);
+  localStorage.setItem('fitto_ownedav', JSON.stringify(ownedAvatars));
+}
+
+function updateCoinUI() {
+  var hc = document.getElementById('hdr-coins');
+  if(hc) hc.textContent = coins;
+  var sc = document.getElementById('shop-coins');
+  if(sc) sc.textContent = coins;
+  var wu = document.getElementById('w-used');
+  if(wu) wu.textContent = wardrobe.length;
+  var wm = document.getElementById('w-max');
+  if(wm) wm.textContent = wardrobeLimit;
+  var av = document.getElementById('wb-avatar');
+  if(av) {
+    var avatarPhotoMap = {'☀️':'sunny','🌙':'korean','⚡':'rugged'};
+    var photoKey = avatarPhotoMap[userAvatar];
+    if(photoKey && AVATAR_IMGS[photoKey]) {
+      av.innerHTML = '<img src="' + AVATAR_IMGS[photoKey] + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+    } else {
+      av.innerHTML = '<span style="font-size:1.6rem">' + userAvatar + '</span>';
+    }
+  }
+}
+
+function spendCoin(amt, reason) {
+  if(coins < amt) {
+    showToast('金幣不足！需要 ' + amt + ' 枚');
+    setTimeout(goShop, 1000);
+    return false;
+  }
+  coins -= amt;
+  saveProgress();
+  updateCoinUI();
+  return true;
+}
+
+function showCoinAnim(amt) {
+  var el = document.createElement('div');
+  el.textContent = '+' + amt + ' 🪙';
+  el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);font-weight:900;font-size:2rem;color:#C9904A;background:rgba(255,248,235,.97);border:2px solid #C9904A;border-radius:16px;padding:16px 28px;z-index:9998;box-shadow:0 8px 32px rgba(180,130,50,.3);font-family:Inter,sans-serif;';
+  document.body.appendChild(el);
+  setTimeout(function(){
+    el.style.transition = 'opacity .5s'; el.style.opacity = '0';
+    setTimeout(function(){ document.body.removeChild(el); }, 500);
+  }, 1500);
+}
+
+function showToast(msg) {
+  var el = document.createElement('div');
+  el.textContent = msg;
+  el.style.cssText = 'position:fixed;top:80px;left:50%;transform:translateX(-50%);background:#2C2416;color:#FFE8C0;padding:12px 20px;border-radius:12px;font-size:.82rem;font-weight:700;z-index:9997;box-shadow:0 4px 16px rgba(0,0,0,.3);white-space:nowrap;';
+  document.body.appendChild(el);
+  setTimeout(function(){ document.body.removeChild(el); }, 2000);
+}
+
+function showLimitAlert() {
+  showToast('👗 衣櫃已滿！前往商店擴充');
+  setTimeout(goShop, 1200);
+}
+
+function buyCoins(amt, price) {
+  if(!confirm('購買 ' + amt + ' 金幣 (' + price + ')\n（目前展示模式，將直接獲得金幣）')) return;
+  coins += amt; saveProgress(); updateCoinUI(); showCoinAnim(amt);
+}
+
+function buyExpansion(add, cost) {
+  if(!spendCoin(cost,'衣櫃擴充')) return;
+  wardrobeLimit += add; saveProgress(); updateCoinUI();
+  showToast('✅ 衣櫃擴充到 ' + wardrobeLimit + ' 件！');
+}
+
+function buyAvatar(emoji, cost, btnId) {
+  if(ownedAvatars.indexOf(emoji) >= 0) {
+    userAvatar = emoji; saveProgress(); updateCoinUI(); updateBanner();
+    renderShop();
+    return;
+  }
+  if(!spendCoin(cost,'購買頭像')) return;
+  ownedAvatars.push(emoji); userAvatar = emoji;
+  saveProgress(); updateCoinUI(); updateBanner();
+  renderShop();
+}
+
+// ═══ NAV ═══
+function goNav(name) {
+  document.querySelectorAll('.view').forEach(function(v){ v.classList.remove('active'); });
+  document.querySelectorAll('.nb').forEach(function(b){ b.classList.remove('active'); });
+  var view = document.getElementById('view-' + name);
+  if(view) view.classList.add('active');
+  var navMap = {wardrobe:0,styling:1,saved:2,catalog:3,shop:4};
+  var nbs = document.querySelectorAll('.nb');
+  if(navMap[name] !== undefined && nbs[navMap[name]]) nbs[navMap[name]].classList.add('active');
+  if(name === 'saved') renderSaved();
+  if(name === 'shop') { renderMissions(); renderShop(); }
+}
+
+function goShop() { goNav('shop'); }
+
+// ═══ NAME + BANNER ═══
+function getGreeting() {
+  var h = new Date().getHours();
+  if(h < 6) return '深夜了 🌙';
+  if(h < 10) return '早安 ☀️';
+  if(h < 12) return '上午好 🌤';
+  if(h < 14) return '午安 ☀️';
+  if(h < 18) return '下午好 🌈';
+  if(h < 21) return '晚安 🌆';
+  return '夜深了 🌙';
+}
+
+function updateBanner() {
+  var ne = document.getElementById('wb-name');
+  var ge = document.getElementById('wb-greeting');
+  if(ne) ne.innerHTML = USER_NAME + ' <button class="name-edit-btn" onclick="openNameModal()">✏️</button>';
+  if(ge) ge.textContent = getGreeting();
+  updateCoinUI();
+}
+
+function openNameModal() {
+  document.getElementById('name-inp').value = USER_NAME;
+  var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
+  if(p.h) document.getElementById('p-height').value = p.h;
+  if(p.w) document.getElementById('p-weight').value = p.w;
+  if(p.g) document.getElementById('p-gender').value = p.g;
+
+  document.getElementById('name-ov').classList.add('show');
+}
+
+function saveName() {
+  var n = document.getElementById('name-inp').value.trim();
+  if(!n) return;
+  USER_NAME = n; localStorage.setItem('fitto_name', n);
+  var prof = {
+    h: document.getElementById('p-height').value,
+    w: document.getElementById('p-weight').value,
+    g: document.getElementById('p-gender').value
+  };
+  localStorage.setItem('fitto_profile', JSON.stringify(prof));
+  updateBanner();
+  closeModal('name-ov');
+}
+
+function closeModal(id) {
+  document.getElementById(id).classList.remove('show');
+}
+
+function getProfile() {
+  var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
+  return {
+    h: p.h || '175', w: p.w || '65', g: p.g || 'male'
+  };
+}
+
+// 頭像 emoji → 圖片生成用的人物描述
+var AVATAR_PROMPT_MAP = {
+  '👤': 'Asian person',
+  '☀️': 'handsome young Asian man with warm smile, clean-cut appearance, sunny vibe',
+  '🌙': 'handsome Korean-style Asian man, sharp jawline, K-pop idol look',
+  '⚡': 'rugged Asian man, strong features, street-style edge',
+  '🌸': 'beautiful Korean-style Asian woman, soft features, K-beauty look',
+  '🌺': 'cute Japanese-style Asian woman, natural beauty, fresh-faced',
+  '👑': 'elegant mature Asian woman, sophisticated, confident beauty',
+  '⭐': 'stylish Asian woman, fashionable, versatile trendy look',
+};
+
+function getAvatarPromptDesc() {
+  return AVATAR_PROMPT_MAP[userAvatar] || 'Asian person';
+}
+
+// ═══ CAT FILTER ═══
+var CAT_MAP = {'上衣':['上衣','T恤','襯衫','毛衣'],'外套':['外套','夾克'],'下身':['褲子','牛仔褲','裙子','洋裝'],'鞋子':['鞋子'],'配件':['配件']};
+
+function setCatFilter(cat, btn) {
+  activeCat = cat;
+  document.querySelectorAll('.cat-tab-btn').forEach(function(b){ b.classList.remove('active'); });
+  if(btn) btn.classList.add('active');
+  renderW();
+}
+
+function refreshCatTabs() {
+  var tabs = document.getElementById('cat-tabs');
+  if(!tabs) return;
+  var existing = {};
+  wardrobe.forEach(function(i){
+    for(var g in CAT_MAP){ if(CAT_MAP[g].indexOf(i.type) >= 0){ existing[g] = true; break; } }
+  });
+  var allA = activeCat === '全部' ? ' active' : '';
+  var html = `<button class="cat-tab-btn${allA}" onclick="setCatFilter('全部',this)">全部</button>`;
+  for(var cat in existing) {
+    var a = activeCat === cat ? ' active' : '';
+    html += "<button class=\"cat-tab-btn" + a + "\" onclick=\"setCatFilter('" + cat + "',this)\">" + cat + "</button>";
+  }
+  tabs.innerHTML = html;
+}
+
+// ═══ MISSIONS ═══
+function getMissions() {
+  var def = {
+    daily_login:{done:false,reward:3,label:'每日登入',icon:'📅',daily:true},
+    share_ig:{done:false,reward:3,label:'IG 分享穿搭',icon:'📸'},
+    share_fb:{done:false,reward:3,label:'FB 分享穿搭',icon:'👥'},
+    invite:{done:false,reward:3,label:'介紹好友使用',icon:'🤝'},
+    gen5:{done:false,reward:5,label:'生成 5 張穿搭圖',icon:'🎨'},
+    wardrobe5:{done:false,reward:5,label:'加入 5 件衣物',icon:'👔'},
+    ad:{done:false,reward:3,label:'看廣告得金幣',icon:'📺',soon:true}
+  };
+  var saved = JSON.parse(localStorage.getItem('fitto_missions') || '{}');
+  var today = new Date().toISOString().slice(0,10);
+  var lastDay = localStorage.getItem('fitto_mission_day');
+  if(lastDay !== today) {
+    localStorage.setItem('fitto_mission_day', today);
+    if(saved.daily_login) saved.daily_login.done = false;
+  }
+  for(var k in def) { if(saved[k] !== undefined) def[k].done = saved[k].done; }
+  return def;
+}
+
+function saveMissionsData(m) {
+  var data = {};
+  for(var k in m) data[k] = {done: m[k].done};
+  localStorage.setItem('fitto_missions', JSON.stringify(data));
+}
+
+function claimMission(key) {
+  var m = getMissions();
+  if(!m[key] || m[key].done) return;
+  if(m[key].soon) { alert('📺 廣告功能即將推出！'); return; }
+  if(key === 'share_ig') { window.open('https://www.instagram.com/','_blank'); }
+  if(key === 'share_fb') { window.open('https://www.facebook.com/sharer/sharer.php?u=https://4hyzc9kt57-spec.github.io/fitto','_blank'); }
+  if(key === 'invite') {
+    var txt = '推薦你試試 Fitto AI 穿搭！https://4hyzc9kt57-spec.github.io/fitto';
+    if(navigator.share) navigator.share({title:'Fitto',text:txt});
+    else if(navigator.clipboard) navigator.clipboard.writeText(txt).then(function(){ showToast('✅ 連結已複製！'); });
+  }
+  m[key].done = true;
+  saveMissionsData(m);
+  coins += m[key].reward;
+  saveProgress(); updateCoinUI();
+  showCoinAnim(m[key].reward);
+  renderMissions();
+}
+
+function checkAutoMissions() {
+  var m = getMissions();
+  var changed = false;
+  var totalImgs = parseInt(localStorage.getItem('fitto_total_imgs') || '0');
+  if(!m.gen5.done && totalImgs >= 5) { m.gen5.done = true; coins += 5; changed = true; showCoinAnim(5); }
+  if(!m.wardrobe5.done && wardrobe.length >= 5) { m.wardrobe5.done = true; coins += 5; changed = true; showCoinAnim(5); }
+  if(changed) { saveMissionsData(m); saveProgress(); updateCoinUI(); }
+}
+
+
+function renderShop() {
+  updateCoinUI();
+  var avatarMap = {'btn-sun':'☀️','btn-kr':'🌙','btn-rg':'⚡','btn-kg':'🌸','btn-jp':'🌺','btn-qu':'👑','btn-st':'⭐'};
+  var costMap   = {'btn-sun':15,'btn-kr':20,'btn-rg':25,'btn-kg':20,'btn-jp':15,'btn-qu':25,'btn-st':12};
+  for(var bid in avatarMap) {
+    var emoji = avatarMap[bid];
+    var btn = document.getElementById(bid);
+    if(!btn) continue;
+    if(ownedAvatars.indexOf(emoji) >= 0) {
+      if(userAvatar === emoji) {
+        btn.textContent = '✓ 使用中';
+        btn.className = 'si-owned';
+        btn.disabled = true;
+        btn.onclick = null;
+      } else {
+        btn.textContent = '切換使用';
+        btn.className = 'si-price';
+        btn.disabled = false;
+        btn.onclick = (function(e, b){ return function(){ buyAvatar(e, 0, b); }; })(emoji, bid);
+      }
+    } else {
+      btn.textContent = '🪙 ' + costMap[bid] + '枚';
+      btn.className = 'si-price';
+      btn.disabled = false;
+      btn.onclick = (function(e, c, b){ return function(){ buyAvatar(e, c, b); }; })(emoji, costMap[bid], bid);
+    }
+  }
+}
+
+function renderMissions() {
+  var el = document.getElementById('mission-list');
+  if(!el) return;
+  var m = getMissions();
+  var html = '';
+  for(var k in m) {
+    var v = m[k];
+    var tag = v.daily ? '<span style="font-size:.55rem;background:#E8F0EA;color:#4A7A58;padding:1px 5px;border-radius:4px;font-weight:700;margin-left:4px">每日</span>' : '';
+    var btn = v.done ? '<span class="mi-done">✓ 已領取</span>'
+      : v.soon ? `<button class="mi-soon" onclick="claimMission('${k}')">即將推出</button>`
+      : `<button class="mi-btn" onclick="claimMission('${k}')">領取 🪙</button>`;
+    html += `<div class="mission-item${v.done?' done':''}"><span class="mi-icon">${v.icon}</span><div class="mi-info"><div class="mi-title">${v.label}${tag}</div><div class="mi-sub">完成得 ${v.reward} 枚</div></div>${btn}</div>`;
+  }
+  el.innerHTML = html;
+}
+
+// ═══ DAILY FREE ═══
+var FREE_PER_DAY = 1;
+function getDailyUsed() { return parseInt(localStorage.getItem('fitto_daily_' + new Date().toISOString().slice(0,10)) || '0'); }
+function useDailyFree() {
+  var used = getDailyUsed();
+  if(used >= FREE_PER_DAY) return false;
+  localStorage.setItem('fitto_daily_' + new Date().toISOString().slice(0,10), String(used+1));
+  return true;
+}
+function getDailyLeft() { return Math.max(0, FREE_PER_DAY - getDailyUsed()); }
+function updateDailyUI() {
+  var el = document.getElementById('daily-badge');
+  if(!el) return;
+  var left = getDailyLeft();
+  el.textContent = left > 0 ? '🎁 今日免費 ' + left + ' 次' : '免費次數已用完';
+  el.style.color = left > 0 ? 'var(--green)' : 'var(--muted)';
+}
+function checkAndSpend() {
+  if(useDailyFree()) { updateDailyUI(); return true; }
+  return spendCoin(1,'生成穿搭圖');
+}
+
+// ═══ SHARE ═══
+function openShareModal(day, outfit, meta, imgSrc) {
+  document.getElementById('sh-day').textContent = day;
+  document.getElementById('sh-outfit').textContent = outfit;
+  document.getElementById('sh-meta').textContent = meta;
+  var ip = document.getElementById('sh-img');
+  ip.innerHTML = imgSrc ? '<img src="' + imgSrc + '">' : '<span style="color:rgba(255,255,255,.2);font-size:.75rem">生成圖片後分享效果更好</span>';
+  lastShare = {day:day, outfit:outfit, meta:meta, imgSrc:imgSrc};
+  document.getElementById('share-ov').classList.add('show');
+}
+function doNativeShare() {
+  var txt = (lastShare.day||'搭配') + '\n' + (lastShare.outfit||'') + '\n' + (lastShare.meta||'') + '\n\n#Fitto穿搭 #AI時尚\nhttps://4hyzc9kt57-spec.github.io/fitto';
+  if(navigator.share) navigator.share({title:'Fitto 穿搭',text:txt});
+  else doCopyShare();
+}
+function doCopyShare() {
+  var txt = 'Fitto AI 穿搭\n' + (lastShare.outfit||'') + '\n#Fitto穿搭\nhttps://4hyzc9kt57-spec.github.io/fitto';
+  if(navigator.clipboard) navigator.clipboard.writeText(txt).then(function(){ showToast('✅ 已複製到剪貼簿！'); });
+}
+
+// ═══ FASHION POSES ═══
+var POSES = ['standing with one hand in pocket, slight hip tilt, confident gaze','leaning against white wall, arms crossed loosely, editorial look','mid-stride walking pose, natural movement, dynamic energy','looking over shoulder, body angled 45 degrees, fashion editorial','sitting on stool, legs crossed, magazine cover pose','one hand touching collar, slight head tilt, high fashion vogue pose','standing with both hands in pockets, relaxed cool stance','turning back slightly, glancing over shoulder, mysterious editorial'];
+function getRandomPose() { return POSES[Math.floor(Math.random()*POSES.length)]; }
+
+
+async function geminiText(prompt, maxTokens) {
+  maxTokens = maxTokens || 800;
+  var key = localStorage.getItem('fitto_gemini_key') || '';
+  if(!key) throw new Error('請先設定 Gemini Key');
+  var preview = prompt.replace(/[\n\r]/g,' ').substring(0, 60);
+  apiLog('→ 文字請求: ' + preview + '…', 'prompt');
+  var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens,temperature:0.7}})
+  });
+  var d = await res.json();
+  if(d.error) {
+    apiLog('✗ 錯誤: ' + (d.error.message||'').substring(0,50), 'err');
+    throw new Error(d.error.message || 'Gemini error');
+  }
+  addTokenUsage((d.usageMetadata||{}).promptTokenCount||0,(d.usageMetadata||{}).candidatesTokenCount||0,'gemini_text');
+  return d.candidates[0].content.parts[0].text.trim();
+}
+async function geminiVision(prompt, b64, mime) {
+  mime = mime || 'image/jpeg';
+  var key = localStorage.getItem('fitto_gemini_key') || '';
+  if(!key) throw new Error('請先設定 Gemini Key');
+  apiLog('→ 圖片辨識 [' + mime + ']: ' + prompt.substring(0,40) + '…', 'prompt');
+  var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({contents:[{role:'user',parts:[{inlineData:{mimeType:mime,data:b64}},{text:prompt}]}],generationConfig:{maxOutputTokens:300,temperature:0.3}})
+  });
+  var d = await res.json();
+  if(d.error) {
+    apiLog('✗ 錯誤: ' + (d.error.message||'').substring(0,50), 'err');
+    throw new Error(d.error.message || 'Gemini error');
+  }
+  addTokenUsage((d.usageMetadata||{}).promptTokenCount||0,(d.usageMetadata||{}).candidatesTokenCount||0,'gemini_text');
+  return d.candidates[0].content.parts[0].text.trim();
+}
+
+const COLORS={'白色':'#F8F8F8','米白':'#F0E6D3','淺灰':'#D0D0D0','灰色':'#9E9E9E','深灰':'#4A4A4A','黑色':'#2C2C2C','淺藍':'#90CAF9','深藍':'#1A237E','卡其':'#C8A96E','棕色':'#6D4C41','紅色':'#EF5350','酒紅':'#7B1C2E','粉色':'#F48FB1','綠色':'#66BB6A','橄欖綠':'#6B7A3A','花紋/條紋':'repeating-linear-gradient(45deg,#ddd,#ddd 4px,#bbb 4px,#bbb 8px)'};
+const EMOJIS={'上衣':'👕','T恤':'👕','襯衫':'👔','毛衣':'🧶','外套':'🧥','夾克':'🧥','褲子':'👖','牛仔褲':'👖','裙子':'👗','洋裝':'👗','鞋子':'👟','配件':'👜'};
+const TOPS=['上衣','T恤','襯衫','毛衣'],BTMS=['褲子','牛仔褲','裙子','洋裝'],OUTS=['外套','夾克'];
+
+let wardrobe=JSON.parse(localStorage.getItem('fitto_w')||'[]');
+let saved=JSON.parse(localStorage.getItem('fitto_s')||'[]');
+let nid=parseInt(localStorage.getItem('fitto_id')||'1');
+let scanB64=null,scanMime="image/jpeg",catB64=null,catMime="image/jpeg",lastRes=null;
+
+
+const persist=()=>{localStorage.setItem('fitto_w',JSON.stringify(wardrobe));localStorage.setItem('fitto_s',JSON.stringify(saved));localStorage.setItem('fitto_id',String(nid))};
+
+// API KEY (Gemini only)
+function updApiUI(){var d=document.getElementById('api-dot'),s=document.getElementById('api-st');var gk=localStorage.getItem('fitto_gemini_key')||'';if(gk){d.className='dot on';d.style.background='var(--green)';s.textContent='Gemini Key ✓';}else{d.className='dot';d.style.background='';s.textContent='設定 Gemini Key';}}
+function openApiModal(){var gk=localStorage.getItem('fitto_gemini_key')||'';var inp=document.getElementById('gemini-key-inp');if(inp)inp.value=gk;document.getElementById('api-ov').classList.add('show');}
+function saveKey(){var gk=(document.getElementById('gemini-key-inp')||{}).value;if(gk){gk=gk.trim();if(gk)localStorage.setItem('fitto_gemini_key',gk);}updApiUI();document.getElementById('api-ov').classList.remove('show');}
+
+// NAV
+function sv(name,btn){goNav(name);}
+
+// WARDROBE
+function addItem(data){
+  if(wardrobe.length >= wardrobeLimit){ showLimitAlert(); return; }
+  let item;
+  if(data){ item=data; }
+  else {
+    item={id:nid++,type:document.getElementById('it').value,color:document.getElementById('ic').value,style:document.getElementById('is').value,note:document.getElementById('in').value.trim()};
+    document.getElementById('in').value='';
+  }
+  wardrobe.push(item);persist();renderW();
+}
+function delItem(id){wardrobe=wardrobe.filter(i=>i.id!==id);persist();renderW()}
+function openEdit(id){
+  const i=wardrobe.find(x=>x.id===id);if(!i)return;
+  document.getElementById('eid').value=id;
+  document.getElementById('et').value=i.type;document.getElementById('ec').value=i.color;
+  document.getElementById('es').value=i.style;document.getElementById('en').value=i.note||'';
+  document.getElementById('edit-ov').classList.add('show');
+}
+function confirmEdit(){
+  const id=parseInt(document.getElementById('eid').value),i=wardrobe.find(x=>x.id===id);if(!i)return;
+  i.type=document.getElementById('et').value;i.color=document.getElementById('ec').value;
+  i.style=document.getElementById('es').value;i.note=document.getElementById('en').value.trim();
+  persist();renderW();document.getElementById('edit-ov').classList.remove('show');
+}
+function renderW(){
+  refreshCatTabs(); updateCoinUI();
+  const g=document.getElementById('cgrid');
+  let ct=0,cb=0,co=0;
+  g.innerHTML='';
+  // Count all for stats
+  wardrobe.forEach(i=>{if(['上衣','T恤','襯衫','毛衣'].includes(i.type))ct++;if(['褲子','牛仔褲','裙子','洋裝'].includes(i.type))cb++;if(['外套','夾克'].includes(i.type))co++;});
+  document.getElementById('cnt-a').textContent=wardrobe.length;
+  document.getElementById('cnt-t').textContent=ct;
+  document.getElementById('cnt-b').textContent=cb;
+  document.getElementById('cnt-o').textContent=co;
+  const displayW = activeCat==='全部' ? wardrobe : wardrobe.filter(i=>(CAT_MAP[activeCat]||[]).includes(i.type));
+  if(!displayW.length){
+    g.innerHTML='<div class="empty"><div class="ei">'+(wardrobe.length?'🔍':'👗')+'</div><p>'+(wardrobe.length?'此分類沒有衣物':'衣櫃還是空的<br>拍照或手動新增第一件衣服！')+'</p></div>';
+  } else {
+    displayW.forEach(i=>{
+      if(TOPS.includes(i.type))ct++;if(BTMS.includes(i.type))cb++;if(OUTS.includes(i.type))co++;
+      const bg=COLORS[i.color]||'#1A3326', em=EMOJIS[i.type]||'👗';
+      const card=document.createElement('div'); card.className='cc';
+      const imgHtml=i.hasPhoto&&i.thumb
+        ? '<img src="'+i.thumb+'" style="width:100%;height:100%;object-fit:cover">'
+        : em;
+      const noteTag=i.note ? '<span class="ctag t-muted">'+i.note+'</span>' : '';
+      card.innerHTML=
+        '<div class="ci" style="background:'+bg+'">'+imgHtml+'<div class="ci-overlay"></div></div>'+
+        '<div class="cb">'+
+          '<div class="ctype">'+i.type+'</div>'+
+          '<div class="cname">'+i.color+'</div>'+
+          '<div class="ctags"><span class="ctag t-gold">'+i.style+'</span>'+noteTag+'</div>'+
+        '</div>'+
+        '<button class="btn-edit-c">✏️</button>'+
+        '<button class="btn-del-c">✕</button>';
+      // Use addEventListener to avoid quote/closure issues
+      card.querySelector('.btn-del-c').addEventListener('click', function(e){
+        e.stopPropagation(); delItem(i.id);
+      });
+      card.querySelector('.btn-edit-c').addEventListener('click', function(e){
+        e.stopPropagation(); openEdit(i.id);
+      });
+      g.appendChild(card);
+    });
+  }
+}
+
+// SCAN
+function openScan(m){scanB64=null;document.getElementById('pbox').innerHTML=`<div class="ph"><span>👗</span><p>拍照或選圖</p></div>`;document.getElementById('sres').classList.remove('show');document.getElementById('scaning').classList.remove('show');document.getElementById('scan-ov').classList.add('show');if(m==='camera')setTimeout(()=>document.getElementById('scam').click(),100)}
+function closeScan(){document.getElementById('scan-ov').classList.remove('show')}
+function handleScan(e){
+  const f=e.target.files[0];if(!f)return;
+  scanMime = f.type || 'image/jpeg'; // 記錄實際 mimeType
+  const r=new FileReader();
+  r.onload=ev=>{
+    const url=ev.target.result;
+    document.getElementById('pbox').innerHTML=`<img src="${url}">`;
+    scanB64=url.split(',')[1];
+    document.getElementById('sres').classList.remove('show');
+    aiScan();
+  };
+  r.readAsDataURL(f);
+  e.target.value='';
+}
+
+async function aiScan(){
+  if(!scanB64)return;
+  const ind=document.getElementById('scaning'),res=document.getElementById('sres');
+  ind.classList.add('show');res.classList.remove('show');
+  const gk = localStorage.getItem('fitto_gemini_key')||'';
+  if(!gk){await new Promise(r=>setTimeout(r,800));ind.classList.remove('show');fillScan({type:'上衣',color:'白色',style:'休閒',note:'（示範）'});return}
+  try{
+    const raw = await geminiVision('仔細觀察這件衣服，只回JSON不要其他文字：{"type":"上衣/T恤/襯衫/毛衣/外套/夾克/褲子/牛仔褲/裙子/洋裝/鞋子/配件","color":"白色/米白/淺灰/灰色/深灰/黑色/淺藍/深藍/卡其/棕色/紅色/酒紅/粉色/綠色/橄欖綠/花紋/條紋","style":"休閒/正式/商務/運動/韓系/簡約/街頭","note":"品牌或特徵10字內"}\n顏色判斷規則：深灰色或炭灰選deep gray=深灰；淺灰選淺灰；白色只在非常確定時選白色。', scanB64, scanMime);
+    fillScan(JSON.parse(raw.replace(/```json|```/g,'').trim()));
+  }catch(e){
+    apiLog('✗ 衣物辨識失敗: ' + (e.message||'').substring(0,50), 'err');
+    showToast('⚠️ 辨識失敗：' + (e.message||'未知錯誤').substring(0,30));
+    fillScan({type:'T恤',color:'白色',style:'休閒',note:'辨識失敗，請手動修改'});
+  }
+  finally{ind.classList.remove('show')}
+}
+function fillScan(r){const s=(id,v)=>{const e=document.getElementById(id);if([...e.options].find(o=>o.value===v))e.value=v};s('st',r.type);s('sc2',r.color);s('ss',r.style);document.getElementById('sn').value=r.note||'';document.getElementById('sres').classList.add('show')}
+function confirmScan(){
+  if(wardrobe.length >= wardrobeLimit){ showLimitAlert(); closeScan(); return; }
+  const item={id:nid++,type:document.getElementById('st').value,color:document.getElementById('sc2').value,style:document.getElementById('ss').value,note:document.getElementById('sn').value.trim(),hasPhoto:!!scanB64};
+  if(scanB64){
+    // Compress image via canvas before storing
+    const imgEl=new Image();
+    imgEl.onload=function(){
+      const canvas=document.createElement('canvas');
+      const MAX=200; // max 200px thumbnail
+      const ratio=Math.min(MAX/imgEl.width, MAX/imgEl.height, 1);
+      canvas.width=imgEl.width*ratio; canvas.height=imgEl.height*ratio;
+      canvas.getContext('2d').drawImage(imgEl,0,0,canvas.width,canvas.height);
+      item.thumb=canvas.toDataURL('image/jpeg',0.7);
+      wardrobe.push(item);persist();renderW();closeScan();
+    };
+    imgEl.onerror=function(){ wardrobe.push(item);persist();renderW();closeScan(); };
+    imgEl.src='data:image/jpeg;base64,'+scanB64;
+  } else {
+    wardrobe.push(item);persist();renderW();closeScan();
+  }
+}
+
+// GENERATE
+async function fetchTrend(sea) {
+  const seaLabel = sea.replace(/[🌸☀️🍂❄️]\s*/,'');
+  const year = new Date().getFullYear();
+  const prompt = `今是${year}年${seaLabel}季。請用繁體中文簡要列出目前最流行的5個穿搭趨勢（包含流行單品、色系、廓形），每項一行，格式：「趨勢名：簡短說明」。只列清單，不要加前言。`;
+  const raw = await geminiText(prompt, 300);
+  return raw.trim();
+}
+
+async function genOutfit(){
+  if(wardrobe.length<3){document.getElementById('wfew').classList.add('show');return}
+  document.getElementById('wfew').classList.remove('show');
+  const btn=document.getElementById('bgen');btn.classList.add('loading');btn.disabled=true;
+  const occ=document.getElementById('socc').value,sea=document.getElementById('ssea').value;
+  const trendOn = document.getElementById('trend-on').checked;
+  const trendInfoEl = document.getElementById('trend-info');
+  const trendTextEl = document.getElementById('trend-text');
+
+  // 隱藏舊潮流資訊
+  trendInfoEl.style.display = 'none';
+  trendTextEl.textContent = '';
+
+  let trendContext = '';
+  if(trendOn) {
+    btn.querySelector('.spinner').style.display = 'block';
+    try {
+      const trendRaw = await fetchTrend(sea);
+      trendContext = trendRaw;
+      // 顯示潮流資訊卡
+      trendTextEl.innerHTML = trendRaw.split('\n').map(l=>
+        l.trim() ? `<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05)">• ${l.replace(/^[·•\-\d.]+\s*/,'')}</div>` : ''
+      ).join('');
+      trendInfoEl.style.display = 'block';
+    } catch(e) {
+      trendContext = '';
+    }
+  }
+
+  const wj=JSON.stringify(wardrobe.map(i=>({id:i.id,type:i.type,color:i.color,style:i.style,...(i.note?{note:i.note}:{})})));
+  const trendSection = trendContext
+    ? `\n\n【當季流行趨勢參考】\n${trendContext}\n以上趨勢若衣櫃內有對應單品請優先選用；若無，可在tip中建議補充哪類單品。`
+    : '';
+  const prompt=`你是專業穿搭顧問。衣櫃：${wj}\n為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合生成工作日（週一到週五）5天搭配計劃。${trendSection}\n只回JSON，不要加任何說明：{"title":"主題","days":[{"day":"週一","outfit":"搭配描述","tip":"建議"},{"day":"週二","outfit":"搭配描述","tip":"建議"},{"day":"週三","outfit":"搭配描述","tip":"建議"},{"day":"週四","outfit":"搭配描述","tip":"建議"},{"day":"週五","outfit":"搭配描述","tip":"建議"}],"overall_note":"整體建議2句"}`;
+  try{
+    const raw = await geminiText(prompt, 1000);
+    // 先清除 code block 標記，再擷取 { } 之間的 JSON
+    const cleaned = raw.replace(/```json/g,'').replace(/```/g,'').trim();
+    const jsonStart = cleaned.indexOf('{');
+    const jsonEnd = cleaned.lastIndexOf('}');
+    if(jsonStart === -1 || jsonEnd === -1) throw new Error('回應中找不到 JSON：' + raw.substring(0,80));
+    const jsonStr = cleaned.substring(jsonStart, jsonEnd + 1);
+    apiLog('  JSON擷取: ' + jsonStr.substring(0,40) + '…', 'info');
+    const parsed = JSON.parse(jsonStr);
+    renderRes(parsed, 0, 0, occ, sea);
+  }catch(e){
+    apiLog('✗ 搭配生成失敗: ' + (e.message||'').substring(0,80), 'err');
+    showToast('⚠️ ' + (e.message||'生成失敗').substring(0,40));
+    renderRes({title:'示範：都市工作週',days:[{day:'週一',outfit:'白色襯衫＋深藍褲',tip:'清爽開啟新的一週'},{day:'週二',outfit:'米白上衣＋卡其褲',tip:'暖色系讓氣色更好'},{day:'週三',outfit:'黑色T恤＋牛仔褲',tip:'百搭基本款不出錯'},{day:'週四',outfit:'灰色毛衣＋深藍褲',tip:'週末前輕鬆過渡'},{day:'週五',outfit:'白色上衣＋裙子',tip:'Happy Friday！'}],overall_note:'中性色系為主，適合多種辦公場合。\n（示範模式—請設定 API Key 取得真實建議）'},0,0,occ,sea,true);
+  }finally{btn.classList.remove('loading');btn.disabled=false}
+}
+function renderRes(r,it,ot,occ,sea,isDemo=false){
+  document.getElementById('rtitle').textContent=r.title||'本週搭配';
+  document.getElementById('rmeta').textContent=`${sea.replace(/[🌸☀️🍂❄️]\s*/,'')} · ${occ}`;
+  // Token badge: show Claude + image cost estimate
+  const claudeTok=it+ot;
+  const imgCost=localStorage.getItem('fitto_gemini_key')?'Gemini ✓':'未設 Key';
+  document.getElementById('rtok').innerHTML=isDemo
+    ? '示範模式'
+    : `<span style="display:block">${claudeTok} tok</span><span style="font-size:0.6rem;color:var(--muted)">圖片:${imgCost}</span>`;
+  if(!isDemo) addTokenUsage(it, ot, 'gemini_text');
+
+  document.getElementById('wscroll').innerHTML=(r.days||[]).map((d,idx)=>`
+    <div class="dc" id="dc-${idx}">
+      <div class="dn">${d.day}</div>
+      <div class="do" id="outfit-${idx}">${d.outfit}</div>
+      <div class="dt">${d.tip}</div>
+      <div class="img-box" id="imgbox-${idx}">
+        <button class="btn-gen-img" onclick="genImg(${idx},'${d.outfit.replace(/'/g,'\'')}','${occ}','${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}')">
+          🎨 生成示意圖
+        </button>
+      </div>
+    </div>`).join('');
+
+  document.getElementById('onote').textContent=r.overall_note||'';
+  document.getElementById('rcard').classList.add('show');
+  lastRes={...r,occ,sea,at:new Date().toLocaleDateString('zh-TW')};
+}
+
+
+// ═══ 衣物 REFERENCE 查找 ═══
+function findOutfitRefs(outfitText) {
+  // 從 outfit 描述文字反查衣櫃中有縮圖的單品，最多回傳 2 件
+  var refs = [];
+  var checked = new Set();
+  wardrobe.forEach(function(item) {
+    if(refs.length >= 2) return;
+    if(!item.thumb || !item.hasPhoto) return;
+    if(checked.has(item.id)) return;
+    // 用顏色 + 種類去 match outfit 文字
+    var keywords = [item.color, item.type, item.note].filter(Boolean);
+    var matched = keywords.some(function(kw) {
+      return kw && outfitText.indexOf(kw) !== -1;
+    });
+    if(matched) {
+      refs.push(item);
+      checked.add(item.id);
+    }
+  });
+  return refs;
+}
+// Demo outfit images (SVG placeholders matching outfit colors)
+const DEMO_IMGS = [
+  'https://placehold.co/280x360/1A3326/C9A550?text=👗+Demo+Look',
+  'https://placehold.co/280x360/1A2A20/E8C96A?text=✨+Outfit+Demo',
+  'https://placehold.co/280x360/142318/C9A550?text=🧥+Style+Demo',
+  'https://placehold.co/280x360/0F2418/4CAF7D?text=👔+Look+Demo',
+  'https://placehold.co/280x360/1C2E20/C9A550?text=👕+Outfit',
+  'https://placehold.co/280x360/162A1C/E8C96A?text=🌸+Style',
+  'https://placehold.co/280x360/1A3326/4CAF7D?text=🎯+Look',
+];
+
+async function genImg(idx, outfit, occ, sea) {
+  const box = document.getElementById('imgbox-'+idx);
+  box.innerHTML = '<div class="img-loading"><div class="img-spinner"></div><span>生成中…</span></div>';
+  if(!checkAndSpend()){return;}
+
+  try {
+    const prof = getProfile();
+    const avatarDesc = getAvatarPromptDesc();
+    const seasonMap = {'春':'spring','夏':'summer','秋':'autumn','冬':'winter'};
+    const seaEn = seasonMap[sea] || sea;
+    const occEn = occ;
+
+    // 核心提示詞：聚焦服裝，人物由頭像決定
+    const imgPrompt = `Fashion lookbook photo. Person: ${avatarDesc}. Outfit: ${outfit}. Season: ${seaEn}, occasion: ${occEn}. Natural standing pose, neutral background, soft natural lighting, full outfit visible, high quality fashion photo.`;
+
+    apiLog('→ 生圖: ' + imgPrompt.substring(0, 60) + '…', 'prompt');
+    apiLog('  頭像:' + userAvatar + ' 服裝:' + outfit.substring(0,20), 'info');
+
+    const key = localStorage.getItem('fitto_gemini_key') || '';
+    if(!key) throw new Error('請先設定 Gemini Key');
+
+    // 頭像 reference
+    const avatarPhotoMap = {'☀️':'sunny','🌙':'korean','⚡':'rugged'};
+    const photoKey = avatarPhotoMap[userAvatar];
+    const avatarRefB64 = photoKey && AVATAR_IMGS[photoKey] ? AVATAR_IMGS[photoKey].split(',')[1] : null;
+
+    // 衣物 reference：從衣櫃找有照片的單品
+    const outfitRefs = findOutfitRefs(outfit);
+    const hasClothRef = outfitRefs.length > 0;
+
+    // 組合 requestParts
+    let requestParts = [];
+    let refNote = '';
+
+    if(avatarRefB64) {
+      requestParts.push({inlineData:{mimeType:'image/jpeg', data:avatarRefB64}});
+      refNote += '人物ref ';
+    }
+    outfitRefs.forEach(function(item, i) {
+      // thumb 是 data:image/jpeg;base64,xxxx 格式
+      const b64 = item.thumb.split(',')[1];
+      if(b64) {
+        requestParts.push({inlineData:{mimeType:'image/jpeg', data:b64}});
+        refNote += '衣物ref(' + item.color + item.type + ') ';
+      }
+    });
+
+    // 組合 prompt，有衣物 ref 時加入指示
+    let finalPrompt = imgPrompt;
+    if(avatarRefB64 && hasClothRef) {
+      finalPrompt = 'Image 1 is the person reference (use for face/appearance). Images 2+ are the actual clothing items to wear. ' + imgPrompt + ' The person must wear the exact clothing shown in the reference images.';
+    } else if(avatarRefB64) {
+      finalPrompt = 'Use the person in Image 1 as reference for face and appearance. ' + imgPrompt;
+    } else if(hasClothRef) {
+      finalPrompt = 'The person must wear the exact clothing items shown in the reference images. ' + imgPrompt;
+    }
+
+    requestParts.push({text: finalPrompt});
+
+    if(refNote) apiLog('  refs: ' + refNote.trim(), 'info');
+    if(hasClothRef) apiLog('  衣物ref ' + outfitRefs.length + '件: ' + outfitRefs.map(function(i){return i.color+i.type}).join(', '), 'ok');
+
+    const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=' + key;
+    const res = await fetch(endpoint, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({contents:[{role:'user',parts:requestParts}],generationConfig:{responseModalities:['TEXT','IMAGE']}})
+    });
+    const d = await res.json();
+    if(d.error) throw new Error(d.error.message || ('Error ' + d.error.code));
+    const candidate = (d.candidates||[])[0];
+    if(!candidate) throw new Error('無回應');
+    if(candidate.finishReason === 'SAFETY') throw new Error('內容被安全過濾');
+    const parts = (candidate.content||{}).parts || [];
+    const imgPart = parts.find(function(p){ return p.inlineData; });
+    if(!imgPart) throw new Error('未生成圖片');
+    addTokenUsage(0,0,'gemini_img');
+    const imgSrc = 'data:' + imgPart.inlineData.mimeType + ';base64,' + imgPart.inlineData.data;
+    // Track for missions
+    const tc = parseInt(localStorage.getItem('fitto_total_imgs')||'0') + 1;
+    localStorage.setItem('fitto_total_imgs', String(tc));
+    checkAutoMissions();
+    const metaTxt = (sea||'') + ' · ' + (occ||'');
+
+    // 儲存圖片供收藏用
+    if(lastRes && lastRes.days && lastRes.days[idx]) {
+      lastRes.days[idx].imgSrc = imgSrc;
+    }
+
+    const escapedSrc = imgSrc;
+    const debugId = 'dbg-'+idx;
+    const refBadgeHtml = hasClothRef
+      ? `<div style="font-size:.58rem;color:var(--green);font-weight:700;margin-bottom:4px">✓ 使用衣物照片 × ${outfitRefs.length}</div>`
+      : `<div style="font-size:.58rem;color:var(--muted);margin-bottom:4px">— 無衣物照片（文字描述）</div>`;
+    box.innerHTML = `<div class="outfit-img-wrap">
+      ${refBadgeHtml}
+      <img src="${imgSrc}" class="outfit-img" alt="穿搭示意圖" onclick="openImgFull(this.src)" style="cursor:zoom-in">
+      <div class="img-cost-note">🪙 -1</div>
+      <details style="margin:6px 0;font-size:.62rem;color:var(--muted)">
+        <summary style="cursor:pointer;color:var(--gold);font-weight:700;list-style:none">▸ 查看生成 Prompt</summary>
+        <div id="${debugId}" style="margin-top:6px;padding:8px;background:rgba(0,0,0,.3);border-radius:8px;line-height:1.6;word-break:break-all;white-space:pre-wrap;font-size:.6rem;color:#ccc;user-select:all">${imgPrompt}</div>
+      </details>
+      <div class="share-bar">
+        <button class="shr-btn shr-fb" onclick="shareToFB('${outfit.replace(/'/g,"\\'")}')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07z"/></svg>
+          <span>Facebook</span>
+        </button>
+        <button class="shr-btn shr-ig" onclick="shareToIG('${imgSrc}')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+          <span>Instagram</span>
+        </button>
+        <button class="shr-btn shr-save" onclick="saveImgLocal('${imgSrc}','fitto_${idx}')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>儲存相片</span>
+        </button>
+      </div>
+    </div>`;
+
+  } catch(e) {
+    apiLog('✗ 生圖失敗: ' + (e.message||'').substring(0,50), 'err');
+    box.innerHTML = `<div class="img-error">⚠️ 生成失敗<br><span>${e.message.substring(0,80)}</span><br><button class="btn-gen-img" onclick="genImg(${idx},'${outfit.replace(/'/g,"\'")}','${occ}','${sea}')">重試</button></div>`;
+  }
+}
+
+// 分享功能
+function shareToFB(outfit) {
+  var url = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent('https://4hyzc9kt57-spec.github.io/fitto') + '&quote=' + encodeURIComponent('今日穿搭：' + outfit + ' #Fitto穿搭');
+  window.open(url, '_blank');
+}
+function shareToIG(imgSrc) {
+  // IG 不支援直接帶圖分享，先儲存再提示
+  saveImgLocal(imgSrc, 'fitto_outfit');
+  showToast('📷 圖片已儲存，請至 IG 上傳！');
+}
+function saveImgLocal(src, name) {
+  var a = document.createElement('a');
+  a.href = src;
+  a.download = (name || 'fitto_outfit') + '.jpg';
+  document.body.appendChild(a);
+  a.click();
+  document.body.removeChild(a);
+  showToast('💾 圖片已儲存！');
+}
+
+function openImgFull(url) {
+  const ov=document.createElement('div');
+  ov.style.cssText='position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:9998;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px';
+  ov.innerHTML=`
+    <img src="${url}" style="max-width:96%;max-height:78vh;border-radius:14px;object-fit:contain">
+    <div style="display:flex;gap:12px">
+      <button onclick="saveImgLocal('${url}','fitto_outfit');event.stopPropagation()" style="padding:10px 22px;background:white;color:#111;border:none;border-radius:20px;font-weight:700;font-size:.82rem;cursor:pointer">💾 儲存到手機</button>
+      <button onclick="document.body.removeChild(this.closest('[style*=fixed]'))" style="padding:10px 22px;background:rgba(255,255,255,.15);color:white;border:none;border-radius:20px;font-weight:700;font-size:.82rem;cursor:pointer">✕ 關閉</button>
+    </div>
+    <div style="font-size:.6rem;color:rgba(255,255,255,.3)">點擊圖片外區域關閉</div>`;
+  ov.addEventListener('click', function(e){ if(e.target===ov) document.body.removeChild(ov); });
+  document.body.appendChild(ov);
+}
+
+// SAVE
+function saveOutfit(){
+  if(!lastRes)return;
+  // lastRes.days[n].imgSrc 已由 genImg 寫入
+  saved.unshift({...lastRes,sid:Date.now()});persist();
+  const b=document.getElementById('bsave');b.textContent='✅ 已收藏！';
+  setTimeout(()=>b.textContent='🔖 收藏這週工作搭配',2000);
+}
+function renderSaved(){
+  const w=document.getElementById('saved-wrap');
+  if(!saved.length){w.innerHTML=`<div class="empty"><div class="ei">🔖</div><p>還沒收藏的搭配<br>先去生成一週計劃吧！</p></div>`;return}
+  w.innerHTML=`<div class="saved-list">${saved.map(s=>`
+    <div class="si">
+      <div class="si-hd"><h3>${s.title}</h3><button class="btn-dls" onclick="delSaved(${s.sid})">刪除</button></div>
+      <div class="si-meta">${s.at||''} · ${(s.sea||'').replace(/[🌸☀️🍂❄️]\s*/,'')} · ${s.occ||''}</div>
+      <div class="si-prev">
+        ${(s.days||[]).map(d=>`
+          <div class="sp">
+            <div class="spd">${d.day}</div>
+            ${d.imgSrc ? `<img src="${d.imgSrc}" style="width:100%;border-radius:6px;margin:4px 0;object-fit:cover;max-height:100px;cursor:zoom-in" onclick="openImgFull(this.src)">` : ''}
+            <div class="spo">${d.outfit}</div>
+          </div>`).join('')}
+      </div>
+    </div>`).join('')}</div>`;
+}
+function delSaved(sid){saved=saved.filter(s=>s.sid!==sid);persist();renderSaved()}
+
+// CATALOG
+function handleCat(e){
+  const f=e.target.files[0];if(!f)return;
+  catMime = f.type || 'image/jpeg';
+  const r=new FileReader();
+  r.onload=ev=>{
+    catB64=ev.target.result.split(',')[1];
+    const img=document.getElementById('cat-preview');
+    img.src=ev.target.result;img.style.display='block';
+    document.getElementById('cat-btn-wrap').style.display='block';
+    document.getElementById('catres').classList.remove('show');
+  };
+  r.readAsDataURL(f);e.target.value='';
+}
+async function scanCat(){
+  if(!catB64)return;
+  const btn=document.getElementById('bcatscan');btn.disabled=true;btn.textContent='⏳ AI 分析中…';
+  let items=[];
+  try{
+    const raw = await geminiVision('分析服裝型錄找出所有服裝單品。只回JSON陣列：[{"name":"單品名","type":"種類","color":"主色","style":"風格","desc":"10字描述"},...最多8項]', catB64, catMime);
+    items=JSON.parse(raw.replace(/```json|```/g,'').trim());
+  }catch(e){items=[{name:'白色寬版T恤',type:'T恤',color:'白色',style:'休閒',desc:'棉質素色'},{name:'深藍直筒褲',type:'褲子',color:'深藍',style:'商務',desc:'挺版顯瘦'},{name:'米色輕薄外套',type:'外套',color:'米白',style:'簡約',desc:'春秋適穿'},{name:'條紋針織衫',type:'毛衣',color:'花紋/條紋',style:'韓系',desc:'橫條紋設計'}]}
+  finally{btn.disabled=false;btn.textContent='🔍 AI 分析型錄'}
+  renderCatItems(items);
+}
+function renderCatItems(items){
+  document.getElementById('catitems').innerHTML=items.map((i,idx)=>`<div class="cit"><div class="cit-info"><strong>${i.name}</strong><span>${i.type} · ${i.color} · ${i.style} · ${i.desc}</span></div><button class="btn-ca" onclick="addFromCat(${idx},'${i.type}','${i.color}','${i.style}','${i.name.replace(/'/g,"\\'")}',this)">加入衣櫃</button></div>`).join('');
+  document.getElementById('catres').classList.add('show');
+}
+function addFromCat(idx,type,color,style,name,btn){if(wardrobe.length>=wardrobeLimit){showLimitAlert();return;}wardrobe.push({id:nid++,type,color,style,note:name});persist();renderW();btn.textContent='✅ 已加入';btn.className='btn-ca added';btn.disabled=true}
+
+
+
+
+
+// ═══ API LOG ═══
+var apiLogs = [];
+function apiLog(msg, type) {
+  type = type || 'info';
+  var now = new Date();
+  var ts = now.getHours().toString().padStart(2,'0') + ':' +
+            now.getMinutes().toString().padStart(2,'0') + ':' +
+            now.getSeconds().toString().padStart(2,'0');
+  var entry = {ts: ts, msg: msg, type: type};
+  apiLogs.unshift(entry);
+  if(apiLogs.length > 30) apiLogs.pop();
+  var el = document.getElementById('tf-log');
+  if(!el) return;
+  el.innerHTML = apiLogs.map(function(e){
+    return '<div class="tf-log-entry ' + e.type + '">' +
+           '<span style="opacity:.5">' + e.ts + '</span> ' + e.msg + '</div>';
+  }).join('');
+}
+
+// ═══ 下載原始碼 ═══
+function downloadSource() {
+  var src = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  // 方法1: data URI 開新分頁，iOS 可長按儲存
+  var dataUri = 'data:text/plain;charset=utf-8,' + encodeURIComponent(src);
+  var w = window.open(dataUri, '_blank');
+  if(!w) {
+    // 方法2: 複製到剪貼簿
+    if(navigator.clipboard && navigator.clipboard.writeText) {
+      navigator.clipboard.writeText(src).then(function(){
+        showToast('✅ 已複製！請貼到編輯器存成 index.html');
+      });
+    } else {
+      var ta = document.createElement('textarea');
+      ta.value = src;
+      ta.style.cssText = 'position:fixed;top:0;left:0;opacity:0';
+      document.body.appendChild(ta);
+      ta.focus(); ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      showToast('✅ 已複製！請貼到編輯器存成 index.html');
+    }
+  } else {
+    showToast('📄 新分頁已開啟，長按頁面 → 儲存到檔案');
+  }
+}
+
+
+// ═══ 複製原始碼到剪貼簿 ═══
+function copySource() {
+  var src = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+  if(navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(src).then(function(){
+      showToast('✅ 已複製！去 GitHub 網頁貼上');
+    }).catch(function(){ fallbackCopy(src); });
+  } else {
+    fallbackCopy(src);
+  }
+}
+function fallbackCopy(src) {
+  var ta = document.createElement('textarea');
+  ta.value = src;
+  ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try {
+    document.execCommand('copy');
+    showToast('✅ 已複製！去 GitHub 網頁貼上');
+  } catch(e) {
+    showToast('⚠️ 複製失敗，請用部署按鈕');
+  }
+  document.body.removeChild(ta);
+}
+// ═══ 一鍵部署 ═══
+function openDeploy() {
+  var saved = localStorage.getItem('fitto_ghtoken') || '';
+  document.getElementById('deploy-token').value = saved;
+  document.getElementById('deploy-status').textContent = '';
+  document.getElementById('deploy-ov').classList.add('show');
+}
+
+async function doDeploy() {
+  var token = document.getElementById('deploy-token').value.trim();
+  if(!token) { showToast('請輸入 GitHub Token'); return; }
+  localStorage.setItem('fitto_ghtoken', token);
+
+  var btn = document.getElementById('deploy-btn');
+  var status = document.getElementById('deploy-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ 準備中…';
+  status.style.color = 'var(--muted)';
+  status.textContent = '產生部署工具…';
+
+  // 取得當前 HTML 原始碼
+  var src = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
+
+  // 產生獨立的部署頁面（可在任何 https 環境執行）
+  var deployPage = `<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fitto Deploy</title>
+<style>
+body{font-family:-apple-system,sans-serif;background:#0a0a0a;color:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;margin:0;padding:20px;box-sizing:border-box}
+h2{color:#C9A550;margin-bottom:8px}
+p{color:#888;font-size:.85rem;margin-bottom:24px;text-align:center}
+.status{font-size:.9rem;margin:16px 0;min-height:24px;text-align:center}
+.ok{color:#4CAF7D}.err{color:#E05252}.info{color:#C9A550}
+button{background:linear-gradient(135deg,#8A5C20,#C9904A);color:#fff;border:none;border-radius:14px;padding:14px 32px;font-size:1rem;font-weight:800;cursor:pointer;width:100%;max-width:320px}
+button:disabled{background:#333;cursor:not-allowed}
+</style>
+</head>
+<body>
+<h2>🚀 Fitto Deploy</h2>
+<p>點下方按鈕將 Fitto v12<br>部署到 GitHub Pages</p>
+<div class="status info" id="st">準備就緒</div>
+<button id="btn" onclick="deploy()">開始部署</button>
+<script>
+var TOKEN = '${token}';
+var SRC = decodeURIComponent(atob('${btoa(encodeURIComponent(src))}'));
+async function deploy() {
+  var btn = document.getElementById('btn');
+  var st = document.getElementById('st');
+  btn.disabled = true;
+  try {
+    st.className='status info'; st.textContent='① 取得檔案資訊…';
+    var r1 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',
+      {headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json'}});
+    var d1 = await r1.json();
+    if(!d1.sha) throw new Error(d1.message||'無法取得 SHA');
+    st.textContent='② 編碼中…';
+    var bytes = new TextEncoder().encode(SRC);
+    var binary=''; bytes.forEach(function(b){binary+=String.fromCharCode(b)});
+    var b64 = btoa(binary);
+    st.textContent='③ 上傳到 GitHub…';
+    var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
+      method:'PUT',
+      headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
+      body:JSON.stringify({message:'Deploy Fitto v12',content:b64,sha:d1.sha,branch:'main'})
+    });
+    var d2 = await r2.json();
+    if(d2.commit){
+      st.className='status ok'; st.textContent='✅ 部署成功！30秒後生效';
+      btn.textContent='✅ 完成';
+    } else {
+      throw new Error(d2.message||'部署失敗');
+    }
+  } catch(e) {
+    st.className='status err'; st.textContent='❌ '+e.message.substring(0,60);
+    btn.disabled=false; btn.textContent='重試';
+  }
+}
+<\/script>
+</body>
+</html>`;
+
+  // 用 data URI 開新分頁，這個頁面是 https-ready 的獨立工具
+  var encoded = 'data:text/html;charset=utf-8,' + encodeURIComponent(deployPage);
+  status.textContent = '✅ 請在新分頁點「開始部署」';
+  status.style.color = 'var(--green)';
+  btn.disabled = false;
+  btn.textContent = '🚀 開啟部署工具';
+  btn.onclick = function() { window.open(encoded, '_blank'); };
+  window.open(encoded, '_blank');
+}
+
+// ═══ TOKEN COUNTER ═══
+let tokenStats = JSON.parse(localStorage.getItem('fitto_tokens') || '{"text":0,"img":0,"cost_twd":0}');
+const USD_TO_TWD = 32;  // 匯率
+
+function saveTokenStats() {
+  localStorage.setItem('fitto_tokens', JSON.stringify(tokenStats));
+}
+
+function addTokenUsage(inputTok, outputTok, type='gemini_text') {
+  if(type === 'gemini_text' || type === 'claude') {
+    const usd = (inputTok * 0.0000003) + (outputTok * 0.0000025);
+    tokenStats.text = (tokenStats.text || 0) + (inputTok + outputTok);
+    tokenStats.cost_twd = (tokenStats.cost_twd || 0) + (usd * USD_TO_TWD);
+    const totalTok = inputTok + outputTok;
+    const twd = (usd * USD_TO_TWD).toFixed(4);
+    document.getElementById('tf-last').textContent = totalTok > 0 ? `文字 +${totalTok} tok` : '文字請求';
+    apiLog('✓ 文字 in:' + inputTok + ' out:' + outputTok + ' NT$' + twd, 'ok');
+  } else if(type === 'gemini_img') {
+    tokenStats.img += 1;
+    tokenStats.cost_twd = (tokenStats.cost_twd || 0) + (0.039 * USD_TO_TWD);
+    document.getElementById('tf-last').textContent = `圖片 +1 張 (NT$${(0.039*USD_TO_TWD).toFixed(2)})`;
+    apiLog('✓ 圖片生成 NT$' + (0.039*USD_TO_TWD).toFixed(2), 'ok');
+  }
+  saveTokenStats();
+  updateTokenUI();
+}
+
+function updateTokenUI() {
+  const textEl = document.getElementById('tf-text');
+  if(textEl) textEl.textContent = (tokenStats.text || 0).toLocaleString() + ' tok';
+  document.getElementById('tf-img').textContent = tokenStats.img + ' 張';
+  document.getElementById('tf-cost').textContent = 'NT$' + (tokenStats.cost_twd || 0).toFixed(2);
+}
+
+function resetTokenCount() {
+  if(!confirm('確定要重置所有 Token 計數？')) return;
+  tokenStats = {text:0, img:0, cost_twd:0};
+  apiLogs = [];
+  var logEl = document.getElementById('tf-log');
+  if(logEl) logEl.innerHTML = '';
+  saveTokenStats(); updateTokenUI();
+  document.getElementById('tf-last').textContent = '已重置';
+}
+
+let tfCollapsed = false;
+function toggleTokenFloat() {
+  tfCollapsed = !tfCollapsed;
+  const el = document.getElementById('token-float');
+  el.classList.toggle('collapsed', tfCollapsed);
+  document.getElementById('tf-toggle').textContent = tfCollapsed ? '▸' : '▾';
+}
+
+// ═══ GOOGLE OAUTH ═══
+// OAuth config - user needs to set their own Client ID for deployment
+
+
+
+
+
+
+// ═══ UNIQLO 2026 春夏型錄資料 ═══
+const UQ_CATALOG = [
+  // ── UNIQLO:C 系列 (Clare Waight Keller) ──
+  {id:'uc1', name:'粉紫色緞面套裝上衣', type:'上衣', color:'粉色', style:'簡約', line:'UNIQLO:C', gender:'女裝', season:'春夏', desc:'緞面質感，粉紫色調'},
+  {id:'uc2', name:'天藍色緞面套裝長褲', type:'褲子', color:'淺藍', style:'簡約', line:'UNIQLO:C', gender:'女裝', season:'春夏', desc:'套裝款，同色系搭配'},
+  {id:'uc3', name:'紅色羅紋米蘭針織上衣', type:'毛衣', color:'紅色', style:'簡約', line:'UNIQLO:C', gender:'女裝', season:'春夏', desc:'羅紋米蘭針織，亮紅色點綴'},
+  {id:'uc4', name:'白色寬版棉質洋裝', type:'洋裝', color:'白色', style:'簡約', line:'UNIQLO:C', gender:'女裝', season:'春夏', desc:'結構式袖型，附腰帶'},
+  {id:'uc5', name:'黏膠纖維網眼T恤', type:'T恤', color:'白色', style:'簡約', line:'UNIQLO:C', gender:'女裝', season:'春夏', desc:'透氣網眼材質，輕薄涼爽'},
+  {id:'uc6', name:'UNIQLO:C 托特包', type:'配件', color:'米白', style:'簡約', line:'UNIQLO:C', gender:'女裝', season:'春夏', desc:'超輕量設計，大容量'},
+  {id:'uc7', name:'復古運動鞋', type:'鞋子', color:'白色', style:'休閒', line:'UNIQLO:C', gender:'女裝', season:'春夏', desc:'經典復古廓形'},
+  {id:'uc8', name:'帆船鞋', type:'鞋子', color:'米白', style:'簡約', line:'UNIQLO:C', gender:'女裝', season:'春夏', desc:'天然皮革，百搭款'},
+
+  // ── JW Anderson 聯名系列 ──
+  {id:'jw1', name:'牛津布短袖襯衫（黃色）', type:'襯衫', color:'粉色', style:'韓系', line:'JW Anderson', gender:'女裝', season:'春夏', desc:'直筒裁剪，6色可選'},
+  {id:'jw2', name:'牛津布短袖襯衫（粉色）', type:'襯衫', color:'粉色', style:'韓系', line:'JW Anderson', gender:'女裝', season:'春夏', desc:'短版廓形，首次聯名款'},
+  {id:'jw3', name:'防風短版外套', type:'外套', color:'白色', style:'休閒', line:'JW Anderson', gender:'女裝', season:'春夏', desc:'防潑水加工，可調節下擺'},
+  {id:'jw4', name:'JWA LOGO棉質Polo衫（白）', type:'上衣', color:'白色', style:'休閒', line:'JW Anderson', gender:'男裝', season:'春夏', desc:'棉質快乾，20色可選'},
+  {id:'jw5', name:'JWA LOGO棉質Polo衫（藍）', type:'上衣', color:'深藍', style:'休閒', line:'JW Anderson', gender:'男裝', season:'春夏', desc:'棉質快乾，JWA標誌'},
+  {id:'jw6', name:'JWA設計T恤', type:'T恤', color:'白色', style:'街頭', line:'JW Anderson', gender:'男裝', season:'春夏', desc:'設計師印花，10色'},
+  {id:'jw7', name:'棉麻工裝短褲', type:'褲子', color:'卡其', style:'休閒', line:'JW Anderson', gender:'男裝', season:'春夏', desc:'棉麻混紡，多口袋'},
+  {id:'jw8', name:'中性拉鍊夾克', type:'夾克', color:'米白', style:'街頭', line:'JW Anderson', gender:'男裝', season:'春夏', desc:'復古工裝風格，中性設計'},
+  {id:'jw9', name:'條紋針織短袖Polo', type:'上衣', color:'花紋/條紋', style:'休閒', line:'JW Anderson', gender:'男裝', season:'春夏', desc:'英倫海軍風橫條紋'},
+
+  // ── LifeWear 基本系列 女裝 ──
+  {id:'lw1', name:'AIRism棉質V領T恤', type:'T恤', color:'白色', style:'簡約', line:'LifeWear', gender:'女裝', season:'春夏', desc:'AIRism涼感技術'},
+  {id:'lw2', name:'AIRism棉質T恤（黑）', type:'T恤', color:'黑色', style:'簡約', line:'LifeWear', gender:'女裝', season:'春夏', desc:'AIRism涼感技術'},
+  {id:'lw3', name:'輕薄防曬外套', type:'外套', color:'米白', style:'簡約', line:'LifeWear', gender:'女裝', season:'春夏', desc:'UPF50+ 防曬，可折疊'},
+  {id:'lw4', name:'亞麻混紡寬褲', type:'褲子', color:'米白', style:'簡約', line:'LifeWear', gender:'女裝', season:'春夏', desc:'透氣亞麻，鬆緊腰帶'},
+  {id:'lw5', name:'彈性牛仔寬褲', type:'牛仔褲', color:'淺藍', style:'休閒', line:'LifeWear', gender:'女裝', season:'春夏', desc:'Baggy Curve 新廓形'},
+  {id:'lw6', name:'Baggy牛仔褲（深藍）', type:'牛仔褲', color:'深藍', style:'休閒', line:'LifeWear', gender:'女裝', season:'春夏', desc:'UNIQLO牛仔創新中心'},
+  {id:'lw7', name:'縐褶雪紡長裙', type:'裙子', color:'米白', style:'簡約', line:'LifeWear', gender:'女裝', season:'春夏', desc:'輕盈縐褶，優雅飄逸'},
+  {id:'lw8', name:'抗UV防曬帽', type:'配件', color:'米白', style:'簡約', line:'LifeWear', gender:'女裝', season:'春夏', desc:'UPF50+ 寬帽簷'},
+
+  // ── LifeWear 基本系列 男裝 ──
+  {id:'lm1', name:'AIRism棉質圓領T恤（白）', type:'T恤', color:'白色', style:'簡約', line:'LifeWear', gender:'男裝', season:'春夏', desc:'AIRism涼感，柔軟親膚'},
+  {id:'lm2', name:'AIRism棉質T恤（灰）', type:'T恤', color:'灰色', style:'簡約', line:'LifeWear', gender:'男裝', season:'春夏', desc:'AIRism涼感技術'},
+  {id:'lm3', name:'亞麻混紡寬版短袖襯衫', type:'襯衫', color:'米白', style:'休閒', line:'LifeWear', gender:'男裝', season:'春夏', desc:'亞麻透氣，寬鬆版型'},
+  {id:'lm4', name:'輕薄防曬外套（男）', type:'外套', color:'灰色', style:'簡約', line:'LifeWear', gender:'男裝', season:'春夏', desc:'UPF50+，極輕量'},
+  {id:'lm5', name:'棉麻錐形褲', type:'褲子', color:'卡其', style:'商務', line:'LifeWear', gender:'男裝', season:'春夏', desc:'棉麻混紡，修身錐形'},
+  {id:'lm6', name:'Baggy牛仔褲（男）', type:'牛仔褲', color:'深藍', style:'休閒', line:'LifeWear', gender:'男裝', season:'春夏', desc:'新寬鬆廓形，JW Anderson版'},
+  {id:'lm7', name:'快乾短褲', type:'褲子', color:'卡其', style:'運動', line:'LifeWear', gender:'男裝', season:'春夏', desc:'Dry-EX速乾材質'},
+  {id:'lm8', name:'UV Protection太陽眼鏡', type:'配件', color:'黑色', style:'簡約', line:'LifeWear', gender:'男裝', season:'春夏', desc:'UV400，25%藍光阻隔'},
+];
+
+let catFilter = 'all';
+let addedUQIds = new Set();
+
+function switchCatTab(tab) {
+  document.getElementById('cat-uniqlo').style.display = tab==='uniqlo' ? 'block' : 'none';
+  document.getElementById('cat-upload-panel').style.display = tab==='upload' ? 'block' : 'none';
+  document.getElementById('tab-uniqlo').classList.toggle('active', tab==='uniqlo');
+  document.getElementById('tab-upload').classList.toggle('active', tab==='upload');
+}
+
+function filterCat(filter, btn) {
+  catFilter = filter;
+  document.querySelectorAll('.cat-filter').forEach(b=>b.classList.remove('active'));
+  btn.classList.add('active');
+  renderUQCatalog();
+}
+
+const LINE_BADGE = {
+  'UNIQLO:C': '<span class="uq-badge badge-c">UNIQLO:C</span>',
+  'JW Anderson': '<span class="uq-badge badge-jw">JW Anderson</span>',
+  'LifeWear': '<span class="uq-badge badge-lw">LifeWear</span>',
+};
+const GENDER_COLOR = {'女裝':'#F48FB1','男裝':'#90CAF9'};
+const TYPE_EMOJI = {'上衣':'👕','T恤':'👕','襯衫':'👔','毛衣':'🧶','外套':'🧥','夾克':'🧥','褲子':'👖','牛仔褲':'👖','裙子':'👗','洋裝':'👗','鞋子':'👟','配件':'👜'};
+const BG_COLOR = {'白色':'#F5F5F5','米白':'#F0E6D3','淺灰':'#D0D0D0','灰色':'#9E9E9E','深灰':'#4A4A4A','黑色':'#333','淺藍':'#90CAF9','深藍':'#1A237E','卡其':'#C8A96E','棕色':'#6D4C41','紅色':'#EF5350','酒紅':'#7B1C2E','粉色':'#F48FB1','綠色':'#66BB6A','橄欖綠':'#6B7A3A','花紋/條紋':'repeating-linear-gradient(45deg,#ddd,#ddd 4px,#bbb 4px,#bbb 8px)'};
+
+function renderUQCatalog() {
+  const list = document.getElementById('uq-list');
+  let items = UQ_CATALOG;
+  if(catFilter !== 'all') {
+    if(catFilter === '女裝' || catFilter === '男裝') items = items.filter(i=>i.gender===catFilter);
+    else items = items.filter(i=>i.line===catFilter);
+  }
+
+  // Group by line
+  const groups = {};
+  items.forEach(i=>{
+    if(!groups[i.line]) groups[i.line] = [];
+    groups[i.line].push(i);
+  });
+
+  list.innerHTML = Object.entries(groups).map(([line, its])=>`
+    <div class="uq-section">
+      <div class="uq-section-title">${line} ${LINE_BADGE[line]||''}</div>
+      <div class="uq-grid">
+        ${its.map(i=>{
+          const added = addedUQIds.has(i.id);
+          const iconBg = BG_COLOR[i.color] || '#333';
+          const emoji = TYPE_EMOJI[i.type] || '👗';
+          return `<div class="uq-item" id="uqitem-${i.id}">
+            <div class="uq-icon" style="background:${iconBg}">${emoji}</div>
+            <div class="uq-info">
+              <div class="uq-name">${i.name}</div>
+              <div class="uq-meta">
+                <span>${i.type}</span>
+                <span>·</span>
+                <span>${i.color}</span>
+                <span>·</span>
+                <span style="color:${GENDER_COLOR[i.gender]||'var(--muted)'}">${i.gender}</span>
+              </div>
+              <div class="uq-meta" style="margin-top:2px">${i.desc}</div>
+            </div>
+            <button class="uq-add-btn${added?' added':''}" onclick="addUQItem('${i.id}',this)">${added?'✓ 已加入':'加入衣櫃'}</button>
+          </div>`;
+        }).join('')}
+      </div>
+    </div>`).join('');
+}
+
+function addUQItem(id, btn) {
+  const item = UQ_CATALOG.find(i=>i.id===id);
+  if(!item || addedUQIds.has(id)) return;
+  if(wardrobe.length >= wardrobeLimit){ showLimitAlert(); return; }
+  wardrobe.push({id:nid++, type:item.type, color:item.color, style:item.style, note:item.name});
+  addedUQIds.add(id);
+  persist(); renderW();
+  btn.textContent='✓ 已加入'; btn.classList.add('added');
+}
+
+// INIT
+document.addEventListener('DOMContentLoaded', function() {
+  // Check lock
+  if(sessionStorage.getItem('fk')==='1') { var ls=document.getElementById('lock-screen'); if(ls)ls.style.display='none'; }
+  try {
+    renderW();
+    updApiUI();
+    renderUQCatalog();
+    updateTokenUI();
+    updateBanner();
+    updateCoinUI();
+    updateDailyUI();
+    checkAutoMissions();
+    setTimeout(renderMissions, 300);
+  } catch(e) { console.error('Init error:', e.message); }
+});
+</script>
+</body>
+</html>
