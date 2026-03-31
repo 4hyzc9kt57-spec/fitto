@@ -1829,16 +1829,63 @@ function genImgSafe(idx) {
   genImg(idx, data.outfit, data.occ, data.sea);
 }
 
+async function requestGeminiImage(parts, key) {
+  const models = ['gemini-3.1-flash-image-preview', 'gemini-2.5-flash-image'];
+  let lastErr = null;
+
+  for(const model of models) {
+    try {
+      apiLog('→ 圖片模型: ' + model, 'info');
+      const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key;
+      const res = await fetch(endpoint, {
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          contents:[{role:'user',parts:parts}],
+          generationConfig:{responseModalities:['IMAGE']}
+        })
+      });
+      const d = await res.json();
+      if(d.error) throw new Error(d.error.message || ('Error ' + d.error.code));
+
+      const candidate = (d.candidates||[])[0];
+      if(!candidate) throw new Error('模型沒有回傳候選內容');
+      if(candidate.finishReason === 'SAFETY') throw new Error('內容被安全過濾');
+
+      const responseParts = (candidate.content||{}).parts || [];
+      const imgPart = responseParts.find(function(part){ return part.inlineData && part.inlineData.data; });
+      if(imgPart) {
+        return {
+          model: model,
+          mimeType: imgPart.inlineData.mimeType,
+          data: imgPart.inlineData.data
+        };
+      }
+
+      const textPart = responseParts.find(function(part){ return part.text; });
+      throw new Error(textPart && textPart.text ? textPart.text.substring(0,120) : '模型未回傳圖片');
+    } catch(err) {
+      lastErr = err;
+      apiLog('✗ 圖片模型失敗 ' + model + ': ' + (err.message||'').substring(0,60), 'err');
+    }
+  }
+
+  throw lastErr || new Error('圖片模型沒有可用回應');
+}
+
 async function genImg(idx, outfit, occ, sea) {
   const box = document.getElementById('imgbox-'+idx);
   box.innerHTML = '<div class="img-loading"><div class="img-spinner"></div><span>生成中…</span></div>';
-  if(!checkAndSpend()){return;}
 
   try {
-    const prof = getProfile();
+    const key = localStorage.getItem('fitto_gemini_key') || '';
+    if(!key) throw new Error('請先設定 Gemini Key');
+    if(!checkAndSpend()){return;}
+
     const avatarDesc = getAvatarPromptDesc();
     const seasonMap = {'春':'spring','夏':'summer','秋':'autumn','冬':'winter'};
-    const seaEn = seasonMap[sea] || sea;
+    const seaClean = String(sea || '').replace(/[🌸☀️🍂❄️]\s*/,'');
+    const seaEn = seasonMap[seaClean] || seaClean;
     const occEn = occ;
 
     // 核心提示詞：聚焦服裝，人物由頭像決定
@@ -1846,9 +1893,6 @@ async function genImg(idx, outfit, occ, sea) {
 
     apiLog('→ 生圖: ' + imgPrompt.substring(0, 60) + '…', 'prompt');
     apiLog('  頭像:' + userAvatar + ' 服裝:' + outfit.substring(0,20), 'info');
-
-    const key = localStorage.getItem('fitto_gemini_key') || '';
-    if(!key) throw new Error('請先設定 Gemini Key');
 
     // 頭像 reference
     const avatarPhotoMap = {'☀️':'sunny','🌙':'korean','⚡':'rugged'};
@@ -1891,26 +1935,15 @@ async function genImg(idx, outfit, occ, sea) {
     if(refNote) apiLog('  refs: ' + refNote.trim(), 'info');
     if(hasClothRef) apiLog('  衣物ref ' + outfitRefs.length + '件: ' + outfitRefs.map(function(i){return i.color+i.type}).join(', '), 'ok');
 
-    const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-image:generateContent?key=' + key;
-    const res = await fetch(endpoint, {
-      method:'POST', headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({contents:[{role:'user',parts:requestParts}],generationConfig:{responseModalities:['TEXT','IMAGE']}})
-    });
-    const d = await res.json();
-    if(d.error) throw new Error(d.error.message || ('Error ' + d.error.code));
-    const candidate = (d.candidates||[])[0];
-    if(!candidate) throw new Error('無回應');
-    if(candidate.finishReason === 'SAFETY') throw new Error('內容被安全過濾');
-    const parts = (candidate.content||{}).parts || [];
-    const imgPart = parts.find(function(p){ return p.inlineData; });
-    if(!imgPart) throw new Error('未生成圖片');
+    const imageResult = await requestGeminiImage(requestParts, key);
     addTokenUsage(0,0,'gemini_img');
-    const imgSrc = 'data:' + imgPart.inlineData.mimeType + ';base64,' + imgPart.inlineData.data;
+    const imgSrc = 'data:' + imageResult.mimeType + ';base64,' + imageResult.data;
     // Track for missions
     const tc = parseInt(localStorage.getItem('fitto_total_imgs')||'0') + 1;
     localStorage.setItem('fitto_total_imgs', String(tc));
     checkAutoMissions();
     const metaTxt = (sea||'') + ' · ' + (occ||'');
+    apiLog('✓ 生圖完成: ' + imageResult.model, 'ok');
 
     // 儲存圖片供收藏用
     if(lastRes && lastRes.days && lastRes.days[idx]) {
