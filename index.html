@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto v13 · AI 智能穿搭</title>
+<title>Fitto VB2 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -641,7 +641,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-  <div class="logo">Fitto <span class="logo-badge">v13</span></div>
+  <div class="logo">Fitto <span class="logo-badge">VB2</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
@@ -694,7 +694,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="fg"><label>種類</label><select id="it">
         <option>上衣</option><option>T恤</option><option>襯衫</option><option>毛衣</option>
         <option>外套</option><option>夾克</option><option>褲子</option><option>牛仔褲</option>
-        <option>裙子</option><option>洋裝</option><option>鞋子</option><option>配件</option>
+        <option>裙子</option><option>洋裝</option><option>鞋子</option><option>球鞋</option><option>皮鞋</option><option>靴子</option><option>包包</option><option>墨鏡</option><option>帽子</option><option>腰帶</option><option>配件</option>
       </select></div>
       <div class="fg"><label>顏色</label><select id="ic">
         <option>白色</option><option>米白</option><option>淺灰</option><option>灰色</option><option>深灰</option><option>黑色</option>
@@ -850,8 +850,8 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto v13 · 2026.03</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">v13 修正週計畫生成示意圖按鈕特殊字符錯誤</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VB2 · 2026.03</div>
+    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VB2 潮流導購卡 · 配件辨識擴充 · 雜誌質感生圖</div>
   </div>
 </div>
 
@@ -932,7 +932,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="fr"><div class="fg"><label>種類</label><select id="st">
         <option>上衣</option><option>T恤</option><option>襯衫</option><option>毛衣</option>
         <option>外套</option><option>夾克</option><option>褲子</option><option>牛仔褲</option>
-        <option>裙子</option><option>洋裝</option><option>鞋子</option><option>配件</option>
+        <option>裙子</option><option>洋裝</option><option>鞋子</option><option>球鞋</option><option>皮鞋</option><option>靴子</option><option>包包</option><option>墨鏡</option><option>帽子</option><option>腰帶</option><option>配件</option>
       </select></div>
       <div class="fg"><label>顏色</label><select id="sc2">
         <option>白色</option><option>米白</option><option>淺灰</option><option>灰色</option><option>深灰</option><option>黑色</option>
@@ -958,7 +958,7 @@ body{background:var(--bg);color:var(--ink);}
     <div class="fr"><div class="fg"><label>種類</label><select id="et">
       <option>上衣</option><option>T恤</option><option>襯衫</option><option>毛衣</option>
       <option>外套</option><option>夾克</option><option>褲子</option><option>牛仔褲</option>
-      <option>裙子</option><option>洋裝</option><option>鞋子</option><option>配件</option>
+      <option>裙子</option><option>洋裝</option><option>鞋子</option><option>球鞋</option><option>皮鞋</option><option>靴子</option><option>包包</option><option>墨鏡</option><option>帽子</option><option>腰帶</option><option>配件</option>
     </select></div>
     <div class="fg"><label>顏色</label><select id="ec">
       <option>白色</option><option>米白</option><option>淺灰</option><option>灰色</option><option>深灰</option><option>黑色</option>
@@ -1003,7 +1003,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-  <div class="lock-footer">Fitto v13 · Gemini Powered · 2026.03</div>
+  <div class="lock-footer">Fitto VB2 · Gemini Powered · 2026.03</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -1298,11 +1298,23 @@ var AVATAR_PROMPT_MAP = {
 };
 
 function getAvatarPromptDesc() {
-  return AVATAR_PROMPT_MAP[userAvatar] || 'Asian person';
+  var base = AVATAR_PROMPT_MAP[userAvatar] || 'Asian person';
+  var prof = getProfile();
+  var w = parseFloat(prof.w) || 65;
+  var h = parseFloat(prof.h) || 170;
+  var bmi = w / ((h/100) * (h/100));
+  var bodyDesc = '';
+  if(bmi >= 35)      bodyDesc = 'very heavy plus-size body, large belly, wide frame, obese build';
+  else if(bmi >= 30) bodyDesc = 'plus-size body, chubby figure, full round belly, heavy-set build';
+  else if(bmi >= 27) bodyDesc = 'slightly overweight, fuller figure, soft belly, stocky build';
+  else if(bmi >= 23) bodyDesc = 'average build, slightly full figure';
+  else if(bmi >= 18) bodyDesc = 'slim average build';
+  else               bodyDesc = 'slim lean build';
+  return base + ', ' + bodyDesc;
 }
 
 // ═══ CAT FILTER ═══
-var CAT_MAP = {'上衣':['上衣','T恤','襯衫','毛衣'],'外套':['外套','夾克'],'下身':['褲子','牛仔褲','裙子','洋裝'],'鞋子':['鞋子'],'配件':['配件']};
+var CAT_MAP = {'上衣':['上衣','T恤','襯衫','毛衣'],'外套':['外套','夾克'],'下身':['褲子','牛仔褲','裙子','洋裝'],'鞋子':['鞋子','球鞋','皮鞋','靴子'],'配件':['包包','墨鏡','帽子','腰帶','配件']};
 
 function setCatFilter(cat, btn) {
   activeCat = cat;
@@ -1472,7 +1484,18 @@ function doCopyShare() {
 }
 
 // ═══ FASHION POSES ═══
-var POSES = ['standing with one hand in pocket, slight hip tilt, confident gaze','leaning against white wall, arms crossed loosely, editorial look','mid-stride walking pose, natural movement, dynamic energy','looking over shoulder, body angled 45 degrees, fashion editorial','sitting on stool, legs crossed, magazine cover pose','one hand touching collar, slight head tilt, high fashion vogue pose','standing with both hands in pockets, relaxed cool stance','turning back slightly, glancing over shoulder, mysterious editorial'];
+var POSES = [
+  'standing with one hand in pocket, slight hip tilt, confident gaze, Vogue editorial pose',
+  'leaning against white wall, arms crossed loosely, high fashion magazine cover pose',
+  'mid-stride walking pose, natural movement, dynamic energy, fashion week runway style',
+  'looking over shoulder, body angled 45 degrees, Harper\'s Bazaar editorial',
+  'sitting on minimalist stool, legs crossed elegantly, luxury fashion magazine pose',
+  'one hand touching collar, slight head tilt, high fashion Vogue pose, sophisticated',
+  'standing with both hands in pockets, relaxed cool stance, GQ magazine style',
+  'turning back slightly, glancing over shoulder, mysterious editorial, Elle magazine',
+  'arms slightly away from body, showing full outfit, clean fashion lookbook pose',
+  'candid walking shot, caught mid-step, street style fashion editorial',
+];
 function getRandomPose() { return POSES[Math.floor(Math.random()*POSES.length)]; }
 
 
@@ -1541,7 +1564,7 @@ async function geminiVision(prompt, b64, mime) {
 }
 
 const COLORS={'白色':'#F8F8F8','米白':'#F0E6D3','淺灰':'#D0D0D0','灰色':'#9E9E9E','深灰':'#4A4A4A','黑色':'#2C2C2C','淺藍':'#90CAF9','深藍':'#1A237E','卡其':'#C8A96E','棕色':'#6D4C41','紅色':'#EF5350','酒紅':'#7B1C2E','粉色':'#F48FB1','綠色':'#66BB6A','橄欖綠':'#6B7A3A','花紋/條紋':'repeating-linear-gradient(45deg,#ddd,#ddd 4px,#bbb 4px,#bbb 8px)'};
-const EMOJIS={'上衣':'👕','T恤':'👕','襯衫':'👔','毛衣':'🧶','外套':'🧥','夾克':'🧥','褲子':'👖','牛仔褲':'👖','裙子':'👗','洋裝':'👗','鞋子':'👟','配件':'👜'};
+const EMOJIS={'上衣':'👕','T恤':'👕','襯衫':'👔','毛衣':'🧶','外套':'🧥','夾克':'🧥','褲子':'👖','牛仔褲':'👖','裙子':'👗','洋裝':'👗','鞋子':'👟','球鞋':'👟','皮鞋':'👞','靴子':'🥾','包包':'👜','墨鏡':'🕶️','帽子':'🧢','腰帶':'👔','配件':'💍'};
 const TOPS=['上衣','T恤','襯衫','毛衣'],BTMS=['褲子','牛仔褲','裙子','洋裝'],OUTS=['外套','夾克'];
 
 let wardrobe=JSON.parse(localStorage.getItem('fitto_w')||'[]');
@@ -1676,8 +1699,8 @@ async function aiScan(){
 }
 async function detectMainGarmentType(simpleMode){
   const prompt = simpleMode
-    ? '請只回答一個最接近的種類，不要回答無法辨識。從這張照片選出畫面中央、面積最大、最清楚的單品種類，只能從這些選：上衣、T恤、襯衫、毛衣、外套、夾克、褲子、牛仔褲、裙子、洋裝、鞋子、配件。若畫面主體是穿在人身上的下身，且看起來像 jeans / denim / 牛仔布、五口袋、撞色車線、手插前口袋的牛仔褲姿勢，優先回答牛仔褲。'
-    : '請只回答一個種類，不要解釋。目標是找出照片裡畫面中央、面積最大、最清楚的主要單品。只能從這些選：上衣、T恤、襯衫、毛衣、外套、夾克、褲子、牛仔褲、裙子、洋裝、鞋子、配件。若主體是穿在人身上的下身，只要看起來像 jeans / denim / 牛仔布、五口袋、撞色車線、手插前口袋的牛仔褲姿勢，就回答牛仔褲，不要回答褲子。';
+    ? '請只回答一個最接近的種類，不要回答無法辨識。從這張照片選出畫面中央、面積最大、最清楚的單品種類，只能從這些選：上衣、T恤、襯衫、毛衣、外套、夾克、褲子、牛仔褲、裙子、洋裝、鞋子、球鞋、皮鞋、靴子、包包、墨鏡、帽子、腰帶、配件。若畫面主體是穿在人身上的下身，且看起來像 jeans / denim / 牛仔布、五口袋、撞色車線、手插前口袋的牛仔褲姿勢，優先回答牛仔褲。'
+    : '請只回答一個種類，不要解釋。目標是找出照片裡畫面中央、面積最大、最清楚的主要單品。只能從這些選：上衣、T恤、襯衫、毛衣、外套、夾克、褲子、牛仔褲、裙子、洋裝、鞋子、球鞋、皮鞋、靴子、包包、墨鏡、帽子、腰帶、配件。若主體是穿在人身上的下身，只要看起來像 jeans / denim / 牛仔布、五口袋、撞色車線、手插前口袋的牛仔褲姿勢，就回答牛仔褲，不要回答褲子。';
   const raw = await geminiVision(prompt, scanB64, scanMime);
   const result = normalizeScanType(raw);
   if(!result) throw new Error('主體種類判斷失敗');
@@ -1689,7 +1712,7 @@ async function detectGarmentDetails(type){
 }
 function normalizeScanType(raw){
   const text = String(raw || '').replace(/```/g,'').trim();
-  const allowedTypes = ['上衣','T恤','襯衫','毛衣','外套','夾克','褲子','牛仔褲','裙子','洋裝','鞋子','配件'];
+  const allowedTypes = ['上衣','T恤','襯衫','毛衣','外套','夾克','褲子','牛仔褲','裙子','洋裝','鞋子','球鞋','皮鞋','靴子','包包','墨鏡','帽子','腰帶','配件'];
   for(let i=0;i<allowedTypes.length;i++){
     if(text.indexOf(allowedTypes[i]) !== -1) return allowedTypes[i];
   }
@@ -1735,7 +1758,7 @@ function parseScanResult(raw){
   throw new Error(text.substring(0,40) || '無法辨識');
 }
 async function fallbackScanResult(fallbackType){
-  const raw = await geminiVision('請不要回答無法辨識，也不要回 JSON。請從這張照片猜最接近的衣物資訊，並且只用一行格式回答：種類|顏色|風格|備註。種類只能是：上衣、T恤、襯衫、毛衣、外套、夾克、褲子、牛仔褲、裙子、洋裝、鞋子、配件。若是 denim / jeans / 牛仔布下身，種類必須回答牛仔褲。', scanB64, scanMime);
+  const raw = await geminiVision('請不要回答無法辨識，也不要回 JSON。請從這張照片猜最接近的衣物資訊，並且只用一行格式回答：種類|顏色|風格|備註。種類只能是：上衣、T恤、襯衫、毛衣、外套、夾克、褲子、牛仔褲、裙子、洋裝、鞋子、球鞋、皮鞋、靴子、包包、墨鏡、帽子、腰帶、配件。若是 denim / jeans / 牛仔布下身，種類必須回答牛仔褲。', scanB64, scanMime);
   const text = String(raw || '').replace(/```/g,'').trim();
   if(/無法辨識|看不清|cannot determine|unable to identify/i.test(text)) {
     throw new Error(text.substring(0,40));
@@ -1778,7 +1801,7 @@ function normalizeScanResult(r){
   else if(/bag|belt|cap|hat|accessor|帽|包|皮帶|配件/.test(clue)) type = '配件';
   else if(/pants|trouser|slacks|褲/.test(clue)) type = '褲子';
 
-  const allowedTypes = ['上衣','T恤','襯衫','毛衣','外套','夾克','褲子','牛仔褲','裙子','洋裝','鞋子','配件'];
+  const allowedTypes = ['上衣','T恤','襯衫','毛衣','外套','夾克','褲子','牛仔褲','裙子','洋裝','鞋子','球鞋','皮鞋','靴子','包包','墨鏡','帽子','腰帶','配件'];
   if(allowedTypes.indexOf(type) === -1) type = '上衣';
 
   return {
@@ -2080,10 +2103,29 @@ async function genOutfit(){
     try {
       const trendRaw = await fetchTrend(sea);
       trendContext = trendRaw;
-      // 顯示潮流資訊卡
-      trendTextEl.innerHTML = trendRaw.split('\n').map(l=>
-        l.trim() ? `<div style="padding:2px 0;border-bottom:1px solid rgba(255,255,255,.05)">• ${l.replace(/^[·•\-\d.]+\s*/,'')}</div>` : ''
-      ).join('');
+      // 顯示潮流資訊卡（升級版：含搜尋連結＋衣櫃比對）
+      const lines = trendRaw.split('\n').filter(l=>l.trim());
+      trendTextEl.innerHTML = lines.map(l=>{
+        const clean = l.replace(/^[·•\-\d.]+\s*/,'');
+        // 取趨勢名稱作為搜尋關鍵字（冒號前）
+        const keyword = clean.split(/[：:]/)[0].trim();
+        const searchQ = encodeURIComponent(keyword + ' 2026 穿搭');
+        const shopQ   = encodeURIComponent(keyword + ' 購買');
+        // 比對衣櫃是否有相關單品
+        const hasItem = wardrobe.some(i=>[i.type,i.color,i.style,i.note].filter(Boolean).some(v=>clean.indexOf(v)!==-1));
+        const matchBadge = hasItem
+          ? `<span style="background:rgba(76,175,125,.25);color:#4CAF7D;border-radius:4px;padding:1px 5px;font-size:.5rem;margin-left:4px;font-weight:700">✓ 衣櫃已有</span>`
+          : `<span style="background:rgba(200,160,80,.18);color:var(--gold);border-radius:4px;padding:1px 5px;font-size:.5rem;margin-left:4px;font-weight:700">+ 可補充</span>`;
+        return `<div style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">
+          <div style="display:flex;align-items:center;flex-wrap:wrap;gap:3px">
+            <span style="color:var(--ink);font-size:.68rem">• ${clean}</span>${matchBadge}
+          </div>
+          <div style="display:flex;gap:6px;margin-top:4px">
+            <a href="https://www.google.com/search?q=${searchQ}&tbm=isch" target="_blank" style="font-size:.55rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.15);border-radius:4px;padding:2px 7px">🔍 看圖</a>
+            <a href="https://www.google.com/search?q=${shopQ}" target="_blank" style="font-size:.55rem;color:var(--ink2);text-decoration:none;background:rgba(255,255,255,.08);border-radius:4px;padding:2px 7px">🛍 選購</a>
+          </div>
+        </div>`;
+      }).join('');
       trendInfoEl.style.display = 'block';
     } catch(e) {
       trendContext = '';
@@ -2134,7 +2176,26 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
       </div>
     </div>`).join('');
 
-  document.getElementById('onote').textContent=r.overall_note||'';
+  // overall_note + 配件推薦卡
+  const onoteEl = document.getElementById('onote');
+  const baseNote = r.overall_note || '';
+  // 根據季節推薦配件關鍵字
+  const seaCleanNote = (sea||'').replace(/[🌸☀️🍂❄️]\s*/,'');
+  const accMap = {
+    '春': [{n:'輕便托特包',q:'canvas tote bag 2026'},{n:'白色運動鞋',q:'white sneakers 2026'},{n:'細框墨鏡',q:'slim sunglasses 2026'}],
+    '夏': [{n:'草編帽',q:'straw hat 2026'},{n:'涼鞋',q:'sandals summer 2026'},{n:'大框墨鏡',q:'oversized sunglasses 2026'}],
+    '秋': [{n:'皮革托特包',q:'leather tote bag 2026'},{n:'踝靴',q:'ankle boots autumn 2026'},{n:'棒球帽',q:'baseball cap 2026'}],
+    '冬': [{n:'羊毛圍巾',q:'wool scarf 2026'},{n:'切爾西靴',q:'chelsea boots 2026'},{n:'迷你包',q:'mini bag winter 2026'}],
+  };
+  const accList = accMap[seaCleanNote] || accMap['春'];
+  const accHtml = `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)">
+    <div style="font-size:.58rem;font-weight:800;color:var(--gold);letter-spacing:.06em;margin-bottom:5px">🛍 本季配件推薦</div>
+    <div style="display:flex;gap:6px;flex-wrap:wrap">
+      ${accList.map(a=>`<a href="https://www.google.com/search?q=${encodeURIComponent(a.q)}&tbm=shop" target="_blank" style="font-size:.6rem;color:var(--ink2);text-decoration:none;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:4px 9px;display:inline-flex;align-items:center;gap:3px">🔗 ${a.n}</a>`).join('')}
+    </div>
+    <div style="font-size:.5rem;color:var(--muted);margin-top:4px;opacity:.6">點擊連結到 Google 選購 · 連結不含業配</div>
+  </div>`;
+  onoteEl.innerHTML = `<span style="font-size:.7rem;color:var(--ink2);line-height:1.6">${baseNote}</span>${accHtml}`;
   document.getElementById('rcard').classList.add('show');
   lastRes={...r,occ,sea,at:new Date().toLocaleDateString('zh-TW')};
 }
@@ -2179,7 +2240,7 @@ function genImgSafe(idx) {
 }
 
 async function requestGeminiImage(parts, key) {
-  const models = ['gemini-3.1-flash-image-preview', 'gemini-2.5-flash-image'];
+  const models = ['gemini-2.0-flash-preview-image-generation', 'gemini-2.0-flash-exp'];
   let lastErr = null;
 
   for(const model of models) {
@@ -2237,8 +2298,9 @@ async function genImg(idx, outfit, occ, sea) {
     const seaEn = seasonMap[seaClean] || seaClean;
     const occEn = occ;
 
-    // 核心提示詞：縮短 prompt 以提升速度
-    const imgPrompt = `Fashion lookbook photo, full outfit visible. Outfit: ${outfit}. Season: ${seaEn}. Occasion: ${occEn}. Neutral background, soft light, realistic.`;
+    // 核心提示詞：加入 pose + 時尚雜誌質感
+    const pose = getRandomPose();
+    const imgPrompt = `High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Outfit: ${outfit}. Season: ${seaEn}. Occasion: ${occEn}. Clean minimal background, professional studio lighting, sharp focus on clothing, full body visible, Vogue-quality photography, 4K detail.`;
 
     apiLog('→ 生圖: ' + imgPrompt.substring(0, 60) + '…', 'prompt');
     apiLog('  頭像:' + userAvatar + ' 服裝:' + outfit.substring(0,20), 'info');
@@ -2286,27 +2348,32 @@ async function genImg(idx, outfit, occ, sea) {
       lastRes.days[idx].imgSrc = imgSrc;
     }
 
-    const escapedSrc = imgSrc;
     const debugId = 'dbg-'+idx;
     const refBadgeHtml = `<div style="font-size:.58rem;color:var(--gold);font-weight:700;margin-bottom:4px">✓ 固定人物 reference</div>`;
+
+    // 把 imgSrc / outfit 存進 cache，避免特殊字符塞進 onclick 字串出錯
+    if(!window._fittoImgCache) window._fittoImgCache = {};
+    window._fittoImgCache[idx] = { imgSrc: imgSrc, outfit: outfit };
+
     box.innerHTML = `<div class="outfit-img-wrap">
       ${refBadgeHtml}
       <img src="${imgSrc}" class="outfit-img" alt="穿搭示意圖" onclick="openImgFull(this.src)" style="cursor:zoom-in">
       <div class="img-cost-note">🪙 -1</div>
+      <div style="font-size:.52rem;color:var(--muted);opacity:0.7;text-align:center;padding:4px 8px;line-height:1.5">⚠️ AI 生成圖僅供參考，實際服裝色彩、圖案與細節可能與原品不符</div>
       <details style="margin:6px 0;font-size:.62rem;color:var(--muted)">
         <summary style="cursor:pointer;color:var(--gold);font-weight:700;list-style:none">▸ 查看生成 Prompt</summary>
         <div id="${debugId}" style="margin-top:6px;padding:8px;background:rgba(0,0,0,.3);border-radius:8px;line-height:1.6;word-break:break-all;white-space:pre-wrap;font-size:.6rem;color:#ccc;user-select:all">${imgPrompt}</div>
       </details>
       <div class="share-bar">
-        <button class="shr-btn shr-fb" onclick="shareToFB('${outfit.replace(/'/g,"\\'")}')">
+        <button class="shr-btn shr-fb" onclick="shareToFBSafe(${idx})">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07z"/></svg>
           <span>Facebook</span>
         </button>
-        <button class="shr-btn shr-ig" onclick="shareToIG('${imgSrc}')">
+        <button class="shr-btn shr-ig" onclick="shareToIGSafe(${idx})">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
           <span>Instagram</span>
         </button>
-        <button class="shr-btn shr-save" onclick="saveImgLocal('${imgSrc}','fitto_${idx}')">
+        <button class="shr-btn shr-save" onclick="saveImgSafe(${idx})">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           <span>儲存相片</span>
         </button>
@@ -2317,6 +2384,20 @@ async function genImg(idx, outfit, occ, sea) {
     apiLog('✗ 生圖失敗: ' + (e.message||'').substring(0,50), 'err');
     box.innerHTML = `<div class="img-error">⚠️ 生成失敗<br><span>${e.message.substring(0,80)}</span><br><button class="btn-gen-img" onclick="genImgSafe(${idx})">重試</button></div>`;
   }
+}
+
+// 分享／儲存 Safe 包裝（從 _fittoImgCache 取資料，避免 onclick 字串注入）
+function shareToFBSafe(idx) {
+  var c = window._fittoImgCache && window._fittoImgCache[idx];
+  if(c) shareToFB(c.outfit);
+}
+function shareToIGSafe(idx) {
+  var c = window._fittoImgCache && window._fittoImgCache[idx];
+  if(c) shareToIG(c.imgSrc);
+}
+function saveImgSafe(idx) {
+  var c = window._fittoImgCache && window._fittoImgCache[idx];
+  if(c) saveImgLocal(c.imgSrc, 'fitto_' + idx);
 }
 
 // 分享功能
@@ -2330,13 +2411,25 @@ function shareToIG(imgSrc) {
   showToast('📷 圖片已儲存，請至 IG 上傳！');
 }
 function saveImgLocal(src, name) {
-  var a = document.createElement('a');
-  a.href = src;
-  a.download = (name || 'fitto_outfit') + '.jpg';
-  document.body.appendChild(a);
-  a.click();
-  document.body.removeChild(a);
-  showToast('💾 圖片已儲存！');
+  // iOS Safari 不支援 <a download>，改為開新分頁讓用戶長按儲存
+  var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  if(isIOS) {
+    // 開新分頁顯示圖片，用戶可長按「加入照片」
+    var win = window.open('', '_blank');
+    if(win) {
+      win.document.write('<html><body style="margin:0;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh"><p style="color:#fff;font-size:14px;font-family:sans-serif;margin-bottom:12px">📲 長按圖片 → 「加入照片」儲存到相簿</p><img src="' + src + '" style="max-width:100%;border-radius:12px"></body></html>');
+      win.document.close();
+    }
+    showToast('📲 長按圖片可儲存到相簿');
+  } else {
+    var a = document.createElement('a');
+    a.href = src;
+    a.download = (name || 'fitto_outfit') + '.jpg';
+    document.body.appendChild(a);
+    a.click();
+    document.body.removeChild(a);
+    showToast('💾 圖片已儲存！');
+  }
 }
 
 function openImgFull(url) {
@@ -2529,7 +2622,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto v13<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VB2<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -2553,7 +2646,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto v13',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VB2',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
