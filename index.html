@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VB14 · AI 智能穿搭</title>
+<title>Fitto VB15 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -647,7 +647,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-  <div class="logo">Fitto <span class="logo-badge">VB14</span></div>
+  <div class="logo">Fitto <span class="logo-badge">VB15</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
@@ -724,7 +724,7 @@ body{background:var(--bg);color:var(--ink);}
     </button>
   </div>
   <div class="clothes-grid" id="cgrid">
-    <div class="empty" id="empty0"><div class="ei">👗</div><p>衣櫃還是空的<br>拍照或手動新增第一件衣服！</p></div>
+    <div class="empty" id="empty0"><div class="ei">🧺</div><p>衣櫃還是空的<br>拍照或手動新增第一件衣服！</p></div>
   </div>
 </div>
 
@@ -909,8 +909,8 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VB14 · 2026.04</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VB14 多張照片辨識 · 縮圖修正 · 生圖含鞋 · AI衣櫃建議</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VB15 · 2026.04</div>
+    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VB15 全身照多件辨識 · 衣櫃建議修正 · 中性圖示</div>
   </div>
 </div>
 
@@ -931,7 +931,7 @@ body{background:var(--bg);color:var(--ink);}
     <div class="shop-item"><span class="si-icon">💎</span><div class="si-name">200 金幣</div><div class="si-desc">大量包<br>NT$3.5/枚</div><button class="si-price" onclick="buyCoins(200,'NT$699')">NT$699</button></div>
     <div class="shop-item"><span class="si-icon">👑</span><div class="si-name">月卡 100 枚</div><div class="si-desc">每月固定<br>NT$2.5/枚</div><button class="si-price" onclick="buyCoins(100,'NT$249/月')">NT$249/月</button></div>
   </div>
-  <div class="shop-sec">👗 衣櫃擴充</div>
+  <div class="shop-sec">🧺 衣櫃擴充</div>
   <div class="shop-grid">
     <div class="shop-item"><span class="si-icon">📦</span><div class="si-name">+10 件空間</div><div class="si-desc">容量到20件</div><button class="si-price" onclick="buyExpansion(10,30)">🪙 30枚</button></div>
     <div class="shop-item"><span class="si-icon">🏠</span><div class="si-name">+30 件空間</div><div class="si-desc">大幅擴充40件</div><button class="si-price" onclick="buyExpansion(30,80)">🪙 80枚</button></div>
@@ -970,7 +970,7 @@ body{background:var(--bg);color:var(--ink);}
 
 <!-- BOTTOM NAV -->
 <nav class="bottom-nav">
-  <button class="nb active" onclick="goNav('wardrobe')"><span class="ni">👗</span><span class="nl">衣櫃</span></button>
+  <button class="nb active" onclick="goNav('wardrobe')"><span class="ni">🧺</span><span class="nl">衣櫃</span></button>
   <button class="nb" onclick="goNav('styling')"><span class="ni">✨</span><span class="nl">搭配</span></button>
   <button class="nb" onclick="goNav('saved')"><span class="ni">🔖</span><span class="nl">收藏</span></button>
   <button class="nb" onclick="goNav('catalog')"><span class="ni">📋</span><span class="nl">型錄</span></button>
@@ -982,7 +982,7 @@ body{background:var(--bg);color:var(--ink);}
   <div class="modal">
     <div class="mhandle"></div>
     <div class="mtitle">📷 AI 掃描衣物</div>
-    <div class="pbox" id="pbox"><div class="ph"><span>👗</span><p>拍照或選圖</p></div></div>
+    <div class="pbox" id="pbox"><div class="ph"><span>🧺</span><p>拍照或選圖</p></div></div>
     <div class="scan-btns2">
       <div class="btn-ghost" onclick="document.getElementById('scam').click()">📷 相機</div>
       <div class="btn-ghost" onclick="document.getElementById('sfile').click()">📁 相簿</div>
@@ -1072,7 +1072,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-  <div class="lock-footer">Fitto VB14 · Gemini Powered · 2026.04</div>
+  <div class="lock-footer">Fitto VB15 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -1774,11 +1774,11 @@ function renderW(){
   document.getElementById('cnt-o').textContent=co;
   const displayW = activeCat==='全部' ? wardrobe : wardrobe.filter(i=>(CAT_MAP[activeCat]||[]).includes(i.type));
   if(!displayW.length){
-    g.innerHTML='<div class="empty"><div class="ei">'+(wardrobe.length?'🔍':'👗')+'</div><p>'+(wardrobe.length?'此分類沒有衣物':'衣櫃還是空的<br>拍照或手動新增第一件衣服！')+'</p></div>';
+    g.innerHTML='<div class="empty"><div class="ei">'+(wardrobe.length?'🔍':'🧺')+'</div><p>'+(wardrobe.length?'此分類沒有衣物':'衣櫃還是空的<br>拍照或手動新增第一件衣服！')+'</p></div>';
   } else {
     displayW.forEach(i=>{
       if(TOPS.includes(i.type))ct++;if(BTMS.includes(i.type))cb++;if(OUTS.includes(i.type))co++;
-      const bg=COLORS[i.color]||'#1A3326', em=EMOJIS[i.type]||'👗';
+      const bg=COLORS[i.color]||'#1A3326', em=EMOJIS[i.type]||'🧺';
       const card=document.createElement('div'); card.className='cc';
       const imgHtml=i.hasPhoto&&i.thumb
         ? '<img src="'+i.thumb+'" style="width:100%;height:100%;object-fit:cover">'
@@ -1820,33 +1820,29 @@ async function openWardrobeSuggest() {
   }
 
   try {
-    const prompt = `你是專業造型師。以下是用戶目前的衣櫃清單：
-${wj}
+    const prompt = `你是造型師。衣櫃清單：${wj}
 
-請分析這個衣櫃的風格與色彩缺口，給出 3 條具體建議：
-1. 目前衣櫃的優勢與問題（2-3句）
-2. 缺少的 3 個關鍵單品（每個請給：品名、推薦理由、顏色建議、Google購物搜尋關鍵字）
-3. 一句整體穿搭升級建議
-
-請用繁體中文，回覆 JSON：
+直接輸出 JSON，不要任何說明：
 {
-  "summary": "衣櫃分析摘要",
+  "summary": "30字內，直接說明風格缺口與色彩問題，不要廢話",
   "gaps": [
-    {"item":"白色棉質T恤","reason":"基礎百搭必備","color":"白色","keyword":"白色棉質T恤 男 2026"},
-    {"item":"深藍牛仔褲","reason":"提升整體質感","color":"深藍","keyword":"深藍 slim fit 牛仔褲 2026"},
-    {"item":"卡其色外套","reason":"春秋過渡必備","color":"卡其","keyword":"卡其色 輕薄外套 2026"}
+    {"item":"單品名稱","reason":"15字內補充理由","color":"顏色名","keyword":"Google搜尋詞 2026"},
+    {"item":"單品名稱","reason":"15字內補充理由","color":"顏色名","keyword":"Google搜尋詞 2026"},
+    {"item":"單品名稱","reason":"15字內補充理由","color":"顏色名","keyword":"Google搜尋詞 2026"}
   ],
-  "tip": "整體升級建議"
+  "tip": "20字內，一句穿搭升級方向"
 }`;
 
-    const raw = await geminiJson(prompt, 800);
+    // 改用 geminiText 避免 responseMimeType:json 被 Gemini 拒絕
+    const raw = await geminiText(prompt, 600);
     let parsed;
     try {
       const cleaned = raw.replace(/```json|```/gi,'').trim();
       const s = cleaned.indexOf('{'), e = cleaned.lastIndexOf('}');
+      if(s === -1 || e === -1) throw new Error('no JSON');
       parsed = JSON.parse(cleaned.slice(s, e+1));
     } catch(ex) {
-      throw new Error('解析失敗');
+      throw new Error('JSON 解析失敗：' + ex.message);
     }
     renderSuggestResult(parsed);
   } catch(ex) {
@@ -2013,29 +2009,31 @@ async function aiScanAndAppend() {
 }
 
 function buildScanPrompt() {
-  return `請仔細分析這張照片，找出所有可見的衣物與配件單品，逐一詳細描述。
+  return `你是專業服裝辨識 AI。請仔細分析這張照片，將照片中「所有可見的服裝與配件單品」逐一列出。
 
-配件種類必須細分，例如：
-- 帽子類：棒球帽、漁夫帽、毛帽、鴨舌帽、寬帽緣帽、針織帽
-- 包包類：托特包、後背包、側背包、腰包、手提包、水桶包
-- 鞋子類：球鞋、皮鞋、靴子、涼鞋、樂福鞋、厚底鞋
-- 頸部類：圍巾、項鍊、絲巾、領帶
-- 手部類：手環、手鍊、手錶、戒指
-- 其他：墨鏡、腰帶、胸針、耳環
+【重要規則】
+- 若照片是全身照，必須分開列出：上衣（或外套）、下身（褲子/裙子/洋裝）、鞋子，不能只回傳上衣
+- 每個單品必須獨立一筆，不要合併成「整套穿搭」
+- 配件（帽子、項鍊、手錶、包包、墨鏡等）若清楚可見，也要列入
 
-每個單品回傳：
-- type：使用細分名稱（如「棒球帽」而非「帽子」、「托特包」而非「包包」）
-- color：主色
-- style：風格
-- note：詳細描述，包含款式特徵、材質、品牌logo、圖案、磨損細節等（20字內，愈具體愈好）
-- placement：穿戴位置的英文描述（例如帽子："worn on head, brim facing forward"；鞋子："worn on feet"；項鍊："around neck"）
-- backPrint：是否為上衣且背面有大型印花圖案
+配件種類細分：
+- 帽子類：棒球帽、漁夫帽、毛帽、針織帽
+- 包包類：托特包、後背包、側背包、腰包
+- 鞋子類：球鞋、皮鞋、靴子、涼鞋、樂福鞋
+- 頸部類：圍巾、項鍊、絲巾
+- 手部類：手環、手錶
+- 其他：墨鏡、腰帶
 
-顏色只能是：白色、米白、淺灰、灰色、深灰、黑色、淺藍、深藍、卡其、棕色、紅色、酒紅、粉色、綠色、橄欖綠、花紋/條紋。
-風格只能是：休閒、正式、商務、運動、韓系、簡約、街頭。
+每個單品請回傳：
+- type：細分名稱（如「白T恤」→ T恤、「牛仔長褲」→ 牛仔褲）
+- color：主色（只能從以下選：白色、米白、淺灰、灰色、深灰、黑色、淺藍、深藍、卡其、棕色、紅色、酒紅、粉色、綠色、橄欖綠、花紋/條紋）
+- style：風格（只能從：休閒、正式、商務、運動、韓系、簡約、街頭）
+- note：款式描述20字內，包含剪裁、材質、圖案、品牌等細節
+- placement：穿戴位置英文（鞋子："worn on feet"；帽子："worn on head"；項鍊："around neck"）
+- backPrint：上衣背面是否有大圖案
 
-只輸出JSON陣列，最多8項，不要markdown不要前言：
-[{"type":"棒球帽","color":"棕色","style":"休閒","note":"復古洗舊感棕色棒球帽","placement":"worn on head, brim facing forward","backPrint":false}]`;
+只輸出 JSON 陣列，最多 8 項，不加任何說明文字：
+[{"type":"T恤","color":"白色","style":"休閒","note":"純白短袖圓領棉質T恤","placement":"","backPrint":false},{"type":"牛仔褲","color":"深藍","style":"休閒","note":"深藍直筒牛仔長褲","placement":"","backPrint":false}]`;
 }
 
 async function aiScan(){
@@ -2187,7 +2185,7 @@ function confirmMultiScan() {
     const w = {id:nid++, type:item.type, color:item.color, style:item.style, note:item.note||'', placement:item.placement||'', backPrint:!!item.backPrint, hasPhoto:false, imgPrompt:prebuiltPrompt};
     // Fix ②：縮圖改用 SVG 色塊 + emoji，而非整張人物照壓縮
     const bg = COLORS[item.color] || '#1A3326';
-    const em = EMOJIS[item.type] || '👗';
+    const em = EMOJIS[item.type] || '🧺';
     const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="${bg}"/><text x="100" y="120" font-size="80" text-anchor="middle" dominant-baseline="middle">${em}</text></svg>`;
     w.thumb = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
     w.hasPhoto = false;
@@ -3421,7 +3419,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VB14<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VB15<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -3445,7 +3443,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VB14',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VB15',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -3625,7 +3623,7 @@ function renderUQCatalog() {
         ${its.map(i=>{
           const added = addedUQIds.has(i.id);
           const iconBg = BG_COLOR[i.color] || '#333';
-          const emoji = TYPE_EMOJI[i.type] || '👗';
+          const emoji = TYPE_EMOJI[i.type] || '🧺';
           return `<div class="uq-item" id="uqitem-${i.id}">
             <div class="uq-icon" style="background:${iconBg}">${emoji}</div>
             <div class="uq-info">
