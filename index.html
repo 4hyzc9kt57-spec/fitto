@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VB15 · AI 智能穿搭</title>
+<title>Fitto VB16 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -647,7 +647,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-  <div class="logo">Fitto <span class="logo-badge">VB15</span></div>
+  <div class="logo">Fitto <span class="logo-badge">VB16</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
@@ -909,8 +909,8 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VB15 · 2026.04</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VB15 全身照多件辨識 · 衣櫃建議修正 · 中性圖示</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VB16 · 2026.04</div>
+    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VB16 辨識token擴增·全身照多件·建議穩定</div>
   </div>
 </div>
 
@@ -1072,7 +1072,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-  <div class="lock-footer">Fitto VB15 · Gemini Powered · 2026.04</div>
+  <div class="lock-footer">Fitto VB16 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -1702,7 +1702,7 @@ async function geminiVision(prompt, b64, mime) {
   apiLog('→ 圖片辨識 [' + mime + ']: ' + prompt.substring(0,40) + '…', 'prompt');
   var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
     method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({contents:[{role:'user',parts:[{inlineData:{mimeType:mime,data:b64}},{text:prompt}]}],generationConfig:{maxOutputTokens:300,temperature:0.3}})
+    body:JSON.stringify({contents:[{role:'user',parts:[{inlineData:{mimeType:mime,data:b64}},{text:prompt}]}],generationConfig:{maxOutputTokens:800,temperature:0.3}})
   });
   var d = await res.json();
   if(d.error) {
@@ -1820,21 +1820,12 @@ async function openWardrobeSuggest() {
   }
 
   try {
-    const prompt = `你是造型師。衣櫃清單：${wj}
+    const prompt = `造型師分析衣櫃。清單：${wj}
 
-直接輸出 JSON，不要任何說明：
-{
-  "summary": "30字內，直接說明風格缺口與色彩問題，不要廢話",
-  "gaps": [
-    {"item":"單品名稱","reason":"15字內補充理由","color":"顏色名","keyword":"Google搜尋詞 2026"},
-    {"item":"單品名稱","reason":"15字內補充理由","color":"顏色名","keyword":"Google搜尋詞 2026"},
-    {"item":"單品名稱","reason":"15字內補充理由","color":"顏色名","keyword":"Google搜尋詞 2026"}
-  ],
-  "tip": "20字內，一句穿搭升級方向"
-}`;
+只輸出這個 JSON，禁止任何說明文字或 markdown：
+{"summary":"直接點出最大缺口，例如：缺乏下身單品、色彩單調偏深、無法應付正式場合等，20字內","gaps":[{"item":"具體單品名","reason":"一句話原因","color":"顏色","keyword":"搜尋詞 2026"},{"item":"具體單品名","reason":"一句話原因","color":"顏色","keyword":"搜尋詞 2026"},{"item":"具體單品名","reason":"一句話原因","color":"顏色","keyword":"搜尋詞 2026"}],"tip":"一句升級方向20字內"}`;
 
-    // 改用 geminiText 避免 responseMimeType:json 被 Gemini 拒絕
-    const raw = await geminiText(prompt, 600);
+    const raw = await geminiText(prompt, 500);
     let parsed;
     try {
       const cleaned = raw.replace(/```json|```/gi,'').trim();
@@ -1842,7 +1833,20 @@ async function openWardrobeSuggest() {
       if(s === -1 || e === -1) throw new Error('no JSON');
       parsed = JSON.parse(cleaned.slice(s, e+1));
     } catch(ex) {
-      throw new Error('JSON 解析失敗：' + ex.message);
+      // 二次嘗試：更寬鬆找第一個 { 到最後一個 } 並補完
+      try {
+        const fallbackRaw = raw.replace(/```json|```/gi,'').trim();
+        const fs = fallbackRaw.indexOf('{');
+        if(fs === -1) throw new Error('no JSON at all');
+        let json = fallbackRaw.slice(fs);
+        // 補齊缺少的右括號
+        const opens = (json.match(/\{/g)||[]).length;
+        const closes = (json.match(/\}/g)||[]).length;
+        for(let i = 0; i < opens - closes; i++) json += '}';
+        parsed = JSON.parse(json);
+      } catch(ex2) {
+        throw new Error('JSON解析失敗');
+      }
     }
     renderSuggestResult(parsed);
   } catch(ex) {
@@ -2009,31 +2013,20 @@ async function aiScanAndAppend() {
 }
 
 function buildScanPrompt() {
-  return `你是專業服裝辨識 AI。請仔細分析這張照片，將照片中「所有可見的服裝與配件單品」逐一列出。
+  return `你是服裝辨識 AI。分析照片中所有單品，全身照必須列出上衣、下身、鞋子三類，不能只回傳一件。
 
-【重要規則】
-- 若照片是全身照，必須分開列出：上衣（或外套）、下身（褲子/裙子/洋裝）、鞋子，不能只回傳上衣
-- 每個單品必須獨立一筆，不要合併成「整套穿搭」
-- 配件（帽子、項鍊、手錶、包包、墨鏡等）若清楚可見，也要列入
+規則：
+1. 全身照→上衣+下身+鞋子必須各一筆，配件若可見也要列
+2. 每件獨立一筆，不合併
+3. type 用細分名：T恤/牛仔褲/球鞋/皮夾克/棒球帽等
+4. color 只能選：白色/米白/淺灰/灰色/深灰/黑色/淺藍/深藍/卡其/棕色/紅色/酒紅/粉色/綠色/橄欖綠/花紋條紋
+5. style 只能選：休閒/正式/商務/運動/韓系/簡約/街頭
+6. note 款式描述10字內
+7. placement 穿戴位置英文（鞋子 worn on feet，帽子 worn on head）
+8. backPrint 上衣背面有大圖案則 true
 
-配件種類細分：
-- 帽子類：棒球帽、漁夫帽、毛帽、針織帽
-- 包包類：托特包、後背包、側背包、腰包
-- 鞋子類：球鞋、皮鞋、靴子、涼鞋、樂福鞋
-- 頸部類：圍巾、項鍊、絲巾
-- 手部類：手環、手錶
-- 其他：墨鏡、腰帶
-
-每個單品請回傳：
-- type：細分名稱（如「白T恤」→ T恤、「牛仔長褲」→ 牛仔褲）
-- color：主色（只能從以下選：白色、米白、淺灰、灰色、深灰、黑色、淺藍、深藍、卡其、棕色、紅色、酒紅、粉色、綠色、橄欖綠、花紋/條紋）
-- style：風格（只能從：休閒、正式、商務、運動、韓系、簡約、街頭）
-- note：款式描述20字內，包含剪裁、材質、圖案、品牌等細節
-- placement：穿戴位置英文（鞋子："worn on feet"；帽子："worn on head"；項鍊："around neck"）
-- backPrint：上衣背面是否有大圖案
-
-只輸出 JSON 陣列，最多 8 項，不加任何說明文字：
-[{"type":"T恤","color":"白色","style":"休閒","note":"純白短袖圓領棉質T恤","placement":"","backPrint":false},{"type":"牛仔褲","color":"深藍","style":"休閒","note":"深藍直筒牛仔長褲","placement":"","backPrint":false}]`;
+只輸出 JSON 陣列，不加任何說明，最多8筆：
+[{"type":"皮夾克","color":"棕色","style":"街頭","note":"棕色機車皮夾克","placement":"","backPrint":false},{"type":"T恤","color":"白色","style":"休閒","note":"白色印花短袖","placement":"","backPrint":false},{"type":"牛仔褲","color":"深藍","style":"休閒","note":"深藍修身牛仔褲","placement":"","backPrint":false},{"type":"球鞋","color":"白色","style":"休閒","note":"白色低筒球鞋","placement":"worn on feet","backPrint":false}]`;
 }
 
 async function aiScan(){
@@ -3419,7 +3412,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VB15<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VB16<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -3443,7 +3436,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VB15',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VB16',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
