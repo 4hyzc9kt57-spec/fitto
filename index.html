@@ -851,7 +851,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
     <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VB6 · 2026.04</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VB6 生圖模型修復 · 春季選購升級 · 背面圖案偵測</div>
+    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VB6 生圖換用 gemini-2.5-flash-image · 潮流JSON修復</div>
   </div>
 </div>
 
@@ -2275,20 +2275,20 @@ function genImgSafe(idx) {
 }
 
 async function requestGeminiImage(parts, key) {
-  // 目前唯一可用的生圖模型（2026.04 確認）
-  const models = ['gemini-2.0-flash-preview-image-generation'];
+  // 目前可用的生圖模型（2026.04 確認）：v1beta + camelCase responseModalities
+  const models = ['gemini-2.5-flash-image', 'gemini-3.1-flash-image-preview'];
   let lastErr = null;
 
   for(const model of models) {
     try {
       apiLog('→ 圖片模型: ' + model, 'info');
-      const endpoint = 'https://generativelanguage.googleapis.com/v1/models/' + model + ':generateContent?key=' + key;
+      const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key;
       const res = await fetch(endpoint, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
         body:JSON.stringify({
           contents:[{role:'user',parts:parts}],
-          generationConfig:{response_modalities:['IMAGE']}
+          generationConfig:{responseModalities:['IMAGE']}
         })
       });
       const d = await res.json();
