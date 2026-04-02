@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VB6 · AI 智能穿搭</title>
+<title>Fitto VB7 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -273,6 +273,12 @@ header{
 .cit-info span{font-size:0.68rem;color:var(--muted)}
 .btn-ca{background:var(--gold);color:#0C1810;border:none;border-radius:6px;padding:6px 12px;font-size:0.72rem;font-weight:800;cursor:pointer;transition:all .2s;white-space:nowrap}
 .btn-ca:hover{opacity:.85}.btn-ca.added{background:var(--green);color:#0C1810}
+
+/* ── SCAN MULTI CARD ── */
+.scan-item-card{
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:var(--r-sm);padding:10px 12px;margin-bottom:10px;
+}
 
 /* ── WARN ── */
 .warn{background:var(--tag-gold-bg);border:1px solid var(--gold);border-radius:var(--r-sm);padding:10px 14px;font-size:0.74rem;color:var(--gold);margin-bottom:12px;display:none}
@@ -641,7 +647,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-  <div class="logo">Fitto <span class="logo-badge">VB6</span></div>
+  <div class="logo">Fitto <span class="logo-badge">VB7</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
@@ -724,6 +730,11 @@ body{background:var(--bg);color:var(--ink);}
     <div class="ctrl-row">
       <select id="socc" class="ctrl-sel"><option>日常上班</option><option>週末休閒</option><option>約會</option><option>混合</option></select>
       <select id="ssea" class="ctrl-sel"><option>🌸 春季</option><option>☀️ 夏季</option><option>🍂 秋季</option><option>❄️ 冬季</option></select>
+    </div>
+    <!-- 配件多選 -->
+    <div id="acc-select-wrap" style="margin-bottom:10px">
+      <div style="font-size:.62rem;font-weight:800;color:var(--gold);letter-spacing:.06em;margin-bottom:6px">🎩 加入配件（可多選）</div>
+      <div id="acc-chips" style="display:flex;flex-wrap:wrap;gap:6px"></div>
     </div>
     <details style="margin-bottom:10px">
       <summary style="cursor:pointer;font-size:.65rem;font-weight:800;color:var(--gold);letter-spacing:.06em;list-style:none;display:flex;align-items:center;gap:5px">
@@ -850,8 +861,8 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VB6 · 2026.04</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VB6 生圖換用 gemini-2.5-flash-image · 潮流JSON修復</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VB7 · 2026.04</div>
+    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VB7 多件掃描 · 配件商店 · 背面圖案pose · 搭配加配件</div>
   </div>
 </div>
 
@@ -900,6 +911,10 @@ body{background:var(--bg);color:var(--ink);}
     <div class="shop-item"><div class="si-badge">VIP</div><span class="si-icon">👑</span><div class="si-name">御姐女王</div><div class="si-desc">成熟自信</div><button class="si-price" id="btn-qu" onclick="buyAvatar('👑',25,'btn-qu')">🪙 25枚</button></div>
     <div class="shop-item"><span class="si-icon">⭐</span><div class="si-name">時尚達人</div><div class="si-desc">百變造型</div><button class="si-price" id="btn-st" onclick="buyAvatar('⭐',12,'btn-st')">🪙 12枚</button></div>
   </div>
+  <div class="shop-sec">🎩 配件解鎖</div>
+  <div style="font-size:.65rem;color:var(--muted);margin-bottom:10px;line-height:1.6">購買後可在搭配時加入，生圖也會呈現配件效果</div>
+  <div class="shop-grid" id="acc-shop-grid"></div>
+
   <div class="shop-sec">🎯 任務中心</div>
   <div id="mission-list"></div>
   <div style="font-size:.62rem;color:var(--muted);text-align:center;padding:12px 0;line-height:1.6">目前為展示模式，正式上線後接入付費系統</div>
@@ -927,23 +942,29 @@ body{background:var(--bg);color:var(--ink);}
     <input type="file" id="scam" accept="image/*" capture="environment" style="display:none" onchange="handleScan(event)">
     <input type="file" id="sfile" accept="image/*" style="display:none" onchange="handleScan(event)">
     <div class="scanning" id="scaning"><div style="margin-bottom:8px">AI 辨識中</div><div class="dw"><span></span><span></span><span></span></div></div>
+
+    <!-- 多件辨識結果區 -->
     <div class="sr" id="sres">
-      <div class="sr-lbl">● 辨識完成，可調整</div>
-      <div class="fr"><div class="fg"><label>種類</label><select id="st">
-        <option>上衣</option><option>T恤</option><option>襯衫</option><option>毛衣</option>
-        <option>外套</option><option>夾克</option><option>褲子</option><option>牛仔褲</option>
-        <option>裙子</option><option>洋裝</option><option>鞋子</option><option>球鞋</option><option>皮鞋</option><option>靴子</option><option>包包</option><option>墨鏡</option><option>帽子</option><option>腰帶</option><option>配件</option>
-      </select></div>
-      <div class="fg"><label>顏色</label><select id="sc2">
-        <option>白色</option><option>米白</option><option>淺灰</option><option>灰色</option><option>深灰</option><option>黑色</option>
-        <option>淺藍</option><option>深藍</option><option>卡其</option><option>棕色</option>
-        <option>紅色</option><option>酒紅</option><option>粉色</option><option>綠色</option><option>橄欖綠</option><option>花紋/條紋</option>
-      </select></div></div>
-      <div class="fr"><div class="fg"><label>風格</label><select id="ss">
-        <option>休閒</option><option>正式</option><option>商務</option><option>運動</option><option>韓系</option><option>簡約</option><option>街頭</option>
-      </select></div>
-      <div class="fg"><label>備註</label><input type="text" id="sn" placeholder="品牌、材質…"></div></div>
-      <button class="btn-p" onclick="confirmScan()">＋ 加入衣櫃</button>
+      <div class="sr-lbl">● 辨識完成，可調整後加入</div>
+      <div id="scan-multi-list"></div>
+      <!-- 單件舊版備用（隱藏） -->
+      <div id="scan-single" style="display:none">
+        <div class="fr"><div class="fg"><label>種類</label><select id="st">
+          <option>上衣</option><option>T恤</option><option>襯衫</option><option>毛衣</option>
+          <option>外套</option><option>夾克</option><option>褲子</option><option>牛仔褲</option>
+          <option>裙子</option><option>洋裝</option><option>鞋子</option><option>球鞋</option><option>皮鞋</option><option>靴子</option><option>包包</option><option>墨鏡</option><option>帽子</option><option>腰帶</option><option>圍巾</option><option>手環</option><option>項鍊</option><option>配件</option>
+        </select></div>
+        <div class="fg"><label>顏色</label><select id="sc2">
+          <option>白色</option><option>米白</option><option>淺灰</option><option>灰色</option><option>深灰</option><option>黑色</option>
+          <option>淺藍</option><option>深藍</option><option>卡其</option><option>棕色</option>
+          <option>紅色</option><option>酒紅</option><option>粉色</option><option>綠色</option><option>橄欖綠</option><option>花紋/條紋</option>
+        </select></div></div>
+        <div class="fr"><div class="fg"><label>風格</label><select id="ss">
+          <option>休閒</option><option>正式</option><option>商務</option><option>運動</option><option>韓系</option><option>簡約</option><option>街頭</option>
+        </select></div>
+        <div class="fg"><label>備註</label><input type="text" id="sn" placeholder="品牌、材質…"></div></div>
+        <button class="btn-p" onclick="confirmScan()">＋ 加入衣櫃</button>
+      </div>
     </div>
     <div style="margin-top:10px"><button class="btn-ghost" style="width:100%" onclick="closeScan()">關閉</button></div>
   </div>
@@ -1003,7 +1024,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-  <div class="lock-footer">Fitto VB6 · Gemini Powered · 2026.04</div>
+  <div class="lock-footer">Fitto VB7 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -1423,6 +1444,72 @@ function renderShop() {
       btn.onclick = (function(e, c, b){ return function(){ buyAvatar(e, c, b); }; })(emoji, costMap[bid], bid);
     }
   }
+  renderAccShop();
+}
+
+// ═══ 配件商店 ═══
+const ACC_SHOP_ITEMS = [
+  {id:'acc_hat',    icon:'🎩', name:'帽子',  desc:'棒球帽/漁夫帽/毛帽', cost:8},
+  {id:'acc_shoe',   icon:'👟', name:'鞋子',  desc:'球鞋/皮鞋/靴子', cost:8},
+  {id:'acc_scarf',  icon:'🧣', name:'圍巾',  desc:'羊毛/格紋/純色', cost:6},
+  {id:'acc_brace',  icon:'📿', name:'手環',  desc:'金屬/皮革/串珠', cost:6},
+  {id:'acc_neck',   icon:'💎', name:'項鍊',  desc:'金鍊/珍珠/吊墜', cost:6},
+  {id:'acc_bag',    icon:'👜', name:'包包',  desc:'托特/後背/腰包', cost:8},
+  {id:'acc_glass',  icon:'🕶️', name:'墨鏡',  desc:'細框/大框/彩色鏡片', cost:6},
+  {id:'acc_belt',   icon:'👔', name:'腰帶',  desc:'皮帶/編織/鍊條', cost:6},
+];
+var ownedAccs = JSON.parse(localStorage.getItem('fitto_accs') || '[]');
+function saveAccs(){ localStorage.setItem('fitto_accs', JSON.stringify(ownedAccs)); }
+
+function renderAccShop(){
+  var grid = document.getElementById('acc-shop-grid');
+  if(!grid) return;
+  grid.innerHTML = ACC_SHOP_ITEMS.map(function(a){
+    var owned = ownedAccs.indexOf(a.id) >= 0;
+    return `<div class="shop-item">
+      <span class="si-icon">${a.icon}</span>
+      <div class="si-name">${a.name}</div>
+      <div class="si-desc">${a.desc}</div>
+      ${owned
+        ? `<div class="si-owned">✓ 已解鎖</div>`
+        : `<button class="si-price" onclick="buyAcc('${a.id}',${a.cost})">🪙 ${a.cost}枚</button>`}
+    </div>`;
+  }).join('');
+}
+
+function buyAcc(id, cost){
+  if(ownedAccs.indexOf(id) >= 0){ showToast('已擁有此配件！'); return; }
+  if(!spendCoin(cost,'解鎖配件')) return;
+  ownedAccs.push(id); saveAccs();
+  showToast('✅ 配件已解鎖！');
+  renderAccShop();
+  renderAccChips();
+}
+
+// ═══ 搭配頁配件 Chips ═══
+var selectedAccs = []; // 目前勾選的配件 id 列表
+function renderAccChips(){
+  var wrap = document.getElementById('acc-chips');
+  if(!wrap) return;
+  var available = ACC_SHOP_ITEMS.filter(function(a){ return ownedAccs.indexOf(a.id) >= 0; });
+  if(!available.length){
+    wrap.innerHTML = '<span style="font-size:.62rem;color:var(--muted)">商店購買配件後可在此加入搭配</span>';
+    return;
+  }
+  wrap.innerHTML = available.map(function(a){
+    var sel = selectedAccs.indexOf(a.id) >= 0;
+    return `<button onclick="toggleAccChip('${a.id}',this)"
+      style="padding:5px 11px;border-radius:20px;font-size:.68rem;font-weight:700;cursor:pointer;transition:all .2s;
+      background:${sel?'var(--gold)':'var(--surface2)'};
+      color:${sel?'#0C1810':'var(--ink2)'};
+      border:1px solid ${sel?'var(--gold)':'var(--border2)'}"
+    >${a.icon} ${a.name}</button>`;
+  }).join('');
+}
+function toggleAccChip(id, btn){
+  var idx = selectedAccs.indexOf(id);
+  if(idx >= 0) selectedAccs.splice(idx,1); else selectedAccs.push(id);
+  renderAccChips();
 }
 
 function renderMissions() {
@@ -1675,35 +1762,134 @@ async function aiScan(){
   const ind=document.getElementById('scaning'),res=document.getElementById('sres');
   ind.classList.add('show');res.classList.remove('show');
   const gk = localStorage.getItem('fitto_gemini_key')||'';
-  if(!gk){await new Promise(r=>setTimeout(r,800));ind.classList.remove('show');fillScan({type:'上衣',color:'白色',style:'休閒',note:'（示範）'});return}
+  if(!gk){
+    await new Promise(r=>setTimeout(r,800));
+    ind.classList.remove('show');
+    renderMultiScanResult([{type:'上衣',color:'白色',style:'休閒',note:'（示範）',backPrint:false}]);
+    return;
+  }
   try{
-    const type = await detectMainGarmentType();
-    const detail = normalizeScanResult(await detectGarmentDetails(type));
-    if(detail.type === '褲子') detail.type = await refinePantsType(detail);
-    // 偵測背面主圖案（僅上衣/T恤類型）
-    if(['上衣','T恤','毛衣'].includes(detail.type)) {
-      try {
-        const backRaw = await geminiVision('這件衣服的背面是否有明顯的大型圖案、印花、或設計（例如大字印刷、塗鴉、大型品牌LOGO、藝術印花）？請只回答：是 或 否', scanB64, scanMime);
-        detail.backPrint = /是|yes|back.*print|graphic/i.test(backRaw);
-      } catch(e){ detail.backPrint = false; }
-    } else { detail.backPrint = false; }
-    fillScan(detail);
-  }catch(e){
-    apiLog('✗ 衣物辨識失敗，改走文字備援: ' + (e.message||'').substring(0,50), 'err');
+    // 一次辨識照片中所有衣物單品（最多6件）
+    const multiPrompt = `請仔細分析這張照片，找出所有可見的衣物與配件單品。
+每個單品請回傳：種類、顏色、風格、備註（品牌/材質/圖案特色，15字內）、是否為上衣且背面有大型圖案（backPrint true/false）。
+顏色只能是：白色、米白、淺灰、灰色、深灰、黑色、淺藍、深藍、卡其、棕色、紅色、酒紅、粉色、綠色、橄欖綠、花紋/條紋。
+風格只能是：休閒、正式、商務、運動、韓系、簡約、街頭。
+種類只能是：上衣、T恤、襯衫、毛衣、外套、夾克、褲子、牛仔褲、裙子、洋裝、鞋子、球鞋、皮鞋、靴子、包包、墨鏡、帽子、腰帶、圍巾、手環、項鍊、配件。
+只輸出JSON陣列，最多6項，不要markdown不要前言：
+[{"type":"T恤","color":"白色","style":"街頭","note":"大型後背印花","backPrint":true}]`;
+    const raw = await geminiVision(multiPrompt, scanB64, scanMime);
+    let items = [];
     try {
-      const fallbackType = await detectMainGarmentType(true);
-      const fallbackParsed = normalizeScanResult(await fallbackScanResult(fallbackType));
-      if(fallbackParsed.type === '褲子') fallbackParsed.type = await refinePantsType(fallbackParsed);
-      fallbackParsed.backPrint = false;
-      showToast('⚠️ 已改用備援辨識，請再確認一次');
-      fillScan(fallbackParsed);
-    } catch(e2) {
-      apiLog('✗ 備援辨識失敗: ' + (e2.message||'').substring(0,50), 'err');
-      showToast('⚠️ AI 辨識不穩，先帶入可編輯預設');
-      fillScan({type:'褲子',color:'深藍',style:'休閒',note:'AI 未穩定辨識，請確認',backPrint:false});
+      const cleaned = raw.replace(/```json|```/gi,'').trim();
+      const s = cleaned.indexOf('['), e = cleaned.lastIndexOf(']');
+      if(s !== -1 && e !== -1) items = JSON.parse(cleaned.slice(s, e+1));
+    } catch(e){ /* fall through */ }
+    if(!Array.isArray(items) || items.length === 0) {
+      // 備援：單件辨識
+      const type = await detectMainGarmentType();
+      const detail = normalizeScanResult(await detectGarmentDetails(type));
+      if(detail.type === '褲子') detail.type = await refinePantsType(detail);
+      detail.backPrint = false;
+      items = [detail];
     }
+    // 正規化每件
+    items = items.map(i=>({
+      type: i.type||'上衣', color: i.color||'白色', style: i.style||'休閒',
+      note: i.note||'', backPrint: !!i.backPrint
+    }));
+    renderMultiScanResult(items);
+  }catch(e){
+    apiLog('✗ 辨識失敗: ' + (e.message||'').substring(0,50), 'err');
+    renderMultiScanResult([{type:'上衣',color:'白色',style:'休閒',note:'辨識失敗，請手動調整',backPrint:false}]);
   }
   finally{ind.classList.remove('show')}
+}
+
+// 多件辨識結果渲染
+const TYPE_OPTIONS = ['上衣','T恤','襯衫','毛衣','外套','夾克','褲子','牛仔褲','裙子','洋裝','鞋子','球鞋','皮鞋','靴子','包包','墨鏡','帽子','腰帶','圍巾','手環','項鍊','配件'];
+const COLOR_OPTIONS = ['白色','米白','淺灰','灰色','深灰','黑色','淺藍','深藍','卡其','棕色','紅色','酒紅','粉色','綠色','橄欖綠','花紋/條紋'];
+const STYLE_OPTIONS = ['休閒','正式','商務','運動','韓系','簡約','街頭'];
+
+function renderMultiScanResult(items) {
+  window._scanItems = items;
+  const list = document.getElementById('scan-multi-list');
+  list.innerHTML = items.map((item, i) => `
+    <div class="scan-item-card" id="scan-card-${i}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:.65rem;font-weight:800;color:var(--gold)">單品 ${i+1}</span>
+        ${item.backPrint ? '<span style="font-size:.55rem;background:rgba(61,170,106,.2);color:var(--green);border-radius:4px;padding:2px 7px;font-weight:700">🎨 後背圖案</span>' : ''}
+        ${items.length > 1 ? `<button onclick="removeScanItem(${i})" style="background:transparent;border:none;color:var(--muted);font-size:.8rem;cursor:pointer">✕</button>` : ''}
+      </div>
+      <div class="fr">
+        <div class="fg"><label>種類</label>
+          <select id="si-type-${i}" onchange="updateScanItem(${i},'type',this.value)">
+            ${TYPE_OPTIONS.map(t=>`<option${t===item.type?' selected':''}>${t}</option>`).join('')}
+          </select>
+        </div>
+        <div class="fg"><label>顏色</label>
+          <select id="si-color-${i}" onchange="updateScanItem(${i},'color',this.value)">
+            ${COLOR_OPTIONS.map(c=>`<option${c===item.color?' selected':''}>${c}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>風格</label>
+          <select id="si-style-${i}" onchange="updateScanItem(${i},'style',this.value)">
+            ${STYLE_OPTIONS.map(s=>`<option${s===item.style?' selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+        <div class="fg"><label>備註</label>
+          <input type="text" id="si-note-${i}" value="${(item.note||'').replace(/"/g,'&quot;')}" placeholder="品牌、材質…" oninput="updateScanItem(${i},'note',this.value)">
+        </div>
+      </div>
+    </div>
+  `).join('');
+
+  const addedCount = items.filter((_,i) => window._scanAdded && window._scanAdded[i]).length;
+  list.innerHTML += `
+    <button class="btn-p" onclick="confirmMultiScan()" style="margin-top:8px">
+      ＋ 全部加入衣櫃（${items.length} 件）
+    </button>`;
+
+  document.getElementById('sres').classList.add('show');
+}
+
+function updateScanItem(i, field, val) {
+  if(window._scanItems && window._scanItems[i]) window._scanItems[i][field] = val;
+}
+function removeScanItem(i) {
+  if(window._scanItems) {
+    window._scanItems.splice(i, 1);
+    renderMultiScanResult(window._scanItems);
+  }
+}
+function confirmMultiScan() {
+  const items = window._scanItems || [];
+  let added = 0;
+  items.forEach(item => {
+    if(wardrobe.length >= wardrobeLimit){ showLimitAlert(); return; }
+    const w = {id:nid++, type:item.type, color:item.color, style:item.style, note:item.note||'', backPrint:!!item.backPrint, hasPhoto:!!scanB64};
+    if(scanB64){
+      // 縮圖處理（非同步，靜默完成）
+      const imgEl = new Image();
+      imgEl.onload = function(){
+        const canvas = document.createElement('canvas');
+        const MAX = 200;
+        const ratio = Math.min(MAX/imgEl.width, MAX/imgEl.height, 1);
+        canvas.width = imgEl.width*ratio; canvas.height = imgEl.height*ratio;
+        canvas.getContext('2d').drawImage(imgEl,0,0,canvas.width,canvas.height);
+        w.thumb = canvas.toDataURL('image/jpeg',0.7);
+        persist();
+      };
+      imgEl.src = 'data:image/jpeg;base64,' + scanB64;
+    }
+    wardrobe.push(w);
+    added++;
+  });
+  persist(); renderW();
+  showToast('✅ 已加入 ' + added + ' 件衣物！');
+  closeScan();
+  checkAutoMissions();
 }
 async function detectMainGarmentType(simpleMode){
   const prompt = simpleMode
@@ -2016,6 +2202,14 @@ function buildWardrobePromptText() {
     return (index + 1) + '.' + parts.filter(Boolean).join('/');
   }).join('；');
 }
+function buildSelectedAccsText() {
+  if(!selectedAccs.length) return '';
+  var names = selectedAccs.map(function(id){
+    var a = ACC_SHOP_ITEMS.find(function(x){ return x.id===id; });
+    return a ? a.name : '';
+  }).filter(Boolean);
+  return names.length ? '【本次搭配加入配件：' + names.join('、') + '，請在每天的 outfit 描述中自然帶入】' : '';
+}
 async function requestWeekPlanJson(prompt) {
   const variants = [
     prompt,
@@ -2168,10 +2362,11 @@ async function genOutfit(){
   }
 
   const wj=buildWardrobePromptText();
+  const accText = buildSelectedAccsText();
   const trendSection = trendContext
     ? `\n\n【當季流行趨勢參考】\n${trendContext}\n以上趨勢若衣櫃內有對應單品請優先選用；若無，可在tip中建議補充哪類單品。`
     : '';
-  const prompt=`你是專業穿搭顧問。衣櫃清單：${wj}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合規劃工作日搭配。${trendSection}\n請優先挑選衣櫃裡明確存在的單品名稱與顏色，不要虛構新品。回覆要精簡。`;
+  const prompt=`你是專業穿搭顧問。衣櫃清單：${wj}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合規劃工作日搭配。${trendSection}${accText ? '\n' + accText : ''}\n請優先挑選衣櫃裡明確存在的單品名稱與顏色，不要虛構新品。回覆要精簡。`;
   try{
     const parsed = await requestWeekPlanByDays(prompt);
     parsed.overall_note = trendContext ? '已結合當季潮流與衣櫃現有單品逐日整理。' : '已依衣櫃現有單品逐日整理。';
@@ -2335,7 +2530,11 @@ async function genImg(idx, outfit, occ, sea) {
     const occEn = occ;
 
     // 核心提示詞：加入 pose + 時尚雜誌質感
-    const pose = getRandomPose();
+    // 若 outfit 對應的衣物有 backPrint，使用背面側臉 pose
+    const hasBackPrint = wardrobe.some(i => i.backPrint && outfit.indexOf(i.color) !== -1 && outfit.indexOf(i.type) !== -1);
+    const pose = hasBackPrint
+      ? 'standing facing away from camera, back turned to viewer, face looking sideways over shoulder, showing the back graphic print clearly, full body visible, cool street style pose'
+      : getRandomPose();
     const imgPrompt = `High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Outfit: ${outfit}. Season: ${seaEn}. Occasion: ${occEn}. Clean minimal background, professional studio lighting, sharp focus on clothing, full body visible, Vogue-quality photography, 4K detail.`;
 
     apiLog('→ 生圖: ' + imgPrompt.substring(0, 60) + '…', 'prompt');
@@ -2658,7 +2857,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VB6<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VB7<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -2682,7 +2881,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VB6',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VB7',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -2906,6 +3105,7 @@ document.addEventListener('DOMContentLoaded', function() {
     updateCoinUI();
     updateDailyUI();
     checkAutoMissions();
+    renderAccChips();
     setTimeout(renderMissions, 300);
   } catch(e) { console.error('Init error:', e.message); }
 });
