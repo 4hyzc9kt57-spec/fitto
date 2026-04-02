@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VB4 · AI 智能穿搭</title>
+<title>Fitto VB5 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -641,7 +641,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-  <div class="logo">Fitto <span class="logo-badge">VB4</span></div>
+  <div class="logo">Fitto <span class="logo-badge">VB5</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
@@ -850,8 +850,8 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VB4 · 2026.04</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VB4 生圖模型修復 · 春季選購升級 · 背面圖案偵測</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VB5 · 2026.04</div>
+    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VB5 生圖模型修復 · 春季選購升級 · 背面圖案偵測</div>
   </div>
 </div>
 
@@ -1003,7 +1003,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-  <div class="lock-footer">Fitto VB4 · Gemini Powered · 2026.04</div>
+  <div class="lock-footer">Fitto VB5 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -1846,17 +1846,29 @@ function confirmScan(){
 async function fetchTrend(sea) {
   const seaLabel = sea.replace(/[🌸☀️🍂❄️]\s*/,'');
   const year = new Date().getFullYear();
-  const prompt = `你是時尚採購顧問。現在是${year}年${seaLabel}季。請列出5個當季最流行的穿搭趨勢，包含趨勢名稱、一句話說明、以及1~2個具體推薦的服裝單品（例如：亞麻寬褲、條紋短袖Polo衫）。只輸出JSON陣列，不要markdown不要前言：[{"trend":"趨勢名","desc":"一句說明","items":["單品1","單品2"]}]`;
-  const raw = await geminiText(prompt, 600);
+  const prompt = `你是時尚採購顧問。現在是${year}年${seaLabel}季。請列出5個當季最流行的穿搭趨勢，包含趨勢名稱、一句話說明、以及1~2個具體推薦的服裝單品名稱（例如：亞麻寬褲、條紋短袖Polo衫）。只輸出JSON陣列，格式：[{"trend":"趨勢名","desc":"一句說明","items":["單品1","單品2"]}]`;
   try {
+    // 用 geminiJson 強制 application/json，避免 Gemini 加 markdown fence
+    const raw = await geminiJson(prompt, 700);
     const cleaned = raw.replace(/```json|```/gi,'').trim();
     const s = cleaned.indexOf('['), e = cleaned.lastIndexOf(']');
     if(s !== -1 && e !== -1) {
       const arr = JSON.parse(cleaned.slice(s, e+1));
       if(Array.isArray(arr) && arr.length > 0) return {type:'structured', data: arr};
     }
-  } catch(e2) { /* fall through */ }
-  return {type:'text', data: raw.trim()};
+    // geminiJson 有時回傳 {days:[...]} 格式，嘗試找物件內的陣列
+    const os = cleaned.indexOf('{'), oe = cleaned.lastIndexOf('}');
+    if(os !== -1 && oe !== -1) {
+      const obj = JSON.parse(cleaned.slice(os, oe+1));
+      const nested = Object.values(obj).find(v => Array.isArray(v));
+      if(nested && nested.length > 0) return {type:'structured', data: nested};
+    }
+  } catch(e2) { /* fall through to text */ }
+  // 最終備援：文字模式（把整段文字逐行顯示）
+  try {
+    const raw2 = await geminiText(`今是${new Date().getFullYear()}年${seaLabel}季。請用繁體中文列出5個流行穿搭趨勢，每項一行格式「趨勢名：說明」，不要加前言。`, 300);
+    return {type:'text', data: raw2.trim()};
+  } catch(e3) { return {type:'text', data: ''}; }
 }
 
 function buildWardrobeWeekPlan(occ, sea, reason) {
@@ -2270,7 +2282,7 @@ async function requestGeminiImage(parts, key) {
   for(const model of models) {
     try {
       apiLog('→ 圖片模型: ' + model, 'info');
-      const endpoint = 'https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key;
+      const endpoint = 'https://generativelanguage.googleapis.com/v1/models/' + model + ':generateContent?key=' + key;
       const res = await fetch(endpoint, {
         method:'POST',
         headers:{'Content-Type':'application/json'},
@@ -2646,7 +2658,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VB4<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VB5<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -2670,7 +2682,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VB4',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VB5',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
