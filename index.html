@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VB3 · AI 智能穿搭</title>
+<title>Fitto VB4 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -641,7 +641,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-  <div class="logo">Fitto <span class="logo-badge">VB3</span></div>
+  <div class="logo">Fitto <span class="logo-badge">VB4</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
@@ -850,8 +850,8 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VB3 · 2026.04</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VB3 生圖模型修復 · 春季選購升級 · Gemini 直出推薦單品</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VB4 · 2026.04</div>
+    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VB4 生圖模型修復 · 春季選購升級 · 背面圖案偵測</div>
   </div>
 </div>
 
@@ -862,8 +862,8 @@ body{background:var(--bg);color:var(--ink);}
     <div class="scd"><span class="scd-amt" id="shop-coins">5</span><span class="scd-lbl">🪙 我的金幣</span></div>
   </div>
   <div style="background:#F5EDD8;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.68rem;color:#7A5020;line-height:1.6">
-    🎁 每日免費生圖 <strong>3 次</strong>（自動補充）<br>
-    💡 每日 1 次免費生圖 · 用完後 1 金幣 = 1 張圖
+    🎁 每日免費生圖 <strong>1 次</strong>（自動補充）<br>
+    💡 用完後每張圖消耗 <strong>2 金幣</strong>
   </div>
   <div class="shop-sec">💰 購買金幣</div>
   <div class="shop-grid">
@@ -1003,7 +1003,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-  <div class="lock-footer">Fitto VB3 · Gemini Powered · 2026.04</div>
+  <div class="lock-footer">Fitto VB4 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -1460,7 +1460,7 @@ function updateDailyUI() {
 }
 function checkAndSpend() {
   if(useDailyFree()) { updateDailyUI(); return true; }
-  return spendCoin(1,'生成穿搭圖');
+  return spendCoin(2,'生成穿搭圖');
 }
 
 // ═══ SHARE ═══
@@ -1680,6 +1680,13 @@ async function aiScan(){
     const type = await detectMainGarmentType();
     const detail = normalizeScanResult(await detectGarmentDetails(type));
     if(detail.type === '褲子') detail.type = await refinePantsType(detail);
+    // 偵測背面主圖案（僅上衣/T恤類型）
+    if(['上衣','T恤','毛衣'].includes(detail.type)) {
+      try {
+        const backRaw = await geminiVision('這件衣服的背面是否有明顯的大型圖案、印花、或設計（例如大字印刷、塗鴉、大型品牌LOGO、藝術印花）？請只回答：是 或 否', scanB64, scanMime);
+        detail.backPrint = /是|yes|back.*print|graphic/i.test(backRaw);
+      } catch(e){ detail.backPrint = false; }
+    } else { detail.backPrint = false; }
     fillScan(detail);
   }catch(e){
     apiLog('✗ 衣物辨識失敗，改走文字備援: ' + (e.message||'').substring(0,50), 'err');
@@ -1687,12 +1694,13 @@ async function aiScan(){
       const fallbackType = await detectMainGarmentType(true);
       const fallbackParsed = normalizeScanResult(await fallbackScanResult(fallbackType));
       if(fallbackParsed.type === '褲子') fallbackParsed.type = await refinePantsType(fallbackParsed);
+      fallbackParsed.backPrint = false;
       showToast('⚠️ 已改用備援辨識，請再確認一次');
       fillScan(fallbackParsed);
     } catch(e2) {
       apiLog('✗ 備援辨識失敗: ' + (e2.message||'').substring(0,50), 'err');
       showToast('⚠️ AI 辨識不穩，先帶入可編輯預設');
-      fillScan({type:'褲子',color:'深藍',style:'休閒',note:'AI 未穩定辨識，請確認'});
+      fillScan({type:'褲子',color:'深藍',style:'休閒',note:'AI 未穩定辨識，請確認',backPrint:false});
     }
   }
   finally{ind.classList.remove('show')}
@@ -1838,18 +1846,16 @@ function confirmScan(){
 async function fetchTrend(sea) {
   const seaLabel = sea.replace(/[🌸☀️🍂❄️]\s*/,'');
   const year = new Date().getFullYear();
-  const prompt = `你是時尚採購顧問。現在是${year}年${seaLabel}季。請列出5個當季最流行的穿搭趨勢，每個趨勢請包含：趨勢名稱、說明、以及1~2個具體推薦購買的服裝單品名稱（例如：亞麻寬褲、條紋短袖Polo衫）。
-回覆格式為 JSON 陣列，不要 markdown，不要前言，直接輸出：
-[{"trend":"趨勢名","desc":"說明","items":["單品1","單品2"]},...]`;
+  const prompt = `你是時尚採購顧問。現在是${year}年${seaLabel}季。請列出5個當季最流行的穿搭趨勢，包含趨勢名稱、一句話說明、以及1~2個具體推薦的服裝單品（例如：亞麻寬褲、條紋短袖Polo衫）。只輸出JSON陣列，不要markdown不要前言：[{"trend":"趨勢名","desc":"一句說明","items":["單品1","單品2"]}]`;
   const raw = await geminiText(prompt, 600);
-  // 嘗試解析 JSON，失敗則回傳原始文字（向下相容）
   try {
-    const jsonStr = extractJsonObject(raw.replace(/^\s*\[/, 'ARRAY[').replace(/^\s*ARRAY/, ''));
-    // 直接嘗試解析陣列
     const cleaned = raw.replace(/```json|```/gi,'').trim();
-    const arr = JSON.parse(cleaned);
-    if(Array.isArray(arr)) return {type:'structured', data: arr};
-  } catch(e) { /* fall through */ }
+    const s = cleaned.indexOf('['), e = cleaned.lastIndexOf(']');
+    if(s !== -1 && e !== -1) {
+      const arr = JSON.parse(cleaned.slice(s, e+1));
+      if(Array.isArray(arr) && arr.length > 0) return {type:'structured', data: arr};
+    }
+  } catch(e2) { /* fall through */ }
   return {type:'text', data: raw.trim()};
 }
 
@@ -2112,59 +2118,41 @@ async function genOutfit(){
     btn.querySelector('.spinner').style.display = 'block';
     try {
       const trendResult = await fetchTrend(sea);
-
       if(trendResult.type === 'structured' && Array.isArray(trendResult.data)) {
-        // 結構化模式：Gemini 直接回傳趨勢 + 推薦單品
         const arr = trendResult.data;
-        trendContext = arr.map(t => t.trend + '：' + t.desc).join('\n');
-        trendTextEl.innerHTML = arr.map(t => {
-          const hasItem = wardrobe.some(i=>[i.type,i.color,i.style,i.note].filter(Boolean).some(v=>t.desc.indexOf(v)!==-1||t.trend.indexOf(v)!==-1));
-          const matchBadge = hasItem
+        trendContext = arr.map(t=>`${t.trend}：${t.desc}`).join('\n');
+        trendTextEl.innerHTML = arr.map(t=>{
+          const hasItem = wardrobe.some(i=>[i.type,i.color,i.style,i.note].filter(Boolean).some(v=>String(v)&&(t.desc+t.trend).indexOf(v)!==-1));
+          const badge = hasItem
             ? `<span style="background:rgba(76,175,125,.25);color:#4CAF7D;border-radius:4px;padding:1px 5px;font-size:.5rem;margin-left:4px;font-weight:700">✓ 衣櫃已有</span>`
             : `<span style="background:rgba(200,160,80,.18);color:var(--gold);border-radius:4px;padding:1px 5px;font-size:.5rem;margin-left:4px;font-weight:700">+ 可補充</span>`;
-          const itemLinks = (t.items||[]).map(item => {
-            const q = encodeURIComponent(item + ' ' + sea.replace(/[🌸☀️🍂❄️]\s*/,'') + '季 購買');
-            const imgQ = encodeURIComponent(item + ' 穿搭');
-            return `<a href="https://www.google.com/search?q=${q}" target="_blank" style="font-size:.58rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,rgba(139,92,32,.7),rgba(201,144,74,.7));border-radius:5px;padding:3px 8px;display:inline-flex;align-items:center;gap:3px">🛍 ${item}</a>
-<a href="https://www.google.com/search?q=${imgQ}&tbm=isch" target="_blank" style="font-size:.55rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.15);border-radius:4px;padding:2px 6px">🔍 看圖</a>`;
+          const itemLinks = (t.items||[]).map(item=>{
+            const q=encodeURIComponent(item+' '+sea.replace(/[🌸☀️🍂❄️]\s*/,'')+'季 購買');
+            const iq=encodeURIComponent(item+' 穿搭');
+            return `<a href="https://www.google.com/search?q=${q}" target="_blank" style="font-size:.58rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,rgba(139,92,32,.7),rgba(201,144,74,.7));border-radius:5px;padding:3px 8px">🛍 ${item}</a> <a href="https://www.google.com/search?q=${iq}&tbm=isch" target="_blank" style="font-size:.55rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.15);border-radius:4px;padding:2px 6px">🔍</a>`;
           }).join(' ');
           return `<div style="padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)">
-            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:3px;margin-bottom:4px">
-              <span style="color:var(--ink);font-size:.7rem;font-weight:700">• ${t.trend}</span>${matchBadge}
-            </div>
-            <div style="font-size:.63rem;color:var(--ink2);margin-bottom:5px;line-height:1.4">${t.desc}</div>
-            ${t.items && t.items.length ? `<div style="display:flex;flex-wrap:wrap;gap:4px">${itemLinks}</div>` : ''}
+            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:3px;margin-bottom:3px"><span style="color:var(--ink);font-size:.7rem;font-weight:700">• ${t.trend}</span>${badge}</div>
+            <div style="font-size:.63rem;color:var(--ink2);margin-bottom:4px;line-height:1.4">${t.desc}</div>
+            ${(t.items&&t.items.length)?`<div style="display:flex;flex-wrap:wrap;gap:4px">${itemLinks}</div>`:''}
           </div>`;
         }).join('');
       } else {
-        // 文字備援模式
-        const trendRaw = trendResult.data || '';
+        // 文字備援
+        const trendRaw = trendResult.data || String(trendResult);
         trendContext = trendRaw;
         const lines = trendRaw.split('\n').filter(l=>l.trim());
         trendTextEl.innerHTML = lines.map(l=>{
-          const clean = l.replace(/^[·•\-\d.]+\s*/,'');
-          const keyword = clean.split(/[：:]/)[0].trim();
-          const searchQ = encodeURIComponent(keyword + ' 2026 穿搭');
-          const shopQ   = encodeURIComponent(keyword + ' 購買');
-          const hasItem = wardrobe.some(i=>[i.type,i.color,i.style,i.note].filter(Boolean).some(v=>clean.indexOf(v)!==-1));
-          const matchBadge = hasItem
-            ? `<span style="background:rgba(76,175,125,.25);color:#4CAF7D;border-radius:4px;padding:1px 5px;font-size:.5rem;margin-left:4px;font-weight:700">✓ 衣櫃已有</span>`
-            : `<span style="background:rgba(200,160,80,.18);color:var(--gold);border-radius:4px;padding:1px 5px;font-size:.5rem;margin-left:4px;font-weight:700">+ 可補充</span>`;
-          return `<div style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">
-            <div style="display:flex;align-items:center;flex-wrap:wrap;gap:3px">
-              <span style="color:var(--ink);font-size:.68rem">• ${clean}</span>${matchBadge}
-            </div>
-            <div style="display:flex;gap:6px;margin-top:4px">
-              <a href="https://www.google.com/search?q=${searchQ}&tbm=isch" target="_blank" style="font-size:.55rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.15);border-radius:4px;padding:2px 7px">🔍 看圖</a>
-              <a href="https://www.google.com/search?q=${shopQ}" target="_blank" style="font-size:.55rem;color:var(--ink2);text-decoration:none;background:rgba(255,255,255,.08);border-radius:4px;padding:2px 7px">🛍 選購</a>
-            </div>
-          </div>`;
+          const clean=l.replace(/^[·•\-\d.]+\s*/,'');
+          const kw=clean.split(/[：:]/)[0].trim();
+          const sq=encodeURIComponent(kw+' 2026 穿搭'); const shq=encodeURIComponent(kw+' 購買');
+          const hasItem=wardrobe.some(i=>[i.type,i.color,i.style,i.note].filter(Boolean).some(v=>String(v)&&clean.indexOf(v)!==-1));
+          const badge=hasItem?`<span style="background:rgba(76,175,125,.25);color:#4CAF7D;border-radius:4px;padding:1px 5px;font-size:.5rem;margin-left:4px;font-weight:700">✓ 衣櫃已有</span>`:`<span style="background:rgba(200,160,80,.18);color:var(--gold);border-radius:4px;padding:1px 5px;font-size:.5rem;margin-left:4px;font-weight:700">+ 可補充</span>`;
+          return `<div style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)"><div style="display:flex;align-items:center;flex-wrap:wrap;gap:3px"><span style="color:var(--ink);font-size:.68rem">• ${clean}</span>${badge}</div><div style="display:flex;gap:6px;margin-top:4px"><a href="https://www.google.com/search?q=${sq}&tbm=isch" target="_blank" style="font-size:.55rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.15);border-radius:4px;padding:2px 7px">🔍 看圖</a><a href="https://www.google.com/search?q=${shq}" target="_blank" style="font-size:.55rem;color:var(--ink2);text-decoration:none;background:rgba(255,255,255,.08);border-radius:4px;padding:2px 7px">🛍 選購</a></div></div>`;
         }).join('');
       }
       trendInfoEl.style.display = 'block';
-    } catch(e) {
-      trendContext = '';
-    }
+    } catch(e) { trendContext = ''; }
   }
 
   const wj=buildWardrobePromptText();
@@ -2275,10 +2263,8 @@ function genImgSafe(idx) {
 }
 
 async function requestGeminiImage(parts, key) {
-  const models = [
-    'gemini-2.0-flash-preview-image-generation',
-    'gemini-2.0-flash-exp-image-generation'
-  ];
+  // 目前唯一可用的生圖模型（2026.04 確認）
+  const models = ['gemini-2.0-flash-preview-image-generation'];
   let lastErr = null;
 
   for(const model of models) {
@@ -2396,7 +2382,7 @@ async function genImg(idx, outfit, occ, sea) {
     box.innerHTML = `<div class="outfit-img-wrap">
       ${refBadgeHtml}
       <img src="${imgSrc}" class="outfit-img" alt="穿搭示意圖" onclick="openImgFull(this.src)" style="cursor:zoom-in">
-      <div class="img-cost-note">🪙 -1</div>
+      <div class="img-cost-note">🪙 -2</div>
       <div style="font-size:.52rem;color:var(--muted);opacity:0.7;text-align:center;padding:4px 8px;line-height:1.5">⚠️ AI 生成圖僅供參考，實際服裝色彩、圖案與細節可能與原品不符</div>
       <details style="margin:6px 0;font-size:.62rem;color:var(--muted)">
         <summary style="cursor:pointer;color:var(--gold);font-weight:700;list-style:none">▸ 查看生成 Prompt</summary>
@@ -2531,8 +2517,7 @@ async function scanCat(){
   let items=[];
   try{
     const raw = await geminiVision('分析服裝型錄找出所有服裝單品。只回JSON陣列：[{"name":"單品名","type":"種類","color":"主色","style":"風格","desc":"10字描述"},...最多8項]', catB64, catMime);
-    const cleaned = raw.replace(/```json|```/gi,'').trim();
-    items=JSON.parse(cleaned);
+    items=JSON.parse(raw.replace(/```json|```/g,'').trim());
   }catch(e){items=[{name:'白色寬版T恤',type:'T恤',color:'白色',style:'休閒',desc:'棉質素色'},{name:'深藍直筒褲',type:'褲子',color:'深藍',style:'商務',desc:'挺版顯瘦'},{name:'米色輕薄外套',type:'外套',color:'米白',style:'簡約',desc:'春秋適穿'},{name:'條紋針織衫',type:'毛衣',color:'花紋/條紋',style:'韓系',desc:'橫條紋設計'}]}
   finally{btn.disabled=false;btn.textContent='🔍 AI 分析型錄'}
   renderCatItems(items);
@@ -2661,7 +2646,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VB3<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VB4<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -2685,7 +2670,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VB3',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VB4',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
