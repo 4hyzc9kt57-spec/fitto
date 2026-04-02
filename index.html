@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VB7 · AI 智能穿搭</title>
+<title>Fitto VB8 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -647,7 +647,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-  <div class="logo">Fitto <span class="logo-badge">VB7</span></div>
+  <div class="logo">Fitto <span class="logo-badge">VB8</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
@@ -780,6 +780,47 @@ body{background:var(--bg);color:var(--ink);}
       <button class="btn-save" id="bsave" onclick="saveOutfit()">🔖 收藏這週工作搭配</button>
     </div>
   </div>
+
+  <!-- 自訂搭配模式 -->
+  <div class="card" style="margin-top:14px">
+    <div style="font-size:.78rem;font-weight:800;color:var(--ink);margin-bottom:4px">🎯 自訂搭配生圖</div>
+    <div style="font-size:.62rem;color:var(--muted);margin-bottom:12px">自選上衣、下身、配件，直接生成一張穿搭示意圖</div>
+
+    <div class="fg" style="margin-bottom:8px">
+      <label>上衣</label>
+      <select id="custom-top" class="ctrl-sel" style="width:100%">
+        <option value="">— 不指定 —</option>
+      </select>
+    </div>
+    <div class="fg" style="margin-bottom:8px">
+      <label>下身</label>
+      <select id="custom-btm" class="ctrl-sel" style="width:100%">
+        <option value="">— 不指定 —</option>
+      </select>
+    </div>
+    <div class="fg" style="margin-bottom:8px">
+      <label>外套（選填）</label>
+      <select id="custom-out" class="ctrl-sel" style="width:100%">
+        <option value="">— 不加外套 —</option>
+      </select>
+    </div>
+    <div class="fg" style="margin-bottom:12px">
+      <label>配件（可多選，逗號分隔自訂）</label>
+      <input type="text" id="custom-acc" class="ctrl-sel" placeholder="例：黑色棒球帽、白色球鞋" style="width:100%">
+    </div>
+    <div id="custom-imgbox" style="margin-bottom:8px"></div>
+    <button class="btn-gen" id="custom-gen-btn" onclick="genCustomOutfitImg()" style="margin-bottom:0">
+      <div class="spinner"></div>🎨 生成自訂搭配圖
+    </button>
+  </div>
+
+  <!-- 衣櫃分析 -->
+  <div class="card" style="margin-top:14px">
+    <div style="font-size:.78rem;font-weight:800;color:var(--ink);margin-bottom:4px">🔬 衣櫃風格分析</div>
+    <div style="font-size:.62rem;color:var(--muted);margin-bottom:12px">AI 分析你的衣櫃，推薦搭配風格 + 網路選購新品建議</div>
+    <div id="analysis-result" style="display:none"></div>
+    <button class="btn-ghost" onclick="analyzeWardrobe()" id="analysis-btn">🔍 分析我的衣櫃</button>
+  </div>
 </div>
 
 <!-- ③ 收藏 -->
@@ -861,8 +902,8 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VB7 · 2026.04</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VB7 多件掃描 · 配件商店 · 背面圖案pose · 搭配加配件</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VB8 · 2026.04</div>
+    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VB8 配件出現修復 · 自訂搭配生圖 · 衣櫃風格分析</div>
   </div>
 </div>
 
@@ -1024,7 +1065,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-  <div class="lock-footer">Fitto VB7 · Gemini Powered · 2026.04</div>
+  <div class="lock-footer">Fitto VB8 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -1247,6 +1288,7 @@ function goNav(name) {
   if(navMap[name] !== undefined && nbs[navMap[name]]) nbs[navMap[name]].classList.add('active');
   if(name === 'saved') renderSaved();
   if(name === 'shop') { renderMissions(); renderShop(); }
+  if(name === 'styling') { populateCustomSelects(); renderAccChips(); }
 }
 
 function goShop() { goNav('shop'); }
@@ -2240,8 +2282,11 @@ async function requestSingleDayPlan(basePrompt, dayLabel, usedOutfits) {
   const avoidText = usedOutfits && usedOutfits.length
     ? `\n前面已使用的搭配：${usedOutfits.join('；')}\n今天必須和前面不同，至少更換主要上衣、下身或外套中的一項，不要重複相同組合。`
     : '';
-  const prompt = `${basePrompt}${avoidText}\n現在只生成${dayLabel}這一天。\n請不要回 JSON、不要 markdown、不要前言、不要解釋。\n只用這一行格式回覆：搭配描述|建議\n規則：1. 左邊是 outfit，右邊是 tip。2. outfit 請控制在 18 字內。3. tip 請控制在 16 字內。4. 不要輸出 day 欄位。`;
-  const raw = await geminiText(prompt, 220);
+  const accNames = selectedAccs.map(id=>{ const a=ACC_SHOP_ITEMS.find(x=>x.id===id); return a?a.name:''; }).filter(Boolean);
+  const accRule = accNames.length ? `\n⚠️ 必須在 outfit 中帶入以下配件（全部都要寫進去）：${accNames.join('、')}` : '';
+  const outfitLimit = accNames.length ? 28 : 18;
+  const prompt = `${basePrompt}${avoidText}${accRule}\n現在只生成${dayLabel}這一天。\n請不要回 JSON、不要 markdown、不要前言、不要解釋。\n只用這一行格式回覆：搭配描述|建議\n規則：1. 左邊是 outfit，右邊是 tip。2. outfit 請控制在 ${outfitLimit} 字內，若有配件必須寫進 outfit。3. tip 請控制在 16 字內。4. 不要輸出 day 欄位。`;
+  const raw = await geminiText(prompt, 260);
   const parsed = parseSingleDayFallback(raw, dayLabel);
   return {
     day: parsed.day || dayLabel,
@@ -2681,6 +2726,114 @@ function openImgFull(url) {
   document.body.appendChild(ov);
 }
 
+// ═══ 自訂搭配生圖 ═══
+function populateCustomSelects() {
+  const tops = wardrobe.filter(i=>['上衣','T恤','襯衫','毛衣'].includes(i.type));
+  const btms = wardrobe.filter(i=>['褲子','牛仔褲','裙子','洋裝'].includes(i.type));
+  const outs = wardrobe.filter(i=>['外套','夾克'].includes(i.type));
+  function buildOpts(items, emptyLabel) {
+    return `<option value="">${emptyLabel}</option>` +
+      items.map(i=>`<option value="${i.color}${i.type}${i.note?'（'+i.note+'）':''}">${i.color}${i.type}${i.note?' · '+i.note:''}</option>`).join('');
+  }
+  const topEl = document.getElementById('custom-top');
+  const btmEl = document.getElementById('custom-btm');
+  const outEl = document.getElementById('custom-out');
+  if(topEl) topEl.innerHTML = buildOpts(tops, '— 不指定 —');
+  if(btmEl) btmEl.innerHTML = buildOpts(btms, '— 不指定 —');
+  if(outEl) outEl.innerHTML = `<option value="">— 不加外套 —</option>` + outs.map(i=>`<option value="${i.color}${i.type}${i.note?'（'+i.note+'）':''}">${i.color}${i.type}${i.note?' · '+i.note:''}</option>`).join('');
+}
+
+async function genCustomOutfitImg() {
+  const topVal = (document.getElementById('custom-top')||{}).value || '';
+  const btmVal = (document.getElementById('custom-btm')||{}).value || '';
+  const outVal = (document.getElementById('custom-out')||{}).value || '';
+  const accVal = ((document.getElementById('custom-acc')||{}).value || '').trim();
+  const parts = [topVal, btmVal, outVal, accVal].filter(Boolean);
+  if(!parts.length) { showToast('⚠️ 請至少選擇一件衣物'); return; }
+  const outfit = parts.join('＋');
+  const box = document.getElementById('custom-imgbox');
+  const btn = document.getElementById('custom-gen-btn');
+  box.innerHTML = '<div class="img-loading"><div class="img-spinner"></div><span>生成中…</span></div>';
+  btn.classList.add('loading'); btn.disabled = true;
+  try {
+    const key = localStorage.getItem('fitto_gemini_key') || '';
+    if(!key) throw new Error('請先設定 Gemini Key');
+    if(!checkAndSpend()) { box.innerHTML=''; return; }
+    const avatarDesc = getAvatarPromptDesc();
+    const pose = getRandomPose();
+    const imgPrompt = `High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Outfit: ${outfit}. Clean minimal background, professional studio lighting, sharp focus on clothing, full body visible, Vogue-quality photography, 4K detail.`;
+    const avatarRef = getSelectedAvatarRefData();
+    if(!avatarRef || !avatarRef.b64) throw new Error('缺少頭像 reference，請在商店選擇頭像');
+    const requestParts = [
+      {inlineData:{mimeType:avatarRef.mimeType, data:avatarRef.b64}},
+      {text:'Image 1 is the fixed person reference. Keep the exact same face, hairstyle, body identity. Only change clothing. ' + imgPrompt}
+    ];
+    const imageResult = await requestGeminiImage(requestParts, key);
+    addTokenUsage(0,0,'gemini_img');
+    const imgSrc = 'data:' + imageResult.mimeType + ';base64,' + imageResult.data;
+    const tc = parseInt(localStorage.getItem('fitto_total_imgs')||'0') + 1;
+    localStorage.setItem('fitto_total_imgs', String(tc));
+    checkAutoMissions();
+    if(!window._fittoImgCache) window._fittoImgCache = {};
+    window._fittoImgCache['custom'] = {imgSrc, outfit};
+    box.innerHTML = `<div class="outfit-img-wrap" style="margin-bottom:8px">
+      <img src="${imgSrc}" class="outfit-img" onclick="openImgFull(this.src)" style="cursor:zoom-in">
+      <div class="img-cost-note">🪙 -2 · ${outfit}</div>
+      <div style="display:flex;gap:8px;margin-top:6px">
+        <button onclick="saveImgSafe('custom')" style="flex:1;padding:7px;border:1px solid var(--border2);border-radius:8px;background:transparent;color:var(--ink2);font-size:.68rem;font-weight:700;cursor:pointer">💾 儲存圖片</button>
+      </div>
+    </div>`;
+  } catch(e) {
+    box.innerHTML = `<div class="img-error">⚠️ 生成失敗<br><span>${(e.message||'').substring(0,80)}</span><br><button class="btn-gen-img" onclick="genCustomOutfitImg()">重試</button></div>`;
+  } finally {
+    btn.classList.remove('loading'); btn.disabled = false;
+  }
+}
+
+// ═══ 衣櫃風格分析 ═══
+async function analyzeWardrobe() {
+  if(wardrobe.length < 3) { showToast('⚠️ 請先加入至少 3 件衣物'); return; }
+  const btn = document.getElementById('analysis-btn');
+  const res = document.getElementById('analysis-result');
+  btn.textContent = '⏳ 分析中…'; btn.disabled = true;
+  res.style.display = 'none';
+  try {
+    const key = localStorage.getItem('fitto_gemini_key') || '';
+    if(!key) throw new Error('請先設定 Gemini Key');
+    const wj = buildWardrobePromptText();
+    const year = new Date().getFullYear();
+    const prompt = `你是頂尖時尚造型師。以下是用戶的衣櫃清單：\n${wj}\n\n請用繁體中文分三段回答：\n【整體風格】分析主要風格（2~3種），各佔比例並說明特色。\n【建議搭配】列出3組最佳搭配，用衣櫃現有單品，每組一行。\n【推薦補充】衣櫃目前缺少什麼，推薦3~5個具體新品（品項名稱＋理由），融入${year}年最新流行趨勢。`;
+    const raw = await geminiText(prompt, 1200);
+    const formatted = raw
+      .replace(/【([^】]+)】/g, '<div style="font-size:.72rem;font-weight:800;color:var(--gold);letter-spacing:.04em;margin:10px 0 4px">▌ $1</div>')
+      .replace(/(\d+[.、]\s*)/g, '<span style="color:var(--gold);font-weight:700">$1</span>')
+      .replace(/\n/g, '<br>');
+    // 抓推薦單品自動加購物連結
+    let shopLinks = '';
+    const seen = new Set();
+    const itemRe = /(?:推薦|建議|補充)[^：\n]*[：:]?\s*([^\n（(]{2,12})/g;
+    const lineRe = /[①②③④⑤\d]+[.、\s]+([^（\n，。、]{2,12})/g;
+    [itemRe, lineRe].forEach(re=>{
+      let m;
+      while((m=re.exec(raw))!==null){
+        const item = m[1].trim().replace(/[：:。，,\s]/g,'');
+        if(item.length>=2&&item.length<=12&&!seen.has(item)){
+          seen.add(item);
+          const q=encodeURIComponent(item+' 購買'); const iq=encodeURIComponent(item+' 穿搭');
+          shopLinks+=`<a href="https://www.google.com/search?q=${q}" target="_blank" style="font-size:.58rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,rgba(139,92,32,.7),rgba(201,144,74,.7));border-radius:5px;padding:3px 9px;display:inline-flex;align-items:center;margin:2px">🛍 ${item}</a>`;
+        }
+      }
+    });
+    res.innerHTML = `<div style="font-size:.74rem;line-height:1.8;color:var(--ink2)">${formatted}${shopLinks?`<div style="margin-top:12px;padding-top:10px;border-top:1px solid var(--border)"><div style="font-size:.6rem;font-weight:800;color:var(--gold);margin-bottom:6px">🔗 快速選購</div><div style="display:flex;flex-wrap:wrap;gap:4px">${shopLinks}</div></div>`:''}</div>`;
+    res.style.display = 'block';
+  } catch(e) {
+    res.innerHTML = `<div style="color:var(--red);font-size:.72rem">⚠️ 分析失敗：${(e.message||'').substring(0,60)}</div>`;
+    res.style.display = 'block';
+  } finally {
+    btn.textContent = '🔍 重新分析'; btn.disabled = false;
+  }
+}
+
 // SAVE
 function saveOutfit(){
   if(!lastRes)return;
@@ -2857,7 +3010,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VB7<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VB8<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -2881,7 +3034,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VB7',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VB8',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
