@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VC17 · AI 智能穿搭</title>
+<title>Fitto VC18 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -647,7 +647,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VC17</span></div>
+<div class="logo">Fitto <span class="logo-badge">VC18</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
@@ -909,8 +909,8 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VC17 · 2026.04</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VC17 專用函式·強化 JSON 模式·建議走 geminiJson</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VC18 · 2026.04</div>
+    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VC18 專用函式·文字容錯解析·支援推薦連結</div>
   </div>
 </div>
 
@@ -1072,7 +1072,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VC17 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VC18 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -2561,26 +2561,63 @@ function normalizeSuggestShape(parsed) {
     tip: parsed.tip || '先補高頻基礎款，再補能拉開層次的單品。'
   };
 }
+function parseWardrobeSuggestText(raw) {
+  const text = String(raw || '').replace(/\r/g,'').replace(/```/g,'').trim();
+  if(!text) throw new Error('衣櫃缺口回應為空');
+  const lines = text.split('\n').map(function(line){ return line.trim(); }).filter(Boolean);
+  const pickLine = function(prefixes) {
+    for(let i = 0; i < lines.length; i++) {
+      for(let j = 0; j < prefixes.length; j++) {
+        const label = prefixes[j];
+        if(lines[i].indexOf(label + '：') === 0 || lines[i].indexOf(label + ':') === 0) {
+          return lines[i].replace(label + '：','').replace(label + ':','').trim();
+        }
+      }
+    }
+    return '';
+  };
+  const gapLines = lines.filter(function(line){
+    return /^推薦[123][:：]/.test(line) || /^補齊[123][:：]/.test(line) || /^單品[123][:：]/.test(line);
+  }).slice(0,3);
+  const gaps = gapLines.map(function(line){
+    const body = line.replace(/^(推薦|補齊|單品)[123][:：]\s*/, '').trim();
+    const parts = body.split('|').map(function(part){ return part.trim(); }).filter(Boolean);
+    return {
+      item: parts[0] || '',
+      reason: parts[1] || '',
+      color: parts[2] || '',
+      keyword: parts[3] || (parts[0] ? parts[0] + ' 2026' : '')
+    };
+  });
+  return normalizeSuggestShape({
+    summary: pickLine(['缺口摘要','summary','重點結論']) || lines[0] || '',
+    gaps: gaps,
+    tip: pickLine(['升級方向','tip','搭配提醒']) || lines[lines.length - 1] || ''
+  });
+}
+function parseWardrobeSuggestResponse(raw) {
+  const jsonStr = extractJsonObject(raw);
+  if(jsonStr) {
+    try {
+      return normalizeSuggestShape(JSON.parse(jsonStr));
+    } catch(err) {}
+  }
+  return parseWardrobeSuggestText(raw);
+}
 async function requestWardrobeSuggest(prompt) {
   const variants = [
-    prompt,
-    prompt + '\n請只輸出一個完整 JSON 物件，不要前言，不要使用 markdown code block。',
-    prompt + '\n請把 summary、tip 都控制在 20 字內，gaps 最多 3 筆，務必輸出完整 JSON 結尾。'
+    prompt + '\n請只輸出 5 行純文字，不要 JSON、不要 markdown。\n第1行：缺口摘要：20字內\n第2行：推薦1：單品|原因|顏色|搜尋關鍵字\n第3行：推薦2：單品|原因|顏色|搜尋關鍵字\n第4行：推薦3：單品|原因|顏色|搜尋關鍵字\n第5行：升級方向：20字內',
+    prompt + '\n若無法完整列出，也至少輸出「缺口摘要」與 1 到 3 行「推薦X：單品|原因|顏色|搜尋關鍵字」，不要 JSON。',
+    prompt + '\n請極短輸出，每行只寫必要內容，不要任何前言或說明。'
   ];
   let lastError = null;
   for(let i = 0; i < variants.length; i++) {
-    const raw = await geminiJson(variants[i], 700);
-    const jsonStr = extractJsonObject(raw);
-    if(!jsonStr) {
-      lastError = new Error('衣櫃缺口回應中找不到完整 JSON：' + String(raw || '').substring(0,80));
-      apiLog('✗ 衣櫃缺口 JSON 不完整，第' + (i + 1) + '次重試', 'err');
-      continue;
-    }
+    const raw = await geminiText(variants[i], 260);
     try {
-      return normalizeSuggestShape(JSON.parse(jsonStr));
+      return parseWardrobeSuggestResponse(raw);
     } catch(err) {
       lastError = err;
-      apiLog('✗ 衣櫃缺口 JSON 解析失敗，第' + (i + 1) + '次重試: ' + (err.message||'').substring(0,50), 'err');
+      apiLog('✗ 衣櫃缺口解析失敗，第' + (i + 1) + '次重試: ' + (err.message||'').substring(0,50), 'err');
     }
   }
   throw lastError || new Error('衣櫃缺口分析失敗');
@@ -3253,6 +3290,13 @@ function parseWardrobeStyleConclusion(raw) {
     buy: pick('優先補齊', 2) || '先補最高頻、最好搭的基礎款。'
   };
 }
+function buildShoppingLinks(keyword) {
+  const clean = String(keyword || '').replace(/[。！!]/g,'').trim();
+  return {
+    img: 'https://www.google.com/search?q=' + encodeURIComponent(clean + ' 穿搭') + '&tbm=isch',
+    shop: 'https://www.google.com/search?q=' + encodeURIComponent(clean + ' 購買') + '&tbm=shop'
+  };
+}
 async function analyzeWardrobe() {
   if(wardrobe.length < 3) { showToast('⚠️ 請先加入至少 3 件衣物'); return; }
   const btn = document.getElementById('analysis-btn');
@@ -3276,6 +3320,7 @@ ${wj}`;
 
     const raw = await geminiText(prompt, 220);
     const summary = parseWardrobeStyleConclusion(raw);
+    const links = buildShoppingLinks(summary.buy);
 
     res.innerHTML = `<div style="display:grid;gap:10px">
       <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px">
@@ -3289,6 +3334,10 @@ ${wj}`;
       <div style="padding:12px 14px;background:rgba(200,160,80,.12);border:1px solid rgba(200,160,80,.28);border-radius:12px">
         <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:5px">優先補齊</div>
         <div style="font-size:.77rem;color:var(--ink2);line-height:1.65">${summary.buy}</div>
+        <div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">
+          <a href="${links.img}" target="_blank" style="font-size:.63rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.14);border:1px solid rgba(200,160,80,.28);border-radius:8px;padding:5px 10px;font-weight:700">🔍 看照片</a>
+          <a href="${links.shop}" target="_blank" style="font-size:.63rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#8A5C20,#C9904A);border-radius:8px;padding:5px 10px;font-weight:700">🛍 去選購</a>
+        </div>
       </div>
     </div>`;
     res.style.display = 'block';
@@ -3478,7 +3527,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VC17<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VC18<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -3502,7 +3551,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VC17',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VC18',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
