@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VC18 · AI 智能穿搭</title>
+<title>Fitto VC19 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -647,7 +647,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VC18</span></div>
+<div class="logo">Fitto <span class="logo-badge">VC19</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
@@ -909,8 +909,8 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VC18 · 2026.04</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VC18 專用函式·文字容錯解析·支援推薦連結</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VC19 · 2026.04</div>
+    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VC19 專用函式·品牌快捷搜尋·強化風格分析</div>
   </div>
 </div>
 
@@ -1072,7 +1072,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VC18 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VC19 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -1866,17 +1866,19 @@ async function openWardrobeSuggest() {
 function renderSuggestResult(d) {
   const el = document.getElementById('suggest-result');
   const gaps = (d.gaps||[]).map(g => {
-    const shopUrl = 'https://www.google.com/search?q=' + encodeURIComponent(g.keyword||g.item) + '&tbm=shop';
     const imgUrl = 'https://www.google.com/search?q=' + encodeURIComponent(g.item+' 穿搭') + '&tbm=isch';
+    const uniqloUrl = 'https://www.google.com/search?q=' + encodeURIComponent((g.keyword||g.item) + ' site:uniqlo.com');
+    const zaraUrl = 'https://www.google.com/search?q=' + encodeURIComponent((g.keyword||g.item) + ' site:zara.com');
     const bg = (COLORS||{})[g.color] || '#888';
     return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-bottom:8px">
       <div style="width:36px;height:36px;border-radius:8px;background:${bg};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem">👗</div>
       <div style="flex:1;min-width:0">
         <div style="font-weight:800;font-size:.82rem;color:var(--ink)">${g.item}</div>
         <div style="font-size:.65rem;color:var(--muted);margin-top:2px">${g.reason}</div>
-        <div style="display:flex;gap:6px;margin-top:5px">
-          <a href="${shopUrl}" target="_blank" style="font-size:.6rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#8A5C20,#C9904A);border-radius:5px;padding:3px 8px;font-weight:700">🛍 選購</a>
+        <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">
           <a href="${imgUrl}" target="_blank" style="font-size:.6rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.15);border-radius:5px;padding:3px 8px;font-weight:700">🔍 看圖</a>
+          <a href="${uniqloUrl}" target="_blank" style="font-size:.6rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#5C6C7C,#8898A8);border-radius:5px;padding:3px 8px;font-weight:700">UNIQLO</a>
+          <a href="${zaraUrl}" target="_blank" style="font-size:.6rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#2B2B2B,#555);border-radius:5px;padding:3px 8px;font-weight:700">ZARA</a>
         </div>
       </div>
     </div>`;
@@ -3274,6 +3276,35 @@ async function genCustomOutfitImg() {
 }
 
 // ═══ 衣櫃風格分析 ═══
+function buildWardrobeStatsSummary() {
+  const countMap = function(list, getter) {
+    const map = {};
+    list.forEach(function(item){
+      const key = getter(item);
+      if(!key) return;
+      map[key] = (map[key] || 0) + 1;
+    });
+    return map;
+  };
+  const topKeys = function(map, limit) {
+    return Object.keys(map).sort(function(a,b){ return map[b] - map[a]; }).slice(0, limit);
+  };
+  const typeMap = countMap(wardrobe, function(item){ return item.type; });
+  const colorMap = countMap(wardrobe, function(item){ return item.color; });
+  const styleMap = countMap(wardrobe, function(item){ return item.style; });
+  const lowerTypes = wardrobe.map(function(item){ return String(item.type || ''); });
+  const missing = [];
+  if(!lowerTypes.some(function(t){ return /褲|裙/.test(t); })) missing.push('下身');
+  if(!lowerTypes.some(function(t){ return /外套|罩衫|襯衫/.test(t); })) missing.push('外層');
+  if(!lowerTypes.some(function(t){ return /鞋/.test(t); })) missing.push('鞋款');
+  return {
+    total: wardrobe.length,
+    topTypes: topKeys(typeMap, 3),
+    topColors: topKeys(colorMap, 3),
+    topStyles: topKeys(styleMap, 3),
+    missing: missing
+  };
+}
 function parseWardrobeStyleConclusion(raw) {
   const text = String(raw || '').replace(/\r/g,'').replace(/```/g,'').trim();
   const lines = text.split('\n').map(function(line){ return line.trim(); }).filter(Boolean);
@@ -3286,15 +3317,18 @@ function parseWardrobeStyleConclusion(raw) {
   };
   return {
     style: pick('風格定位', 0) || '整體風格偏日常實穿。',
-    gap: pick('最大缺口', 1) || '還缺一件能穩定串起搭配的核心單品。',
-    buy: pick('優先補齊', 2) || '先補最高頻、最好搭的基礎款。'
+    strength: pick('現有優勢', 1) || '目前的基礎單品有穩定搭配潛力。',
+    gap: pick('最大缺口', 2) || '還缺一件能穩定串起搭配的核心單品。',
+    buy1: pick('優先補齊1', 3) || '白色俐落上衣|提升上班與日常的百搭度',
+    buy2: pick('優先補齊2', 4) || '深色俐落下身|讓現有上衣更容易成套'
   };
 }
 function buildShoppingLinks(keyword) {
   const clean = String(keyword || '').replace(/[。！!]/g,'').trim();
   return {
     img: 'https://www.google.com/search?q=' + encodeURIComponent(clean + ' 穿搭') + '&tbm=isch',
-    shop: 'https://www.google.com/search?q=' + encodeURIComponent(clean + ' 購買') + '&tbm=shop'
+    uniqlo: 'https://www.google.com/search?q=' + encodeURIComponent(clean + ' site:uniqlo.com'),
+    zara: 'https://www.google.com/search?q=' + encodeURIComponent(clean + ' site:zara.com')
   };
 }
 async function analyzeWardrobe() {
@@ -3310,17 +3344,35 @@ async function analyzeWardrobe() {
     if(!key) throw new Error('請先設定 Gemini Key');
 
     const wj = buildWardrobePromptText();
-    const prompt = `根據這份衣櫃清單直接下結論，請用繁體中文只輸出 3 行，不要前言、不要額外解釋。
-第1行：風格定位：15字內
-第2行：最大缺口：18字內
-第3行：優先補齊：18字內
+    const stats = buildWardrobeStatsSummary();
+    const prompt = `你是高端但務實的個人造型師，請根據這份真實衣櫃清單下具體結論，不要空話，不要泛泛而談。
+請只輸出 5 行，不要前言：
+第1行：風格定位：要點出真正的穿搭傾向
+第2行：現有優勢：指出最能發揮的單品結構或色系
+第3行：最大缺口：指出最影響完整度的缺口
+第4行：優先補齊1：單品名稱|為何適合這個衣櫃
+第5行：優先補齊2：單品名稱|為何適合這個衣櫃
+
+衣櫃統計：
+件數=${stats.total}
+常見種類=${stats.topTypes.join('、') || '未明顯集中'}
+常見顏色=${stats.topColors.join('、') || '未明顯集中'}
+常見風格=${stats.topStyles.join('、') || '未明顯集中'}
+明顯缺口=${stats.missing.join('、') || '無明顯空缺'}
 
 衣櫃清單：
 ${wj}`;
 
-    const raw = await geminiText(prompt, 220);
+    const raw = await geminiText(prompt, 320);
     const summary = parseWardrobeStyleConclusion(raw);
-    const links = buildShoppingLinks(summary.buy);
+    const buy1Parts = String(summary.buy1 || '').split('|');
+    const buy2Parts = String(summary.buy2 || '').split('|');
+    const buy1Name = (buy1Parts[0] || '').trim() || '推薦單品 1';
+    const buy1Why = (buy1Parts[1] || '').trim() || '可補齊現有衣櫃缺口';
+    const buy2Name = (buy2Parts[0] || '').trim() || '推薦單品 2';
+    const buy2Why = (buy2Parts[1] || '').trim() || '能和現有衣櫃形成更多搭配';
+    const links1 = buildShoppingLinks(buy1Name);
+    const links2 = buildShoppingLinks(buy2Name);
 
     res.innerHTML = `<div style="display:grid;gap:10px">
       <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px">
@@ -3328,15 +3380,31 @@ ${wj}`;
         <div style="font-size:.8rem;font-weight:800;color:var(--ink)">${summary.style}</div>
       </div>
       <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px">
+        <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:5px">現有優勢</div>
+        <div style="font-size:.77rem;color:var(--ink2);line-height:1.65">${summary.strength}</div>
+      </div>
+      <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px">
         <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:5px">最大缺口</div>
         <div style="font-size:.77rem;color:var(--ink2);line-height:1.65">${summary.gap}</div>
       </div>
       <div style="padding:12px 14px;background:rgba(200,160,80,.12);border:1px solid rgba(200,160,80,.28);border-radius:12px">
-        <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:5px">優先補齊</div>
-        <div style="font-size:.77rem;color:var(--ink2);line-height:1.65">${summary.buy}</div>
+        <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:8px">優先補齊 1</div>
+        <div style="font-size:.8rem;font-weight:800;color:var(--ink)">${buy1Name}</div>
+        <div style="font-size:.73rem;color:var(--ink2);line-height:1.65;margin-top:4px">${buy1Why}</div>
         <div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">
-          <a href="${links.img}" target="_blank" style="font-size:.63rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.14);border:1px solid rgba(200,160,80,.28);border-radius:8px;padding:5px 10px;font-weight:700">🔍 看照片</a>
-          <a href="${links.shop}" target="_blank" style="font-size:.63rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#8A5C20,#C9904A);border-radius:8px;padding:5px 10px;font-weight:700">🛍 去選購</a>
+          <a href="${links1.img}" target="_blank" style="font-size:.63rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.14);border:1px solid rgba(200,160,80,.28);border-radius:8px;padding:5px 10px;font-weight:700">🔍 看圖</a>
+          <a href="${links1.uniqlo}" target="_blank" style="font-size:.63rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#5C6C7C,#8898A8);border-radius:8px;padding:5px 10px;font-weight:700">UNIQLO</a>
+          <a href="${links1.zara}" target="_blank" style="font-size:.63rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#2B2B2B,#555);border-radius:8px;padding:5px 10px;font-weight:700">ZARA</a>
+        </div>
+      </div>
+      <div style="padding:12px 14px;background:rgba(200,160,80,.08);border:1px solid rgba(200,160,80,.18);border-radius:12px">
+        <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:8px">優先補齊 2</div>
+        <div style="font-size:.8rem;font-weight:800;color:var(--ink)">${buy2Name}</div>
+        <div style="font-size:.73rem;color:var(--ink2);line-height:1.65;margin-top:4px">${buy2Why}</div>
+        <div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">
+          <a href="${links2.img}" target="_blank" style="font-size:.63rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.14);border:1px solid rgba(200,160,80,.28);border-radius:8px;padding:5px 10px;font-weight:700">🔍 看圖</a>
+          <a href="${links2.uniqlo}" target="_blank" style="font-size:.63rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#5C6C7C,#8898A8);border-radius:8px;padding:5px 10px;font-weight:700">UNIQLO</a>
+          <a href="${links2.zara}" target="_blank" style="font-size:.63rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#2B2B2B,#555);border-radius:8px;padding:5px 10px;font-weight:700">ZARA</a>
         </div>
       </div>
     </div>`;
@@ -3527,7 +3595,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VC18<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VC19<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -3551,7 +3619,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VC18',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VC19',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
