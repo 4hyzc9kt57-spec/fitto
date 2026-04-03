@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VC21a · AI 智能穿搭</title>
+<title>Fitto VC22 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -647,7 +647,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VC21a</span></div>
+<div class="logo">Fitto <span class="logo-badge">VC22</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
@@ -685,36 +685,49 @@ body{background:var(--bg);color:var(--ink);}
   </div>
   <div class="limit-bar">
     <span class="lb-label">衣櫃容量</span>
-    <span><span class="lb-val" id="w-used">0</span> / <span id="w-max">10</span> 件</span>
+    <span><span class="lb-val" id="w-used">0</span> / <span id="w-max">20</span> 件</span>
     <button class="lb-btn" onclick="goShop()">🪙 擴充</button>
   </div>
   <div class="cat-tabs" id="cat-tabs">
     <button class="cat-tab-btn active" onclick="setCatFilter('全部',this)">全部</button>
   </div>
   <div class="photo-btns">
-    <div class="pb" onclick="openScan('camera')"><span class="pbi">📷</span><p>拍照辨識</p><small>開啟相機掃描</small></div>
-    <div class="pb" onclick="openScan('upload')"><span class="pbi">🖼️</span><p>上傳照片</p><small>從相簿選圖</small></div>
+    <div class="pb" onclick="openScan('camera')"><span class="pbi">📷</span><p>拍照辨識</p><small>AI精準辨識・生圖效果佳</small></div>
+    <div class="pb" onclick="openScan('upload')"><span class="pbi">🖼️</span><p>上傳照片</p><small>AI精準辨識・生圖效果佳</small></div>
+  </div>
+  <div style="background:linear-gradient(90deg,#FFF3DC,#FFF8EE);border:1px solid #E8C87A;border-radius:10px;padding:9px 12px;margin-bottom:10px;font-size:.65rem;color:#7A5020;display:flex;align-items:center;gap:8px">
+    <span style="font-size:1rem">✨</span>
+    <span>AI辨識可獲得<strong>更精準的穿搭生圖效果</strong>，手動新增生圖品質較低</span>
   </div>
   <div class="card">
+    <div style="font-size:.62rem;color:var(--muted);margin-bottom:8px;font-weight:600;letter-spacing:.04em">✏️ 手動新增（免費・生圖品質普通）</div>
     <div class="fr">
       <div class="fg"><label>種類</label><select id="it">
         <option>上衣</option><option>T恤</option><option>襯衫</option><option>毛衣</option>
         <option>外套</option><option>夾克</option><option>褲子</option><option>牛仔褲</option>
         <option>裙子</option><option>洋裝</option><option>鞋子</option><option>球鞋</option><option>皮鞋</option><option>靴子</option><option>包包</option><option>墨鏡</option><option>帽子</option><option>腰帶</option><option>配件</option>
       </select></div>
-      <div class="fg"><label>顏色</label><select id="ic">
+      <div class="fg"><label>主色</label><select id="ic">
         <option>白色</option><option>米白</option><option>淺灰</option><option>灰色</option><option>深灰</option><option>黑色</option>
         <option>淺藍</option><option>深藍</option><option>卡其</option><option>棕色</option>
         <option>紅色</option><option>酒紅</option><option>粉色</option><option>綠色</option><option>橄欖綠</option><option>花紋/條紋</option>
       </select></div>
     </div>
     <div class="fr">
+      <div class="fg"><label>材質</label><select id="imat">
+        <option>棉</option><option>牛仔</option><option>針織</option><option>雪紡</option><option>皮革</option><option>羊毛</option><option>聚酯</option><option>麻</option><option>絲</option><option>其他</option>
+      </select></div>
+      <div class="fg"><label>版型</label><select id="ifit">
+        <option>修身</option><option>標準</option><option>寬鬆</option><option>Oversized</option><option>貼身</option>
+      </select></div>
+    </div>
+    <div class="fr">
       <div class="fg"><label>風格</label><select id="is">
         <option>休閒</option><option>正式</option><option>商務</option><option>運動</option><option>韓系</option><option>簡約</option><option>街頭</option>
       </select></div>
-      <div class="fg"><label>備註（選填）</label><input type="text" id="in" placeholder="品牌、材質…"></div>
+      <div class="fg"><label>備註（選填）</label><input type="text" id="in" placeholder="品牌…"></div>
     </div>
-    <button class="btn-p" onclick="addItem()">＋ 手動新增</button>
+    <button class="btn-p" onclick="addItem()">＋ 手動新增（免費）</button>
   </div>
   <div class="sec-label">服裝列表</div>
   <!-- 衣櫃建議按鈕 -->
@@ -909,8 +922,8 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VC21a · 2026.04</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VC21a 修正照片辨識多件bug(移除responseMimeType)</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VC22 · 2026.04</div>
+    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VC22 商店改版：正式定價/衣櫃擴充三段/第二波商品</div>
   </div>
 </div>
 
@@ -920,21 +933,39 @@ body{background:var(--bg);color:var(--ink);}
     <h2>🪙 Fitto 商店</h2><p>用金幣解鎖更多功能</p>
     <div class="scd"><span class="scd-amt" id="shop-coins">5</span><span class="scd-lbl">🪙 我的金幣</span></div>
   </div>
-  <div style="background:#F5EDD8;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.68rem;color:#7A5020;line-height:1.6">
-    🎁 每日免費生圖 <strong>1 次</strong>（自動補充）<br>
-    💡 用完後每張圖消耗 <strong>2 金幣</strong>
+  <div style="background:#F5EDD8;border-radius:10px;padding:10px 12px;margin-bottom:12px;font-size:.68rem;color:#7A5020;line-height:1.7">
+    🎁 新用戶福利：<strong>前5次AI辨識免費</strong> ＋ <strong>首次生圖免費</strong> ＋ <strong>贈送10幣</strong><br>
+    📸 AI辨識加衣櫃 <strong>1幣／件</strong>　✨ 生圖 <strong>2幣／張</strong>　💬 文字建議 <strong>1幣／次</strong><br>
+    ✏️ 手動加衣櫃 <strong>免費</strong>（生圖效果較低）
   </div>
   <div class="shop-sec">💰 購買金幣</div>
   <div class="shop-grid">
-    <div class="shop-item"><span class="si-icon">🪙</span><div class="si-name">30 金幣</div><div class="si-desc">入門包<br>NT$4.3/枚</div><button class="si-price" onclick="buyCoins(30,'NT$129')">NT$129</button></div>
-    <div class="shop-item featured"><div class="si-badge">最划算</div><span class="si-icon">💰</span><div class="si-name">80 金幣</div><div class="si-desc">標準包<br>NT$3.7/枚</div><button class="si-price" onclick="buyCoins(80,'NT$299')">NT$299</button></div>
-    <div class="shop-item"><span class="si-icon">💎</span><div class="si-name">200 金幣</div><div class="si-desc">大量包<br>NT$3.5/枚</div><button class="si-price" onclick="buyCoins(200,'NT$699')">NT$699</button></div>
-    <div class="shop-item"><span class="si-icon">👑</span><div class="si-name">月卡 100 枚</div><div class="si-desc">每月固定<br>NT$2.5/枚</div><button class="si-price" onclick="buyCoins(100,'NT$249/月')">NT$249/月</button></div>
+    <div class="shop-item"><span class="si-icon">🪙</span><div class="si-name">10 金幣</div><div class="si-desc">嚐鮮包<br>NT$4.9/枚</div><button class="si-price" onclick="buyCoins(10,'NT$49')">NT$49</button></div>
+    <div class="shop-item featured"><div class="si-badge">最划算</div><span class="si-icon">💰</span><div class="si-name">25 金幣</div><div class="si-desc">標準包<br>NT$3.96/枚</div><button class="si-price" onclick="buyCoins(25,'NT$99')">NT$99</button></div>
+    <div class="shop-item"><span class="si-icon">💎</span><div class="si-name">60 金幣</div><div class="si-desc">超值包<br>NT$3.3/枚</div><button class="si-price" onclick="buyCoins(60,'NT$199')">NT$199</button></div>
   </div>
   <div class="shop-sec">🧺 衣櫃擴充</div>
   <div class="shop-grid">
-    <div class="shop-item"><span class="si-icon">📦</span><div class="si-name">+10 件空間</div><div class="si-desc">容量到20件</div><button class="si-price" onclick="buyExpansion(10,30)">🪙 30枚</button></div>
-    <div class="shop-item"><span class="si-icon">🏠</span><div class="si-name">+30 件空間</div><div class="si-desc">大幅擴充40件</div><button class="si-price" onclick="buyExpansion(30,80)">🪙 80枚</button></div>
+    <div class="shop-item"><span class="si-icon">📦</span><div class="si-name">第一擴充</div><div class="si-desc">+25件（共45件）</div><button class="si-price" onclick="buyExpansion(25,20,'exp1')">🪙 20枚</button></div>
+    <div class="shop-item"><span class="si-icon">🏠</span><div class="si-name">第二擴充</div><div class="si-desc">+25件（共70件）</div><button class="si-price" onclick="buyExpansion(25,20,'exp2')">🪙 20枚</button></div>
+    <div class="shop-item featured"><div class="si-badge">永久</div><span class="si-icon">♾️</span><div class="si-name">無限容量</div><div class="si-desc">不再受限</div><button class="si-price" onclick="buyExpansion(9999,50,'unlimited')">🪙 50枚</button></div>
+  </div>
+  <div class="shop-sec">🌟 進階功能</div>
+  <div class="shop-grid">
+    <div class="shop-item featured">
+      <div class="si-badge">即將推出</div>
+      <span class="si-icon">🎯</span>
+      <div class="si-name">場合穿搭建議</div>
+      <div class="si-desc">約會／面試／旅行<br>從你的衣櫃搭出來</div>
+      <button class="si-price" style="opacity:.6;cursor:not-allowed">🪙 10枚</button>
+    </div>
+    <div class="shop-item">
+      <div class="si-badge">即將推出</div>
+      <span class="si-icon">💡</span>
+      <div class="si-name">穿搭靈感圖</div>
+      <div class="si-desc">復古／極簡／Y2K<br>純風格參考</div>
+      <button class="si-price" style="opacity:.6;cursor:not-allowed">🪙 5枚</button>
+    </div>
   </div>
   <div class="shop-sec">👨 帥哥頭像</div>
   <div class="shop-grid">
@@ -1072,7 +1103,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VC21a · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VC22 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -1175,8 +1206,10 @@ function checkPw() {
 }
 
 // ═══ COINS ═══
-var coins = parseInt(localStorage.getItem('fitto_coins') || '1000');
-var wardrobeLimit = parseInt(localStorage.getItem('fitto_wlimit') || '10');
+var coins = parseInt(localStorage.getItem('fitto_coins') || '10');
+var wardrobeLimit = parseInt(localStorage.getItem('fitto_wlimit') || '20');
+var freeScansLeft = parseInt(localStorage.getItem('fitto_free_scans') ?? '5');
+var firstGenUsed = localStorage.getItem('fitto_first_gen') === '1';
 var userAvatar = localStorage.getItem('fitto_avatar') || '👤';
 var ownedAvatars = JSON.parse(localStorage.getItem('fitto_ownedav') || '["👤"]');
 var activeCat = '全部';
@@ -1186,6 +1219,8 @@ var lastShare = {};
 function saveProgress() {
   localStorage.setItem('fitto_coins', String(coins));
   localStorage.setItem('fitto_wlimit', String(wardrobeLimit));
+  localStorage.setItem('fitto_free_scans', String(freeScansLeft));
+  if(firstGenUsed) localStorage.setItem('fitto_first_gen', '1');
   localStorage.setItem('fitto_avatar', userAvatar);
   localStorage.setItem('fitto_ownedav', JSON.stringify(ownedAvatars));
 }
@@ -1280,10 +1315,25 @@ function buyCoins(amt, price) {
   showToast('✅ 獲得 ' + amt + ' 金幣！');
 }
 
-function buyExpansion(add, cost) {
+function buyExpansion(add, cost, tier) {
+  // 分段鎖：exp2 需先有 exp1
+  var owned = JSON.parse(localStorage.getItem('fitto_exp_owned') || '[]');
+  if(tier === 'exp2' && owned.indexOf('exp1') < 0) {
+    showToast('請先購買第一擴充！'); return;
+  }
+  if(tier && tier !== 'unlimited' && owned.indexOf(tier) >= 0) {
+    showToast('已購買過此擴充！'); return;
+  }
   if(!spendCoin(cost,'衣櫃擴充')) return;
-  wardrobeLimit += add; saveProgress(); updateCoinUI();
-  showToast('✅ 衣櫃擴充到 ' + wardrobeLimit + ' 件！');
+  if(tier === 'unlimited') {
+    wardrobeLimit = 99999;
+  } else {
+    wardrobeLimit += add;
+    if(tier) { owned.push(tier); localStorage.setItem('fitto_exp_owned', JSON.stringify(owned)); }
+  }
+  saveProgress(); updateCoinUI();
+  var label = tier === 'unlimited' ? '無限' : (wardrobeLimit + ' 件');
+  showToast('✅ 衣櫃擴充到 ' + label + '！');
 }
 
 function buyAvatar(emoji, cost, btnId) {
@@ -1610,7 +1660,14 @@ function updateDailyUI() {
 }
 function checkAndSpend() {
   if(useDailyFree()) { updateDailyUI(); return true; }
-  return spendCoin(2,'生成穿搭圖');
+  return (function(){
+    if(!firstGenUsed){
+      firstGenUsed=true; saveProgress();
+      showToast('🎁 首次生圖免費！');
+      return true;
+    }
+    return spendCoin(2,'生成穿搭圖');
+  })();
 }
 
 // ═══ SHARE ═══
@@ -1766,7 +1823,7 @@ function addItem(data){
   let item;
   if(data){ item=data; }
   else {
-    item={id:nid++,type:document.getElementById('it').value,color:document.getElementById('ic').value,style:document.getElementById('is').value,note:document.getElementById('in').value.trim()};
+    item={id:nid++,type:document.getElementById('it').value,color:document.getElementById('ic').value,material:document.getElementById('imat').value,fit:document.getElementById('ifit').value,style:document.getElementById('is').value,note:document.getElementById('in').value.trim(),manualAdd:true};
     document.getElementById('in').value='';
   }
   wardrobe.push(item);persist();renderW();
@@ -2245,6 +2302,19 @@ function confirmMultiScan() {
   const items = window._scanItems || [];
   let added = 0;
   const avatarDesc = getAvatarPromptDesc();
+  // 免費掃描次數判斷
+  const scanCount = items.length;
+  let freeUsed = 0, paidCount = 0;
+  if(freeScansLeft > 0) {
+    freeUsed = Math.min(freeScansLeft, scanCount);
+    paidCount = scanCount - freeUsed;
+  } else {
+    paidCount = scanCount;
+  }
+  if(paidCount > 0 && !spendCoin(paidCount, 'AI辨識加衣櫃')) return;
+  freeScansLeft = Math.max(0, freeScansLeft - freeUsed);
+  saveProgress();
+  if(freeUsed > 0 && paidCount === 0) showToast('🎁 免費辨識 ' + freeUsed + ' 件（剩餘免費次數：' + freeScansLeft + '）');
   items.forEach(item => {
     if(wardrobe.length >= wardrobeLimit){ showLimitAlert(); return; }
     const prebuiltPrompt = buildItemImgPrompt(item, avatarDesc);
@@ -3664,7 +3734,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VC21a<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VC22<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -3688,7 +3758,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VC21a',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VC22',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
