@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VC19 · AI 智能穿搭</title>
+<title>Fitto VC20 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -647,7 +647,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VC19</span></div>
+<div class="logo">Fitto <span class="logo-badge">VC20</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
@@ -823,10 +823,10 @@ body{background:var(--bg);color:var(--ink);}
 
   <!-- 衣櫃分析 -->
   <div class="card" style="margin-top:14px">
-    <div style="font-size:.78rem;font-weight:800;color:var(--ink);margin-bottom:4px">🔬 衣櫃風格分析</div>
-    <div style="font-size:.62rem;color:var(--muted);margin-bottom:12px">AI 分析你的衣櫃，推薦搭配風格 + 網路選購新品建議</div>
+    <div style="font-size:.78rem;font-weight:800;color:var(--ink);margin-bottom:4px">🧠 AI 衣櫃洞察</div>
+    <div style="font-size:.62rem;color:var(--muted);margin-bottom:12px">整合風格分析、缺口診斷與品牌捷徑，集中放在搭配頁查看</div>
     <div id="analysis-result" style="display:none"></div>
-    <button class="btn-ghost" onclick="analyzeWardrobe()" id="analysis-btn">🔍 分析我的衣櫃</button>
+    <button class="btn-ghost" onclick="analyzeClosetInsights()" id="analysis-btn">🔍 分析 AI 衣櫃洞察</button>
   </div>
 </div>
 
@@ -909,8 +909,8 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VC19 · 2026.04</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VC19 專用函式·品牌快捷搜尋·強化風格分析</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VC20 · 2026.04</div>
+    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VC20 專用函式·整合 AI 衣櫃洞察·品牌快捷搜尋</div>
   </div>
 </div>
 
@@ -1072,7 +1072,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VC19 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VC20 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -1788,9 +1788,9 @@ function confirmEdit(){
 }
 function renderW(){
   refreshCatTabs(); updateCoinUI();
-  // 衣櫃建議按鈕：有 3 件以上才顯示
+  // 衣櫃建議按鈕改整合到搭配頁，這裡固定隱藏
   const suggestBar = document.getElementById('wardrobe-suggest-bar');
-  if(suggestBar) suggestBar.style.display = wardrobe.length >= 3 ? 'block' : 'none';
+  if(suggestBar) suggestBar.style.display = 'none';
   const g=document.getElementById('cgrid');
   let ct=0,cb=0,co=0;
   g.innerHTML='';
@@ -1865,10 +1865,15 @@ async function openWardrobeSuggest() {
 
 function renderSuggestResult(d) {
   const el = document.getElementById('suggest-result');
+  el.innerHTML = buildSuggestResultHtml(d);
+  el.style.display = 'block';
+}
+function buildSuggestResultHtml(d) {
   const gaps = (d.gaps||[]).map(g => {
     const imgUrl = 'https://www.google.com/search?q=' + encodeURIComponent(g.item+' 穿搭') + '&tbm=isch';
     const uniqloUrl = 'https://www.google.com/search?q=' + encodeURIComponent((g.keyword||g.item) + ' site:uniqlo.com');
-    const zaraUrl = 'https://www.google.com/search?q=' + encodeURIComponent((g.keyword||g.item) + ' site:zara.com');
+    const mujiUrl = 'https://www.google.com/search?q=' + encodeURIComponent((g.keyword||g.item) + ' site:muji.com');
+    const netUrl = 'https://www.google.com/search?q=' + encodeURIComponent((g.keyword||g.item) + ' site:net-fashion.net');
     const bg = (COLORS||{})[g.color] || '#888';
     return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-bottom:8px">
       <div style="width:36px;height:36px;border-radius:8px;background:${bg};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem">👗</div>
@@ -1878,18 +1883,17 @@ function renderSuggestResult(d) {
         <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">
           <a href="${imgUrl}" target="_blank" style="font-size:.6rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.15);border-radius:5px;padding:3px 8px;font-weight:700">🔍 看圖</a>
           <a href="${uniqloUrl}" target="_blank" style="font-size:.6rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#5C6C7C,#8898A8);border-radius:5px;padding:3px 8px;font-weight:700">UNIQLO</a>
-          <a href="${zaraUrl}" target="_blank" style="font-size:.6rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#2B2B2B,#555);border-radius:5px;padding:3px 8px;font-weight:700">ZARA</a>
+          <a href="${mujiUrl}" target="_blank" style="font-size:.6rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#6A5B4B,#8B7A66);border-radius:5px;padding:3px 8px;font-weight:700">MUJI</a>
+          <a href="${netUrl}" target="_blank" style="font-size:.6rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#7A2E2E,#B04A4A);border-radius:5px;padding:3px 8px;font-weight:700">NET</a>
         </div>
       </div>
     </div>`;
   }).join('');
-
-  el.innerHTML = `
+  return `
     <div style="background:var(--surface2);border-left:3px solid var(--gold);border-radius:8px;padding:11px 13px;margin-bottom:12px;font-size:.74rem;color:var(--ink2);line-height:1.7">${d.summary||''}</div>
     <div style="font-size:.62rem;font-weight:800;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">💡 推薦補充單品</div>
     ${gaps}
     <div style="background:rgba(61,170,106,.1);border:1px solid rgba(61,170,106,.3);border-radius:8px;padding:10px 13px;margin-top:4px;font-size:.72rem;color:var(--green);line-height:1.6">✨ ${d.tip||''}</div>`;
-  el.style.display = 'block';
 }
 
 function renderSuggestDemo() {
@@ -3328,8 +3332,55 @@ function buildShoppingLinks(keyword) {
   return {
     img: 'https://www.google.com/search?q=' + encodeURIComponent(clean + ' 穿搭') + '&tbm=isch',
     uniqlo: 'https://www.google.com/search?q=' + encodeURIComponent(clean + ' site:uniqlo.com'),
-    zara: 'https://www.google.com/search?q=' + encodeURIComponent(clean + ' site:zara.com')
+    muji: 'https://www.google.com/search?q=' + encodeURIComponent(clean + ' site:muji.com'),
+    net: 'https://www.google.com/search?q=' + encodeURIComponent(clean + ' site:net-fashion.net')
   };
+}
+function buildStyleResultHtml(summary) {
+  const buy1Parts = String(summary.buy1 || '').split('|');
+  const buy2Parts = String(summary.buy2 || '').split('|');
+  const buy1Name = (buy1Parts[0] || '').trim() || '推薦單品 1';
+  const buy1Why = (buy1Parts[1] || '').trim() || '可補齊現有衣櫃缺口';
+  const buy2Name = (buy2Parts[0] || '').trim() || '推薦單品 2';
+  const buy2Why = (buy2Parts[1] || '').trim() || '能和現有衣櫃形成更多搭配';
+  const links1 = buildShoppingLinks(buy1Name);
+  const links2 = buildShoppingLinks(buy2Name);
+  return `<div style="display:grid;gap:10px">
+      <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px">
+        <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:5px">風格定位</div>
+        <div style="font-size:.8rem;font-weight:800;color:var(--ink)">${summary.style}</div>
+      </div>
+      <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px">
+        <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:5px">現有優勢</div>
+        <div style="font-size:.77rem;color:var(--ink2);line-height:1.65">${summary.strength}</div>
+      </div>
+      <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px">
+        <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:5px">最大缺口</div>
+        <div style="font-size:.77rem;color:var(--ink2);line-height:1.65">${summary.gap}</div>
+      </div>
+      <div style="padding:12px 14px;background:rgba(200,160,80,.12);border:1px solid rgba(200,160,80,.28);border-radius:12px">
+        <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:8px">優先補齊 1</div>
+        <div style="font-size:.8rem;font-weight:800;color:var(--ink)">${buy1Name}</div>
+        <div style="font-size:.73rem;color:var(--ink2);line-height:1.65;margin-top:4px">${buy1Why}</div>
+        <div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">
+          <a href="${links1.img}" target="_blank" style="font-size:.63rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.14);border:1px solid rgba(200,160,80,.28);border-radius:8px;padding:5px 10px;font-weight:700">🔍 看圖</a>
+          <a href="${links1.uniqlo}" target="_blank" style="font-size:.63rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#5C6C7C,#8898A8);border-radius:8px;padding:5px 10px;font-weight:700">UNIQLO</a>
+          <a href="${links1.muji}" target="_blank" style="font-size:.63rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#6A5B4B,#8B7A66);border-radius:8px;padding:5px 10px;font-weight:700">MUJI</a>
+          <a href="${links1.net}" target="_blank" style="font-size:.63rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#7A2E2E,#B04A4A);border-radius:8px;padding:5px 10px;font-weight:700">NET</a>
+        </div>
+      </div>
+      <div style="padding:12px 14px;background:rgba(200,160,80,.08);border:1px solid rgba(200,160,80,.18);border-radius:12px">
+        <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:8px">優先補齊 2</div>
+        <div style="font-size:.8rem;font-weight:800;color:var(--ink)">${buy2Name}</div>
+        <div style="font-size:.73rem;color:var(--ink2);line-height:1.65;margin-top:4px">${buy2Why}</div>
+        <div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">
+          <a href="${links2.img}" target="_blank" style="font-size:.63rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.14);border:1px solid rgba(200,160,80,.28);border-radius:8px;padding:5px 10px;font-weight:700">🔍 看圖</a>
+          <a href="${links2.uniqlo}" target="_blank" style="font-size:.63rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#5C6C7C,#8898A8);border-radius:8px;padding:5px 10px;font-weight:700">UNIQLO</a>
+          <a href="${links2.muji}" target="_blank" style="font-size:.63rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#6A5B4B,#8B7A66);border-radius:8px;padding:5px 10px;font-weight:700">MUJI</a>
+          <a href="${links2.net}" target="_blank" style="font-size:.63rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#7A2E2E,#B04A4A);border-radius:8px;padding:5px 10px;font-weight:700">NET</a>
+        </div>
+      </div>
+    </div>`;
 }
 async function analyzeWardrobe() {
   if(wardrobe.length < 3) { showToast('⚠️ 請先加入至少 3 件衣物'); return; }
@@ -3365,55 +3416,68 @@ ${wj}`;
 
     const raw = await geminiText(prompt, 320);
     const summary = parseWardrobeStyleConclusion(raw);
-    const buy1Parts = String(summary.buy1 || '').split('|');
-    const buy2Parts = String(summary.buy2 || '').split('|');
-    const buy1Name = (buy1Parts[0] || '').trim() || '推薦單品 1';
-    const buy1Why = (buy1Parts[1] || '').trim() || '可補齊現有衣櫃缺口';
-    const buy2Name = (buy2Parts[0] || '').trim() || '推薦單品 2';
-    const buy2Why = (buy2Parts[1] || '').trim() || '能和現有衣櫃形成更多搭配';
-    const links1 = buildShoppingLinks(buy1Name);
-    const links2 = buildShoppingLinks(buy2Name);
-
-    res.innerHTML = `<div style="display:grid;gap:10px">
-      <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px">
-        <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:5px">風格定位</div>
-        <div style="font-size:.8rem;font-weight:800;color:var(--ink)">${summary.style}</div>
-      </div>
-      <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px">
-        <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:5px">現有優勢</div>
-        <div style="font-size:.77rem;color:var(--ink2);line-height:1.65">${summary.strength}</div>
-      </div>
-      <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px">
-        <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:5px">最大缺口</div>
-        <div style="font-size:.77rem;color:var(--ink2);line-height:1.65">${summary.gap}</div>
-      </div>
-      <div style="padding:12px 14px;background:rgba(200,160,80,.12);border:1px solid rgba(200,160,80,.28);border-radius:12px">
-        <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:8px">優先補齊 1</div>
-        <div style="font-size:.8rem;font-weight:800;color:var(--ink)">${buy1Name}</div>
-        <div style="font-size:.73rem;color:var(--ink2);line-height:1.65;margin-top:4px">${buy1Why}</div>
-        <div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">
-          <a href="${links1.img}" target="_blank" style="font-size:.63rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.14);border:1px solid rgba(200,160,80,.28);border-radius:8px;padding:5px 10px;font-weight:700">🔍 看圖</a>
-          <a href="${links1.uniqlo}" target="_blank" style="font-size:.63rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#5C6C7C,#8898A8);border-radius:8px;padding:5px 10px;font-weight:700">UNIQLO</a>
-          <a href="${links1.zara}" target="_blank" style="font-size:.63rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#2B2B2B,#555);border-radius:8px;padding:5px 10px;font-weight:700">ZARA</a>
-        </div>
-      </div>
-      <div style="padding:12px 14px;background:rgba(200,160,80,.08);border:1px solid rgba(200,160,80,.18);border-radius:12px">
-        <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:8px">優先補齊 2</div>
-        <div style="font-size:.8rem;font-weight:800;color:var(--ink)">${buy2Name}</div>
-        <div style="font-size:.73rem;color:var(--ink2);line-height:1.65;margin-top:4px">${buy2Why}</div>
-        <div style="display:flex;gap:8px;margin-top:9px;flex-wrap:wrap">
-          <a href="${links2.img}" target="_blank" style="font-size:.63rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.14);border:1px solid rgba(200,160,80,.28);border-radius:8px;padding:5px 10px;font-weight:700">🔍 看圖</a>
-          <a href="${links2.uniqlo}" target="_blank" style="font-size:.63rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#5C6C7C,#8898A8);border-radius:8px;padding:5px 10px;font-weight:700">UNIQLO</a>
-          <a href="${links2.zara}" target="_blank" style="font-size:.63rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#2B2B2B,#555);border-radius:8px;padding:5px 10px;font-weight:700">ZARA</a>
-        </div>
-      </div>
-    </div>`;
+    res.innerHTML = buildStyleResultHtml(summary);
     res.style.display = 'block';
   } catch(e) {
     res.innerHTML = `<div style="color:var(--red);font-size:.72rem">⚠️ 分析失敗：${(e.message||'').substring(0,80)}</div>`;
     res.style.display = 'block';
   } finally {
     btn.textContent = '🔍 重新分析'; btn.disabled = false;
+  }
+}
+async function analyzeClosetInsights() {
+  if(wardrobe.length < 3) { showToast('⚠️ 請先加入至少 3 件衣物'); return; }
+  const btn = document.getElementById('analysis-btn');
+  const res = document.getElementById('analysis-result');
+  btn.textContent = '⏳ 分析中…'; btn.disabled = true;
+  res.innerHTML = '<div style="font-size:.72rem;color:var(--muted);padding:10px 0">AI 正在整合衣櫃缺口與風格分析…</div>';
+  res.style.display = 'block';
+
+  try {
+    const key = localStorage.getItem('fitto_gemini_key') || '';
+    if(!key) throw new Error('請先設定 Gemini Key');
+    const wj = buildWardrobePromptText();
+    const suggestPrompt = `分析衣櫃清單並給補充建議。清單：${wj}
+
+輸出格式（繁體中文）：
+{"summary":"最大缺口20字內直接說明","gaps":[{"item":"單品","reason":"原因","color":"顏色","keyword":"關鍵字 2026"},{"item":"單品","reason":"原因","color":"顏色","keyword":"關鍵字 2026"},{"item":"單品","reason":"原因","color":"顏色","keyword":"關鍵字 2026"}],"tip":"升級方向20字內"}`;
+    const stats = buildWardrobeStatsSummary();
+    const stylePrompt = `你是高端但務實的個人造型師，請根據這份真實衣櫃清單下具體結論，不要空話，不要泛泛而談。
+請只輸出 5 行，不要前言：
+第1行：風格定位：要點出真正的穿搭傾向
+第2行：現有優勢：指出最能發揮的單品結構或色系
+第3行：最大缺口：指出最影響完整度的缺口
+第4行：優先補齊1：單品名稱|為何適合這個衣櫃
+第5行：優先補齊2：單品名稱|為何適合這個衣櫃
+
+衣櫃統計：
+件數=${stats.total}
+常見種類=${stats.topTypes.join('、') || '未明顯集中'}
+常見顏色=${stats.topColors.join('、') || '未明顯集中'}
+常見風格=${stats.topStyles.join('、') || '未明顯集中'}
+明顯缺口=${stats.missing.join('、') || '無明顯空缺'}
+
+衣櫃清單：
+${wj}`;
+
+    const [suggestData, styleRaw] = await Promise.all([
+      requestWardrobeSuggest(suggestPrompt),
+      geminiText(stylePrompt, 320)
+    ]);
+    const summary = parseWardrobeStyleConclusion(styleRaw);
+    res.innerHTML = `
+      <div style="font-size:.62rem;font-weight:800;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">AI 衣櫃洞察</div>
+      <div style="display:grid;gap:14px">
+        <div>${buildStyleResultHtml(summary)}</div>
+        <div style="padding-top:2px;border-top:1px solid var(--border)">
+          <div style="font-size:.62rem;font-weight:800;color:var(--gold);letter-spacing:.1em;margin:2px 0 10px">缺口補強與導購</div>
+          ${buildSuggestResultHtml(suggestData)}
+        </div>
+      </div>`;
+  } catch(e) {
+    res.innerHTML = `<div style="color:var(--red);font-size:.72rem">⚠️ 分析失敗：${(e.message||'').substring(0,80)}</div>`;
+  } finally {
+    btn.textContent = '🔍 重新分析 AI 衣櫃洞察'; btn.disabled = false;
   }
 }
 
@@ -3595,7 +3659,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VC19<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VC20<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -3619,7 +3683,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VC19',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VC20',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
