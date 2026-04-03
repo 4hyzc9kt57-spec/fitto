@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VB16 · AI 智能穿搭</title>
+<title>Fitto VB17 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -647,7 +647,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-  <div class="logo">Fitto <span class="logo-badge">VB16</span></div>
+  <div class="logo">Fitto <span class="logo-badge">VB17</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
@@ -909,8 +909,8 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VB16 · 2026.04</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VB16 辨識token擴增·全身照多件·建議穩定</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VB17 · 2026.04</div>
+    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VB17 vision專用函式·強制JSON模式·建議改geminiJson</div>
   </div>
 </div>
 
@@ -1072,7 +1072,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-  <div class="lock-footer">Fitto VB16 · Gemini Powered · 2026.04</div>
+  <div class="lock-footer">Fitto VB17 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -1713,6 +1713,34 @@ async function geminiVision(prompt, b64, mime) {
   return d.candidates[0].content.parts[0].text.trim();
 }
 
+// 多件衣物掃描專用：更高 token、更低 temperature、強制 JSON
+async function geminiVisionScan(b64, mime) {
+  mime = mime || 'image/jpeg';
+  var key = localStorage.getItem('fitto_gemini_key') || '';
+  if(!key) throw new Error('請先設定 Gemini Key');
+  apiLog('→ 多件掃描 vision', 'prompt');
+  const prompt = buildScanPrompt();
+  var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      contents:[{role:'user',parts:[{inlineData:{mimeType:mime,data:b64}},{text:prompt}]}],
+      generationConfig:{
+        maxOutputTokens:1200,
+        temperature:0.1,
+        responseMimeType:'application/json'
+      }
+    })
+  });
+  var d = await res.json();
+  if(d.error) throw new Error(d.error.message || 'Gemini error');
+  addTokenUsage((d.usageMetadata||{}).promptTokenCount||0,(d.usageMetadata||{}).candidatesTokenCount||0,'gemini_text');
+  var parts = (((d.candidates||[])[0]||{}).content||{}).parts||[];
+  var textPart = parts.find(p=>typeof p.text==='string');
+  var raw = textPart ? textPart.text.trim() : '';
+  apiLog('  掃描原文: ' + raw.substring(0,100).replace(/\n/g,' '), 'info');
+  return raw;
+}
+
 const COLORS={'白色':'#F8F8F8','米白':'#F0E6D3','淺灰':'#D0D0D0','灰色':'#9E9E9E','深灰':'#4A4A4A','黑色':'#2C2C2C','淺藍':'#90CAF9','深藍':'#1A237E','卡其':'#C8A96E','棕色':'#6D4C41','紅色':'#EF5350','酒紅':'#7B1C2E','粉色':'#F48FB1','綠色':'#66BB6A','橄欖綠':'#6B7A3A','花紋/條紋':'repeating-linear-gradient(45deg,#ddd,#ddd 4px,#bbb 4px,#bbb 8px)'};
 const EMOJIS={'上衣':'👕','T恤':'👕','襯衫':'👔','毛衣':'🧶','外套':'🧥','夾克':'🧥','褲子':'👖','牛仔褲':'👖','裙子':'👗','洋裝':'👗','鞋子':'👟','球鞋':'👟','皮鞋':'👞','靴子':'🥾','包包':'👜','墨鏡':'🕶️','帽子':'🧢','腰帶':'👔','配件':'💍'};
 const TOPS=['上衣','T恤','襯衫','毛衣'],BTMS=['褲子','牛仔褲','裙子','洋裝'],OUTS=['外套','夾克'];
@@ -1820,12 +1848,12 @@ async function openWardrobeSuggest() {
   }
 
   try {
-    const prompt = `造型師分析衣櫃。清單：${wj}
+    const prompt = `分析衣櫃清單並給補充建議。清單：${wj}
 
-只輸出這個 JSON，禁止任何說明文字或 markdown：
-{"summary":"直接點出最大缺口，例如：缺乏下身單品、色彩單調偏深、無法應付正式場合等，20字內","gaps":[{"item":"具體單品名","reason":"一句話原因","color":"顏色","keyword":"搜尋詞 2026"},{"item":"具體單品名","reason":"一句話原因","color":"顏色","keyword":"搜尋詞 2026"},{"item":"具體單品名","reason":"一句話原因","color":"顏色","keyword":"搜尋詞 2026"}],"tip":"一句升級方向20字內"}`;
+輸出格式（繁體中文）：
+{"summary":"最大缺口20字內直接說明","gaps":[{"item":"單品","reason":"原因","color":"顏色","keyword":"關鍵字 2026"},{"item":"單品","reason":"原因","color":"顏色","keyword":"關鍵字 2026"},{"item":"單品","reason":"原因","color":"顏色","keyword":"關鍵字 2026"}],"tip":"升級方向20字內"}`;
 
-    const raw = await geminiText(prompt, 500);
+    const raw = await geminiJson(prompt, 600);
     let parsed;
     try {
       const cleaned = raw.replace(/```json|```/gi,'').trim();
@@ -1833,20 +1861,7 @@ async function openWardrobeSuggest() {
       if(s === -1 || e === -1) throw new Error('no JSON');
       parsed = JSON.parse(cleaned.slice(s, e+1));
     } catch(ex) {
-      // 二次嘗試：更寬鬆找第一個 { 到最後一個 } 並補完
-      try {
-        const fallbackRaw = raw.replace(/```json|```/gi,'').trim();
-        const fs = fallbackRaw.indexOf('{');
-        if(fs === -1) throw new Error('no JSON at all');
-        let json = fallbackRaw.slice(fs);
-        // 補齊缺少的右括號
-        const opens = (json.match(/\{/g)||[]).length;
-        const closes = (json.match(/\}/g)||[]).length;
-        for(let i = 0; i < opens - closes; i++) json += '}';
-        parsed = JSON.parse(json);
-      } catch(ex2) {
-        throw new Error('JSON解析失敗');
-      }
+      throw new Error('JSON解析失敗: ' + raw.substring(0,80));
     }
     renderSuggestResult(parsed);
   } catch(ex) {
@@ -1993,8 +2008,7 @@ async function aiScanAndAppend() {
     window._scanItems.push({type:'上衣',color:'白色',style:'休閒',note:'（示範）',backPrint:false});
     return;
   }
-  const multiPrompt = buildScanPrompt();
-  const raw = await geminiVision(multiPrompt, scanB64, scanMime);
+  const raw = await geminiVisionScan(scanB64, scanMime);
   let items = [];
   try {
     const cleaned = raw.replace(/```json|```/gi,'').trim();
@@ -2043,16 +2057,23 @@ async function aiScan(){
     return;
   }
   try{
-    const multiPrompt = buildScanPrompt();
-    const raw = await geminiVision(multiPrompt, scanB64, scanMime);
+    const raw = await geminiVisionScan(scanB64, scanMime);
+    apiLog('  辨識原文: ' + raw.substring(0,120).replace(/\n/g,' '), 'info');
     let items = [];
     try {
       const cleaned = raw.replace(/```json|```/gi,'').trim();
       const s = cleaned.indexOf('['), e = cleaned.lastIndexOf(']');
-      if(s !== -1 && e !== -1) items = JSON.parse(cleaned.slice(s, e+1));
-    } catch(e){ /* fall through */ }
+      if(s !== -1 && e !== -1 && e > s) {
+        items = JSON.parse(cleaned.slice(s, e+1));
+      } else {
+        const os = cleaned.indexOf('{'), oe = cleaned.lastIndexOf('}');
+        if(os !== -1 && oe !== -1) items = [JSON.parse(cleaned.slice(os, oe+1))];
+      }
+    } catch(parseErr) {
+      apiLog('  JSON解析失敗: ' + parseErr.message.substring(0,60), 'err');
+    }
     if(!Array.isArray(items) || items.length === 0) {
-      // 備援：單件辨識
+      apiLog('  多件辨識失敗，啟動備援', 'info');
       const type = await detectMainGarmentType();
       const detail = normalizeScanResult(await detectGarmentDetails(type));
       if(detail.type === '褲子') detail.type = await refinePantsType(detail);
@@ -3412,7 +3433,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VB16<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VB17<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -3436,7 +3457,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VB16',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VB17',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
