@@ -2009,12 +2009,12 @@ async function aiScanAndAppend() {
     return;
   }
   const raw = await geminiVisionScan(scanB64, scanMime);
-  let items = [];
-  try {
-    const cleaned = raw.replace(/```json|```/gi,'').trim();
-    const s = cleaned.indexOf('['), e2 = cleaned.lastIndexOf(']');
-    if(s !== -1 && e2 !== -1) items = JSON.parse(cleaned.slice(s, e2+1));
-  } catch(ex) {}
+  let items = parseMultiScanItems(raw);
+  if(items.length <= 1) {
+    try {
+      items = await fallbackMultiScanItems();
+    } catch(ex) {}
+  }
   if(!Array.isArray(items) || items.length === 0) {
     items = [{type:'上衣',color:'白色',style:'休閒',note:'辨識失敗',backPrint:false}];
   }
@@ -2038,6 +2038,8 @@ function buildScanPrompt() {
 6. note 款式描述10字內
 7. placement 穿戴位置英文（鞋子 worn on feet，帽子 worn on head）
 8. backPrint 上衣背面有大圖案則 true
+9. 如果看得到帽子、包包、墨鏡、腰帶等配件，也必須獨立列出，不可省略
+10. 一張圖同時有上衣、褲子、帽子時，必須至少輸出三筆
 
 只輸出 JSON 陣列，不加任何說明，最多8筆：
 [{"type":"皮夾克","color":"棕色","style":"街頭","note":"棕色機車皮夾克","placement":"","backPrint":false},{"type":"T恤","color":"白色","style":"休閒","note":"白色印花短袖","placement":"","backPrint":false},{"type":"牛仔褲","color":"深藍","style":"休閒","note":"深藍修身牛仔褲","placement":"","backPrint":false},{"type":"球鞋","color":"白色","style":"休閒","note":"白色低筒球鞋","placement":"worn on feet","backPrint":false}]`;
@@ -2059,18 +2061,14 @@ async function aiScan(){
   try{
     const raw = await geminiVisionScan(scanB64, scanMime);
     apiLog('  辨識原文: ' + raw.substring(0,120).replace(/\n/g,' '), 'info');
-    let items = [];
-    try {
-      const cleaned = raw.replace(/```json|```/gi,'').trim();
-      const s = cleaned.indexOf('['), e = cleaned.lastIndexOf(']');
-      if(s !== -1 && e !== -1 && e > s) {
-        items = JSON.parse(cleaned.slice(s, e+1));
-      } else {
-        const os = cleaned.indexOf('{'), oe = cleaned.lastIndexOf('}');
-        if(os !== -1 && oe !== -1) items = [JSON.parse(cleaned.slice(os, oe+1))];
+    let items = parseMultiScanItems(raw);
+    if(items.length <= 1) {
+      apiLog('  多件結果不足，啟動多件備援', 'info');
+      try {
+        items = await fallbackMultiScanItems();
+      } catch(parseErr) {
+        apiLog('  多件備援失敗: ' + parseErr.message.substring(0,60), 'err');
       }
-    } catch(parseErr) {
-      apiLog('  JSON解析失敗: ' + parseErr.message.substring(0,60), 'err');
     }
     if(!Array.isArray(items) || items.length === 0) {
       apiLog('  多件辨識失敗，啟動備援', 'info');
@@ -2095,6 +2093,64 @@ async function aiScan(){
     renderMultiScanResult([{type:'上衣',color:'白色',style:'休閒',note:'辨識失敗，請手動調整',backPrint:false}]);
   }
   finally{ind.classList.remove('show')}
+}
+function extractJsonArray(text) {
+  const cleaned = String(text || '').replace(/```json|```/gi,'').trim();
+  const start = cleaned.indexOf('[');
+  if(start === -1) return '';
+  let depth = 0, inString = false, escaped = false;
+  for(let i = start; i < cleaned.length; i++) {
+    const ch = cleaned[i];
+    if(inString) {
+      if(escaped) escaped = false;
+      else if(ch === '\\') escaped = true;
+      else if(ch === '"') inString = false;
+      continue;
+    }
+    if(ch === '"') { inString = true; continue; }
+    if(ch === '[') depth++;
+    if(ch === ']') {
+      depth--;
+      if(depth === 0) return cleaned.slice(start, i + 1);
+    }
+  }
+  return '';
+}
+function parseMultiScanItems(raw) {
+  const cleaned = String(raw || '').replace(/```json|```/gi,'').trim();
+  let items = [];
+  try {
+    const arr = extractJsonArray(cleaned);
+    if(arr) items = JSON.parse(arr);
+    else {
+      const obj = extractJsonObject(cleaned);
+      if(obj) items = [JSON.parse(obj)];
+    }
+  } catch(ex) {
+    apiLog('  多件 JSON解析失敗: ' + (ex.message||'').substring(0,60), 'err');
+  }
+  if(Array.isArray(items) && items.length) return items;
+
+  const lines = cleaned.split(/\r?\n/).map(function(line){ return line.trim(); }).filter(Boolean);
+  const parsed = lines.map(function(line){
+    const parts = line.split('|').map(function(part){ return part.trim(); });
+    if(parts.length < 3) return null;
+    return {
+      type: parts[0],
+      color: parts[1],
+      style: parts[2],
+      note: parts[3] || '',
+      placement: parts[4] || '',
+      backPrint: /true/i.test(parts[5] || '')
+    };
+  }).filter(Boolean);
+  return parsed;
+}
+async function fallbackMultiScanItems() {
+  const raw = await geminiVision('請不要回 JSON。請列出照片中所有可見單品，每件一行，格式：種類|顏色|風格|備註|placement|backPrint。若同時看得到上衣、褲子、帽子，必須分成三行。全身照至少列出上衣、下身、鞋子；可見配件也要列出。種類可用：上衣、T恤、襯衫、毛衣、外套、夾克、褲子、牛仔褲、裙子、洋裝、鞋子、球鞋、皮鞋、靴子、包包、墨鏡、帽子、腰帶、配件。', scanB64, scanMime);
+  const items = parseMultiScanItems(raw);
+  if(!items.length) throw new Error('多件文字備援解析失敗');
+  return items;
 }
 
 // 多件辨識結果渲染
@@ -3304,7 +3360,9 @@ async function scanCat(){
   let items=[];
   try{
     const raw = await geminiVision('分析服裝型錄找出所有服裝單品。只回JSON陣列：[{"name":"單品名","type":"種類","color":"主色","style":"風格","desc":"10字描述"},...最多8項]', catB64, catMime);
-    items=JSON.parse(raw.replace(/```json|```/g,'').trim());
+    const arr = extractJsonArray(raw);
+    if(!arr) throw new Error('型錄回應中找不到 JSON 陣列');
+    items = JSON.parse(arr);
   }catch(e){items=[{name:'白色寬版T恤',type:'T恤',color:'白色',style:'休閒',desc:'棉質素色'},{name:'深藍直筒褲',type:'褲子',color:'深藍',style:'商務',desc:'挺版顯瘦'},{name:'米色輕薄外套',type:'外套',color:'米白',style:'簡約',desc:'春秋適穿'},{name:'條紋針織衫',type:'毛衣',color:'花紋/條紋',style:'韓系',desc:'橫條紋設計'}]}
   finally{btn.disabled=false;btn.textContent='🔍 AI 分析型錄'}
   renderCatItems(items);
