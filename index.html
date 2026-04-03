@@ -1853,16 +1853,7 @@ async function openWardrobeSuggest() {
 輸出格式（繁體中文）：
 {"summary":"最大缺口20字內直接說明","gaps":[{"item":"單品","reason":"原因","color":"顏色","keyword":"關鍵字 2026"},{"item":"單品","reason":"原因","color":"顏色","keyword":"關鍵字 2026"},{"item":"單品","reason":"原因","color":"顏色","keyword":"關鍵字 2026"}],"tip":"升級方向20字內"}`;
 
-    const raw = await geminiJson(prompt, 600);
-    let parsed;
-    try {
-      const cleaned = raw.replace(/```json|```/gi,'').trim();
-      const s = cleaned.indexOf('{'), e = cleaned.lastIndexOf('}');
-      if(s === -1 || e === -1) throw new Error('no JSON');
-      parsed = JSON.parse(cleaned.slice(s, e+1));
-    } catch(ex) {
-      throw new Error('JSON解析失敗: ' + raw.substring(0,80));
-    }
+    const parsed = await requestWardrobeSuggest(prompt);
     renderSuggestResult(parsed);
   } catch(ex) {
     apiLog('✗ 衣櫃分析失敗: ' + (ex.message||'').substring(0,40), 'err');
@@ -2547,6 +2538,53 @@ function extractJsonObject(text) {
   }
   return '';
 }
+function normalizeSuggestShape(parsed) {
+  if(!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) throw new Error('衣櫃缺口回傳格式不是物件');
+  const defaults = [
+    {item:'白色基本上衣', reason:'補齊最常用百搭基礎款', color:'白色', keyword:'白色 基本上衣 2026'},
+    {item:'深色下身', reason:'讓上班搭配更穩定好配', color:'黑色', keyword:'深色 下身 2026'},
+    {item:'輕薄外套', reason:'增加層次也補足冷氣房需求', color:'卡其', keyword:'輕薄 外套 2026'}
+  ];
+  const gaps = (Array.isArray(parsed.gaps) ? parsed.gaps : []).slice(0,3).map(function(g, idx){
+    const fb = defaults[idx] || defaults[0];
+    return {
+      item: g && g.item ? g.item : fb.item,
+      reason: g && g.reason ? g.reason : fb.reason,
+      color: g && g.color ? g.color : fb.color,
+      keyword: g && g.keyword ? g.keyword : ((g && g.item) ? (g.item + ' 2026') : fb.keyword)
+    };
+  });
+  while(gaps.length < 3) gaps.push(defaults[gaps.length]);
+  return {
+    summary: parsed.summary || '已依目前衣櫃整理出最需要先補的缺口。',
+    gaps: gaps,
+    tip: parsed.tip || '先補高頻基礎款，再補能拉開層次的單品。'
+  };
+}
+async function requestWardrobeSuggest(prompt) {
+  const variants = [
+    prompt,
+    prompt + '\n請只輸出一個完整 JSON 物件，不要前言，不要使用 markdown code block。',
+    prompt + '\n請把 summary、tip 都控制在 20 字內，gaps 最多 3 筆，務必輸出完整 JSON 結尾。'
+  ];
+  let lastError = null;
+  for(let i = 0; i < variants.length; i++) {
+    const raw = await geminiJson(variants[i], 700);
+    const jsonStr = extractJsonObject(raw);
+    if(!jsonStr) {
+      lastError = new Error('衣櫃缺口回應中找不到完整 JSON：' + String(raw || '').substring(0,80));
+      apiLog('✗ 衣櫃缺口 JSON 不完整，第' + (i + 1) + '次重試', 'err');
+      continue;
+    }
+    try {
+      return normalizeSuggestShape(JSON.parse(jsonStr));
+    } catch(err) {
+      lastError = err;
+      apiLog('✗ 衣櫃缺口 JSON 解析失敗，第' + (i + 1) + '次重試: ' + (err.message||'').substring(0,50), 'err');
+    }
+  }
+  throw lastError || new Error('衣櫃缺口分析失敗');
+}
 function normalizeWeekPlanShape(parsed) {
   if(!parsed || typeof parsed !== 'object') throw new Error('Gemini 回傳格式不是物件');
   var rawDays = Array.isArray(parsed.days) ? parsed.days : (Array.isArray(parsed) ? parsed : null);
@@ -3199,12 +3237,28 @@ async function genCustomOutfitImg() {
 }
 
 // ═══ 衣櫃風格分析 ═══
+function parseWardrobeStyleConclusion(raw) {
+  const text = String(raw || '').replace(/\r/g,'').replace(/```/g,'').trim();
+  const lines = text.split('\n').map(function(line){ return line.trim(); }).filter(Boolean);
+  const pick = function(label, idx) {
+    const line = lines.find(function(item){
+      return item.indexOf(label + '：') === 0 || item.indexOf(label + ':') === 0;
+    });
+    if(line) return line.replace(label + '：','').replace(label + ':','').trim();
+    return lines[idx] || '';
+  };
+  return {
+    style: pick('風格定位', 0) || '整體風格偏日常實穿。',
+    gap: pick('最大缺口', 1) || '還缺一件能穩定串起搭配的核心單品。',
+    buy: pick('優先補齊', 2) || '先補最高頻、最好搭的基礎款。'
+  };
+}
 async function analyzeWardrobe() {
   if(wardrobe.length < 3) { showToast('⚠️ 請先加入至少 3 件衣物'); return; }
   const btn = document.getElementById('analysis-btn');
   const res = document.getElementById('analysis-result');
   btn.textContent = '⏳ 分析中…'; btn.disabled = true;
-  res.innerHTML = '<div style="font-size:.72rem;color:var(--muted);padding:10px 0">AI 正在以時尚設計師視角分析你的衣櫃…</div>';
+  res.innerHTML = '<div style="font-size:.72rem;color:var(--muted);padding:10px 0">AI 正在整理衣櫃結論…</div>';
   res.style.display = 'block';
 
   try {
@@ -3212,97 +3266,30 @@ async function analyzeWardrobe() {
     if(!key) throw new Error('請先設定 Gemini Key');
 
     const wj = buildWardrobePromptText();
-    const year = new Date().getFullYear();
+    const prompt = `根據這份衣櫃清單直接下結論，請用繁體中文只輸出 3 行，不要前言、不要額外解釋。
+第1行：風格定位：15字內
+第2行：最大缺口：18字內
+第3行：優先補齊：18字內
 
-    // 強制性的時尚設計師角色 prompt，分段避免截斷
-    const prompt1 = `你是 Alexander Wang 級別的頂尖時尚設計師與個人造型師，擅長用現有衣物最大化穿搭效果。
+衣櫃清單：
+${wj}`;
 
-客戶衣櫃清單（種類/顏色/風格/備註）：
-${wj}
+    const raw = await geminiText(prompt, 220);
+    const summary = parseWardrobeStyleConclusion(raw);
 
-⚠️ 重要：你必須根據以上清單做具體分析，不能說「無法分析」或「資訊不足」。即使清單簡短也要盡力分析。
-
-請用繁體中文完成以下兩段：
-
-【一、衣櫃風格診斷】
-• 主要風格定位：（例如：這是一個偏向XX風格的衣櫃，佔XX%，其次是XX）
-• 色彩版圖：主色調是什麼？色系是否和諧？缺少哪種顏色會讓搭配更豐富？
-• 優勢：這個衣櫃最強的地方是什麼？
-• 盲點：目前最大的穿搭缺失是什麼？
-
-【二、三組黃金搭配】
-用衣櫃現有單品，各組必須包含「上衣＋下身（+外套）」，格式：
-▸ 組合1：[具體單品組合] → 場合：[適合場合] → 設計師點評：[一句話亮點]
-▸ 組合2：...
-▸ 組合3：...`;
-
-    const prompt2 = `你是頂尖時尚設計師。客戶衣櫃：${wj}
-
-⚠️ 必須給出具體建議，不能含糊。
-
-【三、${year}年趨勢 × 衣櫃升級計劃】
-結合${year}年最新時尚趨勢，推薦5件能讓這個衣櫃脫胎換骨的單品：
-每件格式：
-• 品項：[具體品名，例如：米白色亞麻寬褲]
-• 理由：[為何適合這個衣櫃]
-• 搭配：[能搭配衣櫃中的哪件單品]
-• 預算：[NT$ 參考區間]
-
-【四、設計師私房穿搭公式】
-不需要買新衣，用現有單品就能做到的3個立竿見影技巧：
-技巧1：...
-技巧2：...
-技巧3：...`;
-
-    const [raw1, raw2] = await Promise.all([
-      geminiText(prompt1, 1000),
-      geminiText(prompt2, 1000)
-    ]);
-
-    const raw = raw1 + '\n\n' + raw2;
-
-    const formatted = raw
-      .replace(/【([^】]+)】/g, '<div style="font-size:.73rem;font-weight:800;color:var(--gold);letter-spacing:.04em;margin:12px 0 5px;padding-top:8px;border-top:1px solid var(--border)">▌ $1</div>')
-      .replace(/^(組合\d+[：:])/gm, '<span style="color:var(--gold);font-weight:700">$1</span>')
-      .replace(/^(\d+\.\s)/gm, '<span style="color:var(--gold);font-weight:700">$1</span>')
-      .replace(/\n/g, '<br>');
-
-    // 從分析文字中抓推薦單品，自動加購物連結
-    let shopLinks = '';
-    const seen = new Set();
-    // 抓「品項名稱：XXX」或「推薦 XXX」格式
-    const patterns = [
-      /品項名稱[：:]\s*([^\n，。]{2,14})/g,
-      /推薦[補充]?\s*[：:]?\s*([^\n（(，。]{2,12})/g,
-      /補充[：:]\s*([^\n（(，。]{2,12})/g,
-      /[①②③④⑤]\s*([^\n（(，。：:]{2,12})/g,
-    ];
-    patterns.forEach(re => {
-      let m;
-      while((m = re.exec(raw)) !== null) {
-        const item = m[1].trim().replace(/[：:。，,\s「」]/g,'');
-        if(item.length >= 2 && item.length <= 14 && !seen.has(item) && !/分析|診斷|搭配|組合|風格|技巧|建議|說明/.test(item)) {
-          seen.add(item);
-          const q = encodeURIComponent(item + ' 穿搭 ' + year);
-          const sq = encodeURIComponent(item + ' 購買');
-          shopLinks += `<a href="https://www.google.com/search?q=${sq}" target="_blank"
-            style="font-size:.58rem;color:#FAF7F2;text-decoration:none;
-            background:linear-gradient(135deg,rgba(139,92,32,.8),rgba(201,144,74,.8));
-            border-radius:6px;padding:4px 10px;display:inline-flex;align-items:center;gap:3px;margin:2px">🛍 ${item}</a>
-          <a href="https://www.google.com/search?q=${q}&tbm=isch" target="_blank"
-            style="font-size:.55rem;color:var(--gold);text-decoration:none;
-            background:rgba(200,160,80,.15);border-radius:4px;padding:3px 7px;margin:2px">🔍</a>`;
-        }
-      }
-    });
-
-    res.innerHTML = `<div style="font-size:.74rem;line-height:1.85;color:var(--ink2)">
-      ${formatted}
-      ${shopLinks ? `<div style="margin-top:14px;padding-top:12px;border-top:1px solid var(--border)">
-        <div style="font-size:.62rem;font-weight:800;color:var(--gold);margin-bottom:7px">🛍 設計師推薦單品 · 快速選購</div>
-        <div style="display:flex;flex-wrap:wrap;gap:4px">${shopLinks}</div>
-        <div style="font-size:.5rem;color:var(--muted);margin-top:6px;opacity:.6">點擊連結到 Google 選購 · 連結不含業配</div>
-      </div>` : ''}
+    res.innerHTML = `<div style="display:grid;gap:10px">
+      <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px">
+        <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:5px">風格定位</div>
+        <div style="font-size:.8rem;font-weight:800;color:var(--ink)">${summary.style}</div>
+      </div>
+      <div style="padding:12px 14px;background:var(--surface2);border:1px solid var(--border);border-radius:12px">
+        <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:5px">最大缺口</div>
+        <div style="font-size:.77rem;color:var(--ink2);line-height:1.65">${summary.gap}</div>
+      </div>
+      <div style="padding:12px 14px;background:rgba(200,160,80,.12);border:1px solid rgba(200,160,80,.28);border-radius:12px">
+        <div style="font-size:.6rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:5px">優先補齊</div>
+        <div style="font-size:.77rem;color:var(--ink2);line-height:1.65">${summary.buy}</div>
+      </div>
     </div>`;
     res.style.display = 'block';
   } catch(e) {
