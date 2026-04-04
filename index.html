@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VC24a · AI 智能穿搭</title>
+<title>Fitto VD1 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -647,7 +647,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VC24a</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD1</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
@@ -945,8 +945,8 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VC24a · 2026.04</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VC24a 自訂頭像生圖/圓形裁切/頭像選擇浮窗/4款髮型實照/掃描retry</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD1 · 2026.04</div>
+    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VD1 AI邏輯全面升級：辨識存材質/版型/英文Prompt，週計畫服裝設計師角色+搭配理由，生圖帶入完整單品細節+場景</div>
   </div>
 </div>
 
@@ -1168,7 +1168,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VC24a · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD1 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -2310,14 +2310,15 @@ async function aiScanAndAppend() {
   }
   items = items.map(i=>({
     type: i.type||'上衣', color: i.color||'白色', style: i.style||'休閒',
-    note: i.note||'', placement: i.placement||'', backPrint: !!i.backPrint
+    material: i.material||'', fit: i.fit||'', note: i.note||'', placement: i.placement||'', backPrint: !!i.backPrint,
+    imgPrompt: i.imgPrompt||''
   }));
   if(!window._scanItems) window._scanItems = [];
   window._scanItems = window._scanItems.concat(items);
 }
 
 function buildScanPrompt() {
-  return `你是服裝辨識 AI。你的任務是列出照片中「所有可見單品」，絕對不能只列一件。
+  return `你是服裝辨識 AI，擅長精準描述服裝細節以利後續生圖使用。你的任務是列出照片中「所有可見單品」，絕對不能只列一件。
 
 強制規則（違反即錯誤）：
 1. 只要照片中看得到人的下半身，「下身單品（褲子/裙子）」必須出現在輸出中
@@ -2328,12 +2329,15 @@ function buildScanPrompt() {
 6. 每件獨立一筆，type 用細分名：T恤/牛仔褲/球鞋/皮夾克/棒球帽等
 7. color 只能選：白色/米白/淺灰/灰色/深灰/黑色/淺藍/深藍/卡其/棕色/紅色/酒紅/粉色/綠色/橄欖綠/花紋條紋
 8. style 只能選：休閒/正式/商務/運動/韓系/簡約/街頭
-9. note 款式描述10字內
-10. placement 穿戴位置英文（鞋子 worn on feet，帽子 worn on head）
-11. backPrint 上衣背面有大圖案則 true
+9. material 只能選：棉/麻/牛仔/針織/皮革/雪紡/聚酯纖維/混紡/其他
+10. fit 只能選：寬鬆/oversized/修身/直筒/A字/正常
+11. note 款式描述15字內（領型/袖長/圖案/剪裁特徵等細節）
+12. placement 穿戴位置英文（鞋子 worn on feet，帽子 worn on head）
+13. backPrint 上衣背面有大圖案則 true
+14. imgPrompt 必填：用英文詳細描述此單品，格式參考：「[color] [material] [fit] [type], [detail description], [style] style」
 
 只輸出 JSON 陣列，不加任何說明，最多8筆：
-[{"type":"皮夾克","color":"棕色","style":"街頭","note":"棕色機車皮夾克","placement":"","backPrint":false},{"type":"T恤","color":"白色","style":"休閒","note":"白色印花短袖","placement":"","backPrint":false},{"type":"牛仔褲","color":"深藍","style":"休閒","note":"深藍修身牛仔褲","placement":"","backPrint":false},{"type":"球鞋","color":"白色","style":"休閒","note":"白色低筒球鞋","placement":"worn on feet","backPrint":false}]`;
+[{"type":"皮夾克","color":"棕色","style":"街頭","material":"皮革","fit":"修身","note":"棕色機車皮夾克，金屬拉鍊細節","placement":"","backPrint":false,"imgPrompt":"brown leather fitted motorcycle jacket, silver zipper details, biker style"},{"type":"T恤","color":"白色","style":"休閒","material":"棉","fit":"正常","note":"白色短袖印花T恤","placement":"","backPrint":false,"imgPrompt":"white cotton regular-fit T-shirt, graphic print, casual style"},{"type":"牛仔褲","color":"深藍","style":"休閒","material":"牛仔","fit":"修身","note":"深藍修身直筒牛仔褲","placement":"","backPrint":false,"imgPrompt":"dark blue denim slim-fit straight jeans, casual style"},{"type":"球鞋","color":"白色","style":"休閒","material":"其他","fit":"正常","note":"白色低筒運動球鞋","placement":"worn on feet","backPrint":false,"imgPrompt":"white low-top sneakers, clean minimal design, casual style"}]`;
 }
 
 async function aiScan(){
@@ -2378,9 +2382,12 @@ async function aiScan(){
       type: i.type||'上衣',
       color: i.color||'白色',
       style: i.style||'休閒',
+      material: i.material||'',
+      fit: i.fit||'',
       note: i.note||'',
       placement: i.placement||'',
-      backPrint: !!i.backPrint
+      backPrint: !!i.backPrint,
+      imgPrompt: i.imgPrompt||''
     }));
     renderMultiScanResult(items);
   }catch(e){
@@ -2483,6 +2490,16 @@ function buildItemImgPrompt(item, avatarDesc) {
   return prompt;
 }
 
+// 使用 AI 辨識時生成的英文 prompt，組合成完整生圖 prompt
+function buildItemImgPromptFromAI(item, avatarDesc) {
+  const poseDesc = item.backPrint ? BACK_POSE : POSES[0];
+  const aiDesc = item.aiItemPrompt || '';
+  const fullDesc = aiDesc
+    ? aiDesc
+    : `${item.color} ${item.type}${item.note ? ', ' + item.note : ''}`;
+  return `High-end fashion magazine editorial photo. ${avatarDesc||'Asian person'}. Pose: ${poseDesc}. Outfit: ${fullDesc}. ${item.backPrint?'Show back of garment clearly with graphic print visible.':''} Clean minimal background, professional studio lighting, sharp focus on clothing, full body front view, Vogue-quality photography, 4K detail.`;
+}
+
 function renderMultiScanResult(items) {
   window._scanItems = items;
   const list = document.getElementById('scan-multi-list');
@@ -2551,13 +2568,16 @@ function confirmSingleScanItem(i) {
   }
 
   const avatarDesc = getAvatarPromptDesc();
-  const prebuiltPrompt = buildItemImgPrompt(item, avatarDesc);
+  const prebuiltPrompt = item.imgPrompt
+    ? buildItemImgPromptFromAI(item, avatarDesc)
+    : buildItemImgPrompt(item, avatarDesc);
   const bg = COLORS[item.color] || '#1A3326';
   const em = EMOJIS[item.type] || '🧺';
 
   const w = {id:nid++, type:item.type, color:item.color, style:item.style,
+    material:item.material||'', fit:item.fit||'',
     note:item.note||'', placement:item.placement||'', backPrint:!!item.backPrint,
-    hasPhoto:false, imgPrompt:prebuiltPrompt};
+    hasPhoto:false, imgPrompt:prebuiltPrompt, aiItemPrompt:item.imgPrompt||''};
 
   // 用原圖縮圖（同 confirmMultiScan 邏輯）
   if(scanB64) {
@@ -2618,8 +2638,10 @@ function confirmMultiScan() {
   if(freeUsed > 0 && paidCount === 0) showToast('🎁 免費辨識 ' + freeUsed + ' 件（剩餘免費次數：' + freeScansLeft + '）');
   items.forEach(item => {
     if(wardrobe.length >= wardrobeLimit){ showLimitAlert(); return; }
-    const prebuiltPrompt = buildItemImgPrompt(item, avatarDesc);
-    const w = {id:nid++, type:item.type, color:item.color, style:item.style, note:item.note||'', placement:item.placement||'', backPrint:!!item.backPrint, hasPhoto:false, imgPrompt:prebuiltPrompt};
+    const prebuiltPrompt = item.imgPrompt
+      ? buildItemImgPromptFromAI(item, avatarDesc)
+      : buildItemImgPrompt(item, avatarDesc);
+    const w = {id:nid++, type:item.type, color:item.color, style:item.style, material:item.material||'', fit:item.fit||'', note:item.note||'', placement:item.placement||'', backPrint:!!item.backPrint, hasPhoto:false, imgPrompt:prebuiltPrompt, aiItemPrompt:item.imgPrompt||''};
     // Fix ②：縮圖改用 SVG 色塊 + emoji，而非整張人物照壓縮
     const bg = COLORS[item.color] || '#1A3326';
     const em = EMOJIS[item.type] || '🧺';
@@ -3043,6 +3065,8 @@ function normalizeWeekPlanShape(parsed) {
 function buildWardrobePromptText() {
   return wardrobe.slice(0, 24).map(function(item, index) {
     var parts = [item.type, item.color, item.style];
+    if(item.material) parts.push(item.material);
+    if(item.fit) parts.push(item.fit + '版型');
     if(item.note) parts.push(item.note);
     return (index + 1) + '.' + parts.filter(Boolean).join('/');
   }).join('；');
@@ -3088,7 +3112,7 @@ async function requestSingleDayPlan(basePrompt, dayLabel, usedOutfits) {
   const accNames = selectedAccs.map(id=>{ const a=ACC_SHOP_ITEMS.find(x=>x.id===id); return a?a.name:''; }).filter(Boolean);
   const accRule = accNames.length ? `\n⚠️ 必須在 outfit 中帶入以下配件（全部都要寫進去）：${accNames.join('、')}` : '';
   const outfitLimit = accNames.length ? 28 : 18;
-  const prompt = `${basePrompt}${avoidText}${accRule}\n現在只生成${dayLabel}這一天。\n請不要回 JSON、不要 markdown、不要前言、不要解釋。\n只用這一行格式回覆：搭配描述|建議\n規則：1. 左邊是 outfit，右邊是 tip。2. outfit 請控制在 ${outfitLimit} 字內，若有配件必須寫進 outfit。3. tip 請控制在 16 字內。4. 不要輸出 day 欄位。`;
+  const prompt = `${basePrompt}${avoidText}${accRule}\n現在只生成${dayLabel}這一天。\n請不要回 JSON、不要 markdown、不要前言、不要解釋。\n只用這一行格式回覆：搭配描述|搭配理由\n規則：1. 左邊是 outfit，右邊是 tip（搭配理由，說明色系或材質搭配邏輯）。2. outfit 請控制在 ${outfitLimit} 字內，若有配件必須寫進 outfit。3. tip 請控制在 18 字內，說明這套搭配的色彩或風格亮點。4. 不要輸出 day 欄位。`;
   const raw = await geminiText(prompt, 260);
   const parsed = parseSingleDayFallback(raw, dayLabel);
   return {
@@ -3214,7 +3238,7 @@ async function genOutfit(){
   const trendSection = trendContext
     ? `\n\n【當季流行趨勢參考】\n${trendContext}\n以上趨勢若衣櫃內有對應單品請優先選用；若無，可在tip中建議補充哪類單品。`
     : '';
-  const prompt=`你是專業穿搭顧問。衣櫃清單：${wj}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合規劃工作日搭配。${trendSection}${accText ? '\n' + accText : ''}\n請優先挑選衣櫃裡明確存在的單品名稱與顏色，不要虛構新品。回覆要精簡。`;
+  const prompt=`你是一位擁有十年經驗的專業服裝設計師，擅長色彩搭配、材質協調與風格整合。衣櫃清單：${wj}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合規劃工作日搭配，每天考慮以下要素：\n1. 色系協調性（主色與配色的搭配邏輯）\n2. 材質相容性（避免材質風格衝突）\n3. 場合適合度（日常／工作／約會）\n4. 整體風格一致性${trendSection}${accText ? '\n' + accText : ''}\n請優先挑選衣櫃裡明確存在的單品名稱與顏色，不要虛構新品。回覆要精簡。`;
   try{
     const parsed = await requestWeekPlanByDays(prompt);
     parsed.overall_note = trendContext ? '已結合當季潮流與衣櫃現有單品逐日整理。' : '已依衣櫃現有單品逐日整理。';
@@ -3381,7 +3405,14 @@ async function genImg(idx, outfit, occ, sea) {
     // 若 outfit 對應的衣物有 backPrint，使用背面側臉 pose
     const hasBackPrint = wardrobe.some(i => i.backPrint && outfit.indexOf(i.color) !== -1 && outfit.indexOf(i.type) !== -1);
     const pose = getRandomPose(hasBackPrint);
-    const imgPrompt = `High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Outfit: ${outfit}. Season: ${seaEn}. Occasion: ${occEn}. IMPORTANT: full body shot from head to toe, shoes clearly visible, feet must appear in frame. Clean minimal background, professional studio lighting, sharp focus on clothing and shoes, Vogue-quality photography, 4K detail.`;
+    // 從衣櫃找出 outfit 中提到的單品詳細描述（AI辨識有 aiItemPrompt 最佳）
+    const matchedItems = wardrobe.filter(i => outfit.indexOf(i.color) !== -1 && outfit.indexOf(i.type) !== -1);
+    const itemDetailStr = matchedItems.length
+      ? matchedItems.map(i => i.aiItemPrompt || `${i.color} ${i.material||''} ${i.fit||''} ${i.type}${i.note?', '+i.note:''}`.trim()).join('; ')
+      : outfit;
+    const sceneMap = {'休閒':'casual street setting, natural daylight','工作':'modern office lobby, soft window light','約會':'cozy cafe, warm afternoon light','正式':'clean studio, professional lighting','運動':'outdoor park, morning light'};
+    const sceneDesc = sceneMap[occ] || 'clean minimal background, natural daylight';
+    const imgPrompt = `High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Outfit: ${itemDetailStr}. Style: ${outfit}. Season: ${seaEn}. Setting: ${sceneDesc}. IMPORTANT: full body shot from head to toe, shoes clearly visible, feet must appear in frame. Professional studio lighting, sharp focus on clothing and shoes, fashion editorial quality, 4K detail.`;
 
     apiLog('→ 生圖: ' + imgPrompt.substring(0, 60) + '…', 'prompt');
     apiLog('  頭像:' + userAvatar + ' 服裝:' + outfit.substring(0,20), 'info');
@@ -4073,7 +4104,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VC24a<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD1<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -4097,7 +4128,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VC24a',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD1',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
