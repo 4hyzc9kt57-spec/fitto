@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VC24 · AI 智能穿搭</title>
+<title>Fitto VC25 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -647,7 +647,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VC24</span></div>
+<div class="logo">Fitto <span class="logo-badge">VC25</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
@@ -665,7 +665,7 @@ body{background:var(--bg);color:var(--ink);}
     <div class="wb-greeting" id="wb-greeting">你好 👋</div>
     <div class="wb-name" id="wb-name">Jack <button class="name-edit-btn" onclick="openNameModal()">✏️</button></div>
     <div class="wb-sub">今天穿什麼好呢？你的衣櫃已準備好</div>
-    <div class="wb-avatar" id="wb-avatar" onclick="goShop()">👤</div>
+    <div class="wb-avatar" id="wb-avatar" onclick="openAvatarPicker()">👤</div>
     <div class="wb-stats">
       <div class="wb-stat"><div class="wsn" id="cnt-a">0</div><div class="wsl">全部</div></div>
       <div class="wb-stat"><div class="wsn" id="cnt-t">0</div><div class="wsl">上衣</div></div>
@@ -809,20 +809,25 @@ body{background:var(--bg);color:var(--ink);}
     <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px;margin-bottom:12px">
       <div style="font-size:.65rem;font-weight:800;color:var(--gold);letter-spacing:.05em;margin-bottom:8px">💇 髮型選擇</div>
       <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px" id="hairstyle-btns">
-        <button onclick="selectHairstyle('short',this)" class="hair-btn hair-btn-active" id="hbtn-short" style="padding:6px 2px;border-radius:8px;border:1.5px solid var(--gold);background:rgba(201,144,74,.15);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px">
-          <span style="font-size:1.1rem">✂️</span><span style="font-size:.5rem;color:var(--ink);font-weight:700;line-height:1.2">短髮<br>俐落</span>
+        <button onclick="selectHairstyle('short',this)" class="hair-btn" id="hbtn-short" style="padding:4px;border-radius:10px;border:1.5px solid var(--gold);background:rgba(201,144,74,.15);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:52px;height:52px;border-radius:50%;overflow:hidden;border:1.5px solid rgba(201,144,74,.4)"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAB4AHgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD6mxQB7UClNQITj2o49KKwPGvi3SfBujPqWtTlIgQiIg3PIx6BR/U8CgDf4rnda8ceF9DuGg1fXtMs50GWjluFDD6ivnDxr+0RrmrW1zY6BpsWkq2ALoXe+Yc544CjI+teNak73Vw893dH7VMxLM5MhJJ5P50riufZetfG7wNpkZaPVlvmxnFqpYfixwK5Zv2lfCjqwgsNSeUZwp8sAnt0Y8Zr5GuoJYZUW5mDK5+Vmyox9KcbeRQwhmhQdGCcfnmjULn2P4Z+P/hnUrloNZgudFOMrNORJC3/AAJeR+IFehad438L6ht+xeINLmLHaoW5Xk+nWvzwJuUVg7rIq9ApBwakg1J4sLMjqvXKnildgmj9LQQelL+FfHvww+NeqeGdHFhJbf2raKQY2muWURJ0wCQSB7V9QeCPFdh4u0WO/sHjDYAmhEgcwtjO0000M6HFGPSigUARXn/HrN/uH+VFF3/x6y/7h/lRTAm7UlL0pDQA12WNGkdgqqCST0A9a+Gvi146ufHfi974zsmi26bLWAZ2lQWw5H94/wCHpX2t4jLf8I/qewkN9llxgZ52HtX56aZbyXempapjzJeeeOPWk9hEb3kd58uF8vG1Ex0FZ0v2xmESh5ow2VKxnj9K+h/Bfw00jTrSOe9RLy6cbgXUMqAjoAf5mvRNH0KxT5RbQIvHSMVxPGRTtFXOyOCk1zSZ8gNpeqXNonm20xWL7rbGOPbOKo/2ZdGVUZWBHA45r7mn02GOIpGEVMfdCDFcrqPhzTxOZTaQCUn72wZ6USxbjuhxwSntI+Q7nR72A7jFJjsQpqukkkbBJUIU9Qc8V9WXdlAqeW0UWw842iuL1vQNPuJMm0hGMfMEFTHGqWjRc8vcVdSPDoLhYkbYx2uMGPbgE+pJ6fhW/wCBPFmqeE9Xh1HTLpo7mF8lCflkGOUcd1I/LrWv4h8JQbHazUBwMjA6muGMbxllK/MpOc11wmprQ4Z05U3qfo74K15PE/hLSNajj8tb62Scx5ztJHI/A5rarz79n9WT4O+GNwwTbFhxjgu2K9BrURFef8es3+4f5UUXf/HrN/uH+VFAE1J+NKaKAIriMSwSRnkOpX8xivj/AMM+CppreGJI2WRAd5cbdmD375r6g8Z+IZtAXTvJtfP+1T+SSTwnGc4zXHn7NI93dRR+WskpbYpzjPP9TXJiKy1gt0dVGhKyqSWjMmICygRrmREjRQu9jtBwMVq6VMlxkwyCQD+51rjfE7aa0jT38F7LJwES3EjMewAA4FefeJZdNs/KK+GvEsd3INyvFqBK/jgkA+3vXDTpxlqd1Scl0PfbpwqHLSKcdGFY0rbzmRiFJ615L4bk1S4kiFvqGoxgkARXA3n6Z713ettfaf4ZjvXbLxBsg+wzUTsnZGtKOl5E2riGFM8szHA4zXKagcRF2Konq3FcVc3Ws+I7Q6g2oT29oZBGiwwbmdj/AArjqf5d8Vj3cFhDqZ0640/xHPfR5V2knEaZHcYyMe+SK0hQXVmc68ui0OtjUSuSuJE7lea5q68Jy+exkQFZS2w/XNM0SWysr9biBbuOSNvmilY5/wADXqEk9q2gXGolS0MEQlI7+mB7810xtHY4Z3l8R7l8IbSSw+F/he2mDLJHp8IYMOc7c/1rrq8D8G/GW/vfFuhaFJpFrbWN1Itokcbs7xAKQCXOASNo4xXvgrshNTV0c9SnKFubqRXfNrNn+4f5UUXn/HpN/uH+VFWQTUUUh60AYPjTTP7R0digPnwN5sZBwQRwf0zXmfh6NoLC5S4nllnkbzTv6enB717Uw45rj9V8ONbzyXNgkIt9vzRkkFR328YP04rjxFByfPE7cPiFGDpS9UcpCYJFKSliD2zVW50SzuHYLDI2RyDIwB/I0kiulw3OBnpV2xkklUhcdex615qdtD0d9UUbXRrHTSv2SAJO3Ug9PpUPjNFPgxYyM5EgHudvNX9aa50yzN3HYy37D/lnC6qw/wC+iBXDeK/FS/8ACOiK6066iCRswVkDYzxncrEEc9aai3cd0upw/g288kmwf/UbSQCemetdbcaFZXPLI+Omd5rzPTNS89YZbS1lWZX56Y2/UGvQItWKwliWBJ6VdVSi7oVFxlGzM3VNPsbKJwi4x71Z1pFtvhdqiK7ia+8uCBVGWdtwbAH0Umsi5lk1O78onIbjHavU7b4bXviuHR5IL2C00u0Uo+8FpGfAyVXGPbk1vRjK2mrOSvKHOraI579mrwtJqniK613VYZPK00r9l3DCmVwcn6qM8f7Qr6drO8P6PZ6Do1tpunRLFbQKFUAck92PuTya0etehThyRscNWo6kr9CG7/49ZuP4D/Kii8P+izdPuGirMiag80ho70AFI6hlKsMg8GlzmikB5TrFm1tqE1s64eMlh/tKTwaxNZv7zT7XdpsBkmbqV5I+g711HxIyuvWzROqyfZcjP+8evtXAW+spNfG2uR9kmzwsn8fup7149aCjUaj0PXoybpLm6mZPretOpGpaRq1y0i7QQ8cK4PUEbufrWVrV0JJbmWXwlfG5ki8llaUGMLg4OATz+Nd9Npr3UYEE8Q3Lnccf1rkdc8H3mSzeJVEfVkEKnjHsaIyT6WN0oRXf+vM8lIksJv8ARbO/tWHGAQ2f1rWs729YYvl2A/dyMH8a230dbEE/aUnOfvHA/SsC6njGpASTIYx1YetbpqWljjmvZ6rQ67Q7BnMaW6b7udtkSjqSeOPevqrw9YnTNEsbNsb4YVV8d2x8x/PNfLHwq1Jr34jaBGqAW6znAI5JxwT6ewr64rqw60bOOs3dCUdKKK6DEivP+PWb/cP8qKS8/wCPWb/cP8qKBk340tfNPi39o+eWCSLwppIt5CSqz6hhyPcIhx+ZNeP698SfF2v+Z/afiG+Mb5DQwyGKI+2xcDH1osK59i+LfiT4T8LwytqWsWrXEf8Ay627iWYn02A9friuB0n4yzeM9cOkeGrNtNVI2nlurzDybFxwqD5Qx9SSAOxr5IkI6gD5u/v611Xw28Tp4a8Z2WqTMRaFXt7jjoj4GT9CM/hUVFLkfLuVTkudKWx9K6nez3uob7iVpnjXZuc846/1rn/Emi2eu2LQ3q5C8q6cMh9QfWt2ZI5iJrdw8co3o6cqwx1BqnMzZKnGfevCTd+Z7nu2jy8q2POb3Std023SHT9SjuIhwEuMowHpuAOa5S/v/EtuT58CMuOCs2cfpzXr12seMsQD64rjddtY5SxNwNpzkBsV0wqtaNHNUoLeLPMrl7+6fLTLCD1KncT+GBUXkCKchCzN3djya6CTTw8xWHkDqQKrTWqxybAMvWzqN6HP7KxpeEL99M1OC5ibZIjgqwOCPp6V6VD8dNW8NzrLrWzV9NZijrtWKeM84Kso2sPUMM+9eQujQDc3X1rlvGt6ZmtrRXVtvzuByVPYH3rSi3zJIzqpKLufa/gb40+DvFwMcGojTrwEL9m1FlhZiem052t+Bz7V6QrBlDAgqRkEdDX5gQsyPlePX3Fdb4c8eeJvD8qPouu6hbKuMRrMWjIHYocqfyrsONSufodef8ek2P7h/lRXy18OP2gddu9Qg0rxNb2+oi8mSBJ4UEEkZdguSB8rAZz0BooLR4JLKFVs56H8+1RRv+74JOOPrSqpYg5Pcc08IFFWZDQD/wDr5o2nDZJ3nnIHFTA8gc00nnjNFg0On8E/ELV/CDeWoN5pzNlrWYnYDjqjdUP6e1evaV8TvCOtopur6TSbjAzHeKSoOOcSICCPrivnnBI4JFQlMHOPy4rmqYaFR3aOiniZ09j6f1K4truFH0y+tbpG5BhnR8/hnP6VjnQru8mKxW8kj/7K5r50aJGO4xqT68UDeoIQyKPQOR/WsPqPaX4HT9fvvE+jNS8Mtpdk0t2yW5IyTIyr/M1wH9peHtOufP1DVYp2HSC2zK5/IYH4mvLTGrc+WCfUnNSKrADDYHoBVxwaXxSIljW/hibvijxO+qXBGl2zWNsBgNIQ0je/HArlDDzlST3JJ61cK8ktkmhl6YFdMYRgrI5JzlN3kVvLPcn8aeo2juKm28mnKDiqsZmr4Gfb410DqP8AT7cH/v4tFSeCxjxloGBydQt//Ri0VSdi4llPDWv550DWs/8AXhN/8TSnw3r3GfD+s89P9Am/+JooouFhV8Oa9uz/AGBrPB/58Jv/AImmv4b17kDQNZ45/wCPCb/4miii5Nhn/COa/kAaBrP/AIATf/E0j+G9f7+H9Z/8AJv/AImiii47DP8AhG9f7eH9Y/8AACb/AOJo/wCEa1/B/wCJBrPP/ThN/wDE0UUh2GDwzr4z/wAU/rI/7cJv/iaX/hGPEH/QA1rH/XhN/wDE0UUw5QPhjXxz/YGs5P8A04Tf/E0f8Iz4g6/8I/rR/wC3Cb/4miikhWAeGPEHfQNZ/wDACb/4mj/hGdfHH9gaz6/8eEv/AMTRRQNo1vB3h7XIvF+hSSaJq0ca38BZnspVCgSLkklcAUUUUhxP/9k=" style="width:100%;height:100%;object-fit:cover"></div>
+          <span style="font-size:.48rem;color:var(--ink);font-weight:700;line-height:1.2;text-align:center">短髮俐落</span>
         </button>
-        <button onclick="selectHairstyle('curly',this)" class="hair-btn" id="hbtn-curly" style="padding:6px 2px;border-radius:8px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px">
-          <span style="font-size:1.1rem">🌀</span><span style="font-size:.5rem;color:var(--ink);font-weight:700;line-height:1.2">捲髮<br>蓬鬆</span>
+        <button onclick="selectHairstyle('curly',this)" class="hair-btn" id="hbtn-curly" style="padding:4px;border-radius:10px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:52px;height:52px;border-radius:50%;overflow:hidden;border:1.5px solid rgba(201,144,74,.4)"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:cover"></div>
+          <span style="font-size:.48rem;color:var(--ink);font-weight:700;line-height:1.2;text-align:center">捲髮蓬鬆</span>
         </button>
-        <button onclick="selectHairstyle('straight',this)" class="hair-btn" id="hbtn-straight" style="padding:6px 2px;border-radius:8px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px">
-          <span style="font-size:1.1rem">💆</span><span style="font-size:.5rem;color:var(--ink);font-weight:700;line-height:1.2">直髮<br>側分</span>
+        <button onclick="selectHairstyle('straight',this)" class="hair-btn" id="hbtn-straight" style="padding:4px;border-radius:10px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:52px;height:52px;border-radius:50%;overflow:hidden;border:1.5px solid rgba(201,144,74,.4)"><img src="data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBQYFBAYGBQYHBwYIChAKCgkJChQODwwQFxQYGBcUFhYaHSUfGhsjHBYWICwgIyYnKSopGR8tMC0oMCUoKSj/2wBDAQcHBwoIChMKChMoGhYaKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCgoKCj/wAARCAB4AHgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD6gsh/okX+6KmwMVDZf8ekX+6KmqBBRRXmXxT+KumeEEFnZzwXGrM2GQDeIBjqwBGT6Lke+KGB6ZkDqQPxpplQEjcuR2Br4z8QfGjxLNcSOutXMCPwEjhiRsfgMisS0+NXiS0kRbW+LjptkjQ5+vHP160rgfYvizxpofhW0a41q9jt4xwAQWZz/dVRyT+leeXvx0tImVo9LitoG5V9Tv47d2HYiNQ7/mBXzBr3i/U/E18b69YSyKuxZZSFUDPYH35rKRrmWRiL62aR+T8/J/E0AfWVj8fNFeYR3lsqjON9ncC4Ue5GFb/x016J4W8baD4mj3aRfRTsBlouVkT6oQCPyr4JlhuoTieBWJ7j/GrljdSRZkE9xEYxuyjneno6sOePSp1Q1Y/Q4MrDjGDTuK+IPDXxn8YaBIbVtR/tK3P3fPbdkdiG+8P1r3X4Z/GQeI38nWLdLV0/1jJJuKDIG4rgHZ6sM478U1IVj2rFJil60UwExRR+lFMCKz/49Iv90VLUNn/x6xf7opuo3aWNjPdSrI0cKGRljXcxAGeB3NAM8n+OHjyXw7ol1Faysl1NM1pCF42kIGaQ+wDDHqT6CvlBj5RF9qEjyyzZZR1J9T/9eup+NHivUPFXitZL6FbS1Q74rdP4EIHzOe7kAZ7DoOlclrUjG4FxgFWC7B2UBen51F7sdrIzL++iWTP9nRbDziR23N7msi7linIe3t/IPdVOR+Fbfh3RJ/FGseRDwhOWc8nFfQXhP4WaHZogltVmlxy71nUrxpuz3NKeHnUXN0PmtY3lAdlZo1X7uMAen4VW2iKXLxHbn+9tr7GuPh7oqQFfsFuB6gYNcpq3w60Pfk2uV5+XPH8qzeKUd0aLCSlszwiyuTDFGsxMtpIPkY8NGeuDjg/UVk6hcSW94WhlZGVjgjnH/wBau9+JXh6y0S2t49NUo87ELFnPIIwR+teb3G8szMp+U/MB2reE1NKSMKlN03ysnS4hlkDzrGG77FKn/Cuh0vWGQwtp0pSa3O5FbOT6/N15HBHpXOWkkTYVwn/AhipXMdjdHY+8EZO309c+tNoiLPt74LfEvT/FGg29jeSR2msW6eW0Dyf61VH30J6jHXuP1r06OZXkdFPzJjcPr0r8+vDJuZ7+O4tmEW1wyXEHLxN2YL65x+dfdHgKNz4Y0+5uY5UvbqFJrnzWy5k2gEH0AxgDjAGKIu+5TOiooNFXYRBZ/wDHpF/uipqhsh/okWf7oqegD4//AGl9BuV8X3TwWSWljtUxyJFtEuRluQOSCTXjpvGhhntpFDbwCCeePT9BX258d9Os7/wNI91GxuIpVFs6j7kjfLzx0IJFfJth4Vn1DxHNpoRTcRLlkfIKDOOfb+dYykou1zSMJNXtoa/wOtlS6lYJuLA9unNfQmmBzyFPHfFeW6X4csfDOmH7Vqf2YNnzGIHzHPp169qqaprttpCxNaeLtQtnkUPHG2nMQ4yRkE/SuCUVUm5XPQjJwgo2PZ7xplUsGVhXN67fwWemXN7eSKkUMbOxPoK4vSfEevXUio99HeIeBui8tvxrZ8a2kj+D52lUKkkBDdDg5Bzj61nJLmSNoL3bnmdzZXGp3t3rusDYIIy0UHZCRlU+oHU+px6157LEl1Z3MoASSNsKfUEZ5rqrrWdUvJZQfLtYZpGYMy71LN1C+vP41yt/pYjmP2W9a6bnzYkhZCuOvXiu2mrbs4KrT2RhK22ddoXjinX8mZ2RRjaoT9K1ItBkuJQ9kZGHXZIhUg/XpVi/0W7W6jS6haKaQZVCRyPUV0cyOXkZ13wR0/Ub7xTp6aar/aI5BIrIPTk55HGM8192W0RijVSQcDHyjAH0FfMn7McUEHime1uRi5FqZYQq8EAgEsfxGBX1AOlODTV0EouLswPSihulFWSyGy/49Iv92pqgsuLOH/dFT0DMnxRpaavo09s4JIxIgH95TkV4FoVj5HxQ16WZQr3GnRtGcfeIbDfyFfSdcP4n8KLJqcOqWMS74t28A4IUj5h7jvj1Fcteld8yOqjVSjyP1OPis7WUYuEUt6kAkVnan4eguMbHmYdgFHH0JFaE6tFOcdM9at20zsMBefYV513HQ9NJSV0ZWm6FbaYAzZeZjkbudtHjyAN4Lcc4KN/SrurvJp1s15cW9xOijOy3Te/5VynjPxjp6+Hlt7hJ4C0ZKpLGVbk9waEm3cbaS3OI8KzRGJ7KZV+ThDjkZ61qXPh6CQlk4J5OAK5HTtQiN1BPah8s2HUrggetdt/aeLcHoa0m5J6GVNRktTn7zRYLeXcuA+Rz3qj4+sxbR6HddbgbyR328Y/WteN3vtQRTkgkGvQ7X4Y6j4o1SG9mlhtdKMAgV92ZNoJ3bVxxk55NbU1JnLV5L9kWv2a/DvmW934mu0ZZmzZ26kYAQYLN+eB+Br3ccVU0qwtdK0+CxsIVhtYECRovQAVbFd9OHJGxx1JupLmYjUUGiqM2QWX/AB6Rf7oqYnjFQ2X/AB6w8/wip6BiCggEc9KKKQHlGu2Zs9UntXGNp3x/7SHpWLqeqHS7czRpvOcdM4/Cuy+J4Kz6bJHgS7XGfbivO/7Sj+2i3mIhnIyAx4I9Qe9eTXglUaR6lGbdNX6lN/Fkt2hW9jviT8oit7VlBHqSwxXP+IdQ09knabTdUJeERLCQ21QDnd93rXdTWlzdR7InVcjgkg1zGr+H9cQlpNdiERHKeWOB6UQcXqbcsYqz1PKEmFtMRZNcxEnlJISf6Vr2t9cTIFnTy2zjGCK1rnS2t3Z3uFmbselYklwovXFxIPLQ8sDk/St7qZySTg9DrfDNjNc6pa21she4mYIg/Hr9K+rNNtVsbC3tY+VhjCA+uB1r5o+EN+l78QtLcLtjDEIp6/cPJr6fFdNBK1zlqt3sLS9BSUueK3MhDRQaKAILH/j0h/3RU9eDeP8A46jQLm60fQdNEt9aEwyT3ZxGrjrhFOW/EivEvEXxU8Y+IDIl/rlxHAxI8i0/cJj0wvJ/EmkB9e+K/H3hjwrE7a1rFrDKoJFujh5m9gg5rzeP45DxBrdrpXhbTDEJ2JN3fsMqgGSRGvVvTLV8rTuZdxfknqepNXfD2ry6NrFhqEHMltIGZQfvDow/Impmnyvl3HBrmXNsfUuq6ld6hcg3szTNGMAkADn2FYGt6Ta6xbGK6TcVOVdW2sh9j1q9p13ba3YxahYP5ltP8ykdvY+hFOkby22nPNeNeV7vc9pKPLaOxwl5beIdKTZY6gt1bg8R3A2uPbI4Ncrqmt+Io8rdW42En5hIDx9a9YvAhGZD17iuN8QWdvMGHnLt7jOK3hU7o550eqZ5vc3+o3MvzSCJOeAd3WoFX58BmZs/MzHk1uSacJJ2WMfKCelVJLcJJ5aL82a1c7mHJY2fCepy6VfQ3FvI8UsbZV1OCvuK9Bj+POq+Gp0/tiKPWLST5cZEM0Z9mAww+oz715S8TW+3Oa43xRfJd3wjhfzEiHzMDkbq0otuWhnVso6n2x4M+NPg3xOioNRXTLs8eRfkREnH8LZ2n8/wr0iN0ljWSNlZGGQynII9jX5lQMytnOPauq8OeMvEPh9t2iaxfWYH8EUzbD9UPy/pXXc5lI/Q0UV8peDv2i9ctI44vEVlbapGMAyx/uZfqcZU/kKKY7nm3xScj4jeJh3+3ycflXK544rqPioS3xK8T9gdQk69e1cxjFMjqMyeaQA544PqKeRnpSd6dhGz4Y8U6v4Xu2uNOmO1v9ZE43xyfVex9xzXqelfFzRL+KP+3LabT5ujPCDNF9QANw/WvE+9Rtyc1hUoQnrJG1OvOnsz6JvfE/h68iDafrtjNnsXKN+TgGqiwQXwDrdWhT+8ZowP518/kbuuCKj8lOcoh/AVh9SV9JHQsc7WcT33VBoml2hN5q+nozA4AuEY/kCa4I+JdA0+4eWNptSc9EhUoPxZh/IGuAVAv3VUfSlwxA+Y4q44SK3dyJYuTWiNLX9du9YnyVW0tu0MRyT9W71iGIY2qu0dqs7cHjmkKc8V0RioqyOaUnJ3kVxHtwOlSJlc4FPK89KULTsSOhbbxRRtyP60UxHonxQ8P6xN8R/EsttourSwvfSMkiWcrKw45BC4NcyfDmu8Z0HWP/ACb/4miihFtCnw5ruP+QFrH/gBN/8AE00+HdcH/MC1j/wAm/8AiaKKdxWE/wCEc17HGhawf+3Cb/4mmnw3r3/QB1j/AMAJf/iaKKQ7DT4b17/oA6x/4AS//E0f8I3r3/QB1jn/AKcJv/iaKKBWE/4RrXef+JFrH/gDL/8AE0f8I3rv/QC1f/wAl/8AiaKKLhYX/hG9dzxoWsf+AE3/AMTSf8Izrw5/sHV//ACX/wCJoooCwv8AwjOvcY0HWP8AwAl/+JpP+Ea14f8AMB1j/wAAJv8A4miigLB/wjevf9AHWP8AwAl/+JoooouFj//Z" style="width:100%;height:100%;object-fit:cover"></div>
+          <span style="font-size:.48rem;color:var(--ink);font-weight:700;line-height:1.2;text-align:center">直髮側分</span>
         </button>
-        <button onclick="selectHairstyle('midwavy',this)" class="hair-btn" id="hbtn-midwavy" style="padding:6px 2px;border-radius:8px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px">
-          <span style="font-size:1.1rem">〰️</span><span style="font-size:.5rem;color:var(--ink);font-weight:700;line-height:1.2">中長<br>捲髮</span>
+        <button onclick="selectHairstyle('midwavy',this)" class="hair-btn" id="hbtn-midwavy" style="padding:4px;border-radius:10px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:52px;height:52px;border-radius:50%;overflow:hidden;border:1.5px solid rgba(201,144,74,.4)"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:cover"></div>
+          <span style="font-size:.48rem;color:var(--ink);font-weight:700;line-height:1.2;text-align:center">中長捲髮</span>
         </button>
-        <button onclick="selectHairstyle('wolf',this)" class="hair-btn" id="hbtn-wolf" style="padding:6px 2px;border-radius:8px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px">
-          <span style="font-size:1.1rem">🐺</span><span style="font-size:.5rem;color:var(--ink);font-weight:700;line-height:1.2">狼尾<br>層次</span>
+        <button onclick="selectHairstyle('wolf',this)" class="hair-btn" id="hbtn-wolf" style="padding:4px;border-radius:10px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:4px">
+          <div style="width:52px;height:52px;border-radius:50%;overflow:hidden;border:1.5px solid rgba(201,144,74,.4)"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:cover"></div>
+          <span style="font-size:.48rem;color:var(--ink);font-weight:700;line-height:1.2;text-align:center">狼尾層次</span>
         </button>
       </div>
     </div>
@@ -944,8 +949,8 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VC24 · 2026.04</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VC24 單品個別加入/自訂頭像商店/髮型選擇器</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VC25 · 2026.04</div>
+    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VC25 自訂頭像生圖/首頁頭像選擇/髮型照片按鈕/VIP標籤</div>
   </div>
 </div>
 
@@ -989,7 +994,7 @@ body{background:var(--bg);color:var(--ink);}
       <button class="si-price" style="opacity:.6;cursor:not-allowed">🪙 5枚</button>
     </div>
   </div>
-  <div class="shop-sec">📸 自訂頭像</div>
+  <div class="shop-sec">📸 自訂頭像 <span style="background:linear-gradient(135deg,#C9904A,#E8C87A);color:#0C1810;font-size:.5rem;font-weight:900;padding:2px 7px;border-radius:20px;letter-spacing:.05em;vertical-align:middle">VIP</span></div>
   <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:14px">
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
       <div id="custom-avatar-preview" style="width:60px;height:60px;border-radius:50%;overflow:hidden;border:2px solid var(--gold);flex-shrink:0;background:var(--border2);display:flex;align-items:center;justify-content:center;font-size:1.6rem">👤</div>
@@ -1087,6 +1092,17 @@ body{background:var(--bg);color:var(--ink);}
   </div>
 </div>
 
+<!-- AVATAR PICKER -->
+<div class="overlay" id="avatar-picker-ov">
+  <div class="modal" style="max-height:80vh;overflow-y:auto">
+    <div class="mhandle"></div>
+    <div class="mtitle">🧑 選擇頭像</div>
+    <div id="avatar-picker-grid" style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px"></div>
+    <button class="btn-p" onclick="goShop();document.getElementById('avatar-picker-ov').classList.remove('show')" style="width:100%;margin-bottom:6px">🛍 前往商店購買更多</button>
+    <button class="btn-ghost" onclick="document.getElementById('avatar-picker-ov').classList.remove('show')" style="width:100%">關閉</button>
+  </div>
+</div>
+
 <!-- EDIT MODAL -->
 <div class="overlay" id="edit-ov">
   <div class="modal">
@@ -1141,7 +1157,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VC24 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VC25 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -1274,11 +1290,16 @@ function updateCoinUI() {
   if(wm) wm.textContent = wardrobeLimit;
   var av = document.getElementById('wb-avatar');
   if(av) {
-    var avatarRef = getSelectedAvatarRefData();
-    if(avatarRef && avatarRef.src) {
-      av.innerHTML = '<img src="' + avatarRef.src + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+    // 自訂頭像優先，其次商店頭像
+    if(_customAvatarEnabled && _customAvatarB64) {
+      av.innerHTML = '<img src="' + _customAvatarB64 + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
     } else {
-      av.innerHTML = '<span style="font-size:1.6rem">' + userAvatar + '</span>';
+      var avatarRef = getSelectedAvatarRefData();
+      if(avatarRef && avatarRef.src) {
+        av.innerHTML = '<img src="' + avatarRef.src + '" style="width:100%;height:100%;object-fit:cover;border-radius:50%">';
+      } else {
+        av.innerHTML = '<span style="font-size:1.6rem">' + userAvatar + '</span>';
+      }
     }
   }
 }
@@ -1287,6 +1308,14 @@ function getAvatarButtonIdByEmoji(emoji) {
   return map[emoji] || '';
 }
 function getSelectedAvatarRefData() {
+  // 自訂頭像優先（VIP）
+  if(_customAvatarEnabled && _customAvatarB64) {
+    return {
+      src: _customAvatarB64,
+      b64: _customAvatarB64.split(',')[1] || _customAvatarB64,
+      mimeType: 'image/jpeg'
+    };
+  }
   var btnId = getAvatarButtonIdByEmoji(userAvatar);
   if(btnId) {
     var btn = document.getElementById(btnId);
@@ -1421,6 +1450,70 @@ function buyCustomAvatar() {
   localStorage.setItem('fitto_custom_avatar_on', '1');
   showToast('🎉 自訂頭像已啟用！');
   updateCustomAvatarUI();
+}
+
+function openAvatarPicker() {
+  const grid = document.getElementById('avatar-picker-grid');
+  if(!grid) return;
+  let html = '';
+  // 自訂頭像（若已啟用）
+  if(_customAvatarEnabled && _customAvatarB64) {
+    const selected = _customAvatarEnabled ? 'border:2px solid var(--gold)' : 'border:2px solid var(--border2)';
+    html += `<div onclick="selectAvatarFromPicker('custom')" style="cursor:pointer;text-align:center">
+      <div style="width:70px;height:70px;border-radius:50%;overflow:hidden;margin:0 auto 4px;${selected}">
+        <img src="${_customAvatarB64}" style="width:100%;height:100%;object-fit:cover">
+      </div>
+      <div style="font-size:.55rem;color:var(--gold);font-weight:700">📸 自訂</div>
+    </div>`;
+  }
+  // 已購買的商店頭像
+  const allAvatars = [
+    {emoji:'👤', label:'預設', free:true},
+    {emoji:'☀️', label:'陽光', free:false},
+    {emoji:'🌙', label:'韓系', free:false},
+    {emoji:'⚡', label:'街頭', free:false},
+  ];
+  allAvatars.forEach(a => {
+    if(a.free || ownedAvatars.indexOf(a.emoji) >= 0) {
+      const isSelected = !_customAvatarEnabled && userAvatar === a.emoji;
+      const border = isSelected ? 'border:2px solid var(--gold)' : 'border:2px solid var(--border2)';
+      const avatarRef = a.emoji === '👤' ? null : getAvatarRefByEmoji(a.emoji);
+      const imgHtml = avatarRef
+        ? `<img src="${avatarRef.src}" style="width:100%;height:100%;object-fit:cover">`
+        : `<span style="font-size:1.8rem">${a.emoji}</span>`;
+      html += `<div onclick="selectAvatarFromPicker('${a.emoji}')" style="cursor:pointer;text-align:center">
+        <div style="width:70px;height:70px;border-radius:50%;overflow:hidden;margin:0 auto 4px;${border};display:flex;align-items:center;justify-content:center;background:var(--surface2)">
+          ${imgHtml}
+        </div>
+        <div style="font-size:.55rem;color:var(--ink);font-weight:700">${a.label}</div>
+      </div>`;
+    }
+  });
+  grid.innerHTML = html || '<div style="color:var(--muted);font-size:.72rem;grid-column:1/-1;text-align:center">尚未購買任何頭像，前往商店選購</div>';
+  document.getElementById('avatar-picker-ov').classList.add('show');
+}
+
+function getAvatarRefByEmoji(emoji) {
+  var avatarPhotoMap = {'☀️':'sunny','🌙':'korean','⚡':'rugged'};
+  var photoKey = avatarPhotoMap[emoji];
+  if(photoKey && AVATAR_IMGS[photoKey]) {
+    return { src: AVATAR_IMGS[photoKey] };
+  }
+  return null;
+}
+
+function selectAvatarFromPicker(key) {
+  if(key === 'custom') {
+    _customAvatarEnabled = true;
+    localStorage.setItem('fitto_custom_avatar_on', '1');
+  } else {
+    _customAvatarEnabled = false;
+    localStorage.setItem('fitto_custom_avatar_on', '0');
+    userAvatar = key;
+  }
+  saveProgress(); updateCoinUI(); updateBanner();
+  document.getElementById('avatar-picker-ov').classList.remove('show');
+  showToast('✅ 頭像已切換');
 }
 
 function updateCustomAvatarUI() {
@@ -3943,7 +4036,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VC24<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VC25<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -3967,7 +4060,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VC24',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VC25',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
