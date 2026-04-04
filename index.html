@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD1 · AI 智能穿搭</title>
+<title>Fitto VD2 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -647,7 +647,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD1</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD2</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
@@ -945,8 +945,8 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD1 · 2026.04</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VD1 AI邏輯全面升級：辨識存材質/版型/英文Prompt，週計畫服裝設計師角色+搭配理由，生圖帶入完整單品細節+場景</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD2 · 2026.04</div>
+    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VD2 AI邏輯全面升級：辨識存材質/版型/英文Prompt，週計畫服裝設計師角色+搭配理由，生圖帶入完整單品細節+場景</div>
   </div>
 </div>
 
@@ -1063,7 +1063,7 @@ body{background:var(--bg);color:var(--ink);}
 
     <!-- 多件辨識結果區 -->
     <div class="sr" id="sres">
-      <div class="sr-lbl">● 辨識完成，可調整後加入</div>
+      <div class="sr-lbl" id="scan-result-label">● 辨識完成，可調整後加入</div>
       <div id="scan-multi-list"></div>
       <!-- 單件舊版備用（隱藏） -->
       <div id="scan-single" style="display:none">
@@ -1168,7 +1168,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD1 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD2 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -2236,12 +2236,12 @@ function handleScan(e){
     };
     r.readAsDataURL(f);
   } else {
-    // 多張：建立 queue，逐張辨識
+    // 多張：建立 queue，逐張辨識，每張完成馬上顯示，不用等全部
     _scanQueue = files;
     _scanQueueIdx = 0;
-    // 清空先前結果
     window._scanItems = [];
-    document.getElementById('scan-multi-list').innerHTML = '';
+    const list = document.getElementById('scan-multi-list');
+    list.innerHTML = '';
     document.getElementById('sres').classList.remove('show');
     processNextScanQueue();
   }
@@ -2250,28 +2250,28 @@ function handleScan(e){
 async function processNextScanQueue() {
   if(_scanQueueIdx >= _scanQueue.length) {
     // 全部完成
-    if(window._scanItems && window._scanItems.length > 0) {
-      renderMultiScanResult(window._scanItems);
-    }
     document.getElementById('scaning').classList.remove('show');
+    // 更新底部「全部加入」按鈕數量
+    _refreshMultiScanFooter();
     return;
   }
   const f = _scanQueue[_scanQueueIdx];
   const total = _scanQueue.length;
   const cur = _scanQueueIdx + 1;
+  const remaining = total - cur; // 還有幾張背景中
 
-  // 顯示目前進度
+  // 顯示進度 loading（不蓋住已完成的結果）
   const ind = document.getElementById('scaning');
   ind.classList.add('show');
-  ind.innerHTML = `<div style="margin-bottom:8px">AI 辨識中 (${cur}/${total})：${f.name||'照片'+cur}</div><div class="dw"><span></span><span></span><span></span></div>`;
+  ind.innerHTML = `<div style="margin-bottom:8px">AI 辨識中 (${cur}/${total})${remaining > 0 ? '，其餘 ' + remaining + ' 張背景辨識中' : ''}…</div><div class="dw"><span></span><span></span><span></span></div>`;
 
   // 讀取這張圖
   await new Promise(resolve => {
     const r = new FileReader();
     r.onload = ev => {
       const url = ev.target.result;
-      document.getElementById('pbox').innerHTML = `<img src="${url}" style="opacity:.7">
-        <div style="position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:.65rem;font-weight:700;color:var(--gold)">第 ${cur}/${total} 張</div>`;
+      document.getElementById('pbox').innerHTML = `<img src="${url}" style="opacity:.8">
+        <div style="position:absolute;bottom:6px;left:0;right:0;text-align:center;font-size:.65rem;font-weight:700;color:var(--gold)">第 ${cur}/${total} 張辨識中</div>`;
       scanB64 = url.split(',')[1];
       scanMime = f.type || 'image/jpeg';
       resolve();
@@ -2280,13 +2280,104 @@ async function processNextScanQueue() {
   });
 
   // 辨識
+  let newItems = [];
   try {
+    const beforeLen = (window._scanItems || []).length;
     await aiScanAndAppend();
+    newItems = (window._scanItems || []).slice(beforeLen);
   } catch(ex) {
     apiLog('✗ 第'+cur+'張失敗: '+(ex.message||'').substring(0,40), 'err');
   }
+
+  // 第一張辨識完，立刻讓 sres 顯示
+  const sres = document.getElementById('sres');
+  if(!sres.classList.contains('show')) {
+    sres.classList.add('show');
+    const lbl = document.getElementById('scan-result-label');
+    if(lbl) lbl.textContent = '● 辨識完成，可調整後加入（背景繼續辨識中）';
+  }
+
+  // 把這張新辨識到的單品 append 到畫面
+  if(newItems.length > 0) {
+    const avatarDesc = getAvatarPromptDesc();
+    const list = document.getElementById('scan-multi-list');
+    const startIdx = (window._scanItems||[]).length - newItems.length;
+    // 插入「第 N 張」分隔線
+    const divider = document.createElement('div');
+    divider.style.cssText = 'font-size:.58rem;color:var(--muted);font-weight:700;padding:6px 0 4px;border-top:'+(startIdx>0?'1px solid var(--border)':'none');
+    divider.textContent = '📷 第 ' + cur + ' 張照片';
+    list.appendChild(divider);
+    newItems.forEach((item, relIdx) => {
+      const globalIdx = startIdx + relIdx;
+      const card = document.createElement('div');
+      card.innerHTML = _buildScanItemCardHtml(item, globalIdx, avatarDesc);
+      list.appendChild(card.firstElementChild);
+    });
+    _refreshMultiScanFooter();
+  }
+
   _scanQueueIdx++;
-  processNextScanQueue();
+  // 第一張完成後，繼續背景辨識下一張（不 await，讓使用者可立即操作）
+  if(_scanQueueIdx < _scanQueue.length) {
+    setTimeout(() => processNextScanQueue(), 80);
+  } else {
+    processNextScanQueue(); // 觸發結束邏輯
+  }
+}
+
+// 建立單一掃描卡片 HTML（供逐張 append 用）
+function _buildScanItemCardHtml(item, i, avatarDesc) {
+  const previewPrompt = item.imgPrompt
+    ? buildItemImgPromptFromAI(item, avatarDesc)
+    : buildItemImgPrompt(item, avatarDesc);
+  return `
+    <div class="scan-item-card" id="scan-card-${i}">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
+        <span style="font-size:.65rem;font-weight:800;color:var(--gold)">單品 ${i+1} · ${item.type}</span>
+        ${item.backPrint ? '<span style="font-size:.55rem;background:rgba(61,170,106,.2);color:var(--green);border-radius:4px;padding:2px 7px;font-weight:700">🎨 後背圖案</span>' : ''}
+        <button onclick="removeScanItem(${i})" style="background:transparent;border:none;color:var(--muted);font-size:.8rem;cursor:pointer">✕</button>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>種類</label>
+          <input type="text" id="si-type-${i}" value="${item.type}" style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border2);border-radius:var(--r-sm);font-size:.78rem;color:var(--ink);outline:none" oninput="updateScanItem(${i},'type',this.value)">
+        </div>
+        <div class="fg"><label>顏色</label>
+          <select id="si-color-${i}" onchange="updateScanItem(${i},'color',this.value)">
+            ${COLOR_OPTIONS.map(c=>`<option${c===item.color?' selected':''}>${c}</option>`).join('')}
+          </select>
+        </div>
+      </div>
+      <div class="fr">
+        <div class="fg"><label>風格</label>
+          <select id="si-style-${i}" onchange="updateScanItem(${i},'style',this.value)">
+            ${STYLE_OPTIONS.map(s=>`<option${s===item.style?' selected':''}>${s}</option>`).join('')}
+          </select>
+        </div>
+        <div class="fg"><label>描述</label>
+          <input type="text" id="si-note-${i}" value="${(item.note||'').replace(/"/g,'&quot;')}" placeholder="款式特徵…" oninput="updateScanItem(${i},'note',this.value)">
+        </div>
+      </div>
+      <details style="margin-top:6px">
+        <summary style="font-size:.58rem;color:var(--gold);font-weight:700;cursor:pointer;list-style:none">▸ 生圖 Prompt（可複製檢查）</summary>
+        <div style="margin-top:5px;padding:8px 10px;background:rgba(0,0,0,.25);border-radius:7px;font-size:.56rem;color:#E8D5A8;line-height:1.7;word-break:break-all;white-space:pre-wrap;user-select:all" id="si-prompt-${i}">${previewPrompt}</div>
+      </details>
+      <button onclick="confirmSingleScanItem(${i})" style="margin-top:8px;width:100%;padding:8px;background:rgba(61,170,106,.15);border:1px solid var(--green);border-radius:8px;color:var(--green);font-size:.72rem;font-weight:800;cursor:pointer" id="scan-add-btn-${i}">＋ 加入衣櫃</button>
+    </div>`;
+}
+
+// 更新底部「全部加入」按鈕
+function _refreshMultiScanFooter() {
+  const items = window._scanItems || [];
+  const allDone = _scanQueueIdx >= _scanQueue.length;
+  const label = document.getElementById('scan-result-label');
+  if(label) label.textContent = allDone
+    ? '● 辨識完成，可調整後加入'
+    : `● 辨識中（已完成 ${items.length} 件）`;
+  const footer = document.getElementById('scan-multi-footer');
+  if(!footer) return;
+  footer.innerHTML = items.length > 1
+    ? `<button class="btn-p" onclick="confirmMultiScan()" style="width:100%">＋ 全部加入衣櫃（${items.length} 件）</button>`
+    : '';
 }
 
 // 辨識並把結果 append 到 window._scanItems（多張模式用）
@@ -2504,50 +2595,10 @@ function renderMultiScanResult(items) {
   window._scanItems = items;
   const list = document.getElementById('scan-multi-list');
   const avatarDesc = getAvatarPromptDesc();
-  list.innerHTML = items.map((item, i) => {
-    const previewPrompt = buildItemImgPrompt(item, avatarDesc);
-    return `
-    <div class="scan-item-card" id="scan-card-${i}">
-      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px">
-        <span style="font-size:.65rem;font-weight:800;color:var(--gold)">單品 ${i+1} · ${item.type}</span>
-        ${item.backPrint ? '<span style="font-size:.55rem;background:rgba(61,170,106,.2);color:var(--green);border-radius:4px;padding:2px 7px;font-weight:700">🎨 後背圖案</span>' : ''}
-        ${items.length > 1 ? `<button onclick="removeScanItem(${i})" style="background:transparent;border:none;color:var(--muted);font-size:.8rem;cursor:pointer">✕</button>` : ''}
-      </div>
-      <div class="fr">
-        <div class="fg"><label>種類</label>
-          <input type="text" id="si-type-${i}" value="${item.type}" style="width:100%;padding:8px 10px;background:var(--bg);border:1px solid var(--border2);border-radius:var(--r-sm);font-size:.78rem;color:var(--ink);outline:none" oninput="updateScanItem(${i},'type',this.value)">
-        </div>
-        <div class="fg"><label>顏色</label>
-          <select id="si-color-${i}" onchange="updateScanItem(${i},'color',this.value)">
-            ${COLOR_OPTIONS.map(c=>`<option${c===item.color?' selected':''}>${c}</option>`).join('')}
-          </select>
-        </div>
-      </div>
-      <div class="fr">
-        <div class="fg"><label>風格</label>
-          <select id="si-style-${i}" onchange="updateScanItem(${i},'style',this.value)">
-            ${STYLE_OPTIONS.map(s=>`<option${s===item.style?' selected':''}>${s}</option>`).join('')}
-          </select>
-        </div>
-        <div class="fg"><label>描述</label>
-          <input type="text" id="si-note-${i}" value="${(item.note||'').replace(/"/g,'&quot;')}" placeholder="款式特徵…" oninput="updateScanItem(${i},'note',this.value)">
-        </div>
-      </div>
-      <details style="margin-top:6px">
-        <summary style="font-size:.58rem;color:var(--gold);font-weight:700;cursor:pointer;list-style:none">▸ 生圖 Prompt（可複製檢查）</summary>
-        <div style="margin-top:5px;padding:8px 10px;background:rgba(0,0,0,.25);border-radius:7px;font-size:.56rem;color:#E8D5A8;line-height:1.7;word-break:break-all;white-space:pre-wrap;user-select:all" id="si-prompt-${i}">${previewPrompt}</div>
-      </details>
-      <button onclick="confirmSingleScanItem(${i})" style="margin-top:8px;width:100%;padding:8px;background:rgba(61,170,106,.15);border:1px solid var(--green);border-radius:8px;color:var(--green);font-size:.72rem;font-weight:800;cursor:pointer" id="scan-add-btn-${i}">＋ 加入衣櫃</button>
-    </div>`;
-  }).join('');
-
-  list.innerHTML += `
-    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
-      <button class="btn-p" onclick="confirmMultiScan()" style="width:100%">
-        ＋ 全部加入衣櫃（${items.length} 件）
-      </button>
-    </div>`;
-
+  list.innerHTML = items.map((item, i) => _buildScanItemCardHtml(item, i, avatarDesc)).join('');
+  list.innerHTML += `<div id="scan-multi-footer" style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+    ${items.length > 1 ? `<button class="btn-p" onclick="confirmMultiScan()" style="width:100%">＋ 全部加入衣櫃（${items.length} 件）</button>` : ''}
+  </div>`;
   document.getElementById('sres').classList.add('show');
 }
 
@@ -3752,7 +3803,8 @@ function parseWardrobeStyleConclusion(raw) {
   const text = String(raw || '').replace(/\r/g,'').replace(/```/g,'').trim();
   const lines = text.split('\n').map(function(line){ return line.trim(); }).filter(Boolean);
   const clean = function(value, fallback) {
-    const out = String(value || '').replace(/^[|：:\-、，。\s]+/, '').replace(/[|：:\-、，。\s]+$/, '').trim();
+    // 只 strip 開頭的分隔符號，結尾保留標點以避免缺字
+    const out = String(value || '').replace(/^[|：:\-\s]+/, '').trim();
     return out || fallback;
   };
   const pick = function(label, idx) {
@@ -3882,18 +3934,15 @@ async function analyzeClosetInsights() {
     const key = localStorage.getItem('fitto_gemini_key') || '';
     if(!key) throw new Error('請先設定 Gemini Key');
     const wj = buildWardrobePromptText();
-    const suggestPrompt = `分析衣櫃清單並給補充建議。清單：${wj}
-
-輸出格式（繁體中文）：
-{"summary":"最大缺口20字內直接說明","gaps":[{"item":"單品","reason":"原因","color":"顏色","keyword":"關鍵字 2026"},{"item":"單品","reason":"原因","color":"顏色","keyword":"關鍵字 2026"},{"item":"單品","reason":"原因","color":"顏色","keyword":"關鍵字 2026"}],"tip":"升級方向20字內"}`;
     const stats = buildWardrobeStatsSummary();
+    // 整合 prompt：讓風格分析和缺口推薦從同一個 AI 回應，確保一致性
     const stylePrompt = `你是高端但務實的個人造型師，請根據這份真實衣櫃清單下具體結論，不要空話，不要泛泛而談。
 請只輸出 5 行，不要前言：
 第1行：風格定位：要點出真正的穿搭傾向
 第2行：現有優勢：指出最能發揮的單品結構或色系
-第3行：最大缺口：指出最影響完整度的缺口
-第4行：優先補齊1：單品名稱|為何適合這個衣櫃
-第5行：優先補齊2：單品名稱|為何適合這個衣櫃
+第3行：最大缺口：指出最影響完整度的缺口（例如「缺乏正式套裝」要對應推薦正式服裝，「缺少正式鞋」要推薦皮鞋/正式鞋）
+第4行：優先補齊1：單品名稱|為何適合這個衣櫃（必須和第3行缺口直接對應）
+第5行：優先補齊2：單品名稱|為何適合這個衣櫃（必須和第3行缺口直接對應）
 
 衣櫃統計：
 件數=${stats.total}
@@ -3905,9 +3954,17 @@ async function analyzeClosetInsights() {
 衣櫃清單：
 ${wj}`;
 
+    // 缺口補強 prompt 明確要求和最大缺口一致
+    const suggestPrompt = `你是高端穿搭顧問。請先確認這份衣櫃清單最缺什麼類型的服裝，然後推薦直接對應該缺口的具體單品。清單：${wj}
+
+重要規則：若衣櫃缺乏正式服裝，則必須推薦正裝類單品（如西裝、正式襯衫、皮鞋、正式褲）；若缺運動服，推薦運動類單品。推薦品項必須和缺口完全一致，不得推薦衣櫃已有的類型。
+
+輸出格式（繁體中文）：
+{"summary":"最大缺口20字內直接說明","gaps":[{"item":"單品（必須和缺口一致）","reason":"原因","color":"顏色","keyword":"關鍵字 2026"},{"item":"單品（必須和缺口一致）","reason":"原因","color":"顏色","keyword":"關鍵字 2026"},{"item":"單品（必須和缺口一致）","reason":"原因","color":"顏色","keyword":"關鍵字 2026"}],"tip":"升級方向20字內"}`;
+
     const [suggestData, styleRaw] = await Promise.all([
       requestWardrobeSuggest(suggestPrompt),
-      geminiText(stylePrompt, 320)
+      geminiText(stylePrompt, 380)
     ]);
     const summary = parseWardrobeStyleConclusion(styleRaw);
     res.innerHTML = `
@@ -4104,7 +4161,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD1<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD2<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -4128,7 +4185,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD1',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD2',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
