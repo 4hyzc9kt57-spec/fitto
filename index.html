@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VC23 · AI 智能穿搭</title>
+<title>Fitto VC24 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -647,7 +647,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VC23</span></div>
+<div class="logo">Fitto <span class="logo-badge">VC24</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
@@ -805,6 +805,28 @@ body{background:var(--bg);color:var(--ink);}
     <div style="font-size:.78rem;font-weight:800;color:var(--ink);margin-bottom:4px">🎯 自訂搭配生圖</div>
     <div style="font-size:.62rem;color:var(--muted);margin-bottom:12px">自選上衣、下身、配件，直接生成一張穿搭示意圖</div>
 
+    <!-- 髮型選擇框 -->
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px;margin-bottom:12px">
+      <div style="font-size:.65rem;font-weight:800;color:var(--gold);letter-spacing:.05em;margin-bottom:8px">💇 髮型選擇</div>
+      <div style="display:grid;grid-template-columns:repeat(5,1fr);gap:6px" id="hairstyle-btns">
+        <button onclick="selectHairstyle('short',this)" class="hair-btn hair-btn-active" id="hbtn-short" style="padding:6px 2px;border-radius:8px;border:1.5px solid var(--gold);background:rgba(201,144,74,.15);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px">
+          <span style="font-size:1.1rem">✂️</span><span style="font-size:.5rem;color:var(--ink);font-weight:700;line-height:1.2">短髮<br>俐落</span>
+        </button>
+        <button onclick="selectHairstyle('curly',this)" class="hair-btn" id="hbtn-curly" style="padding:6px 2px;border-radius:8px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px">
+          <span style="font-size:1.1rem">🌀</span><span style="font-size:.5rem;color:var(--ink);font-weight:700;line-height:1.2">捲髮<br>蓬鬆</span>
+        </button>
+        <button onclick="selectHairstyle('straight',this)" class="hair-btn" id="hbtn-straight" style="padding:6px 2px;border-radius:8px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px">
+          <span style="font-size:1.1rem">💆</span><span style="font-size:.5rem;color:var(--ink);font-weight:700;line-height:1.2">直髮<br>側分</span>
+        </button>
+        <button onclick="selectHairstyle('midwavy',this)" class="hair-btn" id="hbtn-midwavy" style="padding:6px 2px;border-radius:8px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px">
+          <span style="font-size:1.1rem">〰️</span><span style="font-size:.5rem;color:var(--ink);font-weight:700;line-height:1.2">中長<br>捲髮</span>
+        </button>
+        <button onclick="selectHairstyle('wolf',this)" class="hair-btn" id="hbtn-wolf" style="padding:6px 2px;border-radius:8px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px">
+          <span style="font-size:1.1rem">🐺</span><span style="font-size:.5rem;color:var(--ink);font-weight:700;line-height:1.2">狼尾<br>層次</span>
+        </button>
+      </div>
+    </div>
+
     <div class="fg" style="margin-bottom:8px">
       <label>上衣</label>
       <select id="custom-top" class="ctrl-sel" style="width:100%">
@@ -922,8 +944,8 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VC23 · 2026.04</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VC23 修正本週搭配文字截斷/缺口推薦精準化/辨識縮圖用原圖/加強多件辨識</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VC24 · 2026.04</div>
+    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VC24 單品個別加入/自訂頭像商店/髮型選擇器</div>
   </div>
 </div>
 
@@ -966,6 +988,22 @@ body{background:var(--bg);color:var(--ink);}
       <div class="si-desc">復古／極簡／Y2K<br>純風格參考</div>
       <button class="si-price" style="opacity:.6;cursor:not-allowed">🪙 5枚</button>
     </div>
+  </div>
+  <div class="shop-sec">📸 自訂頭像</div>
+  <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:12px;padding:14px;margin-bottom:14px">
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:10px">
+      <div id="custom-avatar-preview" style="width:60px;height:60px;border-radius:50%;overflow:hidden;border:2px solid var(--gold);flex-shrink:0;background:var(--border2);display:flex;align-items:center;justify-content:center;font-size:1.6rem">👤</div>
+      <div>
+        <div style="font-size:.82rem;font-weight:800;color:var(--ink)">上傳個人照片</div>
+        <div style="font-size:.62rem;color:var(--muted);margin-top:2px;line-height:1.5">作為生圖時的頭像基礎<br>上傳後自動套用至所有生圖</div>
+      </div>
+    </div>
+    <input type="file" id="custom-avatar-input" accept="image/*" style="display:none" onchange="handleCustomAvatarUpload(event)">
+    <div style="display:flex;gap:8px">
+      <button onclick="document.getElementById('custom-avatar-input').click()" style="flex:1;padding:10px;background:var(--bg);border:1px solid var(--border2);border-radius:8px;font-size:.72rem;font-weight:700;color:var(--ink);cursor:pointer">📂 選擇照片</button>
+      <button id="custom-avatar-buy-btn" onclick="buyCustomAvatar()" style="flex:1;padding:10px;background:linear-gradient(135deg,#8A5C20,#C9904A);border:none;border-radius:8px;font-size:.72rem;font-weight:800;color:#FAF7F2;cursor:pointer">🪙 50枚 啟用</button>
+    </div>
+    <div id="custom-avatar-status" style="margin-top:8px;font-size:.62rem;color:var(--muted);text-align:center"></div>
   </div>
   <div class="shop-sec">👨 帥哥頭像</div>
   <div class="shop-grid">
@@ -1103,7 +1141,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VC23 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VC24 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -1336,6 +1374,71 @@ function buyExpansion(add, cost, tier) {
   showToast('✅ 衣櫃擴充到 ' + label + '！');
 }
 
+// ═══ 自訂頭像 ═══
+var _customAvatarB64 = localStorage.getItem('fitto_custom_avatar') || '';
+var _customAvatarEnabled = localStorage.getItem('fitto_custom_avatar_on') === '1';
+
+function handleCustomAvatarUpload(e) {
+  const file = e.target.files[0];
+  if(!file) return;
+  const r = new FileReader();
+  r.onload = function(ev) {
+    // 壓縮到 200px 圓形預覽
+    const img = new Image();
+    img.onload = function() {
+      const canvas = document.createElement('canvas');
+      const SIZE = 200;
+      canvas.width = SIZE; canvas.height = SIZE;
+      const ctx = canvas.getContext('2d');
+      ctx.beginPath(); ctx.arc(SIZE/2,SIZE/2,SIZE/2,0,Math.PI*2); ctx.clip();
+      const ratio = Math.max(SIZE/img.width, SIZE/img.height);
+      const w2 = img.width*ratio, h2 = img.height*ratio;
+      ctx.drawImage(img, (SIZE-w2)/2, (SIZE-h2)/2, w2, h2);
+      _customAvatarB64 = canvas.toDataURL('image/jpeg', 0.8);
+      // 更新預覽
+      const prev = document.getElementById('custom-avatar-preview');
+      if(prev) prev.innerHTML = '<img src="'+_customAvatarB64+'" style="width:100%;height:100%;object-fit:cover">';
+      const status = document.getElementById('custom-avatar-status');
+      if(status) status.textContent = '✅ 照片已選取，點擊「啟用」套用';
+    };
+    img.src = ev.target.result;
+  };
+  r.readAsDataURL(file);
+}
+
+function buyCustomAvatar() {
+  if(!_customAvatarB64) { showToast('請先選擇照片！'); return; }
+  if(_customAvatarEnabled) {
+    // 已啟用：直接更換照片
+    localStorage.setItem('fitto_custom_avatar', _customAvatarB64);
+    showToast('✅ 頭像已更新！');
+    updateCustomAvatarUI();
+    return;
+  }
+  if(!spendCoin(50, '自訂頭像')) return;
+  _customAvatarEnabled = true;
+  localStorage.setItem('fitto_custom_avatar', _customAvatarB64);
+  localStorage.setItem('fitto_custom_avatar_on', '1');
+  showToast('🎉 自訂頭像已啟用！');
+  updateCustomAvatarUI();
+}
+
+function updateCustomAvatarUI() {
+  const prev = document.getElementById('custom-avatar-preview');
+  if(prev && _customAvatarB64 && _customAvatarEnabled) {
+    prev.innerHTML = '<img src="'+_customAvatarB64+'" style="width:100%;height:100%;object-fit:cover">';
+  }
+  const btn = document.getElementById('custom-avatar-buy-btn');
+  if(btn && _customAvatarEnabled) {
+    btn.textContent = '🔄 更換照片';
+    btn.style.background = 'var(--surface2)';
+    btn.style.color = 'var(--gold)';
+    btn.style.border = '1px solid var(--gold)';
+  }
+  const status = document.getElementById('custom-avatar-status');
+  if(status) status.textContent = _customAvatarEnabled ? '✅ 自訂頭像已啟用，生圖將使用此照片' : '';
+}
+
 function buyAvatar(emoji, cost, btnId) {
   if(ownedAvatars.indexOf(emoji) >= 0) {
     userAvatar = emoji; saveProgress(); updateCoinUI(); updateBanner();
@@ -1432,6 +1535,10 @@ var AVATAR_PROMPT_MAP = {
 };
 
 function getAvatarPromptDesc() {
+  // 自訂頭像優先
+  if(_customAvatarEnabled && _customAvatarB64) {
+    return 'person matching the uploaded reference photo';
+  }
   var base = AVATAR_PROMPT_MAP[userAvatar] || 'Asian person';
   var prof = getProfile();
   var w = parseFloat(prof.w) || 65;
@@ -2278,19 +2385,78 @@ function renderMultiScanResult(items) {
           <input type="text" id="si-note-${i}" value="${(item.note||'').replace(/"/g,'&quot;')}" placeholder="款式特徵…" oninput="updateScanItem(${i},'note',this.value)">
         </div>
       </div>
-      <details style="margin-top:6px" open>
+      <details style="margin-top:6px">
         <summary style="font-size:.58rem;color:var(--gold);font-weight:700;cursor:pointer;list-style:none">▸ 生圖 Prompt（可複製檢查）</summary>
         <div style="margin-top:5px;padding:8px 10px;background:rgba(0,0,0,.25);border-radius:7px;font-size:.56rem;color:#E8D5A8;line-height:1.7;word-break:break-all;white-space:pre-wrap;user-select:all" id="si-prompt-${i}">${previewPrompt}</div>
       </details>
+      <button onclick="confirmSingleScanItem(${i})" style="margin-top:8px;width:100%;padding:8px;background:rgba(61,170,106,.15);border:1px solid var(--green);border-radius:8px;color:var(--green);font-size:.72rem;font-weight:800;cursor:pointer" id="scan-add-btn-${i}">＋ 加入衣櫃</button>
     </div>`;
   }).join('');
 
   list.innerHTML += `
-    <button class="btn-p" onclick="confirmMultiScan()" style="margin-top:8px">
-      ＋ 全部加入衣櫃（${items.length} 件）
-    </button>`;
+    <div style="margin-top:10px;padding-top:10px;border-top:1px solid var(--border)">
+      <button class="btn-p" onclick="confirmMultiScan()" style="width:100%">
+        ＋ 全部加入衣櫃（${items.length} 件）
+      </button>
+    </div>`;
 
   document.getElementById('sres').classList.add('show');
+}
+
+function confirmSingleScanItem(i) {
+  const item = window._scanItems && window._scanItems[i];
+  if(!item) return;
+  if(wardrobe.length >= wardrobeLimit){ showLimitAlert(); return; }
+
+  // 免費次數判斷
+  let paid = 1;
+  if(freeScansLeft > 0) {
+    freeScansLeft--;
+    saveProgress();
+    paid = 0;
+    showToast('🎁 免費辨識（剩餘：' + freeScansLeft + ' 次）');
+  } else {
+    if(!spendCoin(1, 'AI辨識加衣櫃')) return;
+  }
+
+  const avatarDesc = getAvatarPromptDesc();
+  const prebuiltPrompt = buildItemImgPrompt(item, avatarDesc);
+  const bg = COLORS[item.color] || '#1A3326';
+  const em = EMOJIS[item.type] || '🧺';
+
+  const w = {id:nid++, type:item.type, color:item.color, style:item.style,
+    note:item.note||'', placement:item.placement||'', backPrint:!!item.backPrint,
+    hasPhoto:false, imgPrompt:prebuiltPrompt};
+
+  // 用原圖縮圖（同 confirmMultiScan 邏輯）
+  if(scanB64) {
+    const fullDataUrl = 'data:' + (scanMime||'image/jpeg') + ';base64,' + scanB64;
+    const imgEl = new Image();
+    imgEl.onload = (function(wItem){ return function(){
+      const canvas = document.createElement('canvas');
+      const MAX = 300;
+      const ratio = Math.min(MAX/imgEl.width, MAX/imgEl.height, 1);
+      canvas.width = imgEl.width*ratio; canvas.height = imgEl.height*ratio;
+      canvas.getContext('2d').drawImage(imgEl,0,0,canvas.width,canvas.height);
+      wItem.thumb = canvas.toDataURL('image/jpeg', 0.7);
+      wItem.hasPhoto = true;
+      persist(); renderW();
+    }; })(w);
+    imgEl.src = fullDataUrl;
+    w.thumb = null; w.hasPhoto = false;
+  } else {
+    const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="${bg}"/><text x="100" y="120" font-size="80" text-anchor="middle" dominant-baseline="middle">${em}</text></svg>`;
+    w.thumb = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
+    w.hasPhoto = false;
+  }
+
+  wardrobe.push(w); persist(); renderW();
+
+  // 標記此單品已加入
+  const btn = document.getElementById('scan-add-btn-' + i);
+  if(btn) { btn.textContent = '✅ 已加入'; btn.disabled = true; btn.style.opacity = '.5'; }
+  showToast('✅ ' + item.type + ' 已加入衣櫃！');
+  checkAutoMissions();
 }
 
 function updateScanItem(i, field, val) {
@@ -3300,6 +3466,26 @@ function toggleCustomAcc(val, btn) {
   }
 }
 
+// ═══ 髮型系統 ═══
+var selectedHairstyle = 'short';
+const HAIRSTYLE_PROMPTS = {
+  'short':    'short sides buzzed, clean-cut short hair, neat undercut',
+  'curly':    'natural curly hair, voluminous fluffy curls, textured perm',
+  'straight': 'long straight hair, side-parted, sleek and refined',
+  'midwavy':  'medium-length wavy hair, shoulder-length, natural waves',
+  'wolf':     'wolf cut hair, layered fringe, textured shaggy mullet style',
+};
+
+function selectHairstyle(key, el) {
+  selectedHairstyle = key;
+  document.querySelectorAll('.hair-btn').forEach(b => {
+    b.style.border = '1.5px solid var(--border2)';
+    b.style.background = 'transparent';
+  });
+  el.style.border = '1.5px solid var(--gold)';
+  el.style.background = 'rgba(201,144,74,.15)';
+}
+
 async function genCustomOutfitImg() {
   const topVal = (document.getElementById('custom-top')||{}).value || '';
   const btmVal = (document.getElementById('custom-btm')||{}).value || '';
@@ -3333,8 +3519,8 @@ async function genCustomOutfitImg() {
     const key = localStorage.getItem('fitto_gemini_key') || '';
     if(!key) throw new Error('請先設定 Gemini Key');
     if(!checkAndSpend()) { box.innerHTML=''; return; }
-    const avatarDesc = getAvatarPromptDesc();
-    const pose = getRandomPose(false);
+    const hairDesc = HAIRSTYLE_PROMPTS[selectedHairstyle] || '';
+  const avatarDesc = getAvatarPromptDesc() + (hairDesc ? ', ' + hairDesc : '');t pose = getRandomPose(false);
     // 明確把配件穿戴位置寫進 prompt
     const accessoryClause = accDesc ? ` Accessories being worn: ${accDesc}.` : '';
     const imgPrompt = `High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Wearing: ${mainOutfit || outfit}.${accessoryClause} All accessories must be clearly visible and properly worn. Clean minimal background, professional studio lighting, sharp focus on full outfit including accessories, full body front view, Vogue-quality photography, 4K detail.`;
@@ -3756,7 +3942,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VC23<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VC24<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -3780,7 +3966,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VC23',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VC24',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
