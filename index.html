@@ -3520,7 +3520,8 @@ async function genCustomOutfitImg() {
     if(!key) throw new Error('請先設定 Gemini Key');
     if(!checkAndSpend()) { box.innerHTML=''; return; }
     const hairDesc = HAIRSTYLE_PROMPTS[selectedHairstyle] || '';
-  const avatarDesc = getAvatarPromptDesc() + (hairDesc ? ', ' + hairDesc : '');t pose = getRandomPose(false);
+  const avatarDesc = getAvatarPromptDesc() + (hairDesc ? ', ' + hairDesc : '');
+    const pose = getRandomPose(false);
     // 明確把配件穿戴位置寫進 prompt
     const accessoryClause = accDesc ? ` Accessories being worn: ${accDesc}.` : '';
     const imgPrompt = `High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Wearing: ${mainOutfit || outfit}.${accessoryClause} All accessories must be clearly visible and properly worn. Clean minimal background, professional studio lighting, sharp focus on full outfit including accessories, full body front view, Vogue-quality photography, 4K detail.`;
