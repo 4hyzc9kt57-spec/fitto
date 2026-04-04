@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD3 · AI 智能穿搭</title>
+<title>Fitto VD4-1 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -641,13 +641,24 @@ body{background:var(--bg);color:var(--ink);}
 .tf-log-entry.err  { color: #E05252; }
 .tf-log-entry.info { color: #9AB8A8; }
 .tf-log-entry.prompt { color: #C9A550; }
+
+/* ── 免責聲明 MODAL ── */
+.disc-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.82);z-index:500;align-items:center;justify-content:center;padding:20px;}
+.disc-overlay.show{display:flex;animation:fadeIn .2s ease;}
+.disc-box{background:var(--surface);border:1.5px solid var(--border2);border-radius:18px;padding:22px 20px 20px;max-width:400px;width:100%;max-height:85vh;overflow-y:auto;}
+.disc-icon{font-size:2rem;text-align:center;margin-bottom:8px;}
+.disc-title{font-family:'Inter',sans-serif;font-weight:800;font-size:1rem;color:var(--ink);text-align:center;margin-bottom:12px;}
+.disc-body{font-size:.72rem;color:var(--ink2);line-height:1.8;margin-bottom:14px;background:var(--surface2);border-radius:10px;padding:12px 14px;border-left:3px solid var(--gold);}
+.disc-check-row{display:flex;align-items:flex-start;gap:10px;margin-bottom:14px;cursor:pointer;}
+.disc-check-row input[type=checkbox]{width:18px;height:18px;margin-top:1px;accent-color:var(--gold);flex-shrink:0;cursor:pointer;}
+.disc-check-row span{font-size:.72rem;color:var(--ink);line-height:1.65;font-weight:600;}
 </style>
 
 </head>
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD3</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-1</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <div class="coin-bar" onclick="goShop()">
       <span>🪙</span><span class="coin-amt" id="hdr-coins">5</span><span class="coin-lbl">金幣</span>
@@ -931,10 +942,11 @@ body{background:var(--bg);color:var(--ink);}
 <!-- FLOATING TOKEN COUNTER -->
 <div id="token-float" onclick="toggleTokenFloat()">
   <div class="tf-title">
-    <span>Gemini 用量</span>
+    <span>Fitto 數據</span>
     <span id="tf-toggle" style="font-size:0.7rem">▾</span>
   </div>
   <div class="tf-rows">
+    <div style="font-size:0.52rem;font-weight:800;color:var(--gold);letter-spacing:0.08em;margin-bottom:4px">── API 用量 ──</div>
     <div class="tf-row">
       <span class="tf-label">文字 Tokens</span>
       <span class="tf-val gold" id="tf-text">0</span>
@@ -943,14 +955,37 @@ body{background:var(--bg);color:var(--ink);}
       <span class="tf-label">圖片生成</span>
       <span class="tf-val green" id="tf-img">0 張</span>
     </div>
-    <div class="tf-divider"></div>
     <div class="tf-row">
-      <span class="tf-label">累計費用</span>
+      <span class="tf-label">API 費用</span>
       <span class="tf-val" id="tf-cost">NT$0.00</span>
     </div>
     <div class="tf-row">
       <span class="tf-label">本次操作</span>
       <span class="tf-val" id="tf-last" style="font-size:0.62rem;color:var(--muted)">—</span>
+    </div>
+    <div class="tf-divider"></div>
+    <div style="font-size:0.52rem;font-weight:800;color:var(--gold);letter-spacing:0.08em;margin-bottom:4px">── 金幣消耗 ──</div>
+    <div class="tf-row">
+      <span class="tf-label">累計消耗金幣</span>
+      <span class="tf-val gold" id="tf-coins-spent">0 枚</span>
+    </div>
+    <div class="tf-row">
+      <span class="tf-label">金幣消費金額</span>
+      <span class="tf-val" id="tf-coin-revenue">NT$0</span>
+    </div>
+    <div class="tf-divider"></div>
+    <div style="font-size:0.52rem;font-weight:800;color:var(--gold);letter-spacing:0.08em;margin-bottom:4px">── 收入試算 ──</div>
+    <div class="tf-row">
+      <span class="tf-label">使用者付費金額</span>
+      <span class="tf-val green" id="tf-gross">NT$0</span>
+    </div>
+    <div class="tf-row">
+      <span class="tf-label">扣除 Apple 30%</span>
+      <span class="tf-val green" id="tf-net">NT$0</span>
+    </div>
+    <div class="tf-row" style="background:rgba(61,170,106,.08);border-radius:6px;padding:3px 4px;margin-top:2px">
+      <span class="tf-label" style="color:var(--green);font-weight:800">實際收入</span>
+      <span class="tf-val green" id="tf-profit" style="font-size:0.88rem">NT$0</span>
     </div>
     <div class="tf-divider"></div>
     <div style="font-size:0.55rem;font-weight:800;color:var(--muted);letter-spacing:0.06em;margin-bottom:3px">LOG</div>
@@ -960,8 +995,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD3 · 2026.04</div>
-    <div style="font-size:0.45rem;color:var(--border2);opacity:0.6;text-align:center;margin-top:2px">VD3 AI邏輯全面升級：辨識存材質/版型/英文Prompt，週計畫服裝設計師角色+搭配理由，生圖帶入完整單品細節+場景</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-1 · 2026.04</div>
   </div>
 </div>
 
@@ -1173,6 +1207,27 @@ body{background:var(--bg);color:var(--ink);}
   </div>
 </div>
 
+<!-- 免責聲明 MODAL -->
+<div class="disc-overlay" id="disc-overlay">
+  <div class="disc-box">
+    <div class="disc-icon">⚠️</div>
+    <div class="disc-title">AI 生圖使用聲明</div>
+    <div class="disc-body">
+      本功能使用 AI 技術生成穿搭示意圖，使用前請注意以下事項：<br><br>
+      🚫 <strong>禁止上傳他人照片</strong>作為頭像 Reference 進行生圖，包含公眾人物、網紅、明星等真實人物的肖像。<br><br>
+      🚫 <strong>禁止使用未經授權的圖片</strong>（如雜誌截圖、網路照片）作為參考素材。<br><br>
+      ✅ 僅限使用<strong>本人照片</strong>或 Fitto 內建的虛擬頭像進行生圖。<br><br>
+      違反上述規定可能侵害他人著作權及肖像權，請務必遵守。
+    </div>
+    <label class="disc-check-row" id="disc-check-row">
+      <input type="checkbox" id="disc-check" onchange="updateDiscBtn()">
+      <span>我已閱讀並同意上述聲明，確認使用的頭像為本人照片或 Fitto 內建虛擬頭像。</span>
+    </label>
+    <button class="btn-p" id="disc-confirm-btn" onclick="confirmDisclaimer()" disabled style="opacity:.45;cursor:not-allowed;margin-bottom:8px">確認並生成圖片</button>
+    <button class="btn-ghost" onclick="cancelDisclaimer()">取消</button>
+  </div>
+</div>
+
 <!-- LOCK SCREEN -->
 <div id="lock-screen">
   <div class="lock-logo">Fitto</div>
@@ -1183,7 +1238,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD3 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-1 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- NAME MODAL -->
@@ -1371,6 +1426,9 @@ function spendCoin(amt, reason) {
   coins -= amt;
   saveProgress();
   updateCoinUI();
+  // 記錄金幣消耗到統計面板
+  recordCoinSpend(amt);
+  apiLog('🪙 消耗 ' + amt + ' 枚 (' + (reason||'') + ')', 'info');
   return true;
 }
 
@@ -1394,8 +1452,12 @@ function showToast(msg) {
 }
 
 function showLimitAlert() {
-  showToast('👗 衣櫃已滿！前往商店擴充');
-  setTimeout(goShop, 1200);
+  // 立刻跳商店，顯示強制提示
+  var el = document.createElement('div');
+  el.innerHTML = '👗 衣櫃已滿！<br><span style="font-size:.75rem;opacity:.8">自動前往商店擴充…</span>';
+  el.style.cssText = 'position:fixed;top:50%;left:50%;transform:translate(-50%,-50%);background:linear-gradient(135deg,#8A5C20,#C9904A);color:#FAF7F2;padding:16px 24px;border-radius:16px;font-size:.9rem;font-weight:800;z-index:9997;box-shadow:0 8px 32px rgba(0,0,0,.4);text-align:center;line-height:1.6;';
+  document.body.appendChild(el);
+  setTimeout(function(){ document.body.removeChild(el); goShop(); }, 1400);
 }
 
 function buyCoins(amt, price) {
@@ -1907,6 +1969,44 @@ function updateDailyUI() {
   el.textContent = left > 0 ? '🎁 今日免費 ' + left + ' 次' : '免費次數已用完';
   el.style.color = left > 0 ? 'var(--green)' : 'var(--muted)';
 }
+// ═══ 免責聲明系統 ═══
+var _discCallback = null; // 免責聲明確認後要執行的 callback
+
+function showDisclaimer(callback) {
+  // 若本 session 已同意過，直接執行
+  if(sessionStorage.getItem('fitto_disc_ok') === '1') {
+    callback();
+    return;
+  }
+  _discCallback = callback;
+  // 重置 checkbox
+  var cb = document.getElementById('disc-check');
+  if(cb) cb.checked = false;
+  updateDiscBtn();
+  document.getElementById('disc-overlay').classList.add('show');
+}
+
+function updateDiscBtn() {
+  var cb = document.getElementById('disc-check');
+  var btn = document.getElementById('disc-confirm-btn');
+  if(!cb || !btn) return;
+  var checked = cb.checked;
+  btn.disabled = !checked;
+  btn.style.opacity = checked ? '1' : '.45';
+  btn.style.cursor = checked ? 'pointer' : 'not-allowed';
+}
+
+function confirmDisclaimer() {
+  sessionStorage.setItem('fitto_disc_ok', '1');
+  document.getElementById('disc-overlay').classList.remove('show');
+  if(_discCallback) { _discCallback(); _discCallback = null; }
+}
+
+function cancelDisclaimer() {
+  document.getElementById('disc-overlay').classList.remove('show');
+  _discCallback = null;
+}
+
 function checkAndSpend() {
   if(useDailyFree()) { updateDailyUI(); return true; }
   return (function(){
@@ -1966,15 +2066,30 @@ async function geminiWithSearch(prompt, maxTokens) {
     body:JSON.stringify({
       contents:[{role:'user',parts:[{text:prompt}]}],
       tools:[{googleSearch:{}}],
-      generationConfig:{maxOutputTokens:maxTokens, temperature:0.4}
+      generationConfig:{maxOutputTokens:maxTokens, temperature:0.5}
     })
   });
   var d = await res.json();
-  if(d.error) throw new Error(d.error.message || 'Gemini Search error');
+  if(d.error) {
+    apiLog('✗ Search 錯誤: ' + (d.error.message||'').substring(0,50), 'err');
+    throw new Error(d.error.message || 'Gemini Search error');
+  }
   addTokenUsage((d.usageMetadata||{}).promptTokenCount||0,(d.usageMetadata||{}).candidatesTokenCount||0,'gemini_text');
-  var parts = (((d.candidates||[])[0]||{}).content||{}).parts || [];
-  var textPart = parts.find(function(p){ return typeof p.text === 'string'; });
-  return textPart ? textPart.text.trim() : '';
+  var candidate = (d.candidates||[])[0] || {};
+  var parts = (candidate.content||{}).parts || [];
+  // 收集所有 text parts（Search grounding 可能回傳多個 part）
+  var allText = parts
+    .filter(function(p){ return typeof p.text === 'string' && p.text.trim(); })
+    .map(function(p){ return p.text.trim(); })
+    .join('\n');
+  if(!allText) {
+    // finishReason 記錄
+    var reason = candidate.finishReason || 'UNKNOWN';
+    apiLog('⚠️ Search 回傳空文字，finishReason=' + reason, 'info');
+    throw new Error('搜尋回傳空結果 (finishReason:' + reason + ')');
+  }
+  apiLog('✓ 搜尋完成，取得 ' + allText.length + ' 字', 'ok');
+  return allText;
 }
 
 async function geminiText(prompt, maxTokens) {
@@ -2007,7 +2122,7 @@ async function geminiJson(prompt, maxTokens) {
       contents:[{role:'user',parts:[{text:prompt}]}],
       generationConfig:{
         maxOutputTokens:maxTokens,
-        temperature:0.2,
+        temperature:0.75,
         responseMimeType:'application/json'
       }
     })
@@ -2197,19 +2312,33 @@ function renderSuggestResult(d) {
   el.style.display = 'block';
 }
 function buildSuggestResultHtml(d) {
-  const gaps = (d.gaps||[]).map(g => {
-    const searchKw = (g.keyword||g.item);
+  // 顏色對照（包含 warm theme 的 BG_COLOR 和 dark 的 COLORS，優先用 BG_COLOR）
+  const COLOR_MAP = (typeof BG_COLOR !== 'undefined' ? BG_COLOR : {}) ||
+    {'白色':'#F5F5F5','米白':'#F0E6D3','淺灰':'#D0D0D0','灰色':'#9E9E9E','深灰':'#555','黑色':'#333','淺藍':'#90CAF9','深藍':'#1A237E','卡其':'#C8A96E','棕色':'#6D4C41','紅色':'#EF5350','酒紅':'#7B1C2E','粉色':'#F48FB1','綠色':'#66BB6A','橄欖綠':'#6B7A3A'};
+
+  const gapsArr = d.gaps || [];
+
+  // gaps 空白時顯示提示而不是空白
+  if(!gapsArr.length) {
+    return `
+      <div style="background:var(--surface2);border-left:3px solid var(--gold);border-radius:8px;padding:11px 13px;margin-bottom:12px;font-size:.74rem;color:var(--ink2);line-height:1.7">${d.summary||'AI 分析完成'}</div>
+      <div style="font-size:.72rem;color:var(--muted);text-align:center;padding:12px 0">衣櫃已相當完整，暫無明顯缺口！</div>
+      <div style="background:rgba(61,170,106,.1);border:1px solid rgba(61,170,106,.3);border-radius:8px;padding:10px 13px;margin-top:4px;font-size:.72rem;color:var(--green);line-height:1.6">✨ ${d.tip||''}</div>`;
+  }
+
+  const gaps = gapsArr.map(g => {
+    const searchKw = (g.keyword||g.item||'');
     const styleTag = g.style ? (' ' + g.style) : '';
-    const imgUrl = 'https://www.google.com/search?q=' + encodeURIComponent(g.item + styleTag + ' 穿搭') + '&tbm=isch';
+    const imgUrl = 'https://www.google.com/search?q=' + encodeURIComponent((g.item||'') + styleTag + ' 穿搭') + '&tbm=isch';
     const uniqloUrl = 'https://www.google.com/search?q=' + encodeURIComponent(searchKw + ' site:uniqlo.com');
     const mujiUrl = 'https://www.google.com/search?q=' + encodeURIComponent(searchKw + ' site:muji.com');
     const hmUrl = 'https://www.google.com/search?q=' + encodeURIComponent(searchKw + ' site:hm.com');
-    const bg = (COLORS||{})[g.color] || '#888';
+    const bg = COLOR_MAP[g.color] || '#8B7A66';
     return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-bottom:8px">
       <div style="width:36px;height:36px;border-radius:8px;background:${bg};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem">👗</div>
       <div style="flex:1;min-width:0">
-        <div style="font-weight:800;font-size:.82rem;color:var(--ink)">${g.item}</div>
-        <div style="font-size:.65rem;color:var(--muted);margin-top:2px">${g.reason}</div>
+        <div style="font-weight:800;font-size:.82rem;color:var(--ink)">${g.item||'—'}</div>
+        <div style="font-size:.65rem;color:var(--muted);margin-top:2px">${g.reason||''}</div>
         <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">
           <a href="${imgUrl}" target="_blank" style="font-size:.6rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.15);border-radius:5px;padding:3px 8px;font-weight:700">🔍 看圖</a>
           <a href="${uniqloUrl}" target="_blank" style="font-size:.6rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#5C6C7C,#8898A8);border-radius:5px;padding:3px 8px;font-weight:700">UNIQLO</a>
@@ -3006,10 +3135,10 @@ ${wj}
     res.style.display = 'block';
     apiLog('✓ 潮流搭配生成完成', 'ok');
   } catch(e) {
-    res.innerHTML = `<div style="color:var(--red);font-size:.72rem;padding:8px 0">⚠️ 生成失敗：${(e.message||'').substring(0,80)}</div>`;
+    res.innerHTML = `<div style="color:var(--red);font-size:.72rem;padding:8px 0">⚠️ 生成失敗：${(e.message||'').substring(0,100)}<br><span style="font-size:.62rem;color:var(--muted)">已退回 5 枚金幣</span></div>`;
     res.style.display = 'block';
     // refund coins on error
-    coins += 5; saveProgress(); updateCoinDisplay();
+    coins += 5; saveProgress(); updateCoinUI();
     apiLog('✗ 潮流搭配失敗: ' + (e.message||'').substring(0,50), 'err');
   } finally {
     btn.classList.remove('loading'); btn.disabled = false;
@@ -3542,7 +3671,9 @@ const DEMO_IMGS = [
 function genImgSafe(idx) {
   const data = window._fittoOutfits && window._fittoOutfits[idx];
   if(!data){ showToast('⚠️ 找不到搭配資料'); return; }
-  genImg(idx, data.outfit, data.occ, data.sea);
+  showDisclaimer(function() {
+    genImg(idx, data.outfit, data.occ, data.sea);
+  });
 }
 
 async function requestGeminiImage(parts, key) {
@@ -3852,6 +3983,11 @@ function selectHairstyle(key, el) {
 }
 
 async function genCustomOutfitImg() {
+  // 免責聲明攔截
+  if(sessionStorage.getItem('fitto_disc_ok') !== '1') {
+    showDisclaimer(function(){ genCustomOutfitImg(); });
+    return;
+  }
   const topVal = (document.getElementById('custom-top')||{}).value || '';
   const btmVal = (document.getElementById('custom-btm')||{}).value || '';
   const outVal = (document.getElementById('custom-out')||{}).value || '';
@@ -4116,7 +4252,8 @@ ${wj}`;
 {"summary":"最大缺口20字內直接說明","gaps":[{"item":"單品（必須和缺口一致）","reason":"原因","color":"顏色","keyword":"關鍵字 2026"},{"item":"單品（必須和缺口一致）","reason":"原因","color":"顏色","keyword":"關鍵字 2026"},{"item":"單品（必須和缺口一致）","reason":"原因","color":"顏色","keyword":"關鍵字 2026"}],"tip":"升級方向20字內"}`;
 
     // 整合單一 prompt：風格分析 + 缺口推薦 一起輸出，確保完全一致
-    const unifiedPrompt = `你是高端但務實的個人造型師。請分析衣櫃並輸出 JSON。
+    const _seed = Math.floor(Math.random()*9000)+1000;
+    const unifiedPrompt = `你是高端但務實的個人造型師。請分析衣櫃並輸出 JSON。（本次分析種子：${_seed}，請給出與上次不同角度的洞察）
 
 衣櫃統計：件數=${stats.total}，常見種類=${stats.topTypes.join('、')||'無'}，常見顏色=${stats.topColors.join('、')||'無'}，常見風格=${stats.topStyles.join('、')||'無'}，明顯缺口=${stats.missing.join('、')||'無明顯缺口'}
 
@@ -4127,6 +4264,7 @@ ${wj}`;
 2. 補強單品 必須 100% 對應「最大缺口」——缺正裝就推正裝/皮鞋，缺運動服就推運動單品，不能推衣櫃已有的類型
 3. gaps 的每個 item 必須是填補 gap 缺口的具體單品（例如缺口是「缺少正式服裝」，gaps 就推「白色正式襯衫」「深色西裝褲」「黑色皮鞋」）
 4. keyword 用英文，適合在網路搜尋購買
+5. 每次推薦的具體單品品名、顏色、搭配理由盡量多元，不要和上次相同
 
 只輸出 JSON，不要說明：
 {"style":"風格定位描述","strength":"現有優勢描述","gap":"最大缺口描述","buy1":"補強單品1名稱|適合原因","buy2":"補強單品2名稱|適合原因","summary":"缺口摘要20字","gaps":[{"item":"具體單品","reason":"原因","color":"顏色","keyword":"English search keyword 2026"},{"item":"具體單品","reason":"原因","color":"顏色","keyword":"English search keyword 2026"},{"item":"具體單品","reason":"原因","color":"顏色","keyword":"English search keyword 2026"}],"tip":"升級方向建議20字"}`;
@@ -4400,6 +4538,21 @@ async function deploy() {
 let tokenStats = JSON.parse(localStorage.getItem('fitto_tokens') || '{"text":0,"img":0,"cost_twd":0}');
 const USD_TO_TWD = 32;  // 匯率
 
+// 金幣消費統計（累計）
+var coinSpendLog = JSON.parse(localStorage.getItem('fitto_coin_log') || '{"spent":0,"revenue_twd":0}');
+function saveCoinLog() { localStorage.setItem('fitto_coin_log', JSON.stringify(coinSpendLog)); }
+
+// 金幣對應金額（依購買方案換算平均單價）
+// Starter NT$49/10枚=4.9, Standard NT$99/25枚=3.96, Value NT$199/60枚=3.32 → 平均約 NT$4
+const COIN_AVG_TWD = 4.0;
+
+function recordCoinSpend(amt) {
+  coinSpendLog.spent = (coinSpendLog.spent || 0) + amt;
+  coinSpendLog.revenue_twd = (coinSpendLog.revenue_twd || 0) + amt * COIN_AVG_TWD;
+  saveCoinLog();
+  updateTokenUI();
+}
+
 function saveTokenStats() {
   localStorage.setItem('fitto_tokens', JSON.stringify(tokenStats));
 }
@@ -4426,17 +4579,36 @@ function addTokenUsage(inputTok, outputTok, type='gemini_text') {
 function updateTokenUI() {
   const textEl = document.getElementById('tf-text');
   if(textEl) textEl.textContent = (tokenStats.text || 0).toLocaleString() + ' tok';
-  document.getElementById('tf-img').textContent = tokenStats.img + ' 張';
-  document.getElementById('tf-cost').textContent = 'NT$' + (tokenStats.cost_twd || 0).toFixed(2);
+  const imgEl = document.getElementById('tf-img');
+  if(imgEl) imgEl.textContent = tokenStats.img + ' 張';
+  const costEl = document.getElementById('tf-cost');
+  if(costEl) costEl.textContent = 'NT$' + (tokenStats.cost_twd || 0).toFixed(2);
+
+  // 金幣消耗欄位
+  const spent = coinSpendLog.spent || 0;
+  const grossTwd = coinSpendLog.revenue_twd || 0;
+  const netTwd = grossTwd * 0.7; // 扣 Apple 30%
+  const profitTwd = netTwd; // 實際收入
+  const spentEl = document.getElementById('tf-coins-spent');
+  if(spentEl) spentEl.textContent = spent + ' 枚';
+  const revEl = document.getElementById('tf-coin-revenue');
+  if(revEl) revEl.textContent = 'NT$' + grossTwd.toFixed(0);
+  const grossEl = document.getElementById('tf-gross');
+  if(grossEl) grossEl.textContent = 'NT$' + grossTwd.toFixed(0);
+  const netEl = document.getElementById('tf-net');
+  if(netEl) netEl.textContent = 'NT$' + netTwd.toFixed(0);
+  const profitEl = document.getElementById('tf-profit');
+  if(profitEl) profitEl.textContent = 'NT$' + profitTwd.toFixed(0);
 }
 
 function resetTokenCount() {
-  if(!confirm('確定要重置所有 Token 計數？')) return;
+  if(!confirm('確定要重置所有計數（含金幣統計）？')) return;
   tokenStats = {text:0, img:0, cost_twd:0};
+  coinSpendLog = {spent:0, revenue_twd:0};
   apiLogs = [];
   var logEl = document.getElementById('tf-log');
   if(logEl) logEl.innerHTML = '';
-  saveTokenStats(); updateTokenUI();
+  saveTokenStats(); saveCoinLog(); updateTokenUI();
   document.getElementById('tf-last').textContent = '已重置';
 }
 
