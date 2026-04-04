@@ -5064,20 +5064,25 @@ function buyVipWardrobe() {
 }
 
 function switchWardrobe(id) {
+  // 先把當前衣櫃存檔，避免資料遺失
+  persistCurrent();
+
   activeWardrobeId = id;
   localStorage.setItem('fitto_active_wardrobe', id);
+
   if(id === 'main') {
-    // 主衣櫃：讀 fitto_w
     wardrobe = JSON.parse(localStorage.getItem('fitto_w') || '[]');
     wardrobeLimit = parseInt(localStorage.getItem('fitto_wlimit') || '20');
   } else {
     var vip = vipWardrobes.find(function(v){ return v.id === id; });
     if(vip) {
-      wardrobe = vip.items || [];
-      wardrobeLimit = 99999; // VIP 無上限
+      wardrobe = vip.items ? vip.items.slice() : [];
+      wardrobeLimit = 99999;
     }
   }
+
   renderW();
+  renderVipWrdSelector();   // ← 更新下拉選單 selected 狀態
   showToast('✅ 已切換到「' + getCurrentWardrobeName() + '」');
 }
 
@@ -5124,19 +5129,42 @@ function renderVipWrdSelector() {
 function renderProfVipList() {
   var el = document.getElementById('prof-vip-list');
   if(!el) return;
+
+  // 永遠顯示主衣櫃作為第一個選項
+  var mainActive = activeWardrobeId === 'main';
+  var mainCount = JSON.parse(localStorage.getItem('fitto_w') || '[]').length;
+  var mainLimit = parseInt(localStorage.getItem('fitto_wlimit') || '20');
+  var html = '<div class="vip-wrd-item" style="margin-bottom:6px;background:' + (mainActive ? 'rgba(61,170,106,.08)' : 'var(--surface2)') + ';border-color:' + (mainActive ? 'var(--green)' : 'var(--border)') + '">' +
+    '<div>' +
+      '<div class="vip-wrd-name">🧺 主衣櫃' + (mainActive ? ' <span style="font-size:.55rem;color:var(--green)">使用中</span>' : '') + '</div>' +
+      '<div class="vip-wrd-meta">' + mainCount + ' / ' + mainLimit + ' 件</div>' +
+    '</div>' +
+    '<button onclick="switchWardrobe(\'main\');renderProfVipList();closeModal(\'name-ov\')" ' +
+      'style="background:' + (mainActive ? 'var(--green)' : 'var(--surface3)') + ';color:' + (mainActive ? '#0C1810' : 'var(--ink2)') + ';border:1px solid ' + (mainActive ? 'var(--green)' : 'var(--border2)') + ';border-radius:8px;padding:5px 12px;font-size:.68rem;font-weight:800;cursor:pointer">' +
+      (mainActive ? '使用中' : '切換') +
+    '</button>' +
+  '</div>';
+
   if(!vipWardrobes.length) {
-    el.innerHTML = '<div style="font-size:.68rem;color:var(--muted);text-align:center;padding:8px 0">尚未購買 VIP 衣櫃</div>';
+    el.innerHTML = html + '<div style="font-size:.62rem;color:var(--muted);text-align:center;padding:6px 0">購買 VIP 衣櫃後會顯示在這裡</div>';
     return;
   }
-  el.innerHTML = vipWardrobes.map(function(v){
+
+  html += vipWardrobes.map(function(v){
     var active = activeWardrobeId === v.id;
-    return '<div class="vip-wrd-item">' +
-      '<div><div class="vip-wrd-name">👑 ' + v.name + (active?' <span style="font-size:.55rem;color:var(--green)">使用中</span>':'') + '</div>' +
-      '<div class="vip-wrd-meta">' + (v.items||[]).length + ' 件 · 容量無上限</div></div>' +
-      '<button onclick="switchWardrobe(\'' + v.id + '\');closeModal(\'name-ov\')" style="background:' + (active?'var(--green)':'var(--gold)') + ';color:#0C1810;border:none;border-radius:8px;padding:5px 12px;font-size:.68rem;font-weight:800;cursor:pointer">' +
-        (active ? '使用中' : '切換') + '</button>' +
+    return '<div class="vip-wrd-item" style="background:' + (active ? 'rgba(201,165,80,.08)' : 'var(--surface2)') + ';border-color:' + (active ? 'var(--gold)' : 'var(--border)') + '">' +
+      '<div>' +
+        '<div class="vip-wrd-name">👑 ' + v.name + (active ? ' <span style="font-size:.55rem;color:var(--gold)">使用中</span>' : '') + '</div>' +
+        '<div class="vip-wrd-meta">' + (v.items||[]).length + ' 件 · 無上限</div>' +
+      '</div>' +
+      '<button onclick="switchWardrobe(\'' + v.id + '\');renderProfVipList();closeModal(\'name-ov\')" ' +
+        'style="background:' + (active ? 'var(--gold)' : 'var(--surface3)') + ';color:' + (active ? '#0C1810' : 'var(--ink2)') + ';border:1px solid ' + (active ? 'var(--gold)' : 'var(--border2)') + ';border-radius:8px;padding:5px 12px;font-size:.68rem;font-weight:800;cursor:pointer">' +
+        (active ? '使用中' : '切換') +
+      '</button>' +
     '</div>';
   }).join('');
+
+  el.innerHTML = html;
 }
 
 // ── 整合設定頁開啟 ──
