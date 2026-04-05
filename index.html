@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-9 · AI 智能穿搭</title>
+<title>Fitto VD4-10 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -702,7 +702,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-9</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-10</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1033,7 +1033,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-9 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-10 · 2026.04</div>
   </div>
 </div>
 
@@ -1295,7 +1295,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-9 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-10 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1808,7 +1808,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-9 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-10 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -3275,11 +3275,12 @@ priceRange: 預估NT$價格範圍
     rec.mujiSearch = rec.mujiSearch || rec.newItem;
     rec.priceRange = rec.priceRange || '';
 
-    const imgSearchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(rec.searchKeyword+' outfit '+year) + '&tbm=isch';
-    const shopSearchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(rec.newItem + ' ' + rec.newItemColor + ' 購買 ' + year);
-    const uniqloUrl = 'https://www.uniqlo.com/tw/zh_TW/search?q=' + encodeURIComponent(rec.uniqloSearch);
-    const mujiUrl = 'https://www.muji.com/tw/search?keyword=' + encodeURIComponent(rec.mujiSearch);
-    const zaraUrl = 'https://www.zara.com/tw/zh/search?searchTerm=' + encodeURIComponent(rec.newItem);
+    const _q = rec.newItem + (rec.newItemColor ? ' ' + rec.newItemColor : '');
+    const imgSearchUrl  = 'https://www.google.com/search?q=' + encodeURIComponent((rec.searchKeyword||_q)+' 穿搭') + '&tbm=isch';
+    const shopSearchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(_q + ' 購買') + '&tbm=shop';
+    const uniqloUrl     = 'https://www.google.com/search?q=' + encodeURIComponent(_q + ' site:uniqlo.com/tw') + '&tbm=shop';
+    const mujiUrl       = 'https://www.google.com/search?q=' + encodeURIComponent(_q + ' site:muji.com/tw') + '&tbm=shop';
+    const zaraUrl       = 'https://www.google.com/search?q=' + encodeURIComponent(_q + ' site:zara.com/tw') + '&tbm=shop';
 
     res.innerHTML = `
       <div style="background:linear-gradient(135deg,rgba(200,160,80,.12),rgba(200,160,80,.06));border:1px solid rgba(200,160,80,.35);border-radius:14px;padding:14px;margin-bottom:10px">
@@ -4529,22 +4530,33 @@ ${wj}`;
       const jsonStr = extractJsonObject(cleaned);
       if(jsonStr) unified = JSON.parse(jsonStr);
       else unified = JSON.parse(cleaned);
-    } catch(e) { unified = {}; }
+    } catch(e) {
+      apiLog('✗ 洞察 JSON 解析失敗: ' + e.message.substring(0,60), 'err');
+    }
 
+    // 若主要欄位為空代表解析完全失敗，直接 throw 讓使用者重試
+    if(!unified.style && !unified.gap && !unified.buy1) {
+      throw new Error('AI 回應無法解析，請再試一次');
+    }
+
+    const angleLabel = _angle.match(/「([^」]+)」/)?.[1] || '綜合';
     const summary = {
-      style: unified.style || '整體風格偏日常實穿。',
-      strength: unified.strength || '目前的基礎單品有穩定搭配潛力。',
-      gap: unified.gap || '還缺一件能穩定串起搭配的核心單品。',
-      buy1: unified.buy1 || '白色俐落上衣|提升上班與日常的百搭度',
-      buy2: unified.buy2 || '深色俐落下身|讓現有上衣更容易成套'
+      style:    unified.style    || '（本次分析未能取得風格定位）',
+      strength: unified.strength || '（本次分析未能取得優勢描述）',
+      gap:      unified.gap      || '（本次分析未能取得缺口描述）',
+      buy1:     unified.buy1     || '（無推薦）',
+      buy2:     unified.buy2     || '（無推薦）'
     };
     const suggestData = {
-      summary: unified.summary || unified.gap || '',
-      gaps: unified.gaps || [],
+      summary: unified.summary || unified.gap || summary.gap,
+      gaps: (Array.isArray(unified.gaps) && unified.gaps.length) ? unified.gaps : [
+        {item: summary.buy1.split('|')[0], reason: summary.buy1.split('|')[1]||'', color:'', keyword: summary.buy1.split('|')[0]},
+        {item: summary.buy2.split('|')[0], reason: summary.buy2.split('|')[1]||'', color:'', keyword: summary.buy2.split('|')[0]}
+      ],
       tip: unified.tip || ''
     };
     res.innerHTML = `
-      <div style="font-size:.58rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:6px;padding:4px 8px;background:rgba(201,165,80,.1);border-radius:6px">🔍 本次分析角度：${_angle.replace('這次請聚焦','').replace('：分析','').split('，')[0].trim()}</div>
+      <div style="font-size:.58rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:6px;padding:4px 8px;background:rgba(201,165,80,.1);border-radius:6px">🔍 本次分析角度：${angleLabel}</div>
       <div style="font-size:.62rem;font-weight:800;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">AI 衣櫃洞察</div>
       <div style="display:grid;gap:14px">
         <div>${buildStyleResultHtml(summary)}</div>
@@ -4565,10 +4577,19 @@ function saveOutfit(){
   if(!lastRes){ showToast('⚠️ 請先生成本週搭配再收藏'); return; }
   // 直接從 localStorage 讀取最新的 saved，避免 switchWardrobe 後變數失效
   var currentSaved = JSON.parse(localStorage.getItem('fitto_s') || '[]');
-  currentSaved.unshift({...lastRes, sid:Date.now()});
+  // 存入前移除 imgSrc (base64 很大會超過 localStorage 限制)
+  var toSave = JSON.parse(JSON.stringify(lastRes));
+  if(toSave.days) toSave.days = toSave.days.map(function(d){ return {day:d.day, outfit:d.outfit, tip:d.tip}; });
+  currentSaved.unshift(Object.assign({}, toSave, {sid:Date.now()}));
+  if(currentSaved.length > 20) currentSaved = currentSaved.slice(0,20); // 最多保留 20 筆
   saved = currentSaved;
-  // 強制寫入 fitto_s，不依賴 persist() 的衣櫃判斷
-  localStorage.setItem('fitto_s', JSON.stringify(saved));
+  try {
+    localStorage.setItem('fitto_s', JSON.stringify(saved));
+  } catch(e) {
+    // 若仍超量，只保留最新 5 筆
+    saved = currentSaved.slice(0,5);
+    localStorage.setItem('fitto_s', JSON.stringify(saved));
+  }
   localStorage.setItem('fitto_id', String(nid));
   const b=document.getElementById('bsave');b.textContent='✅ 已收藏！';
   setTimeout(()=>b.textContent='🔖 收藏這週工作搭配',2000);
@@ -4745,7 +4766,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-9<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-10<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -4769,7 +4790,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-9',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-10',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -5015,7 +5036,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-9 新功能：髮型購買、VIP衣櫃、整合設定頁
+// VD4-10 新功能：髮型購買、VIP衣櫃、整合設定頁
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
