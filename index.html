@@ -1523,6 +1523,18 @@ function getSelectedAvatarRefData() {
   return null;
 }
 
+// 金幣消耗統計（需在 spendCoin 之前宣告）
+var coinSpendLog = JSON.parse(localStorage.getItem('fitto_coin_log') || '{"spent":0,"revenue_twd":0}');
+function saveCoinLog() { localStorage.setItem('fitto_coin_log', JSON.stringify(coinSpendLog)); }
+// Starter NT$49/10枚=4.9, Standard NT$99/25枚=3.96, Value NT$199/60枚=3.32 → 平均約 NT$4
+var COIN_AVG_TWD = 4.0;
+function recordCoinSpend(amt) {
+  coinSpendLog.spent = (coinSpendLog.spent || 0) + amt;
+  coinSpendLog.revenue_twd = (coinSpendLog.revenue_twd || 0) + amt * COIN_AVG_TWD;
+  saveCoinLog();
+  if(typeof updateTokenUI === 'function') updateTokenUI();
+}
+
 function spendCoin(amt, reason) {
   if(coins < amt) {
     showToast('金幣不足！需要 ' + amt + ' 枚');
@@ -2341,6 +2353,15 @@ let scanB64=null,scanMime="image/jpeg",catB64=null,catMime="image/jpeg",lastRes=
 // VIP 衣櫃變數（需在 persist 之前宣告）
 var vipWardrobes = JSON.parse(localStorage.getItem('fitto_vip_wardrobes') || '[]');
 var activeWardrobeId = localStorage.getItem('fitto_active_wardrobe') || 'main';
+// ═══ 全域狀態變數（統一提前宣告，避免執行期 ReferenceError）═══
+var tokenStats = JSON.parse(localStorage.getItem('fitto_tokens') || '{"text":0,"img":0,"cost_twd":0}');
+var apiLogs = [];
+var selectedHairstyle = localStorage.getItem('fitto_selected_hair') || 'none';
+// ownedHairstyles declared early (see global vars section)
+var catFilter = 'all';
+var addedUQIds = new Set();
+var tfCollapsed = false;
+
 
 
 // persist：若 persistCurrent 已定義則用它，否則直接寫 main 衣櫃
@@ -4141,7 +4162,7 @@ function toggleCustomAcc(val, btn) {
 }
 
 // ═══ 髮型系統 ═══
-var selectedHairstyle = 'short';
+// selectedHairstyle declared early
 const HAIRSTYLE_PROMPTS = {
   'short':    'short sides undercut, neat short textured hair on top',
   'curly':    'natural curly voluminous hair, textured perm',
@@ -4553,7 +4574,7 @@ function addFromCat(idx,type,color,style,name,btn){if(wardrobe.length>=wardrobeL
 
 
 // ═══ API LOG ═══
-var apiLogs = [];
+// apiLogs declared early
 function apiLog(msg, type) {
   type = type || 'info';
   var now = new Date();
@@ -4719,24 +4740,10 @@ async function deploy() {
 }
 
 // ═══ TOKEN COUNTER ═══
-let tokenStats = JSON.parse(localStorage.getItem('fitto_tokens') || '{"text":0,"img":0,"cost_twd":0}');
+// tokenStats declared early (see top of JS section)
 const USD_TO_TWD = 32;  // 匯率
 
 // 金幣消費統計（累計）
-var coinSpendLog = JSON.parse(localStorage.getItem('fitto_coin_log') || '{"spent":0,"revenue_twd":0}');
-function saveCoinLog() { localStorage.setItem('fitto_coin_log', JSON.stringify(coinSpendLog)); }
-
-// 金幣對應金額（依購買方案換算平均單價）
-// Starter NT$49/10枚=4.9, Standard NT$99/25枚=3.96, Value NT$199/60枚=3.32 → 平均約 NT$4
-const COIN_AVG_TWD = 4.0;
-
-function recordCoinSpend(amt) {
-  coinSpendLog.spent = (coinSpendLog.spent || 0) + amt;
-  coinSpendLog.revenue_twd = (coinSpendLog.revenue_twd || 0) + amt * COIN_AVG_TWD;
-  saveCoinLog();
-  updateTokenUI();
-}
-
 function saveTokenStats() {
   localStorage.setItem('fitto_tokens', JSON.stringify(tokenStats));
 }
@@ -4796,7 +4803,7 @@ function resetTokenCount() {
   document.getElementById('tf-last').textContent = '已重置';
 }
 
-let tfCollapsed = false;
+// tfCollapsed declared early
 function toggleTokenFloat() {
   tfCollapsed = !tfCollapsed;
   const el = document.getElementById('token-float');
@@ -4856,8 +4863,8 @@ const UQ_CATALOG = [
   {id:'lm8', name:'UV Protection太陽眼鏡', type:'配件', color:'黑色', style:'簡約', line:'LifeWear', gender:'男裝', season:'春夏', desc:'UV400，25%藍光阻隔'},
 ];
 
-let catFilter = 'all';
-let addedUQIds = new Set();
+// catFilter declared early
+// addedUQIds declared early
 
 function switchCatTab(tab) {
   document.getElementById('cat-uniqlo').style.display = tab==='uniqlo' ? 'block' : 'none';
