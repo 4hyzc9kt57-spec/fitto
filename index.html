@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-3 · AI 智能穿搭</title>
+<title>Fitto VD4-4 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -702,7 +702,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-3</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-4</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1037,7 +1037,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-3 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-4 · 2026.04</div>
   </div>
 </div>
 
@@ -1291,7 +1291,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-3 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-4 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1797,7 +1797,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-3 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-4 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -2338,8 +2338,16 @@ let saved=JSON.parse(localStorage.getItem('fitto_s')||'[]');
 let nid=parseInt(localStorage.getItem('fitto_id')||'1');
 let scanB64=null,scanMime="image/jpeg",catB64=null,catMime="image/jpeg",lastRes=null;
 
+// VIP 衣櫃變數（需在 persist 之前宣告）
+var vipWardrobes = JSON.parse(localStorage.getItem('fitto_vip_wardrobes') || '[]');
+var activeWardrobeId = localStorage.getItem('fitto_active_wardrobe') || 'main';
 
-const persist=()=>{ persistCurrent(); };
+
+// persist：若 persistCurrent 已定義則用它，否則直接寫 main 衣櫃
+const persist=()=>{
+  if(typeof persistCurrent === 'function') { persistCurrent(); }
+  else { localStorage.setItem('fitto_w',JSON.stringify(wardrobe));localStorage.setItem('fitto_s',JSON.stringify(saved));localStorage.setItem('fitto_id',String(nid)); }
+};
 
 // API KEY (Gemini only)
 function updApiUI(){var d=document.getElementById('api-dot'),s=document.getElementById('api-st');var gk=localStorage.getItem('fitto_gemini_key')||'';if(gk){d.className='dot on';d.style.background='var(--green)';s.textContent='Gemini Key ✓';}else{d.className='dot';d.style.background='';s.textContent='設定 Gemini Key';}}
@@ -3764,24 +3772,20 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
   // 把 outfit 資料存在 window 物件，避免特殊字符塞進 onclick 字串出錯
   window._fittoOutfits = (r.days||[]).map(d=>({outfit:d.outfit, occ:occ, sea:seaClean}));
 
-  document.getElementById('wscroll').innerHTML=(r.days||[]).map((d,idx)=>{
-    // 找出 outfit 中不在衣櫃的單品，提供購買連結
+  document.getElementById('wscroll').innerHTML=(r.days||[]).map(function(d,idx){
     var outfitText = d.outfit || '';
     var shopUrl = 'https://www.google.com/search?q=' + encodeURIComponent(outfitText + ' 購買 2026') + '&tbm=shop';
-    // 判斷是否有衣櫃外的單品（outfit 含「推薦」「新入手」「潮流」等字）
     var hasNewItem = /推薦|入手|新品|潮流/.test(outfitText) || !wardrobe.some(function(w){ return outfitText.indexOf(w.color) !== -1 && outfitText.indexOf(w.type) !== -1; });
-    var shopBtn = hasNewItem ? \`<a href="\${shopUrl}" target="_blank" style="display:block;margin-top:5px;font-size:.55rem;color:var(--gold);font-weight:700;text-decoration:none;background:rgba(201,165,80,.1);border-radius:5px;padding:3px 7px;text-align:center">🛍 選購單品</a>\` : '';
-    return \`<div class="dc" id="dc-\${idx}">
-      <div class="dn">\${d.day}</div>
-      <div class="do" id="outfit-\${idx}">\${outfitText}</div>
-      <div class="dt">\${d.tip}</div>
-      \${shopBtn}
-      <div class="img-box" id="imgbox-\${idx}">
-        <button class="btn-gen-img" onclick="genImgSafe(\${idx})">
-          🎨 生成示意圖
-        </button>
-      </div>
-    </div>\`;
+    var shopBtn = hasNewItem ? '<a href="' + shopUrl + '" target="_blank" style="display:block;margin-top:5px;font-size:.55rem;color:var(--gold);font-weight:700;text-decoration:none;background:rgba(201,165,80,.1);border-radius:5px;padding:3px 7px;text-align:center">🛍 選購單品</a>' : '';
+    return '<div class="dc" id="dc-' + idx + '">' +
+      '<div class="dn">' + d.day + '</div>' +
+      '<div class="do" id="outfit-' + idx + '">' + outfitText + '</div>' +
+      '<div class="dt">' + d.tip + '</div>' +
+      shopBtn +
+      '<div class="img-box" id="imgbox-' + idx + '">' +
+        '<button class="btn-gen-img" onclick="genImgSafe(' + idx + ')">🎨 生成示意圖</button>' +
+      '</div>' +
+    '</div>';
   }).join('');
 
   // overall_note + 配件推薦卡
@@ -4932,7 +4936,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-3 新功能：髮型購買、VIP衣櫃、整合設定頁
+// VD4-4 新功能：髮型購買、VIP衣櫃、整合設定頁
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
@@ -4987,7 +4991,7 @@ function renderHairQuickPanel() {
   var list = document.getElementById('hair-quick-list');
   if(!list) return;
   var noneActive = selectedHairstyle === 'none';
-  var noneItem = '<div class="hair-picker-item' + (noneActive?' active':'') + '" onclick="applyHairstyle('none');closeHairPanel()">' +
+  var noneItem = '<div class="hair-picker-item' + (noneActive?' active':'') + '" onclick="applyHairstyle(\'none\');closeHairPanel()">' +
     '<div style="width:32px;height:32px;border-radius:50%;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">🖼️</div>' +
     '<div class="hair-picker-info">' +
       '<div class="hair-picker-name">維持頭像設定' + (noneActive?' ✓':'') + '</div>' +
@@ -5104,9 +5108,7 @@ function renderProfAvatarRow() {
 }
 
 // ── VIP 衣櫃系統 ──
-var vipWardrobes = JSON.parse(localStorage.getItem('fitto_vip_wardrobes') || '[]');
-// [{id, name, items:[]}]
-var activeWardrobeId = localStorage.getItem('fitto_active_wardrobe') || 'main';
+// vipWardrobes 和 activeWardrobeId 已在檔案前方宣告（避免 persist 時 ReferenceError）
 function saveVipWardrobes(){ localStorage.setItem('fitto_vip_wardrobes', JSON.stringify(vipWardrobes)); }
 
 function openVipWrdModal() {
