@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-8 · AI 智能穿搭</title>
+<title>Fitto VD4-9 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -702,7 +702,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-8</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-9</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1033,7 +1033,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-8 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-9 · 2026.04</div>
   </div>
 </div>
 
@@ -1295,7 +1295,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-8 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-9 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1808,7 +1808,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-8 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-9 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -3217,34 +3217,47 @@ async function genTrendStyling() {
     const wj = buildWardrobePromptText();
     const seed = Math.floor(Math.random()*9000)+1000;
 
-    // 單一 prompt 完成：不再拆 Step1+Step2，避免 trendInfo 塞爆 JSON mode
-    const prompt = `你是專業時尚造型師。現在是${year}年${seaLabel}季（分析種子:${seed}）。
+    // 先用純文字取得分析（避免 JSON 格式限制讓 AI 截斷），再解析
+    const prompt = `你是專業時尚造型師。現在是${year}年${seaLabel}季（種子:${seed}）。
 
-【用戶衣櫃單品】
-${wj}
+用戶衣櫃：${wj}
 
-任務：
-1. 根據${year}年${seaLabel}季的時尚趨勢（例如亞麻材質、寬版輪廓、莫蘭迪色調等當季流行方向），從衣櫃挑一件最有搭配潛力的「核心單品」
-2. 推薦一件全新購入單品，讓整體穿搭更有當季潮流感
-3. 輸出完整 JSON，欄位如下
+請依照以下格式逐行輸出，每行一個欄位，不要多餘說明：
+baseItem: 從衣櫃挑一件核心單品（顏色+種類）
+newItem: 推薦一件新購入單品名稱
+newItemColor: 推薦顏色
+newItemDesc: 材質版型特色（15字內）
+whyTrend: 符合${year}年${seaLabel}季潮流的理由（15字內）
+whyMatch: 與核心單品的搭配邏輯（15字內）
+trendContext: 本季最重要的流行方向（15字內）
+outfit: 兩件單品組成的完整穿搭描述（25字內）
+searchKeyword: English search keyword for the new item
+priceRange: 預估NT$價格範圍
 
-只輸出 JSON 物件（禁止任何說明、markdown、前言）：
-{"baseItem":"核心單品","newItem":"推薦新單品","newItemColor":"顏色","newItemDesc":"材質特色15字","whyTrend":"潮流理由15字","whyMatch":"搭配邏輯15字","trendContext":"本季方向15字","outfit":"穿搭描述25字","searchKeyword":"English keyword","uniqloSearch":"UNIQLO詞","mujiSearch":"MUJI詞","priceRange":"NT$範圍"}`;
+只輸出以上10行，每行格式為「欄位名: 內容」，不要其他文字。`;
 
     // 用 geminiText 避免 JSON mode 截斷複雜 prompt
     const raw = await geminiText(prompt, 1000);
     apiLog('  潮流回應長度: ' + raw.length + ' 字', 'info');
 
-    // 多層解析：先試 extractJsonObject，失敗再試 JSON.parse 整段
-    let rec = {};
-    const cleaned = raw.replace(/```json/gi,'').replace(/```/g,'').trim();
-    try {
-      const js = extractJsonObject(cleaned);
-      if(js) rec = JSON.parse(js);
-    } catch(e1) {
-      try { rec = JSON.parse(cleaned); } catch(e2) {
-        apiLog('✗ JSON 解析失敗: ' + e2.message.substring(0,40), 'err');
-      }
+    // 解析 key-value 格式（每行 "欄位名: 內容"）
+    function parseKV(text) {
+      const out = {};
+      text.split('\n').forEach(function(line) {
+        const m = line.match(/^(\w+):\s*(.+)$/);
+        if(m) out[m[1].trim()] = m[2].trim();
+      });
+      return out;
+    }
+    const cleaned = raw.replace(/```/g,'').trim();
+    let rec = parseKV(cleaned);
+
+    // 若 key-value 解析失敗（欄位少於 3 個），嘗試 JSON 解析做 fallback
+    if(Object.keys(rec).length < 3) {
+      try {
+        const js = extractJsonObject(cleaned);
+        if(js) rec = JSON.parse(js);
+      } catch(e) {}
     }
 
     // 欄位容錯：即使部分欄位缺失也能顯示
@@ -4483,23 +4496,30 @@ ${wj}`;
 輸出格式（繁體中文）：
 {"summary":"最大缺口20字內直接說明","gaps":[{"item":"單品（必須和缺口一致）","reason":"原因","color":"顏色","keyword":"關鍵字 2026"},{"item":"單品（必須和缺口一致）","reason":"原因","color":"顏色","keyword":"關鍵字 2026"},{"item":"單品（必須和缺口一致）","reason":"原因","color":"顏色","keyword":"關鍵字 2026"}],"tip":"升級方向20字內"}`;
 
-    // 整合單一 prompt：風格分析 + 缺口推薦 一起輸出，確保完全一致
-    const _seed = Math.floor(Math.random()*9000)+1000;
-    const unifiedPrompt = `你是高端但務實的個人造型師。請分析衣櫃並輸出 JSON。（本次分析種子：${_seed}，請給出與上次完全不同角度的洞察，例如上次聚焦色彩，這次聚焦材質或場合；上次推外套，這次推配件或下身）
+    // 真正有效的多元化：每次隨機選一個分析維度，讓 AI 強制從不同方向切入
+    const _angles = [
+      '這次請聚焦「色彩搭配」：分析現有色系組合的強弱，從色彩協調角度指出缺口，推薦能提升色彩層次的單品',
+      '這次請聚焦「場合適配」：分析衣櫃在日常/工作/約會場合的覆蓋率，找出最缺哪個場合的服裝，推薦對應單品',
+      '這次請聚焦「材質與版型」：分析現有材質組合（棉/牛仔/針織/皮革等）的多樣性，從材質搭配角度找缺口，推薦缺少的材質類型',
+      '這次請聚焦「配件完整度」：分析現有鞋子、包包、飾品的配置，找出配件缺口，推薦能大幅提升整體造型的配件',
+      '這次請聚焦「層次與輪廓」：分析上下外三層的組合豐富度，找出缺少的輪廓類型（寬版/修身/oversized），推薦能增加層次的單品',
+    ];
+    const _angle = _angles[Math.floor(Math.random() * _angles.length)];
+
+    const unifiedPrompt = `你是高端但務實的個人造型師。分析以下衣櫃，${_angle}。
 
 衣櫃統計：件數=${stats.total}，常見種類=${stats.topTypes.join('、')||'無'}，常見顏色=${stats.topColors.join('、')||'無'}，常見風格=${stats.topStyles.join('、')||'無'}，明顯缺口=${stats.missing.join('、')||'無明顯缺口'}
 
 衣櫃清單：${wj}
 
 輸出規則：
-1. 風格定位、現有優勢、最大缺口 必須具體（禁止空話）
-2. 補強單品 必須 100% 對應「最大缺口」
-3. gaps 每筆 item 必須是填補缺口的具體單品
-4. keyword 用英文，適合網路搜尋
-5. 每次推薦的品名、顏色、理由必須和種子 ${_seed} 產生不同組合，禁止重複
+1. style/strength/gap 必須從本次「${_angle.substring(0,8)}」角度切入，給具體結論（禁止空話）
+2. buy1/buy2 和 gaps 必須完全對應 gap 缺口，禁止推薦衣櫃已有的種類
+3. gaps 每筆 item 是具體單品（如「霧藍色亞麻寬褲」而非「褲子」）
+4. keyword 用英文
 
-只輸出 JSON，不要說明：
-{"style":"風格定位描述","strength":"現有優勢描述","gap":"最大缺口描述","buy1":"補強單品1名稱|適合原因","buy2":"補強單品2名稱|適合原因","summary":"缺口摘要20字","gaps":[{"item":"具體單品","reason":"原因","color":"顏色","keyword":"English search keyword 2026"},{"item":"具體單品","reason":"原因","color":"顏色","keyword":"English search keyword 2026"},{"item":"具體單品","reason":"原因","color":"顏色","keyword":"English search keyword 2026"}],"tip":"升級方向建議20字"}`;
+只輸出以下格式的 JSON，不要說明：
+{"style":"具體風格定位","strength":"具體現有優勢","gap":"具體最大缺口","buy1":"單品名|原因","buy2":"單品名|原因","summary":"缺口20字","gaps":[{"item":"具體單品","reason":"原因","color":"顏色","keyword":"English 2026"},{"item":"具體單品","reason":"原因","color":"顏色","keyword":"English 2026"},{"item":"具體單品","reason":"原因","color":"顏色","keyword":"English 2026"}],"tip":"升級方向20字"}`;
 
     // 用 geminiText 保留創意多元性，1200 token 確保完整
     const unifiedRaw = await geminiText(unifiedPrompt, 1200);
@@ -4524,6 +4544,7 @@ ${wj}`;
       tip: unified.tip || ''
     };
     res.innerHTML = `
+      <div style="font-size:.58rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:6px;padding:4px 8px;background:rgba(201,165,80,.1);border-radius:6px">🔍 本次分析角度：${_angle.replace('這次請聚焦','').replace('：分析','').split('，')[0].trim()}</div>
       <div style="font-size:.62rem;font-weight:800;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">AI 衣櫃洞察</div>
       <div style="display:grid;gap:14px">
         <div>${buildStyleResultHtml(summary)}</div>
@@ -4724,7 +4745,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-8<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-9<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -4748,7 +4769,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-8',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-9',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -4994,7 +5015,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-8 新功能：髮型購買、VIP衣櫃、整合設定頁
+// VD4-9 新功能：髮型購買、VIP衣櫃、整合設定頁
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
