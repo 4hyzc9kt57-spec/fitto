@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-11 · AI 智能穿搭</title>
+<title>Fitto VD4-12 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -702,7 +702,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-11</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-12</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1033,7 +1033,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-11 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-12 · 2026.04</div>
   </div>
 </div>
 
@@ -1295,7 +1295,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-11 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-12 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1808,7 +1808,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-11 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-12 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -2487,20 +2487,24 @@ function buildSuggestResultHtml(d) {
   }
 
   const gaps = gapsArr.map(g => {
-    const searchKw = (g.keyword||g.item||'');
-    const styleTag = g.style ? (' ' + g.style) : '';
-    const imgUrl = 'https://www.google.com/search?q=' + encodeURIComponent((g.item||'') + styleTag + ' 穿搭') + '&tbm=isch';
-    const uniqloUrl = 'https://www.google.com/search?q=' + encodeURIComponent(searchKw + ' site:uniqlo.com');
-    const mujiUrl = 'https://www.google.com/search?q=' + encodeURIComponent(searchKw + ' site:muji.com');
-    const hmUrl = 'https://www.google.com/search?q=' + encodeURIComponent(searchKw + ' site:hm.com');
+    const itemName = g.item || '';
+    const colorPrefix = g.color ? g.color + ' ' : '';
+    const fullKw = colorPrefix + itemName;
+    const kwEn = g.keyword || itemName;
+    const imgUrl    = 'https://www.google.com/search?q=' + encodeURIComponent(fullKw + ' 穿搭') + '&tbm=isch';
+    const shopUrl   = 'https://www.google.com/search?q=' + encodeURIComponent(fullKw + ' 購買') + '&tbm=shop';
+    const uniqloUrl = 'https://www.google.com/search?q=' + encodeURIComponent(fullKw + ' site:uniqlo.com/tw') + '&tbm=shop';
+    const mujiUrl   = 'https://www.google.com/search?q=' + encodeURIComponent(fullKw + ' site:muji.com/tw') + '&tbm=shop';
+    const hmUrl     = 'https://www.google.com/search?q=' + encodeURIComponent(fullKw + ' site:hm.com') + '&tbm=shop';
     const bg = COLOR_MAP[g.color] || '#8B7A66';
     return `<div style="display:flex;align-items:center;gap:10px;padding:10px 12px;background:var(--surface2);border:1px solid var(--border);border-radius:10px;margin-bottom:8px">
       <div style="width:36px;height:36px;border-radius:8px;background:${bg};flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:1.1rem">👗</div>
       <div style="flex:1;min-width:0">
-        <div style="font-weight:800;font-size:.82rem;color:var(--ink)">${g.item||'—'}</div>
+        <div style="font-weight:800;font-size:.82rem;color:var(--ink)">${itemName}${g.color ? ' · <span style="color:var(--muted)">' + g.color + '</span>' : ''}</div>
         <div style="font-size:.65rem;color:var(--muted);margin-top:2px">${g.reason||''}</div>
         <div style="display:flex;gap:6px;margin-top:5px;flex-wrap:wrap">
           <a href="${imgUrl}" target="_blank" style="font-size:.6rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.15);border-radius:5px;padding:3px 8px;font-weight:700">🔍 看圖</a>
+          <a href="${shopUrl}" target="_blank" style="font-size:.6rem;color:var(--ink);text-decoration:none;background:var(--surface2);border:1px solid var(--border);border-radius:5px;padding:3px 8px;font-weight:700">🛒 選購</a>
           <a href="${uniqloUrl}" target="_blank" style="font-size:.6rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#5C6C7C,#8898A8);border-radius:5px;padding:3px 8px;font-weight:700">UNIQLO</a>
           <a href="${mujiUrl}" target="_blank" style="font-size:.6rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#6A5B4B,#8B7A66);border-radius:5px;padding:3px 8px;font-weight:700">MUJI</a>
           <a href="${hmUrl}" target="_blank" style="font-size:.6rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#8E3B46,#C96370);border-radius:5px;padding:3px 8px;font-weight:700">H&M</a>
@@ -3318,7 +3322,7 @@ priceRange: 預估NT$價格範圍
         <!-- AI 生圖區 -->
         <div id="trend-imgbox" style="margin-bottom:10px"></div>
         <button onclick="genTrendOutfitImg()" style="width:100%;padding:9px;background:linear-gradient(135deg,#7B5E2A,#C9904A);color:#FAF7F2;border:none;border-radius:8px;font-size:.75rem;font-weight:800;cursor:pointer;margin-bottom:10px;display:flex;align-items:center;justify-content:center;gap:6px" id="trend-genimg-btn">
-          🎨 生成穿搭示意圖 <span style="font-size:.6rem;opacity:.8">（-2🪙）</span>
+          🔄 重新生成示意圖
         </button>
         <div style="font-size:.6rem;font-weight:800;color:var(--gold);margin-bottom:7px">🛍 選購管道${rec.priceRange ? '　<span style="color:var(--muted);font-weight:600">預估 ' + rec.priceRange + '</span>' : ''}</div>
         <div style="display:flex;flex-wrap:wrap;gap:7px">
@@ -3330,7 +3334,9 @@ priceRange: 預估NT$價格範圍
         </div>
       </div>`;
     res.style.display = 'block';
-    apiLog('✓ 潮流搭配生成完成', 'ok');
+    apiLog('✓ 潮流搭配生成完成，自動觸發生圖', 'ok');
+    // 自動生圖（已包含在 5 金幣內）
+    setTimeout(function(){ genTrendOutfitImg(); }, 300);
 
   } catch(e) {
     res.innerHTML = `<div style="background:rgba(224,82,82,.08);border:1px solid rgba(224,82,82,.3);border-radius:10px;padding:12px 14px">
@@ -3352,7 +3358,7 @@ async function genTrendOutfitImg() {
   if(!rec) { showToast('⚠️ 請先生成潮流搭配結果'); return; }
   const key = localStorage.getItem('fitto_gemini_key') || '';
   if(!key) { showToast('請先設定 Gemini Key'); return; }
-  if(!checkAndSpend()) return;
+  // 生圖費用已包含在潮流搭配的 5 金幣內，不額外扣費
 
   const box  = document.getElementById('trend-imgbox');
   const btn  = document.getElementById('trend-genimg-btn');
@@ -3391,7 +3397,7 @@ async function genTrendOutfitImg() {
     if(box) box.innerHTML = `<div class="img-error">⚠️ 生成失敗：${(e.message||'').substring(0,60)}<br><button class="btn-gen-img" onclick="genTrendOutfitImg()">重試</button></div>`;
     apiLog('✗ 潮流生圖失敗: ' + (e.message||'').substring(0,50), 'err');
   } finally {
-    if(btn) { btn.disabled = false; btn.innerHTML = '🎨 重新生成示意圖 <span style="font-size:.6rem;opacity:.8">（-2🪙）</span>'; }
+    if(btn) { btn.disabled = false; btn.innerHTML = '🔄 重新生成示意圖'; }
   }
 }
 
@@ -4662,29 +4668,75 @@ tip: 整體升級方向（20字內）`;
 }
 
 // SAVE
+function compressImgSrc(src, maxW, cb) {
+  // 把 base64 圖壓縮到 maxW 寬度，降低 localStorage 體積
+  if(!src) { cb(null); return; }
+  var img = new Image();
+  img.onload = function() {
+    var ratio = Math.min(maxW / img.width, 1);
+    var canvas = document.createElement('canvas');
+    canvas.width = Math.round(img.width * ratio);
+    canvas.height = Math.round(img.height * ratio);
+    canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+    cb(canvas.toDataURL('image/jpeg', 0.55));
+  };
+  img.onerror = function() { cb(null); };
+  img.src = src;
+}
+
 function saveOutfit(){
   if(!lastRes){ showToast('⚠️ 請先生成本週搭配再收藏'); return; }
-  // 直接從 localStorage 讀取最新的 saved，避免 switchWardrobe 後變數失效
-  var currentSaved = JSON.parse(localStorage.getItem('fitto_s') || '[]');
-  // 存入前移除 imgSrc (base64 很大會超過 localStorage 限制)
-  var toSave = JSON.parse(JSON.stringify(lastRes));
-  // 保留 imgSrc 但壓縮品質（若太大則不保留）
-  if(toSave.days) toSave.days = toSave.days.map(function(d){
-    return {day:d.day, outfit:d.outfit, tip:d.tip, imgSrc: d.imgSrc || null};
-  });
-  currentSaved.unshift(Object.assign({}, toSave, {sid:Date.now()}));
-  if(currentSaved.length > 5) currentSaved = currentSaved.slice(0,5); // 最多保留 5 筆（含圖片）
-  saved = currentSaved;
-  try {
-    localStorage.setItem('fitto_s', JSON.stringify(saved));
-  } catch(e) {
-    // 若仍超量，只保留最新 5 筆
-    saved = currentSaved.slice(0,5);
-    localStorage.setItem('fitto_s', JSON.stringify(saved));
+  var btn = document.getElementById('bsave');
+  if(btn) { btn.textContent = '⏳ 儲存中…'; btn.disabled = true; }
+
+  // 壓縮所有已生成的圖片，再一起存入
+  var days = (lastRes.days || []).slice();
+  var pending = days.filter(function(d){ return d && d.imgSrc; }).length;
+
+  function doSave(compressedDays) {
+    var toSave = JSON.parse(JSON.stringify(lastRes));
+    toSave.days = compressedDays.map(function(d){
+      return {day:d.day, outfit:d.outfit, tip:d.tip, imgSrc: d.imgSrc || null};
+    });
+    var currentSaved = JSON.parse(localStorage.getItem('fitto_s') || '[]');
+    currentSaved.unshift(Object.assign({}, toSave, {sid:Date.now()}));
+    if(currentSaved.length > 5) currentSaved = currentSaved.slice(0,5);
+    saved = currentSaved;
+    var ok = false;
+    try {
+      localStorage.setItem('fitto_s', JSON.stringify(saved));
+      ok = true;
+    } catch(e) {
+      // 圖片太大，只保留文字
+      var noImg = currentSaved.map(function(s){
+        return Object.assign({}, s, {days: (s.days||[]).map(function(d){
+          return {day:d.day, outfit:d.outfit, tip:d.tip};
+        })});
+      });
+      try { localStorage.setItem('fitto_s', JSON.stringify(noImg)); saved = noImg; ok = true; } catch(e2) {}
+    }
+    localStorage.setItem('fitto_id', String(nid));
+    if(btn) { btn.textContent = ok ? '✅ 已收藏！' : '⚠️ 儲存失敗'; btn.disabled = false; }
+    setTimeout(function(){ if(btn) btn.textContent = '🔖 收藏這週工作搭配'; }, 2000);
+    if(ok) showToast('✅ 搭配已收藏！');
   }
-  localStorage.setItem('fitto_id', String(nid));
-  const b=document.getElementById('bsave');b.textContent='✅ 已收藏！';
-  setTimeout(()=>b.textContent='🔖 收藏這週工作搭配',2000);
+
+  if(pending === 0) {
+    doSave(days);
+    return;
+  }
+
+  // 逐一壓縮有圖的天
+  var result = days.map(function(d){ return Object.assign({}, d); });
+  var done = 0;
+  result.forEach(function(d, i) {
+    if(!d.imgSrc) { done++; if(done === pending) doSave(result); return; }
+    compressImgSrc(d.imgSrc, 200, function(compressed) {
+      result[i].imgSrc = compressed;
+      done++;
+      if(done === pending) doSave(result);
+    });
+  });
 }
 function renderSaved(){
   // 每次渲染都從 localStorage 讀取，保證資料最新
@@ -4858,7 +4910,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-11<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-12<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -4882,7 +4934,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-11',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-12',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -5128,7 +5180,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-11 新功能：髮型購買、VIP衣櫃、整合設定頁
+// VD4-12 新功能：髮型購買、VIP衣櫃、整合設定頁
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
