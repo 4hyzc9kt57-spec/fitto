@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-6 · AI 智能穿搭</title>
+<title>Fitto VD4-7 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -702,7 +702,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-6</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-7</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1033,7 +1033,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-6 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-7 · 2026.04</div>
   </div>
 </div>
 
@@ -1156,6 +1156,9 @@ body{background:var(--bg);color:var(--ink);}
     <div class="mhandle"></div>
     <div class="mtitle">📷 AI 掃描衣物</div>
     <div class="pbox" id="pbox"><div class="ph"><span>🧺</span><p>拍照或選圖</p></div></div>
+    <div style="background:rgba(201,165,80,.08);border:1px solid rgba(201,165,80,.22);border-radius:8px;padding:8px 12px;margin-bottom:8px;font-size:.62rem;color:var(--ink2);line-height:1.6">
+      💡 <strong>辨識技巧：</strong>建議使用<strong>單品照片</strong>（一張一件），辨識準確度最高。若上傳全身穿搭照，部分單品可能無法完整辨識，建議拍攝後逐件確認並調整。
+    </div>
     <div class="scan-btns2">
       <div class="btn-ghost" onclick="document.getElementById('scam').click()">📷 相機</div>
       <div class="btn-ghost" onclick="document.getElementById('sfile').click()">📁 相簿</div>
@@ -1292,7 +1295,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-6 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-7 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1703,8 +1706,12 @@ function openAvatarPicker() {
   } else {
     grid.innerHTML='';
   }
-  var avatars=[{emoji:'👤',label:'預設',free:true},{emoji:'☀️',label:'陽光'},{emoji:'🌙',label:'韓系'},{emoji:'⚡',label:'街頭'}];
-  var pmap={'☀️':'sunny','🌙':'korean','⚡':'rugged'};
+  var avatars=[
+    {emoji:'👤',label:'預設',free:true},
+    {emoji:'☀️',label:'陽光'},{emoji:'🌙',label:'韓系'},{emoji:'⚡',label:'街頭'},
+    {emoji:'🌸',label:'韓系女'},{emoji:'🌺',label:'甜美女'},{emoji:'👑',label:'御姐'},{emoji:'⭐',label:'時尚女'}
+  ];
+  var pmap={'☀️':'sunny','🌙':'korean','⚡':'rugged','🌸':'girl1','🌺':'girl2'};
   avatars.forEach(function(a){
     if(!a.free&&ownedAvatars.indexOf(a.emoji)<0)return;
     var isSel=!_customAvatarEnabled&&userAvatar===a.emoji;
@@ -1798,7 +1805,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-6 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-7 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -2742,7 +2749,7 @@ function buildScanPrompt() {
 4. 半身照（腰部以上）：至少列出上衣，若有帽子/項鍊/外套也要列
 5. 禁止只輸出一件——即使畫面模糊，也要根據可見部分推斷並列出
 6. 每件獨立一筆，type 用細分名：T恤/牛仔褲/球鞋/皮夾克/棒球帽等
-7. color 只能選：白色/米白/淺灰/灰色/深灰/黑色/淺藍/深藍/卡其/棕色/紅色/酒紅/粉色/綠色/橄欖綠/花紋條紋
+7. color【極重要】只能選：白色/米白/淺灰/灰色/深灰/黑色/淺藍/深藍/卡其/棕色/紅色/酒紅/粉色/綠色/橄欖綠/花紋條紋。請仔細觀察照片中的實際顏色，不要預設。若有圖案/印花則選「花紋條紋」
 8. style 只能選：休閒/正式/商務/運動/韓系/簡約/街頭
 9. material 只能選：棉/麻/牛仔/針織/皮革/雪紡/聚酯纖維/混紡/其他
 10. fit 只能選：寬鬆/oversized/修身/直筒/A字/正常
@@ -2879,6 +2886,7 @@ function buildItemImgPrompt(item, avatarDesc) {
   // 衣物類型分組
   const isAcc = /帽|包|鞋|靴|涼鞋|墨鏡|圍巾|項鍊|手環|手錶|手鍊|腰帶|絲巾|領帶|胸針|耳環|戒指/.test(item.type);
   const isTop = /上衣|T恤|襯衫|毛衣/.test(item.type);
+  const isShorts = /短褲/.test(item.type);
 
   // 配件穿戴位置：優先用 AI 辨識的 placement，否則依種類推斷
   let placementNote = item.placement || '';
@@ -2894,7 +2902,7 @@ function buildItemImgPrompt(item, avatarDesc) {
   }
 
   const poseDesc = item.backPrint ? BACK_POSE : POSES[0];
-  const itemFullDesc = `${item.color} ${item.type}${item.note ? '，' + item.note : ''}（風格：${item.style}）`;
+  const itemFullDesc = `${item.color} ${item.type}${item.note ? '，' + item.note : ''}（風格：${item.style}）${isShorts ? '，very short hemline, micro-length, above mid-thigh, trendy streetwear cut' : ''}`;
 
   let prompt;
   if(isAcc) {
@@ -3220,8 +3228,9 @@ ${wj}
 只輸出 JSON 物件，不要任何說明或 markdown：
 {"baseItem":"衣櫃核心單品（顏色+種類）","newItem":"推薦新單品名稱","newItemColor":"推薦顏色","newItemDesc":"材質版型特色，20字內","whyTrend":"符合當季潮流的理由，15字內","whyMatch":"與核心單品的搭配邏輯，15字內","trendContext":"本季流行方向一句話說明，20字內","outfit":"完整穿搭描述含兩件單品，30字內","searchKeyword":"英文搜尋關鍵字，適合網購","uniqloSearch":"UNIQLO繁中搜尋詞","mujiSearch":"MUJI繁中搜尋詞","priceRange":"預估NT$價格範圍"}`;
 
-    // 用 geminiText（不強制 JSON mode）避免截斷，再自己抽取 JSON
-    const raw = await geminiText(prompt, 700);
+    // 用 geminiJson 強制 JSON 模式，提升成功率
+    let raw;
+    try { raw = await geminiJson(prompt, 800); } catch(e1) { raw = await geminiText(prompt, 800); }
     apiLog('  潮流回應長度: ' + raw.length + ' 字', 'info');
 
     // 多層解析：先試 extractJsonObject，失敗再試 JSON.parse 整段
@@ -3834,13 +3843,16 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
   const baseNote = r.overall_note || '';
   // 根據季節推薦配件關鍵字
   const seaCleanNote = (sea||'').replace(/[🌸☀️🍂❄️]\s*/,'');
-  const accMap = {
-    '春': [{n:'輕便托特包',q:'canvas tote bag 2026'},{n:'白色運動鞋',q:'white sneakers 2026'},{n:'細框墨鏡',q:'slim sunglasses 2026'}],
-    '夏': [{n:'草編帽',q:'straw hat 2026'},{n:'涼鞋',q:'sandals summer 2026'},{n:'大框墨鏡',q:'oversized sunglasses 2026'}],
-    '秋': [{n:'皮革托特包',q:'leather tote bag 2026'},{n:'踝靴',q:'ankle boots autumn 2026'},{n:'棒球帽',q:'baseball cap 2026'}],
-    '冬': [{n:'羊毛圍巾',q:'wool scarf 2026'},{n:'切爾西靴',q:'chelsea boots 2026'},{n:'迷你包',q:'mini bag winter 2026'}],
+  const accPool = {
+    '春': [{n:'輕便托特包',q:'canvas tote bag 2026'},{n:'白色運動鞋',q:'white sneakers 2026'},{n:'細框墨鏡',q:'slim sunglasses 2026'},{n:'漁夫帽',q:'bucket hat spring 2026'},{n:'帆布腰包',q:'canvas crossbody bag 2026'},{n:'透明果凍鞋',q:'jelly sandals 2026'}],
+    '夏': [{n:'草編帽',q:'straw hat 2026'},{n:'涼鞋',q:'sandals summer 2026'},{n:'大框墨鏡',q:'oversized sunglasses 2026'},{n:'竹編包',q:'bamboo bag summer 2026'},{n:'運動涼鞋',q:'sport sandals 2026'},{n:'棉質頭巾',q:'cotton headband 2026'}],
+    '秋': [{n:'皮革托特包',q:'leather tote bag 2026'},{n:'踝靴',q:'ankle boots autumn 2026'},{n:'棒球帽',q:'baseball cap 2026'},{n:'針織圍巾',q:'knit scarf autumn 2026'},{n:'麂皮樂福鞋',q:'suede loafers 2026'},{n:'皮革腰帶',q:'leather belt autumn 2026'}],
+    '冬': [{n:'羊毛圍巾',q:'wool scarf 2026'},{n:'切爾西靴',q:'chelsea boots 2026'},{n:'迷你包',q:'mini bag winter 2026'},{n:'皮革手套',q:'leather gloves winter 2026'},{n:'毛帽',q:'beanie winter 2026'},{n:'厚底靴',q:'chunky boots 2026'}],
   };
-  const accList = accMap[seaCleanNote] || accMap['春'];
+  // 每次隨機取 3 個，避免每次都一樣
+  var _pool = (accPool[seaCleanNote] || accPool['春']).slice();
+  for(var _i=_pool.length-1;_i>0;_i--){var _j=Math.floor(Math.random()*(_i+1));var _t=_pool[_i];_pool[_i]=_pool[_j];_pool[_j]=_t;}
+  const accList = _pool.slice(0,3);
   const accHtml = `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)">
     <div style="font-size:.58rem;font-weight:800;color:var(--gold);letter-spacing:.06em;margin-bottom:5px">🛍 本季配件推薦</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
@@ -4487,7 +4499,7 @@ ${wj}`;
 只輸出 JSON，不要說明：
 {"style":"風格定位描述","strength":"現有優勢描述","gap":"最大缺口描述","buy1":"補強單品1名稱|適合原因","buy2":"補強單品2名稱|適合原因","summary":"缺口摘要20字","gaps":[{"item":"具體單品","reason":"原因","color":"顏色","keyword":"English search keyword 2026"},{"item":"具體單品","reason":"原因","color":"顏色","keyword":"English search keyword 2026"},{"item":"具體單品","reason":"原因","color":"顏色","keyword":"English search keyword 2026"}],"tip":"升級方向建議20字"}`;
 
-    const unifiedRaw = await geminiJson(unifiedPrompt, 700);
+    const unifiedRaw = await geminiJson(unifiedPrompt, 800);
     let unified = {};
     try {
       const jsonStr = extractJsonObject(unifiedRaw);
@@ -4524,7 +4536,7 @@ ${wj}`;
 
 // SAVE
 function saveOutfit(){
-  if(!lastRes)return;
+  if(!lastRes){ showToast('⚠️ 請先生成本週搭配再收藏'); return; }
   // 直接從 localStorage 讀取最新的 saved，避免 switchWardrobe 後變數失效
   var currentSaved = JSON.parse(localStorage.getItem('fitto_s') || '[]');
   currentSaved.unshift({...lastRes, sid:Date.now()});
@@ -4707,7 +4719,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-6<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-7<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -4731,7 +4743,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-6',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-7',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -4977,7 +4989,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-6 新功能：髮型購買、VIP衣櫃、整合設定頁
+// VD4-7 新功能：髮型購買、VIP衣櫃、整合設定頁
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
