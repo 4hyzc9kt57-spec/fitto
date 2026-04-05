@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-3 · AI 智能穿搭</title>
+<title>Fitto VD4-6 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -491,8 +491,8 @@ header{
 
 
 .img-ref-badge {
-  position:absolute; bottom:28px; left:6px;
-  background:rgba(76,175,122,.9); color:#0C1810;
+  position:absolute; top:6px; left:6px;
+  background:rgba(61,170,106,.88); color:#0C1810;
   font-size:0.55rem; font-weight:800; padding:2px 7px;
   border-radius:4px; letter-spacing:0.03em;
 }
@@ -682,7 +682,7 @@ body{background:var(--bg);color:var(--ink);}
 .av-lbl{font-size:.5rem;font-weight:700;color:var(--ink2);}
 
 /* ── 髮型商店格 ── */
-.hair-shop-row{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;}
+.hair-shop-row{display:grid;grid-template-columns:repeat(5,1fr);gap:8px;}
 .hair-shop-cell{text-align:center;border-radius:10px;border:1.5px solid var(--border2);padding:6px 4px;cursor:pointer;transition:all .2s;}
 .hair-shop-cell.owned{border-color:var(--green);}
 .hair-shop-cell.active-hair{border-color:var(--gold);background:rgba(201,165,80,.1);}
@@ -702,7 +702,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-3</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-6</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -888,30 +888,9 @@ body{background:var(--bg);color:var(--ink);}
   <!-- 自訂搭配模式 -->
   <div class="card" style="margin-top:14px">
     <div style="font-size:.78rem;font-weight:800;color:var(--ink);margin-bottom:4px">🎯 自訂搭配生圖</div>
-    <div style="font-size:.62rem;color:var(--muted);margin-bottom:12px">自選上衣、下身、配件，直接生成一張穿搭示意圖</div>
+    <div style="font-size:.62rem;color:var(--muted);margin-bottom:6px">自選上衣、下身、配件，直接生成一張穿搭示意圖</div>
+    <div style="font-size:.6rem;color:var(--gold);background:rgba(201,165,80,.1);border:1px solid rgba(201,165,80,.25);border-radius:8px;padding:5px 10px;margin-bottom:12px">💇 髮型設定請點右上角髮型按鈕，或至「個人設定」更改</div>
 
-    <!-- 髮型選擇框 -->
-    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px;margin-bottom:12px">
-      <div style="font-size:.65rem;font-weight:800;color:var(--gold);letter-spacing:.05em;margin-bottom:8px">💇 髮型選擇</div>
-      <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px" id="hairstyle-btns">
-        <button onclick="selectHairstyle('short',this)" class="hair-btn" id="hbtn-short" style="padding:4px;border-radius:10px;border:1.5px solid var(--gold);background:rgba(201,144,74,.15);cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px">
-          <div style="width:54px;height:54px;border-radius:50%;overflow:hidden;border:1.5px solid rgba(201,144,74,.4)"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:cover"></div>
-          <span style="font-size:.48rem;color:var(--ink);font-weight:700;line-height:1.3;text-align:center">短髮俐落</span>
-        </button>
-        <button onclick="selectHairstyle('curly',this)" class="hair-btn" id="hbtn-curly" style="padding:4px;border-radius:10px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px">
-          <div style="width:54px;height:54px;border-radius:50%;overflow:hidden;border:1.5px solid rgba(201,144,74,.4)"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:cover"></div>
-          <span style="font-size:.48rem;color:var(--ink);font-weight:700;line-height:1.3;text-align:center">捲髮蓬鬆</span>
-        </button>
-        <button onclick="selectHairstyle('straight',this)" class="hair-btn" id="hbtn-straight" style="padding:4px;border-radius:10px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px">
-          <div style="width:54px;height:54px;border-radius:50%;overflow:hidden;border:1.5px solid rgba(201,144,74,.4)"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:cover"></div>
-          <span style="font-size:.48rem;color:var(--ink);font-weight:700;line-height:1.3;text-align:center">波浪側分</span>
-        </button>
-        <button onclick="selectHairstyle('midwavy',this)" class="hair-btn" id="hbtn-midwavy" style="padding:4px;border-radius:10px;border:1.5px solid var(--border2);background:transparent;cursor:pointer;display:flex;flex-direction:column;align-items:center;gap:3px">
-          <div style="width:54px;height:54px;border-radius:50%;overflow:hidden;border:1.5px solid rgba(201,144,74,.4)"><img src="data:image/jpeg;base64,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" style="width:100%;height:100%;object-fit:cover"></div>
-          <span style="font-size:.48rem;color:var(--ink);font-weight:700;line-height:1.3;text-align:center">中長捲髮</span>
-        </button>
-      </div>
-    </div>
 
     <div class="fg" style="margin-bottom:8px">
       <label>上衣</label>
@@ -1054,7 +1033,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-3 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-6 · 2026.04</div>
   </div>
 </div>
 
@@ -1106,6 +1085,11 @@ body{background:var(--bg);color:var(--ink);}
         <div style="font-size:.82rem;font-weight:800;color:var(--ink)">上傳個人照片</div>
         <div style="font-size:.62rem;color:var(--muted);margin-top:2px;line-height:1.5">作為生圖時的頭像基礎<br>上傳後自動套用至所有生圖</div>
       </div>
+    </div>
+    <!-- 費用警語 -->
+    <div style="background:rgba(200,90,50,.13);border:1.5px solid rgba(200,90,50,.45);border-radius:8px;padding:10px 12px;margin-bottom:10px;font-size:.65rem;color:#C05A3A;line-height:1.7">
+      ⚠️ <strong>收費警告：每次啟用或更換照片均需 🪙 50枚</strong><br>
+      <span style="color:#9A4A2A">• 首次啟用：50枚<br>• 已購買後再次更換照片：同樣再扣 50枚<br>• 請確認照片正確後再點「啟用」，無法退費</span>
     </div>
     <input type="file" id="custom-avatar-input" accept="image/*" style="display:none" onchange="handleCustomAvatarUpload(event)">
     <div style="display:flex;gap:8px">
@@ -1308,7 +1292,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-3 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-6 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1814,7 +1798,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-3 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-6 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -2006,17 +1990,20 @@ function renderShop() {
     hairGrid.innerHTML = HAIR_DEFS.map(function(h){
       var owned = ownedHairstyles.indexOf(h.id) >= 0;
       var active = selectedHairstyle === h.id;
-      var icon = {short:'💇',curly:'🌀',straight:'〰️',midwavy:'🌊'}[h.id]||'💇';
-      if(h.free) {
+      // 圖片區塊：avatar 用 emoji，其餘用 HAIR_IMGS
+      var imgBlock = h.id === 'avatar'
+        ? '<div style="width:60px;height:60px;border-radius:50%;overflow:hidden;margin:0 auto 8px;border:2px solid #D4A055;display:flex;align-items:center;justify-content:center;font-size:1.8rem;background:var(--surface2)">👤</div>'
+        : '<div style="width:60px;height:60px;border-radius:50%;overflow:hidden;margin:0 auto 8px;border:2px solid #D4A055">' + (HAIR_IMGS[h.id] ? '<img src="' + HAIR_IMGS[h.id] + '" style="width:100%;height:100%;object-fit:cover">' : '<span style="font-size:1.6rem">' + ({curly:'🌀',straight:'〰️',midwavy:'🌊'}[h.id]||'💇') + '</span>') + '</div>';
+      if(h.id === 'avatar' || h.free) {
         return '<div class="shop-item"><div class="si-badge">免費</div>' +
-          '<span class="si-icon">' + icon + '</span>' +
+          imgBlock +
           '<div class="si-name">' + h.name + '</div>' +
-          '<div class="si-desc">預設髮型</div>' +
-          '<div class="si-owned">' + (active ? '✓ 使用中' : '已解鎖') + '</div>' +
+          '<div class="si-desc">' + (h.id==='avatar'?'依頭像原始髮型':'預設髮型') + '</div>' +
+          '<div class="si-owned">' + (active ? '✓ 使用中' : (h.id==='avatar'?'<button class="si-price" onclick="applyHairstyle(\'avatar\')">切換使用</button>':'已解鎖')) + '</div>' +
         '</div>';
       }
       return '<div class="shop-item">' +
-        '<span class="si-icon">' + icon + '</span>' +
+        imgBlock +
         '<div class="si-name">' + h.name + '</div>' +
         '<div class="si-desc">解鎖後可切換</div>' +
         (owned
@@ -3764,6 +3751,48 @@ async function genOutfit(){
     renderRes(buildWardrobeWeekPlan(occ, sea, explainGeminiError(e && e.message)),0,0,occ,sea,false,'衣櫃排列');
   }finally{btn.classList.remove('loading');btn.disabled=false}
 }
+function findMissingItems(outfitText) {
+  // 從 outfit 文字中找出衣櫃沒有的關鍵單品，附上購買連結
+  var keywords = ['上衣','T恤','襯衫','毛衣','外套','夾克','褲子','牛仔褲','裙子','洋裝','鞋子','球鞋','皮鞋','靴子','包包','墨鏡','帽子','圍巾','腰帶'];
+  var missing = [];
+  keywords.forEach(function(kw) {
+    if(outfitText.indexOf(kw) === -1) return;
+    // 找是否有類似顏色+種類在衣櫃
+    var hasIt = wardrobe.some(function(item) {
+      return outfitText.indexOf(item.type) !== -1 && outfitText.indexOf(item.color) !== -1;
+    });
+    // 嘗試更精確：找 outfit 裡的 "顏色+種類" 組合
+    var matched = false;
+    wardrobe.forEach(function(item) {
+      if(outfitText.indexOf(item.type) !== -1) matched = true;
+    });
+    if(!matched) {
+      // 用 kw 本身搜尋
+      var q = encodeURIComponent(kw + ' 穿搭 購買 2026');
+      missing.push({name: kw, q: q});
+    }
+  });
+  return missing;
+}
+
+function buildOutfitBuyLinks(outfitText) {
+  // 掃描 outfit 文字，找出衣櫃沒有對應的種類，最多顯示 2 個
+  var allTypes = ['上衣','T恤','襯衫','毛衣','外套','夾克','褲子','牛仔褲','裙子','洋裝','鞋子','球鞋','皮鞋','靴子','包包','墨鏡','帽子','圍巾','腰帶'];
+  var links = [];
+  allTypes.forEach(function(kw) {
+    if(outfitText.indexOf(kw) === -1) return;
+    var hasInWardrobe = wardrobe.some(function(item) { return item.type === kw || (outfitText.indexOf(item.color) !== -1 && item.type === kw); });
+    if(!hasInWardrobe && links.length < 2) {
+      // 從 outfit 嘗試取得顏色前綴
+      var colorMatch = outfitText.match(/[\u767d\u7c73\u9ed1\u7070\u85cd\u8272\u6de1\u6df1\u7d05\u7d2b\u7da0\u946b\u68d5\u6c88\u7c89\u5361\u5176]/);
+      var searchQ = encodeURIComponent((colorMatch ? colorMatch[0] : '') + kw + ' 2026 購買');
+      var imgQ = encodeURIComponent((colorMatch ? colorMatch[0] : '') + kw + ' 穿搭');
+      links.push({name: kw, buyUrl: 'https://www.google.com/search?q=' + searchQ, imgUrl: 'https://www.google.com/search?q=' + imgQ + '&tbm=isch'});
+    }
+  });
+  return links;
+}
+
 function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
   document.getElementById('rtitle').textContent=r.title||'本週搭配';
   const seaClean = sea.replace(/[🌸☀️🍂❄️]\s*/,'');
@@ -3781,17 +3810,24 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
   // 把 outfit 資料存在 window 物件，避免特殊字符塞進 onclick 字串出錯
   window._fittoOutfits = (r.days||[]).map(d=>({outfit:d.outfit, occ:occ, sea:seaClean}));
 
-  document.getElementById('wscroll').innerHTML=(r.days||[]).map((d,idx)=>`
-    <div class="dc" id="dc-${idx}">
+  document.getElementById('wscroll').innerHTML=(r.days||[]).map((d,idx)=>{
+    const buyLinks = buildOutfitBuyLinks(d.outfit || '');
+    const buyHtml = buyLinks.length ? `<div style="margin-top:5px;padding-top:5px;border-top:1px solid rgba(255,255,255,.07)">
+      <div style="font-size:.48rem;color:var(--gold);font-weight:800;letter-spacing:.04em;margin-bottom:3px">🛍 衣櫃沒有？可選購</div>
+      ${buyLinks.map(lk=>`<div style="display:flex;gap:4px;margin-bottom:2px;align-items:center"><span style="font-size:.5rem;color:var(--ink2)">${lk.name}</span><a href="${lk.buyUrl}" target="_blank" style="font-size:.46rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.15);border-radius:4px;padding:1px 5px;white-space:nowrap">🔍購買</a><a href="${lk.imgUrl}" target="_blank" style="font-size:.46rem;color:var(--ink2);text-decoration:none;background:rgba(255,255,255,.07);border-radius:4px;padding:1px 5px;white-space:nowrap">看圖</a></div>`).join('')}
+    </div>` : '';
+    return `<div class="dc" id="dc-${idx}">
       <div class="dn">${d.day}</div>
       <div class="do" id="outfit-${idx}">${d.outfit}</div>
       <div class="dt">${d.tip}</div>
+      ${buyHtml}
       <div class="img-box" id="imgbox-${idx}">
         <button class="btn-gen-img" onclick="genImgSafe(${idx})">
           🎨 生成示意圖
         </button>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 
   // overall_note + 配件推薦卡
   const onoteEl = document.getElementById('onote');
@@ -3929,7 +3965,7 @@ async function genImg(idx, outfit, occ, sea) {
       : outfit;
     const sceneMap = {'休閒':'casual street setting, natural daylight','工作':'modern office lobby, soft window light','約會':'cozy cafe, warm afternoon light','正式':'clean studio, professional lighting','運動':'outdoor park, morning light'};
     const sceneDesc = sceneMap[occ] || 'clean minimal background, natural daylight';
-    const imgPrompt = `High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Outfit: ${itemDetailStr}. Style: ${outfit}. Season: ${seaEn}. Setting: ${sceneDesc}. IMPORTANT: full body shot from head to toe, shoes clearly visible, feet must appear in frame. Professional studio lighting, sharp focus on clothing and shoes, fashion editorial quality, 4K detail.`;
+    const imgPrompt = `High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Outfit: ${itemDetailStr}. Style: ${outfit}. Season: ${seaEn}. Setting: ${sceneDesc}. IMPORTANT: full body shot from head to toe, shoes clearly visible, feet must appear in frame. No vignette, no circular frame, no black border, rectangular photo format. Professional studio lighting, sharp focus on clothing and shoes, fashion editorial quality, 4K detail.`;
 
     apiLog('→ 生圖: ' + imgPrompt.substring(0, 60) + '…', 'prompt');
     apiLog('  頭像:' + userAvatar + ' 服裝:' + outfit.substring(0,20), 'info');
@@ -3978,14 +4014,12 @@ async function genImg(idx, outfit, occ, sea) {
     }
 
     const debugId = 'dbg-'+idx;
-    const refBadgeHtml = `<div style="font-size:.58rem;color:var(--gold);font-weight:700;margin-bottom:4px">✓ 固定人物 reference</div>`;
 
     // 把 imgSrc / outfit 存進 cache，避免特殊字符塞進 onclick 字串出錯
     if(!window._fittoImgCache) window._fittoImgCache = {};
     window._fittoImgCache[idx] = { imgSrc: imgSrc, outfit: outfit };
 
     box.innerHTML = `<div class="outfit-img-wrap">
-      ${refBadgeHtml}
       <img src="${imgSrc}" class="outfit-img" alt="穿搭示意圖" onclick="openImgFull(this.src)" style="cursor:zoom-in">
       <div class="img-cost-note">🪙 -2</div>
       <div style="font-size:.52rem;color:var(--muted);opacity:0.7;text-align:center;padding:4px 8px;line-height:1.5">⚠️ AI 生成圖僅供參考，實際服裝色彩、圖案與細節可能與原品不符</div>
@@ -4100,9 +4134,9 @@ function openImgFull(url) {
 // ═══ 自訂搭配生圖 ═══
 function populateCustomSelects() {
   const tops = wardrobe.filter(i=>['上衣','T恤','襯衫','毛衣'].includes(i.type));
-  const btms = wardrobe.filter(i=>['褲子','牛仔褲','裙子','洋裝'].includes(i.type));
+  const btms = wardrobe.filter(i=>['褲子','牛仔褲','裙子','洋裝','短褲','西裝褲','運動褲','工裝褲','哈倫褲'].includes(i.type) || /褲|裙|洋裝/.test(i.type));
   const outs = wardrobe.filter(i=>['外套','夾克'].includes(i.type));
-  const accs = wardrobe.filter(i=>['鞋子','球鞋','皮鞋','靴子','包包','墨鏡','帽子','腰帶','圍巾','手環','項鍊','配件'].includes(i.type));
+  const accs = wardrobe.filter(i=>['鞋子','球鞋','皮鞋','靴子','包包','墨鏡','帽子','腰帶','圍巾','手環','項鍊','配件'].includes(i.type) || /鞋|靴|包|眼鏡|墨鏡|帽|圍巾|手環|手鍊|項鍊|腰帶/.test(i.type));
   function buildOpts(items, emptyLabel) {
     return `<option value="">${emptyLabel}</option>` +
       items.map(i=>`<option value="${i.color}${i.type}${i.note?'（'+i.note+'）':''}">${i.color}${i.type}${i.note?' · '+i.note:''}</option>`).join('');
@@ -4146,8 +4180,9 @@ function toggleCustomAcc(val, btn) {
 }
 
 // ═══ 髮型系統 ═══
-var selectedHairstyle = 'short';
+var selectedHairstyle = 'avatar';
 const HAIRSTYLE_PROMPTS = {
+  'avatar':   '',  // 空字串 = 維持頭像原始髮型，不額外指定
   'short':    'short sides undercut, neat short textured hair on top',
   'curly':    'natural curly voluminous hair, textured perm',
   'straight': 'medium wavy side-swept hair, textured natural waves',
@@ -4162,6 +4197,7 @@ function selectHairstyle(key, el) {
   });
   el.style.border = '1.5px solid var(--gold)';
   el.style.background = 'rgba(201,144,74,.15)';
+  localStorage.setItem('fitto_selected_hair', key);
 }
 
 async function genCustomOutfitImg() {
@@ -4207,7 +4243,7 @@ async function genCustomOutfitImg() {
     const pose = getRandomPose(false);
     // 明確把配件穿戴位置寫進 prompt
     const accessoryClause = accDesc ? ` Accessories being worn: ${accDesc}.` : '';
-    const imgPrompt = `High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Wearing: ${mainOutfit || outfit}.${accessoryClause} All accessories must be clearly visible and properly worn. Clean minimal background, professional studio lighting, sharp focus on full outfit including accessories, full body front view, Vogue-quality photography, 4K detail.`;
+    const imgPrompt = `High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Wearing: ${mainOutfit || outfit}.${accessoryClause} All accessories must be clearly visible and properly worn. Clean minimal white or light grey studio background, no vignette, no circular frame, no black border, rectangular photo format. Professional studio lighting, sharp focus on full outfit including accessories, full body front view, Vogue-quality photography, 4K detail.`;
     const avatarRef = getSelectedAvatarRefData();
     if(!avatarRef || !avatarRef.b64) throw new Error('缺少頭像 reference，請在商店選擇頭像');
     const requestParts = [
@@ -4671,7 +4707,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD3<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-6<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -4695,7 +4731,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD3',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-6',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -4941,19 +4977,29 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-3 新功能：髮型購買、VIP衣櫃、整合設定頁
+// VD4-6 新功能：髮型購買、VIP衣櫃、整合設定頁
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
 const HAIR_DEFS = [
+  {id:'avatar',   name:'維持原狀', price:0,  free:true},
   {id:'short',    name:'短髮俐落', price:0,  free:true},
   {id:'curly',    name:'捲髮蓬鬆', price:10, free:false},
   {id:'straight', name:'波浪側分', price:10, free:false},
   {id:'midwavy',  name:'中長波浪', price:10, free:false},
 ];
+// 髮型預覽圖（base64，供設定頁與商店格使用）
+const HAIR_IMGS = {
+  short:    'data:image/jpeg;base64,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',
+  curly:    'data:image/jpeg;base64,/9j/4AAQSkZJRgABAQAAAQABAAD/2wBDAAYEBAUEBAYFBQUGBgYHCQ4JCQgICRINDQoOFRIWFhUSFBQXGiEcFxgfGRQUHScdHyIjJSUlFhwpLCgkKyEkJST/2wBDAQYGBgkICREJCREkGBQYJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCQkJCT/wAARCAB4AHgDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1RVVldYWVpjZGVmZ2hpanN0dXZ3eHl6goOEhYaHiImKkpOUlZaXmJmaoqOkpaanqKmqsrO0tba3uLm6wsPExcbHyMnK0tPU1dbX2Nna4uPk5ebn6Onq8vP09fb3+Pn6/9oADAMBAAIRAxEAPwD6jIoxTs8UYBqQG0Uu2kIoAKa7qi7mOBUGpalaaRZTX19OlvbwrueR+gH+e1fNXxY+Otxql9LZaHctHpMPBcbkMz46nHJHbGQOuaUpWGlc+g9c8ZaH4etWuNRv47dBnG8EbiBnA49q4aL4+6U+o2sF1pd1ptleHFvfXbqVc4yMquSueOvrXyBqfjPWb+STOp3TRmMxgNIxAQnlcZPFUjeTyzR+ddS4JG3eAFz/AEqbsND7nj+Mvg9G8m81e3trhGKyRnc2zHUkgEAfXFdlZ3lvqFulzazxTwyDKyRsGVh7EV+e9n4ivbEhob6S2AcgxI5VSPUYP869M+Fnxx1DwTceVfyy3ulzlS8LD5ouPvqfbv6jFHM1uO3Y+w6KztG16w12ytruxuEmjuY/NjK9145/8eH51o1a1JAUZoooAKKXFFADselJjinDpRikA3ntQ5CqWPAHU0uMUyZwkTs3RVJP0oA8I/aN+IN/o9rbaTYypGJJ8PtGZSUAfdzwFBxjuSPpXy7qMkl0BGHYxMCSMZ+v6nr7V2HxB19vEXi2/wBQknlRJZnWKMHcEjUnbgk8D3/KuQVVnSXBKjH7wZ5Zc/19PxrNPqaW6GSHjUKpVmAyMg4B/wAmtCKd2DNIqiIeigjA6jnnIrf8M+EhrEzgIcYYxoRjce+fTgVU8TWEMV1Lp+mRPJJGrLM6jADZxk9u1L2ivYfsna5hyW8TyR78vGincFODnt/n3q9aTgqtuC53HEbn+Ansfash182M3G50eIbCAep6D+VIlz9mER8xj5nLHPTj/wDVV7oz2Z7x+z58Sl0HxDHpV9M7JchLcM3IAzwuO2CSQR179q+t0JdQxBXPY9a/OHQLq5s51niYCeNsRNnPzds+or9B/BWqNrPhDRdRfPmXVlDKwP8AeKDd+uaUdNBy7mzScmnY5oxitCQxRS9aKAFFLSGjNAC1Q1tbc6Vdm6maCEQvvlVtpRcEE5q/VDXrOPUNEv7OV9kc9vJE7HsCpBPQ9qQHwd48tNviLVILeVJGguXi3KQAygkDHbpVHQ0j3LLKjBowXGTn5uApP0z0qx4w0K4s7u94fyGnY7pMlnPZj74/nXoXgjwT9k8L2F/Npq318UMscbEAbWOQGz04xzXJUmoR1OujTc5aG94L8OWVr4VuBDd2sl5dQEKnmDfGeTn1zmvOtX0Z/tKtAT9laKOKRiuGhdRhkf057+ufWum1rS7u71RI5NC0i1QhW860Z1kLenPp+Ga6DXtDm0bwVLfq7/aUO5i3LHI6GuVz5X6ncocy16HjGueGodPuFlSVHhl+9tbJRvXHpXN38ZmmJaNMDP3RjJ9a9Hk8Lm3iF4NOtdQaTBb7XMQBkZLKF7DpzWbfaSl/ZvEtksEnIUpyp+hrqhVscVSizldE8s3Imkwm10GeigZ5zX6A+BtU0vUdAtE0uSOWK2t4YmaMDYD5anaCOOBjgdO9fAFhZzXERsYIm8wNgrjOSPWvuH4JWklt4ItlkSaIqzRiKXrFt4K46DDBunXr3reO5yvY9AoApaBWpItFFFIBAaKKDTAWkZQykHkHgilFFID52+OfgXTo9VgjsLS9WbVIpVjGGNvDMFzuBPAzgDHb0rV8NyRJo2nMF4a2QcjuBg/qK9f8QeHNP8R2Ztr+BZAMlG6NG3qD2PSvJII5U+2WFwjLcabeSWzkjAccMrD1BDdfXNcGMp6cx34Ook+Vl9rS2kk8+REIAyFwOfrWT45TzfBV6MfePX8OlaSyW0MZa6nSNVycFsZrz3xlqWvLo11b21xJeLIHnVmg24jBA4x1xnvXFBOVmehJqO5Q8MMt1pghlAJiJQhu2KZcWsFzqttYxqoDOAWHTFYPhvVSI52e4UuwBKdCDjFbegjzr6W5k5AR8c9yCB69zWqg1IxnUXs9Cl8NvAzeIfFyXDYFrd3m54VfDmLLOQAMnnaAW6Lkc9q+wLGzgsLWO3to/LiQcLnPucnuc964b4R+DL7w1olvLqN68snltHBbrH5UcMZbJJUdXbapJP0AFeg16tONlqeROV3oFAooFWSLRRRSASg0UUwAUtFFIArjPiLaxQWtvqRB3LIIXx3Vs4P4EfrXZZriPiDrenXNhJpkNzHLdRTp5sac+XwThj0BwRx15rHEW9m7m1BN1FY8t1iwOr3cci3ggEAyAYw/PY4PFcl4muHSFrV/E90sh+9H5QJY+gIxge1dDdasfDt6Xv0eXT5BhZNufKOfusew561R1fxzoEts629rbuR0k4Yt7g15lPmWyuj1/aRje+jPO0sCT581wXIPynYFJ9z61658EtPhvvF9osnP2W2e7x2LZCrn6Zz+FeRap4jtr2Qw2sW1g2W/2QK9C+Bniq18O+IbrUNWlkEL2zRs6oWK5ZSOByRx0FdUNJLmOGpZp8p9TUVV0vVbHW7CDUdNuoru0uFDxzRNuVgf89KtV6BwBQKKKAFopM0UAFAorkvGPxU8J+B43GqanG90vSztyJJifQqPu/8AAsUAddXDeO/jL4S8AN9n1C9a5vyCRZ2gEkg/3ucJ/wACIr59+IP7RXiPxSZLPSnbRdObjZA/76Qf7Ug6fRcfjXkNxcPJJuZiSSSSe59adhXPWPiD+0Z4m8Wh7HTsaJpznDJbuTNIvo0nB/BQPxrqPhzdJfeBtNdSS6eakxzkmTeck+5yDXzu7Fj7ivQfhR47t/D9zNpOpyCKyu3DrMx4gkxjJ/2SMZPbANcuLpOdPTdHVhKihU16nsF9ai4t3jYA59RXlfivwlYQOZYbTy5QcjyxhR9RXrtyny7kIaN13KynIYeoPQ1xetvNOTEjrzwNwzivLpzcWepUgprU8visvJBVECjOTV+yvDa5wTgjBrY1PRXtI441VmeZ+WI7muU8ZXQ0aU2ELA3ZTDKD/qwe7eh9q6YXm7I5JpQV2U/B3xS8SeBNfn1HQr9olmkbzIHG+GVS2cMh4P14Iz1r6W8C/tV+H9b8i18TWj6PduQpuI8yWxPqf4kH1yPevjxIipwM8d6txOUx6jmvTSseZe5+k1le2uo20d1ZXENzbyDKSxOHRh7EcGpjXwT4J+I/iLwHei40XUZIUJzJbv8ANBKP9pOn4jB96+nfh7+0X4Z8WpHaaxImh6mcArO/7iQ/7Mh6fRsfU07DPWaKRHWRFdGDKwyCDkEetFAHhvx++Mk/ht28LaDcmG+ZA15dIfmgUjhFPZiOSewIxyePl+4vHld5JGJLHJJOST71Y8S6xda5rN3qV5IZLi7leaRj3YnP+fpWOz7jjNWkTckaYtkgUwZfk0YIHT604DigVxxXj0qNkDDnII7g81J0FNJzQFzZ0Dx74k8LxeRp2pN9l/595lEkX4K3T8CK17f4vatC5kk0nSZ3znLCQD8g1cS3WkwCeg/KspUISd2jWNepFWTOl134l+IddOHntrFCNu2zi2tj/eJLfka5UjJOM8nJJOST6k1Jj8KQiqhTjFWirEzqSk7ydyLGBxTlTNOxxThxVWIuSQyYG05yvFTC4CdDVOTkjHUc/WonkJ6HuB+dAz3f4CfGy48L6vb+HNaumk0S7cRxtI2fsch6EE9EJ4I6DOfXJXhOZYJMOrIy4bDDBwRkH8RzRSaHcu3cuXFVkb5sHoBmiiqILKne6r2ABP1NOz/OiimA0tTS3FFFAETHk0gNFFIB+eKaTz60UUAJntQTRRQMYrfvvwqC2naKVJBtLI5l+ZQwyB3B4PPaiikBp+IvFF14maK7uooImVUiURIFzheST1PPQdugooooGf/Z',
+  straight: 'data:image/jpeg;base64,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',
+  midwavy:  'data:image/jpeg;base64,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',
+};
 // 從 HAIRSTYLE_PROMPTS 的 key 對應
-var ownedHairstyles = JSON.parse(localStorage.getItem('fitto_owned_hairs') || '["short"]');
+var ownedHairstyles = JSON.parse(localStorage.getItem('fitto_owned_hairs') || '["short","avatar"]');
 function saveOwnedHairstyles(){ localStorage.setItem('fitto_owned_hairs', JSON.stringify(ownedHairstyles)); }
+// 確保 avatar 永遠在 owned 清單
+if(ownedHairstyles.indexOf('avatar') < 0) ownedHairstyles.push('avatar');
 
 function buyHairstyle(id) {
   if(ownedHairstyles.indexOf(id) >= 0){ showToast('此髮型已解鎖！'); return; }
@@ -4967,7 +5013,7 @@ function buyHairstyle(id) {
 }
 
 function applyHairstyle(id) {
-  if(ownedHairstyles.indexOf(id) < 0){ buyHairstyle(id); return; }
+  if(id !== 'avatar' && ownedHairstyles.indexOf(id) < 0){ buyHairstyle(id); return; }
   selectedHairstyle = id;
   localStorage.setItem('fitto_selected_hair', id);
   // 同步 styling 頁面的髮型按鈕 UI
@@ -4987,7 +5033,7 @@ function updateHairQuickBtn() {
   var btn = document.getElementById('hair-quick-btn');
   if(!btn) return;
   var def = HAIR_DEFS.find(function(h){ return h.id === selectedHairstyle; });
-  var icons = {short:'💇', curly:'🌀', straight:'〰️', midwavy:'🌊'};
+  var icons = {avatar:'👤', short:'💇', curly:'🌀', straight:'〰️', midwavy:'🌊'};
   btn.textContent = icons[selectedHairstyle] || '💇';
   btn.title = '當前髮型：' + (def ? def.name : selectedHairstyle);
 }
@@ -4998,13 +5044,18 @@ function renderHairQuickPanel() {
   list.innerHTML = HAIR_DEFS.map(function(h){
     var owned = ownedHairstyles.indexOf(h.id) >= 0;
     var active = selectedHairstyle === h.id;
+    var icons = {avatar:'👤', short:'💇', curly:'🌀', straight:'〰️', midwavy:'🌊'};
+    var subText = h.id === 'avatar'
+      ? '不額外指定，依頭像原始髮型'
+      : (owned ? (active ? '使用中' : '已解鎖') : '🪙 10枚解鎖');
+    var bgColor = h.id === 'avatar' ? 'var(--surface2)' : 'var(--surface3)';
     return '<div class="hair-picker-item' + (active?' active':'') + '" onclick="applyHairstyle(\'' + h.id + '\');closeHairPanel()">' +
-      '<div style="width:32px;height:32px;border-radius:50%;background:var(--surface3);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">' +
-        ({short:'💇',curly:'🌀',straight:'〰️',midwavy:'🌊'}[h.id]||'💇') +
+      '<div style="width:32px;height:32px;border-radius:50%;background:' + bgColor + ';border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:1rem;flex-shrink:0">' +
+        (icons[h.id]||'💇') +
       '</div>' +
       '<div class="hair-picker-info">' +
         '<div class="hair-picker-name">' + h.name + (active?' ✓':'') + '</div>' +
-        '<div class="hair-picker-status">' + (owned ? (active?'使用中':'已解鎖') : '🪙 10枚解鎖') + '</div>' +
+        '<div class="hair-picker-status">' + subText + '</div>' +
       '</div>' +
     '</div>';
   }).join('');
@@ -5033,25 +5084,19 @@ document.addEventListener('click', function(e){
 function renderHairShopGrid() {
   var grid = document.getElementById('hair-shop-grid');
   if(!grid) return;
-  // 取得 hair btn 預覽圖片（從 styling 頁的 hair-btn 抽取）
-  var imgMap = {};
-  document.querySelectorAll('.hair-btn').forEach(function(b){
-    var key = b.id ? b.id.replace('hbtn-','') : '';
-    if(key){ var img = b.querySelector('img'); if(img) imgMap[key] = img.src; }
-  });
   grid.innerHTML = HAIR_DEFS.map(function(h){
     var owned = ownedHairstyles.indexOf(h.id) >= 0;
     var active = selectedHairstyle === h.id;
-    var cls = 'hair-shop-cell' + (active?' active-hair':'') + (owned?' owned':'') + (!owned?' locked':'');
-    var icon = {short:'💇',curly:'🌀',straight:'〰️',midwavy:'🌊'}[h.id]||'💇';
-    var action = owned ? 'applyHairstyle(\'' + h.id + '\')' : 'buyHairstyle(\'' + h.id + '\')';
+    var cls = 'hair-shop-cell' + (active?' active-hair':'') + (owned?' owned':'') + (!owned&&h.id!=='avatar'?' locked':'');
+    var action = (h.id === 'avatar' || owned) ? 'applyHairstyle(\'' + h.id + '\')' : 'buyHairstyle(\'' + h.id + '\')';
+    var imgHtml = h.id === 'avatar'
+      ? '<div class="hair-circle" style="display:flex;align-items:center;justify-content:center;font-size:1.6rem;background:var(--surface2)">👤</div>'
+      : '<div class="hair-circle">' + (HAIR_IMGS[h.id] ? '<img src="' + HAIR_IMGS[h.id] + '">' : '<span style="font-size:1.4rem">' + ({curly:'🌀',straight:'〰️',midwavy:'🌊'}[h.id]||'💇') + '</span>') + '</div>';
     return '<div class="' + cls + '" onclick="' + action + '">' +
-      '<div class="hair-circle" style="display:flex;align-items:center;justify-content:center;font-size:1.5rem">' +
-        (imgMap[h.id] ? '<img src="' + imgMap[h.id] + '">' : icon) +
-      '</div>' +
+      imgHtml +
       '<div class="hair-cell-name">' + h.name + '</div>' +
       '<div class="hair-cell-price">' +
-        (active ? '✓ 使用中' : owned ? '✓ 已解鎖' : '🪙 ' + h.price + '枚') +
+        (active ? '✓ 使用中' : (h.id === 'avatar' || owned) ? '✓ 已解鎖' : '🪙 ' + h.price + '枚') +
       '</div>' +
     '</div>';
   }).join('');
@@ -5246,8 +5291,8 @@ function openNameModal() {
 }
 
 // INIT 時讀取已儲存的髮型
-var _savedHair = localStorage.getItem('fitto_selected_hair');
-if(_savedHair && HAIRSTYLE_PROMPTS && HAIRSTYLE_PROMPTS[_savedHair]) {
+var _savedHair = localStorage.getItem('fitto_selected_hair') || 'avatar';
+if(_savedHair && HAIRSTYLE_PROMPTS && HAIRSTYLE_PROMPTS[_savedHair] !== undefined) {
   selectedHairstyle = _savedHair;
 }
 
@@ -5275,10 +5320,11 @@ document.addEventListener('DOMContentLoaded', function() {
     renderAccChips();
     renderVipWrdSelector();
     updateHairQuickBtn();
-    // 恢復髮型按鈕選中狀態
-    var hbtn = document.getElementById('hbtn-' + selectedHairstyle);
-    if(hbtn){ hbtn.style.border = '1.5px solid var(--gold)'; hbtn.style.background = 'rgba(201,144,74,.15)'; }
     setTimeout(renderMissions, 300);
+    // 恢復髮型按鈕選中狀態（預設 avatar）
+    var _hInit = selectedHairstyle || 'avatar';
+    var hbtn = document.getElementById('hbtn-' + _hInit);
+    if(hbtn){ hbtn.style.border = '1.5px solid var(--gold)'; hbtn.style.background = 'rgba(201,144,74,.15)'; }
   } catch(e) { console.error('Init error:', e.message); }
 });
 </script>
