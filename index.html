@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-16 · AI 智能穿搭</title>
+<title>Fitto VD4-17 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -705,7 +705,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-16</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-17</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -931,9 +931,14 @@ body{background:var(--bg);color:var(--ink);}
   <!-- 衣櫃分析 -->
   <div class="card" style="margin-top:14px">
     <div style="font-size:.78rem;font-weight:800;color:var(--ink);margin-bottom:4px">🧠 AI 衣櫃洞察</div>
-    <div style="font-size:.62rem;color:var(--muted);margin-bottom:12px">整合風格分析、缺口診斷與品牌捷徑，集中放在搭配頁查看</div>
+    <div style="font-size:.6rem;color:var(--muted);margin-bottom:6px">三層分析：快速掃描（免費）→ 類別深入（🪙-1）→ 搭配潛力（🪙-2）</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+      <span style="font-size:.56rem;background:rgba(76,175,125,.1);border:1px solid rgba(76,175,125,.25);border-radius:6px;padding:2px 7px;color:#4CAF7D;font-weight:700">第一層免費</span>
+      <span style="font-size:.56rem;background:rgba(201,165,80,.12);border:1px solid rgba(201,165,80,.3);border-radius:6px;padding:2px 7px;color:var(--gold);font-weight:700">第二層 1 幣</span>
+      <span style="font-size:.56rem;background:rgba(201,165,80,.12);border:1px solid rgba(201,165,80,.3);border-radius:6px;padding:2px 7px;color:var(--gold);font-weight:700">第三層 2 幣</span>
+    </div>
     <div id="analysis-result" style="display:none"></div>
-    <button class="btn-ghost" onclick="analyzeClosetInsights()" id="analysis-btn">🔍 分析 AI 衣櫃洞察</button>
+    <button class="btn-ghost" onclick="analyzeClosetInsights()" id="analysis-btn">🔍 開始 AI 衣櫃洞察</button>
   </div>
 </div>
 
@@ -1040,7 +1045,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-16 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-17 · 2026.04</div>
   </div>
 </div>
 
@@ -1302,7 +1307,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-16 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-17 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1816,7 +1821,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-16 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-17 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -4831,152 +4836,316 @@ async function analyzeClosetInsights() {
   if(wardrobe.length < 3) { showToast('⚠️ 請先加入至少 3 件衣物'); return; }
   const btn = document.getElementById('analysis-btn');
   const res = document.getElementById('analysis-result');
-  btn.textContent = '⏳ 分析中…'; btn.disabled = true;
-  res.innerHTML = '<div style="font-size:.72rem;color:var(--muted);padding:10px 0">AI 正在整合衣櫃缺口與風格分析…</div>';
+  btn.textContent = '⏳ 掃描中…'; btn.disabled = true;
   res.style.display = 'block';
-
+  res.innerHTML = '<div style="font-size:.72rem;color:var(--muted);padding:10px 0">🔍 第一層快速掃描中…</div>';
   try {
     const key = localStorage.getItem('fitto_gemini_key') || '';
     if(!key) throw new Error('請先設定 Gemini Key');
-    const wj = buildWardrobePromptText();
-    const stats = buildWardrobeStatsSummary();
-    // 整合 prompt：讓風格分析和缺口推薦從同一個 AI 回應，確保一致性
-    const stylePrompt = `你是高端但務實的個人造型師，請根據這份真實衣櫃清單下具體結論，不要空話，不要泛泛而談。
-請只輸出 5 行，不要前言：
-第1行：風格定位：要點出真正的穿搭傾向
-第2行：現有優勢：指出最能發揮的單品結構或色系
-第3行：最大缺口：指出最影響完整度的缺口（例如「缺乏正式套裝」要對應推薦正式服裝，「缺少正式鞋」要推薦皮鞋/正式鞋）
-第4行：優先補齊1：單品名稱|為何適合這個衣櫃（必須和第3行缺口直接對應）
-第5行：優先補齊2：單品名稱|為何適合這個衣櫃（必須和第3行缺口直接對應）
-
-衣櫃統計：
-件數=${stats.total}
-常見種類=${stats.topTypes.join('、') || '未明顯集中'}
-常見顏色=${stats.topColors.join('、') || '未明顯集中'}
-常見風格=${stats.topStyles.join('、') || '未明顯集中'}
-明顯缺口=${stats.missing.join('、') || '無明顯空缺'}
-
-衣櫃清單：
-${wj}`;
-
-    // 缺口補強 prompt 明確要求和最大缺口一致
-    const suggestPrompt = `你是高端穿搭顧問。請先確認這份衣櫃清單最缺什麼類型的服裝，然後推薦直接對應該缺口的具體單品。清單：${wj}
-
-重要規則：若衣櫃缺乏正式服裝，則必須推薦正裝類單品（如西裝、正式襯衫、皮鞋、正式褲）；若缺運動服，推薦運動類單品。推薦品項必須和缺口完全一致，不得推薦衣櫃已有的類型。
-
-輸出格式（繁體中文）：
-{"summary":"最大缺口20字內直接說明","gaps":[{"item":"單品（必須和缺口一致）","reason":"原因","color":"顏色","keyword":"關鍵字 2026"},{"item":"單品（必須和缺口一致）","reason":"原因","color":"顏色","keyword":"關鍵字 2026"},{"item":"單品（必須和缺口一致）","reason":"原因","color":"顏色","keyword":"關鍵字 2026"}],"tip":"升級方向20字內"}`;
-
-    // 真正有效的多元化：每次隨機選一個分析維度，讓 AI 強制從不同方向切入
-    const _angles = [
-      '這次請聚焦「色彩搭配」：分析現有色系組合的強弱，從色彩協調角度指出缺口，推薦能提升色彩層次的單品',
-      '這次請聚焦「場合適配」：分析衣櫃在日常/工作/約會場合的覆蓋率，找出最缺哪個場合的服裝，推薦對應單品',
-      '這次請聚焦「材質與版型」：分析現有材質組合（棉/牛仔/針織/皮革等）的多樣性，從材質搭配角度找缺口，推薦缺少的材質類型',
-      '這次請聚焦「配件完整度」：分析現有鞋子、包包、飾品的配置，找出配件缺口，推薦能大幅提升整體造型的配件',
-      '這次請聚焦「層次與輪廓」：分析上下外三層的組合豐富度，找出缺少的輪廓類型（寬版/修身/oversized），推薦能增加層次的單品',
-    ];
-    const _angle = _angles[Math.floor(Math.random() * _angles.length)];
-
-    const unifiedPrompt = `你是高端但務實的個人造型師。分析以下衣櫃，${_angle}。
-
-衣櫃統計：件數=${stats.total}，常見種類=${stats.topTypes.join('、')||'無'}，常見顏色=${stats.topColors.join('、')||'無'}，常見風格=${stats.topStyles.join('、')||'無'}，明顯缺口=${stats.missing.join('、')||'無明顯缺口'}
-
-衣櫃清單：${wj}
-
-請逐行輸出，每行「欄位: 內容」，不要說明、不要標號、不要 JSON：
-style: 從本次角度看的具體風格定位（20字內）
-strength: 現有衣櫃最大優勢（20字內）
-gap: 最需要補的具體缺口（20字內）
-buy1: 補強單品名稱|選購原因（品名|原因，各15字內）
-buy2: 另一件補強單品|選購原因
-gap1item: 具體單品名（如「霧藍亞麻寬褲」）
-gap1reason: 補強原因（15字內）
-gap1color: 推薦顏色
-gap1kw: English search keyword
-gap2item: 具體單品名
-gap2reason: 補強原因（15字內）
-gap2color: 推薦顏色
-gap2kw: English search keyword
-gap3item: 具體單品名
-gap3reason: 補強原因（15字內）
-gap3color: 推薦顏色
-gap3kw: English search keyword
-tip: 整體升級方向（20字內）`;
-
-    // 用 geminiText 保留創意多元性，800 token 足夠 key-value 格式
-    const unifiedRaw = await geminiText(unifiedPrompt, 900);
-    apiLog('  洞察原文: ' + unifiedRaw.substring(0,80).replace(/\n/g,' '), 'info');
-
-    // 解析 key-value 格式
-    function parseInsightKV(text) {
-      const out = {};
-      text.replace(/```/g,'').split('\n').forEach(function(line) {
-        const m = line.match(/^([a-zA-Z0-9_]+):\s*(.+)$/);
-        if(m) out[m[1].trim()] = m[2].trim();
-      });
-      return out;
-    }
-    const kv = parseInsightKV(unifiedRaw);
-
-    // 若主要欄位為空代表解析完全失敗
-    if(!kv.style && !kv.gap && !kv.buy1) {
-      apiLog('✗ 洞察解析失敗，原文: ' + unifiedRaw.substring(0,100), 'err');
-      throw new Error('AI 回應無法解析，請再試一次');
-    }
-
-    const angleLabel = _angle.match(/「([^」]+)」/)?.[1] || '綜合';
-    const summary = {
-      style:    kv.style    || '（無法取得）',
-      strength: kv.strength || '（無法取得）',
-      gap:      kv.gap      || '（無法取得）',
-      buy1:     kv.buy1     || '',
-      buy2:     kv.buy2     || ''
-    };
-
-    // 從 gap1~gap3 組成 gaps 陣列
-    const gaps = [];
-    for(var _gi = 1; _gi <= 3; _gi++) {
-      var _item = kv['gap'+_gi+'item'];
-      if(_item) gaps.push({
-        item:    _item,
-        reason:  kv['gap'+_gi+'reason'] || '',
-        color:   kv['gap'+_gi+'color']  || '',
-        keyword: kv['gap'+_gi+'kw']     || _item
-      });
-    }
-    // 若 gaps 空，用 buy1/buy2 補
-    if(!gaps.length && kv.buy1) {
-      var b1 = kv.buy1.split('|'); gaps.push({item:b1[0],reason:b1[1]||'',color:'',keyword:b1[0]});
-    }
-    if(gaps.length < 2 && kv.buy2) {
-      var b2 = kv.buy2.split('|'); gaps.push({item:b2[0],reason:b2[1]||'',color:'',keyword:b2[0]});
-    }
-
-    const suggestData = {
-      summary: kv.gap || '',
-      gaps: gaps,
-      tip: kv.tip || ''
-    };
-    res.innerHTML = `
-      <div style="font-size:.58rem;font-weight:800;color:var(--gold);letter-spacing:.08em;margin-bottom:6px;padding:4px 8px;background:rgba(201,165,80,.1);border-radius:6px">🔍 本次分析角度：${angleLabel}</div>
-      <div style="font-size:.62rem;font-weight:800;color:var(--gold);letter-spacing:.1em;margin-bottom:8px">AI 衣櫃洞察</div>
-      <div style="display:grid;gap:14px">
-        <div>${buildStyleResultHtml(summary)}</div>
-        <div style="padding-top:2px;border-top:1px solid var(--border)">
-          <div style="font-size:.62rem;font-weight:800;color:var(--gold);letter-spacing:.1em;margin:2px 0 10px">缺口補強與導購</div>
-          ${buildSuggestResultHtml(suggestData)}
-        </div>
-      </div>`;
+    // 第一層：快速掃描
+    const l1 = await aiInsightLayer1(key);
+    window._insightL1 = l1;
+    renderInsightLayer1(l1, res);
   } catch(e) {
     var emsg = e.message || '未知錯誤';
     var isHighDemand = /high demand|overloaded|503|busy|unavailable|try again|temporarily/i.test(emsg);
-    var displayMsg = isHighDemand
-      ? 'Gemini 服務目前繁忙（已自動重試3次），請稍後幾分鐘再試'
-      : emsg.substring(0, 120);
-    res.innerHTML = `<div style="color:var(--red);font-size:.7rem;line-height:1.6;padding:10px 0">⚠️ 分析失敗：${displayMsg}<br><button onclick="analyzeClosetInsights()" style="margin-top:8px;padding:8px 20px;background:linear-gradient(135deg,#8A5C20,#C9904A);border:none;border-radius:8px;font-size:.7rem;font-weight:800;color:#FAF7F2;cursor:pointer">🔄 重新分析 AI 衣櫃洞察</button></div>`;
+    var displayMsg = isHighDemand ? 'Gemini 服務目前繁忙（已自動重試），請稍後幾分鐘再試' : emsg.substring(0,120);
+    res.innerHTML = `<div style="color:var(--red);font-size:.7rem;line-height:1.6;padding:10px 0">⚠️ 分析失敗：${displayMsg}<br><button onclick="analyzeClosetInsights()" style="margin-top:8px;padding:8px 20px;background:linear-gradient(135deg,#8A5C20,#C9904A);border:none;border-radius:8px;font-size:.7rem;font-weight:800;color:#FAF7F2;cursor:pointer">🔄 重新分析</button></div>`;
   } finally {
-    btn.textContent = '🔍 重新分析 AI 衣櫃洞察'; btn.disabled = false;
+    btn.textContent = '🔍 重新分析'; btn.disabled = false;
   }
+}
+
+// ═══ 三層洞察：第一層 ═══
+async function aiInsightLayer1(key) {
+  const itemsList = wardrobe.map(function(i) {
+    return (i.color||'') + (i.type||'') + (i.note ? '（'+i.note+'）' : '') + ', ' + (i.type||'') + ', ' + (i.color||'');
+  }).join('\n');
+  const prompt = `You are a professional fashion stylist. Analyze this wardrobe and provide a quick overview.
+Wardrobe items:
+${itemsList}
+(Format: item name, category, primary color)
+Respond in Traditional Chinese with JSON format:
+{"style_distribution":[{"style":"風格名稱","percentage":數字}],"color_palette":[{"color":"色系名稱","percentage":數字}],"overall_rating":數字,"summary":"一句話總結衣櫃風格定位","top_gap":"最明顯的一個缺口"}`;
+
+  const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body: JSON.stringify({
+      contents:[{role:'user',parts:[{text:prompt}]}],
+      generationConfig:{responseMimeType:'application/json',temperature:0,maxOutputTokens:1200}
+    })
+  });
+  const d = await res.json();
+  if(d.error) throw new Error(d.error.message || 'Gemini error');
+  var raw = ((((d.candidates||[])[0]||{}).content||{}).parts||[])[0];
+  if(!raw || !raw.text) throw new Error('Gemini 無回傳');
+  var txt = raw.text.replace(/```json|```/g,'').trim();
+  return JSON.parse(txt);
+}
+
+function renderInsightLayer1(l1, res) {
+  // 星等
+  var rating = Math.round(l1.overall_rating || 0);
+  var stars = '★'.repeat(Math.min(rating,10)) + '☆'.repeat(Math.max(0,10-rating));
+  // 風格分佈
+  var styleHtml = (l1.style_distribution||[]).map(function(s){
+    var pct = Math.round(s.percentage||0);
+    return `<div style="margin-bottom:5px">
+      <div style="display:flex;justify-content:space-between;font-size:.62rem;margin-bottom:2px"><span style="color:var(--ink)">${s.style}</span><span style="color:var(--gold)">${pct}%</span></div>
+      <div style="height:4px;background:var(--border2);border-radius:2px"><div style="height:4px;background:linear-gradient(90deg,var(--gold),#C9904A);border-radius:2px;width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+  // 色系分佈
+  var colorHtml = (l1.color_palette||[]).map(function(c){
+    var pct = Math.round(c.percentage||0);
+    return `<div style="margin-bottom:5px">
+      <div style="display:flex;justify-content:space-between;font-size:.62rem;margin-bottom:2px"><span style="color:var(--ink)">${c.color}</span><span style="color:var(--muted)">${pct}%</span></div>
+      <div style="height:4px;background:var(--border2);border-radius:2px"><div style="height:4px;background:var(--ink2);border-radius:2px;width:${pct}%"></div></div>
+    </div>`;
+  }).join('');
+
+  // 類別按鈕（第二層觸發）
+  var catBtns = ['上衣','褲子','外套','鞋子','配件'].map(function(cat){
+    return `<button onclick="triggerLayer2('${cat}')" style="padding:6px 12px;border-radius:16px;font-size:.64rem;font-weight:700;cursor:pointer;background:var(--surface2);border:1px solid var(--border2);color:var(--ink2);white-space:nowrap">${cat}</button>`;
+  }).join('');
+
+  res.innerHTML = `
+    <!-- L1 結果卡 -->
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:.68rem;font-weight:800;color:var(--gold)">🧠 整體掃描（免費）</span>
+        <span style="font-size:.7rem;color:#FFD700;letter-spacing:1px" title="${rating}/10">${stars}</span>
+      </div>
+      <div style="font-size:.72rem;color:var(--ink);font-weight:700;margin-bottom:4px">${l1.summary||''}</div>
+      <div style="font-size:.62rem;color:var(--red);background:rgba(239,68,68,.08);border-radius:6px;padding:4px 8px;margin-bottom:10px">⚠️ 最大缺口：${l1.top_gap||''}</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
+        <div>
+          <div style="font-size:.56rem;color:var(--gold);font-weight:800;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">風格分佈</div>
+          ${styleHtml}
+        </div>
+        <div>
+          <div style="font-size:.56rem;color:var(--gold);font-weight:800;margin-bottom:6px;text-transform:uppercase;letter-spacing:.06em">色系分佈</div>
+          ${colorHtml}
+        </div>
+      </div>
+    </div>
+
+    <!-- L2 觸發 -->
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px;margin-bottom:10px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:.68rem;font-weight:800;color:var(--ink)">🔬 類別深入分析</span>
+        <span style="font-size:.58rem;color:var(--gold);background:rgba(201,165,80,.12);border-radius:6px;padding:2px 7px">🪙 -1 金幣</span>
+      </div>
+      <div style="font-size:.6rem;color:var(--muted);margin-bottom:8px">選擇類別深入分析優勢、弱點與場合覆蓋率</div>
+      <div style="display:flex;gap:6px;flex-wrap:wrap" id="l2-cat-btns">${catBtns}</div>
+      <div id="l2-result" style="margin-top:8px"></div>
+    </div>
+
+    <!-- L3 觸發 -->
+    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+        <span style="font-size:.68rem;font-weight:800;color:var(--ink)">🎯 搭配潛力計算</span>
+        <span style="font-size:.58rem;color:var(--gold);background:rgba(201,165,80,.12);border-radius:6px;padding:2px 7px">🪙 -2 金幣</span>
+      </div>
+      <div style="font-size:.6rem;color:var(--muted);margin-bottom:8px">計算全衣櫃可搭組合數、孤立單品與最佳搭配</div>
+      <button onclick="triggerLayer3()" style="width:100%;padding:9px;background:linear-gradient(135deg,rgba(139,92,32,.6),rgba(201,144,74,.6));border:none;border-radius:8px;font-size:.7rem;font-weight:800;color:#FAF7F2;cursor:pointer">🎯 計算搭配潛力</button>
+      <div id="l3-result" style="margin-top:8px"></div>
+    </div>`;
+}
+
+// ═══ 第二層：類別深入 ═══
+async function triggerLayer2(category) {
+  if(!spendCoin(1,'類別深入分析')) return;
+  const l2el = document.getElementById('l2-result');
+  if(!l2el) return;
+  l2el.innerHTML = '<div style="font-size:.68rem;color:var(--muted);padding:8px 0">🔬 分析中…</div>';
+  // 高亮選中按鈕
+  document.querySelectorAll('#l2-cat-btns button').forEach(function(b){
+    b.style.background = b.textContent.trim() === category ? 'var(--gold)' : 'var(--surface2)';
+    b.style.color = b.textContent.trim() === category ? '#0C1810' : 'var(--ink2)';
+  });
+  try {
+    const key = localStorage.getItem('fitto_gemini_key') || '';
+    if(!key) throw new Error('請先設定 Gemini Key');
+    // 篩選類別單品
+    const catMap = {'上衣':['上衣','T恤','襯衫','毛衣'],'褲子':['褲子','牛仔褲','短褲','西裝褲','運動褲','工裝褲','哈倫褲','裙子','洋裝'],'外套':['外套','夾克'],'鞋子':['鞋子','球鞋','皮鞋','靴子','涼鞋'],'配件':['包包','墨鏡','帽子','腰帶','圍巾','手環','項鍊','配件']};
+    var keys = catMap[category] || [category];
+    var items = wardrobe.filter(function(i){ return keys.some(function(k){ return (i.type||'').indexOf(k)!==-1||k===i.type; }); });
+    if(!items.length){ l2el.innerHTML='<div style="font-size:.65rem;color:var(--muted);padding:6px 0">衣櫃中尚無此類別單品</div>'; coins+=1; saveProgress(); updateCoinUI(); return; }
+    var itemsDetail = items.map(function(i,idx){
+      return (idx+1)+'. '+i.color+(i.type||'')+', 顏色:'+i.color+', 材質:'+(i.material||'未知')+', 版型:'+(i.fit||'未知')+', 風格:'+(i.style||'未知')+(i.note?', 備註:'+i.note:'');
+    }).join('\n');
+    var overallStyle = (window._insightL1 && window._insightL1.summary) || '未知';
+    const prompt = `You are a professional fashion stylist with 10 years of experience.
+Deeply analyze the following wardrobe category and provide actionable insights.
+Category: ${category}
+Items:
+${itemsDetail}
+(Format: name, color, material, fit, style tags)
+User's overall wardrobe style: ${overallStyle}
+Respond in Traditional Chinese with JSON format:
+{"category_rating":數字,"strengths":["優點1","優點2"],"weaknesses":["缺點1","缺點2"],"occasion_coverage":{"daily":數字,"work":數字,"date":數字,"formal":數字,"outdoor":數字},"missing_items":[{"item":"缺少單品","reason":"原因","priority":"high/medium/low"}],"recommendation":"具體建議一段話"}`;
+
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents:[{role:'user',parts:[{text:prompt}]}],
+        generationConfig:{responseMimeType:'application/json',temperature:0,maxOutputTokens:1200}
+      })
+    });
+    const d = await res.json();
+    if(d.error) throw new Error(d.error.message || 'Gemini error');
+    var raw = ((((d.candidates||[])[0]||{}).content||{}).parts||[])[0];
+    var txt = (raw&&raw.text||'').replace(/```json|```/g,'').trim();
+    var l2 = JSON.parse(txt);
+    renderInsightLayer2(l2, category, l2el);
+  } catch(e) {
+    coins += 1; saveProgress(); updateCoinUI();
+    l2el.innerHTML = `<div style="color:var(--red);font-size:.65rem;padding:6px 0">⚠️ ${(e.message||'分析失敗').substring(0,80)}<br><span style="font-size:.58rem;color:var(--green)">✅ 已退回 1 金幣</span></div>`;
+  }
+}
+
+function renderInsightLayer2(l2, category, el) {
+  var rating = Math.round(l2.category_rating||0);
+  var stars = '★'.repeat(Math.min(rating,10))+'☆'.repeat(Math.max(0,10-rating));
+  var occLabels = {daily:'日常',work:'工作',date:'約會',formal:'正式',outdoor:'戶外'};
+  var occHtml = Object.keys(l2.occasion_coverage||{}).map(function(k){
+    var pct = Math.round(l2.occasion_coverage[k]||0);
+    var color = pct>=70?'#4CAF7D':pct>=40?'#C9904A':'#EF5350';
+    return `<div style="margin-bottom:4px">
+      <div style="display:flex;justify-content:space-between;font-size:.6rem;margin-bottom:2px"><span style="color:var(--ink2)">${occLabels[k]||k}</span><span style="color:${color};font-weight:700">${pct}%</span></div>
+      <div style="height:4px;background:var(--border2);border-radius:2px"><div style="height:4px;background:${color};border-radius:2px;width:${Math.min(pct,100)}%"></div></div>
+    </div>`;
+  }).join('');
+  var missHtml = (l2.missing_items||[]).map(function(m){
+    var pc = m.priority==='high'?'#EF5350':m.priority==='medium'?'#C9904A':'#9E9E9E';
+    var q = encodeURIComponent((m.item||'')+ ' 購買 2026');
+    return `<div style="display:flex;align-items:flex-start;gap:6px;margin-bottom:4px">
+      <span style="font-size:.5rem;background:${pc};color:#fff;border-radius:3px;padding:1px 4px;white-space:nowrap;margin-top:2px">${m.priority}</span>
+      <div style="flex:1;min-width:0">
+        <span style="font-size:.65rem;color:var(--ink);font-weight:700">${m.item||''}</span>
+        <span style="font-size:.6rem;color:var(--muted);margin-left:4px">${m.reason||''}</span>
+        <a href="https://www.google.com/search?q=${q}" target="_blank" style="display:inline-block;margin-left:6px;font-size:.54rem;color:var(--gold);text-decoration:none;background:rgba(201,165,80,.15);border-radius:4px;padding:1px 5px">選購</a>
+      </div>
+    </div>`;
+  }).join('');
+  el.innerHTML = `
+    <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px">
+      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
+        <span style="font-size:.65rem;font-weight:800;color:var(--gold)">${category} 分析</span>
+        <span style="font-size:.68rem;color:#FFD700">${stars}</span>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:8px">
+        <div>
+          <div style="font-size:.56rem;color:#4CAF7D;font-weight:800;margin-bottom:4px">✅ 優點</div>
+          ${(l2.strengths||[]).map(function(s){ return '<div style="font-size:.62rem;color:var(--ink2);margin-bottom:2px">· '+s+'</div>'; }).join('')}
+        </div>
+        <div>
+          <div style="font-size:.56rem;color:#EF5350;font-weight:800;margin-bottom:4px">⚠️ 弱點</div>
+          ${(l2.weaknesses||[]).map(function(s){ return '<div style="font-size:.62rem;color:var(--ink2);margin-bottom:2px">· '+s+'</div>'; }).join('')}
+        </div>
+      </div>
+      <div style="font-size:.56rem;color:var(--gold);font-weight:800;margin-bottom:6px">場合覆蓋率</div>
+      ${occHtml}
+      ${missHtml ? '<div style="font-size:.56rem;color:var(--gold);font-weight:800;margin:8px 0 5px">建議補充</div>'+missHtml : ''}
+      <div style="font-size:.62rem;color:var(--ink2);background:rgba(201,165,80,.07);border-radius:8px;padding:7px 9px;margin-top:8px;line-height:1.6">${l2.recommendation||''}</div>
+    </div>`;
+}
+
+// ═══ 第三層：搭配潛力 ═══
+async function triggerLayer3() {
+  if(!spendCoin(2,'搭配潛力計算')) return;
+  const l3el = document.getElementById('l3-result');
+  if(!l3el) return;
+  l3el.innerHTML = '<div style="font-size:.68rem;color:var(--muted);padding:8px 0">🎯 計算中，需要稍等…</div>';
+  try {
+    const key = localStorage.getItem('fitto_gemini_key') || '';
+    if(!key) throw new Error('請先設定 Gemini Key');
+    var allDetail = wardrobe.map(function(i,idx){
+      return 'id:'+(idx+1)+', '+(i.color||'')+(i.type||'')+(i.note?'（'+i.note+'）':'')+', 類別:'+(i.type||'')+', 顏色:'+(i.color||'')+', 材質:'+(i.material||'未知')+', 版型:'+(i.fit||'未知')+', 風格:'+(i.style||'未知');
+    }).join('\n');
+    const prompt = `You are a professional fashion stylist. Calculate the outfit potential of this wardrobe.
+All wardrobe items:
+${allDetail}
+(Format: id, name, category, color, material, fit, style tags)
+Tasks:
+1. Calculate total possible outfit combinations (top + bottom, optional outerwear + shoes)
+2. Identify isolated items (items that match with fewer than 2 others)
+3. Find the most versatile items (items that match with the most others)
+4. Identify the best 3 outfit combinations
+5. Suggest what single item would increase combinations the most
+Respond in Traditional Chinese with JSON format:
+{"total_combinations":數字,"isolated_items":[{"id":"id","name":"名稱","reason":"孤立原因"}],"versatile_items":[{"id":"id","name":"名稱","match_count":數字}],"best_outfits":[{"items":["item_id1","item_id2"],"occasion":"場合","description":"搭配描述"}],"recommended_addition":{"item":"建議新增單品","estimated_new_combinations":數字,"reason":"原因"}}`;
+
+    const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
+      method:'POST', headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({
+        contents:[{role:'user',parts:[{text:prompt}]}],
+        generationConfig:{responseMimeType:'application/json',temperature:0,maxOutputTokens:1200}
+      })
+    });
+    const d = await res.json();
+    if(d.error) throw new Error(d.error.message || 'Gemini error');
+    var raw = ((((d.candidates||[])[0]||{}).content||{}).parts||[])[0];
+    var txt = (raw&&raw.text||'').replace(/```json|```/g,'').trim();
+    var l3 = JSON.parse(txt);
+    renderInsightLayer3(l3, l3el);
+  } catch(e) {
+    coins += 2; saveProgress(); updateCoinUI();
+    l3el.innerHTML = `<div style="color:var(--red);font-size:.65rem;padding:6px 0">⚠️ ${(e.message||'計算失敗').substring(0,80)}<br><span style="font-size:.58rem;color:var(--green)">✅ 已退回 2 金幣</span></div>`;
+  }
+}
+
+function renderInsightLayer3(l3, el) {
+  // 最佳搭配
+  var outfitsHtml = (l3.best_outfits||[]).map(function(o,i){
+    var itemNames = (o.items||[]).map(function(id){
+      var found = wardrobe[parseInt(id)-1];
+      return found ? (found.color||'')+(found.type||'') : 'id:'+id;
+    }).join(' ＋ ');
+    return `<div style="background:rgba(201,165,80,.07);border-radius:8px;padding:7px 9px;margin-bottom:5px">
+      <div style="font-size:.62rem;font-weight:800;color:var(--gold);margin-bottom:2px">#${i+1} ${o.occasion||''}</div>
+      <div style="font-size:.65rem;color:var(--ink);margin-bottom:2px">${itemNames}</div>
+      <div style="font-size:.6rem;color:var(--ink2)">${o.description||''}</div>
+    </div>`;
+  }).join('');
+  // 孤立單品
+  var isoHtml = (l3.isolated_items||[]).map(function(it){
+    return `<div style="font-size:.62rem;color:var(--ink2);margin-bottom:2px">· <span style="color:var(--red)">${it.name||it.id}</span> — ${it.reason||''}</div>`;
+  }).join('') || '<div style="font-size:.62rem;color:#4CAF7D">✅ 無孤立單品，衣櫃搭配性良好</div>';
+  // 萬用單品
+  var verHtml = (l3.versatile_items||[]).slice(0,3).map(function(it,i){
+    var medals = ['🥇','🥈','🥉'];
+    return `<div style="font-size:.62rem;color:var(--ink);margin-bottom:2px">${medals[i]||''} ${it.name||it.id} <span style="color:var(--muted)">（可搭 ${it.match_count||'?'} 件）</span></div>`;
+  }).join('');
+  var rec = l3.recommended_addition || {};
+  var recQ = encodeURIComponent((rec.item||'')+ ' 購買 2026');
+
+  el.innerHTML = `
+    <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px">
+      <div style="text-align:center;padding:10px 0 8px">
+        <div style="font-size:1.6rem;font-weight:900;color:var(--gold)">${l3.total_combinations||0}</div>
+        <div style="font-size:.6rem;color:var(--muted)">可搭配組合數</div>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
+        <div>
+          <div style="font-size:.56rem;color:#EF5350;font-weight:800;margin-bottom:4px">⚠️ 孤立單品</div>
+          ${isoHtml}
+        </div>
+        <div>
+          <div style="font-size:.56rem;color:#4CAF7D;font-weight:800;margin-bottom:4px">🌟 萬用單品</div>
+          ${verHtml}
+        </div>
+      </div>
+      <div style="font-size:.62rem;font-weight:800;color:var(--gold);margin-bottom:6px">🏆 最佳搭配推薦</div>
+      ${outfitsHtml}
+      <div style="background:linear-gradient(135deg,rgba(139,92,32,.15),rgba(201,144,74,.1));border:1px solid rgba(201,165,80,.3);border-radius:8px;padding:9px;margin-top:2px">
+        <div style="font-size:.62rem;font-weight:800;color:var(--gold);margin-bottom:4px">💡 加入這件最能提升搭配數</div>
+        <div style="font-size:.7rem;color:var(--ink);font-weight:700;margin-bottom:2px">${rec.item||''}</div>
+        <div style="font-size:.6rem;color:var(--ink2);margin-bottom:5px">${rec.reason||''} · 預估新增 <span style="color:var(--gold);font-weight:800">${rec.estimated_new_combinations||'?'}</span> 組合</div>
+        <a href="https://www.google.com/search?q=${recQ}" target="_blank" style="display:inline-block;font-size:.62rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#8A5C20,#C9904A);border-radius:6px;padding:4px 12px">🛍 立即選購</a>
+      </div>
+    </div>`;
 }
 
 // SAVE
@@ -5223,7 +5392,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-16<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-17<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -5247,7 +5416,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-16',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-17',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -5493,7 +5662,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-16 新功能：髮型購買、VIP衣櫃、整合設定頁
+// VD4-17 新功能：髮型購買、VIP衣櫃、整合設定頁
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
