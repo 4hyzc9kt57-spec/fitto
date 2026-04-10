@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-22 · AI 智能穿搭</title>
+<title>Fitto VD4-24 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -705,7 +705,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-22</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-24</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1045,7 +1045,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-22 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-24 · 2026.04</div>
   </div>
 </div>
 
@@ -1307,7 +1307,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-22 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-24 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1821,7 +1821,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-22 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-24 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -2269,10 +2269,40 @@ async function geminiWithSearch(prompt, maxTokens) {
 // gemini-2.5-flash: 主力模型
 // gemini-1.5-flash: 穩定備援（quota 較寬鬆）
 // gemini-1.5-flash-8b: 輕量備援（速度快、quota 最寬）
+// JSON 安全解析：處理截斷、markdown wrap 等常見問題
+function safeParseJson(str) {
+  if(!str) return null;
+  // 1. 清除 markdown
+  var s = str.replace(/```json/g,'').replace(/```/g,'').trim();
+  // 2. 取第一個 { 到最後一個 }
+  var fi = s.indexOf('{'), li = s.lastIndexOf('}');
+  if(fi === -1 || li === -1) return null;
+  s = s.slice(fi, li+1);
+  // 3. 嘗試直接解析
+  try { return JSON.parse(s); } catch(e) {}
+  // 4. 截斷修復：從尾巴逐步移除不完整的 key-value 再試
+  var attempt = s;
+  for(var i = 0; i < 5; i++) {
+    // 移除最後一個逗號後的不完整部分
+    var lastComma = attempt.lastIndexOf(',');
+    if(lastComma === -1) break;
+    attempt = attempt.slice(0, lastComma);
+    // 補上缺少的閉括號
+    var opens = (attempt.match(/\{/g)||[]).length;
+    var closes = (attempt.match(/\}/g)||[]).length;
+    var arrOpens = (attempt.match(/\[/g)||[]).length;
+    var arrCloses = (attempt.match(/\]/g)||[]).length;
+    var fixed = attempt;
+    for(var a = 0; a < arrOpens - arrCloses; a++) fixed += ']';
+    for(var b = 0; b < opens - closes; b++) fixed += '}';
+    try { return JSON.parse(fixed); } catch(e2) {}
+  }
+  return null;
+}
+
+// 只使用確認可用的模型（2026.04）
 var GEMINI_TEXT_MODELS = [
-  'gemini-2.5-flash',
-  'gemini-1.5-flash',
-  'gemini-1.5-flash-8b'
+  'gemini-2.5-flash'
 ];
 
 async function geminiText(prompt, maxTokens) {
@@ -2286,7 +2316,7 @@ async function geminiText(prompt, maxTokens) {
   for(var mi = 0; mi < GEMINI_TEXT_MODELS.length; mi++) {
     var model = GEMINI_TEXT_MODELS[mi];
     // 每個模型最多重試一次（等3秒）
-    var delays = [0, 3000];
+    var delays = [0, 5000, 12000, 20000];
     for(var attempt = 0; attempt < delays.length; attempt++) {
       if(delays[attempt] > 0) {
         apiLog('⏳ 重試 ' + model + ' (' + attempt + ')…', 'info');
@@ -2342,7 +2372,7 @@ async function geminiJson(prompt, maxTokens) {
   var lastErr = null;
   for(var mi = 0; mi < GEMINI_TEXT_MODELS.length; mi++) {
     var model = GEMINI_TEXT_MODELS[mi];
-    var delays = [0, 3000];
+    var delays = [0, 5000, 12000, 20000];
     for(var attempt = 0; attempt < delays.length; attempt++) {
       if(delays[attempt] > 0) await new Promise(function(r){ setTimeout(r, delays[attempt]); });
       try {
@@ -4945,8 +4975,10 @@ ${itemsList}
 
   var raw = await geminiText(prompt, 1200);
   var fi = raw.indexOf('{'), li = raw.lastIndexOf('}');
-  if(fi === -1 || li === -1) throw new Error('AI 回傳格式錯誤，請重試。原文：' + raw.substring(0,80));
-  return JSON.parse(raw.slice(fi, li+1));
+  if(fi === -1 || li === -1) throw new Error('AI 回傳格式錯誤，請重試。原文：' + raw.substring(0,60));
+  var l1result = safeParseJson(raw.slice(fi, li+1));
+  if(!l1result) throw new Error('JSON 解析失敗，請重試');
+  return l1result;
 }
 
 function renderInsightLayer1(l1, res, errorMsg) {
@@ -5050,18 +5082,11 @@ async function triggerLayer2(category) {
 輸出:{"category_rating":7,"strengths":["優點"],"weaknesses":["缺點"],"occasion_coverage":{"daily":70,"work":40,"date":50,"formal":10,"outdoor":30},"missing_items":[{"item":"單品","reason":"原因","priority":"high"}],"recommendation":"建議"}
 規則:rating為1-10整數,coverage為0-100整數,priority只能high/medium/low,繁體中文`;
 
-    var raw2 = await geminiText(prompt, 1500);
+    var raw2 = await geminiText(prompt, 1800);
     var fi2 = raw2.indexOf('{'), li2 = raw2.lastIndexOf('}');
-    if(fi2===-1||li2===-1) throw new Error('AI 回傳格式錯誤，請重試。原文：'+raw2.substring(0,80));
-    var jsonStr2 = raw2.slice(fi2,li2+1);
-    var l2;
-    try { l2 = JSON.parse(jsonStr2); }
-    catch(parseErr) {
-      // JSON 被截斷 → 嘗試補尾巴再解析
-      var patched = jsonStr2.replace(/,\s*"[^"]*"\s*:\s*[^}]*$/, '') + '}}';
-      try { l2 = JSON.parse(patched); }
-      catch(e2) { throw new Error('JSON 截斷無法修復，請重試'); }
-    }
+    if(fi2===-1||li2===-1) throw new Error('AI 回傳格式錯誤，請重試。原文：'+raw2.substring(0,60));
+    var l2 = safeParseJson(raw2.slice(fi2,li2+1));
+    if(!l2) throw new Error('JSON 解析失敗，請重試');
     renderInsightLayer2(l2, category, l2el);
   } catch(e) {
     coins += 1; saveProgress(); updateCoinUI();
@@ -5145,12 +5170,11 @@ ${allDetail}
 
 注意：所有數字為整數，items 陣列中填寫單品的 id 字串。`;
 
-    var raw3 = await geminiText(prompt, 1600);
+    var raw3 = await geminiText(prompt, 2000);
     var fi3 = raw3.indexOf('{'), li3 = raw3.lastIndexOf('}');
-    if(fi3===-1||li3===-1) throw new Error('AI 回傳格式錯誤，請重試。原文：'+raw3.substring(0,80));
-    var l3;
-    try { l3 = JSON.parse(raw3.slice(fi3,li3+1)); }
-    catch(e3) { throw new Error('JSON 解析失敗，請重試。原文：'+raw3.substring(0,60)); }
+    if(fi3===-1||li3===-1) throw new Error('AI 回傳格式錯誤，請重試。原文：'+raw3.substring(0,60));
+    var l3 = safeParseJson(raw3.slice(fi3,li3+1));
+    if(!l3) throw new Error('JSON 解析失敗，請重試');
     renderInsightLayer3(l3, l3el);
   } catch(e) {
     coins += 2; saveProgress(); updateCoinUI();
@@ -5454,7 +5478,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-22<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-24<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -5478,7 +5502,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-22',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-24',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -5724,7 +5748,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-22 新功能：髮型購買、VIP衣櫃、整合設定頁
+// VD4-24 新功能：髮型購買、VIP衣櫃、整合設定頁
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
