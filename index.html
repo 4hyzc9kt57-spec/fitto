@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-19 · AI 智能穿搭</title>
+<title>Fitto VD4-21 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -705,7 +705,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-19</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-21</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1045,7 +1045,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-19 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-21 · 2026.04</div>
   </div>
 </div>
 
@@ -1307,7 +1307,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-19 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-21 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1821,7 +1821,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-19 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-21 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -2264,6 +2264,13 @@ async function geminiWithSearch(prompt, maxTokens) {
   return allText;
 }
 
+// 文字模型 fallback 鏈：2.5-flash 繁忙時自動降到 2.0-flash → 1.5-flash
+var GEMINI_TEXT_MODELS = [
+  'gemini-2.5-flash',
+  'gemini-2.0-flash',
+  'gemini-1.5-flash'
+];
+
 async function geminiText(prompt, maxTokens) {
   maxTokens = maxTokens || 800;
   var key = localStorage.getItem('fitto_gemini_key') || '';
@@ -2271,43 +2278,56 @@ async function geminiText(prompt, maxTokens) {
   var preview = prompt.replace(/[\n\r]/g,' ').substring(0, 60);
   apiLog('→ 文字請求: ' + preview + '…', 'prompt');
   var lastErr = null;
-  var delays = [0, 4000, 10000];
-  for(var attempt = 0; attempt < delays.length; attempt++) {
-    if(delays[attempt] > 0) {
-      apiLog('⏳ 高需求重試 (' + attempt + ')…', 'info');
-      await new Promise(function(r){ setTimeout(r, delays[attempt]); });
-    }
-    try {
-      var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
-        method:'POST', headers:{'Content-Type':'application/json'},
-        body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens,temperature:0.7}})
-      });
-      var d = await res.json();
-      if(d.error) {
-        var emsg = d.error.message || 'Gemini error';
-        if(/high demand|overloaded|503|quota|busy|unavailable|try again|temporarily/i.test(emsg) && attempt < delays.length - 1) {
-          lastErr = new Error(emsg);
-          apiLog('⚠️ ' + emsg.substring(0,60) + ' → 重試', 'err');
-          continue;
+
+  for(var mi = 0; mi < GEMINI_TEXT_MODELS.length; mi++) {
+    var model = GEMINI_TEXT_MODELS[mi];
+    // 每個模型最多重試一次（等3秒）
+    var delays = [0, 3000];
+    for(var attempt = 0; attempt < delays.length; attempt++) {
+      if(delays[attempt] > 0) {
+        apiLog('⏳ 重試 ' + model + ' (' + attempt + ')…', 'info');
+        await new Promise(function(r){ setTimeout(r, delays[attempt]); });
+      }
+      try {
+        var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens,temperature:0.7}})
+        });
+        var d = await res.json();
+        if(d.error) {
+          var emsg = d.error.message || 'Gemini error';
+          var isOverload = /high demand|overloaded|503|quota|busy|unavailable|try again|temporarily|resource exhausted/i.test(emsg);
+          if(isOverload) {
+            lastErr = new Error(emsg);
+            apiLog('⚠️ ' + model + ' 繁忙 → ' + (attempt < delays.length-1 ? '重試' : '換模型'), 'err');
+            if(attempt < delays.length - 1) continue;
+            else break; // 跳到下一個模型
+          }
+          apiLog('✗ ' + model + ' 錯誤: ' + emsg.substring(0,50), 'err');
+          throw new Error(emsg);
         }
-        apiLog('✗ 錯誤: ' + emsg.substring(0,50), 'err');
-        throw new Error(emsg);
+        apiLog('✓ 模型: ' + model, 'ok');
+        addTokenUsage((d.usageMetadata||{}).promptTokenCount||0,(d.usageMetadata||{}).candidatesTokenCount||0,'gemini_text');
+        var cand = (d.candidates||[])[0];
+        if(!cand || !cand.content) throw new Error('Gemini 無回傳內容 (finishReason:' + (cand && cand.finishReason||'NONE') + ')');
+        var parts = cand.content.parts || [];
+        var tp = parts.find(function(p){ return typeof p.text === 'string' && p.text.trim(); });
+        if(!tp) throw new Error('Gemini 回傳空文字');
+        return tp.text.trim();
+      } catch(fetchErr) {
+        var isOverloadErr = /high demand|overloaded|503|busy|unavailable|try again|temporarily|resource exhausted/i.test(fetchErr.message);
+        if(isOverloadErr) {
+          lastErr = fetchErr;
+          if(attempt < delays.length - 1) continue;
+          else break;
+        }
+        throw fetchErr;
       }
-      addTokenUsage((d.usageMetadata||{}).promptTokenCount||0,(d.usageMetadata||{}).candidatesTokenCount||0,'gemini_text');
-      var cand = (d.candidates||[])[0];
-      if(!cand || !cand.content) throw new Error('Gemini 無回傳內容 (finishReason:' + (cand && cand.finishReason||'NONE') + ')');
-      var parts = cand.content.parts || [];
-      var tp = parts.find(function(p){ return typeof p.text === 'string' && p.text.trim(); });
-      if(!tp) throw new Error('Gemini 回傳空文字');
-      return tp.text.trim();
-    } catch(fetchErr) {
-      if(attempt < delays.length - 1 && /high demand|overloaded|503|busy|unavailable|try again|temporarily/i.test(fetchErr.message)) {
-        lastErr = fetchErr; continue;
-      }
-      throw fetchErr;
     }
+    // 此模型全部重試失敗，換下一個
+    apiLog('↓ 切換至下一個模型…', 'info');
   }
-  throw lastErr || new Error('Gemini 服務暫時繁忙，請稍後再試');
+  throw lastErr || new Error('所有模型暫時繁忙，請稍後再試');
 }
 
 async function geminiJson(prompt, maxTokens) {
@@ -2315,28 +2335,43 @@ async function geminiJson(prompt, maxTokens) {
   var key = localStorage.getItem('fitto_gemini_key') || '';
   if(!key) throw new Error('請先設定 Gemini Key');
   apiLog('→ JSON請求: ' + String(prompt || '').replace(/[\n\r]/g,' ').substring(0, 60) + '…', 'prompt');
-  var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
-    method:'POST',
-    headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      contents:[{role:'user',parts:[{text:prompt}]}],
-      generationConfig:{
-        maxOutputTokens:maxTokens,
-        temperature:0.75,
-        responseMimeType:'application/json'
+  var lastErr = null;
+  for(var mi = 0; mi < GEMINI_TEXT_MODELS.length; mi++) {
+    var model = GEMINI_TEXT_MODELS[mi];
+    var delays = [0, 3000];
+    for(var attempt = 0; attempt < delays.length; attempt++) {
+      if(delays[attempt] > 0) await new Promise(function(r){ setTimeout(r, delays[attempt]); });
+      try {
+        var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/' + model + ':generateContent?key=' + key, {
+          method:'POST', headers:{'Content-Type':'application/json'},
+          body:JSON.stringify({
+            contents:[{role:'user',parts:[{text:prompt}]}],
+            generationConfig:{maxOutputTokens:maxTokens,temperature:0.75,responseMimeType:'application/json'}
+          })
+        });
+        var d = await res.json();
+        if(d.error) {
+          var emsg = d.error.message || 'Gemini error';
+          var isOverload = /high demand|overloaded|503|quota|busy|unavailable|try again|temporarily|resource exhausted/i.test(emsg);
+          if(isOverload){ lastErr=new Error(emsg); if(attempt<delays.length-1) continue; else break; }
+          apiLog('✗ JSON錯誤: ' + emsg.substring(0,50), 'err');
+          throw new Error(emsg);
+        }
+        apiLog('✓ JSON模型: ' + model, 'ok');
+        addTokenUsage((d.usageMetadata||{}).promptTokenCount||0,(d.usageMetadata||{}).candidatesTokenCount||0,'gemini_text');
+        var parts = (((d.candidates||[])[0]||{}).content||{}).parts || [];
+        var textPart = parts.find(function(part){ return typeof part.text === 'string'; });
+        if(!textPart || !textPart.text) throw new Error('Gemini JSON 回應為空');
+        return textPart.text.trim();
+      } catch(fetchErr) {
+        if(/high demand|overloaded|503|busy|unavailable|try again|temporarily|resource exhausted/i.test(fetchErr.message)){
+          lastErr=fetchErr; if(attempt<delays.length-1) continue; else break;
+        }
+        throw fetchErr;
       }
-    })
-  });
-  var d = await res.json();
-  if(d.error) {
-    apiLog('✗ JSON錯誤: ' + (d.error.message||'').substring(0,50), 'err');
-    throw new Error(d.error.message || 'Gemini JSON error');
+    }
   }
-  addTokenUsage((d.usageMetadata||{}).promptTokenCount||0,(d.usageMetadata||{}).candidatesTokenCount||0,'gemini_text');
-  var parts = (((d.candidates||[])[0]||{}).content||{}).parts || [];
-  var textPart = parts.find(function(part){ return typeof part.text === 'string'; });
-  if(!textPart || !textPart.text) throw new Error('Gemini JSON 回應為空');
-  return textPart.text.trim();
+  throw lastErr || new Error('所有模型暫時繁忙，請稍後再試');
 }
 async function geminiVision(prompt, b64, mime) {
   mime = mime || 'image/jpeg';
@@ -4839,21 +4874,54 @@ async function analyzeClosetInsights() {
   btn.textContent = '⏳ 掃描中…'; btn.disabled = true;
   res.style.display = 'block';
   res.innerHTML = '<div style="font-size:.72rem;color:var(--muted);padding:10px 0">🔍 第一層快速掃描中…</div>';
+  var l1 = null;
+  var l1Error = '';
   try {
     const key = localStorage.getItem('fitto_gemini_key') || '';
     if(!key) throw new Error('請先設定 Gemini Key');
-    // 第一層：快速掃描
-    const l1 = await aiInsightLayer1(key);
+    l1 = await aiInsightLayer1(key);
     window._insightL1 = l1;
-    renderInsightLayer1(l1, res);
   } catch(e) {
-    var emsg = e.message || '未知錯誤';
-    var isHighDemand = /high demand|overloaded|503|busy|unavailable|try again|temporarily/i.test(emsg);
-    var displayMsg = isHighDemand ? 'Gemini 服務目前繁忙（已自動重試），請稍後幾分鐘再試' : emsg.substring(0,120);
-    res.innerHTML = `<div style="color:var(--red);font-size:.7rem;line-height:1.6;padding:10px 0">⚠️ 分析失敗：${displayMsg}<br><button onclick="analyzeClosetInsights()" style="margin-top:8px;padding:8px 20px;background:linear-gradient(135deg,#8A5C20,#C9904A);border:none;border-radius:8px;font-size:.7rem;font-weight:800;color:#FAF7F2;cursor:pointer">🔄 重新分析</button></div>`;
-  } finally {
-    btn.textContent = '🔍 重新分析'; btn.disabled = false;
+    // 第一層 AI 失敗 → 降級：本地計算基本統計，仍顯示完整 UI
+    l1Error = e.message || '未知錯誤';
+    l1 = buildLocalL1Fallback();
+    window._insightL1 = l1;
   }
+  // 無論第一層成功與否，都渲染 UI（讓第二三層按鈕可用）
+  renderInsightLayer1(l1, res, l1Error);
+  btn.textContent = '🔍 重新分析'; btn.disabled = false;
+}
+
+// 本地降級：純統計，不需 AI
+function buildLocalL1Fallback() {
+  var typeMap = {}, colorMap = {}, styleMap = {};
+  wardrobe.forEach(function(i) {
+    var t = i.type||'其他'; typeMap[t] = (typeMap[t]||0)+1;
+    var c = i.color||'其他'; colorMap[c] = (colorMap[c]||0)+1;
+    var s = i.style||'休閒'; styleMap[s] = (styleMap[s]||0)+1;
+  });
+  function toPercent(map) {
+    var total = Object.values(map).reduce(function(a,b){return a+b;},0)||1;
+    return Object.keys(map).sort(function(a,b){return map[b]-map[a];}).slice(0,5).map(function(k){
+      return {style:k, color:k, percentage:Math.round(map[k]/total*100)};
+    });
+  }
+  var styles = toPercent(styleMap);
+  var colors = toPercent(colorMap);
+  // 計算缺口
+  var types = Object.keys(typeMap);
+  var allCats = ['上衣','外套','褲子','鞋子','配件'];
+  var missing = allCats.filter(function(c){ return !types.some(function(t){ return t.indexOf(c)!==-1; }); });
+  var total = wardrobe.length;
+  var rating = Math.min(10, Math.max(1, Math.round(total/3)));
+  return {
+    style_distribution: styles.map(function(s){return {style:s.style,percentage:s.percentage};}),
+    color_palette: colors.map(function(c){return {color:c.color,percentage:c.percentage};}),
+    overall_rating: rating,
+    summary: '共 '+total+' 件單品（本地統計）',
+    top_gap: missing.length ? '缺少：'+missing.join('、') : '類別分布完整',
+    _isLocal: true
+  };
 }
 
 // ═══ 三層洞察：第一層 ═══
@@ -4877,7 +4945,8 @@ ${itemsList}
   return JSON.parse(raw.slice(fi, li+1));
 }
 
-function renderInsightLayer1(l1, res) {
+function renderInsightLayer1(l1, res, errorMsg) {
+  errorMsg = errorMsg || '';
   // 星等
   var rating = Math.round(l1.overall_rating || 0);
   var stars = '★'.repeat(Math.min(rating,10)) + '☆'.repeat(Math.max(0,10-rating));
@@ -4907,9 +4976,10 @@ function renderInsightLayer1(l1, res) {
     <!-- L1 結果卡 -->
     <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px;margin-bottom:10px">
       <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
-        <span style="font-size:.68rem;font-weight:800;color:var(--gold)">🧠 整體掃描（免費）</span>
+        <span style="font-size:.68rem;font-weight:800;color:var(--gold)">🧠 整體掃描${l1._isLocal?'（本地統計）':'（免費）'}</span>
         <span style="font-size:.7rem;color:#FFD700;letter-spacing:1px" title="${rating}/10">${stars}</span>
       </div>
+      ${errorMsg ? '<div style="font-size:.6rem;color:var(--muted);background:rgba(239,68,68,.06);border-radius:6px;padding:4px 8px;margin-bottom:6px">⚠️ AI 繁忙，已改用本地統計。第二三層仍可正常使用。<button onclick="analyzeClosetInsights()" style="margin-left:8px;padding:2px 8px;background:rgba(201,165,80,.2);border:none;border-radius:4px;font-size:.58rem;color:var(--gold);cursor:pointer;font-weight:700">重試AI</button></div>' : ''}
       <div style="font-size:.72rem;color:var(--ink);font-weight:700;margin-bottom:4px">${l1.summary||''}</div>
       <div style="font-size:.62rem;color:var(--red);background:rgba(239,68,68,.08);border-radius:6px;padding:4px 8px;margin-bottom:10px">⚠️ 最大缺口：${l1.top_gap||''}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -5376,7 +5446,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-19<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-21<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -5400,7 +5470,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-19',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-21',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -5646,7 +5716,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-19 新功能：髮型購買、VIP衣櫃、整合設定頁
+// VD4-21 新功能：髮型購買、VIP衣櫃、整合設定頁
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
