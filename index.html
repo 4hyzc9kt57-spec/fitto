@@ -223,9 +223,10 @@ header{
   flex:0 0 160px;
   background:var(--surface2);border:1px solid var(--border2);
   border-radius:var(--r-sm);padding:12px;
+  min-width:0;overflow:hidden;
 }
 .dn{font-family:'Inter',sans-serif;font-weight:800;font-size:0.65rem;color:var(--gold);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.08em}
-.do{font-size:0.75rem;line-height:1.55;font-weight:600;color:var(--ink);white-space:normal;word-break:break-word}
+.do{font-size:0.75rem;line-height:1.55;font-weight:600;color:var(--ink);white-space:normal;word-break:break-word;overflow-wrap:break-word;max-width:100%}
 .dt{font-size:0.62rem;color:var(--muted);margin-top:5px;line-height:1.4;padding-top:5px;border-top:1px solid var(--border)}
 
 .onote{
@@ -611,6 +612,8 @@ body{background:var(--bg);color:var(--ink);}
 .shr-btn span{font-size:.58rem;font-weight:600;letter-spacing:.01em}
 .shr-fb{color:#1877F2}
 .shr-ig{color:#C13584}
+.shr-xhs{color:#FF2442}
+.shr-xhs{color:#FF2442}
 .shr-save{color:var(--green)}
 
 /* ── TREND TOGGLE ── */
@@ -889,6 +892,10 @@ body{background:var(--bg);color:var(--ink);}
   <div class="card" style="margin-top:14px">
     <div style="font-size:.78rem;font-weight:800;color:var(--ink);margin-bottom:4px">🎯 自訂搭配生圖</div>
     <div style="font-size:.62rem;color:var(--muted);margin-bottom:6px">自選上衣、下身、配件，直接生成一張穿搭示意圖</div>
+    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
+      <span style="font-size:.58rem;background:rgba(201,165,80,.12);border:1px solid rgba(201,165,80,.3);border-radius:6px;padding:3px 8px;color:var(--gold);font-weight:700">🪙 生圖 -2 金幣</span>
+      <span style="font-size:.58rem;background:rgba(76,175,125,.1);border:1px solid rgba(76,175,125,.25);border-radius:6px;padding:3px 8px;color:#4CAF7D;font-weight:700">✨ AI挑選 +1 金幣（只計一次）</span>
+    </div>
     <div style="font-size:.6rem;color:var(--gold);background:rgba(201,165,80,.1);border:1px solid rgba(201,165,80,.25);border-radius:8px;padding:5px 10px;margin-bottom:12px">💇 髮型設定請點右上角髮型按鈕，或至「個人設定」更改</div>
 
 
@@ -1524,7 +1531,8 @@ function getSelectedAvatarRefData() {
       mimeType: (AVATAR_IMGS[photoKey].match(/^data:([^;]+);base64,/) || [])[1] || 'image/jpeg'
     };
   }
-  return null;
+  // 預設👤：使用假人 mannequin 純文字模式（無圖片 reference）
+  return {src: null, b64: null, mimeType: null, isMannequin: true};
 }
 
 function spendCoin(amt, reason) {
@@ -1845,7 +1853,7 @@ function getProfile() {
 
 // 頭像 emoji → 圖片生成用的人物描述
 var AVATAR_PROMPT_MAP = {
-  '👤': 'Asian person',
+  '👤': 'white faceless mannequin figure, smooth featureless oval head, store display mannequin body, clean white surface',
   '☀️': 'handsome young Asian man with warm smile, clean-cut appearance, sunny vibe',
   '🌙': 'handsome Korean-style Asian man, sharp jawline, K-pop idol look',
   '⚡': 'rugged Asian man, strong features, street-style edge',
@@ -1854,6 +1862,10 @@ var AVATAR_PROMPT_MAP = {
   '👑': 'elegant mature Asian woman, sophisticated, confident beauty',
   '⭐': 'stylish Asian woman, fashionable, versatile trendy look',
 };
+
+// 假人 mannequin 預設圖（白色無臉假人，用於未選頭像時的預設生圖）
+// 使用小尺寸 1x1 透明 PNG 作為 mannequin placeholder（真正靠 prompt 描述）
+var MANNEQUIN_B64 = null; // null = 僅靠文字 prompt，不帶圖片 reference
 
 function getAvatarPromptDesc() {
   // 自訂頭像優先
@@ -4071,7 +4083,11 @@ async function genImg(idx, outfit, occ, sea) {
       : outfit;
     const sceneMap = {'休閒':'casual street setting, natural daylight','工作':'modern office lobby, soft window light','約會':'cozy cafe, warm afternoon light','正式':'clean studio, professional lighting','運動':'outdoor park, morning light'};
     const sceneDesc = sceneMap[occ] || 'clean minimal background, natural daylight';
-    const imgPrompt = `High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Outfit: ${itemDetailStr}. Style: ${outfit}. Season: ${seaEn}. Setting: ${sceneDesc}. IMPORTANT: full body shot from head to toe, shoes clearly visible, feet must appear in frame. No vignette, no circular frame, no black border, rectangular photo format. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS anywhere in the image. Professional studio lighting, sharp focus on clothing and shoes, fashion editorial quality, 4K detail.`;
+    const isMannequinMode = !userAvatar || userAvatar === '👤';
+    const mannequinPromptPrefix = isMannequinMode
+      ? 'White featureless store display mannequin, smooth oval head, clean white plastic body, full body front view. '
+      : '';
+    const imgPrompt = `${mannequinPromptPrefix}High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Outfit: ${itemDetailStr}. Style: ${outfit}. Season: ${seaEn}. Setting: ${sceneDesc}. IMPORTANT: full body shot from head to toe, shoes clearly visible, feet must appear in frame. No vignette, no circular frame, no black border, rectangular photo format. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS anywhere in the image. Professional studio lighting, sharp focus on clothing and shoes, fashion editorial quality, 4K detail.`;
 
     apiLog('→ 生圖: ' + imgPrompt.substring(0, 60) + '…', 'prompt');
     apiLog('  頭像:' + userAvatar + ' 服裝:' + outfit.substring(0,20), 'info');
@@ -4080,7 +4096,8 @@ async function genImg(idx, outfit, occ, sea) {
     const avatarRef = getSelectedAvatarRefData();
     const avatarRefB64 = avatarRef && avatarRef.b64 ? avatarRef.b64 : null;
     const avatarRefMime = avatarRef && avatarRef.mimeType ? avatarRef.mimeType : 'image/jpeg';
-    if(!avatarRefB64) throw new Error('缺少固定人物 reference，請先選擇可用頭像');
+    // 假人模式不需要圖片 reference，有圖就帶圖
+    if(!avatarRefB64 && !isMannequinMode) throw new Error('缺少固定人物 reference，請先選擇可用頭像');
 
     // 衣物改用文字描述，優先固定人物並提升速度
     const outfitRefs = findOutfitRefs(outfit);
@@ -4095,14 +4112,17 @@ async function genImg(idx, outfit, occ, sea) {
       refNote += '人物ref ';
     }
 
-    // 組合 prompt：只鎖人物，衣物全部用文字，避免人物跑掉並加快速度
-    let finalPrompt = 'Image 1 is the fixed person reference. Keep the exact same face, hairstyle, body identity, and overall appearance across all generations. Do not change the person. Only change the clothing according to the outfit description. ' + imgPrompt;
+    // 組合 prompt
+    let finalPrompt = avatarRefB64
+      ? 'Image 1 is the fixed person reference. Keep the exact same face, hairstyle, body identity, and overall appearance across all generations. Do not change the person. Only change the clothing according to the outfit description. ' + imgPrompt
+      : imgPrompt;  // 假人模式：純文字 prompt，Gemini 自行生成 mannequin
     apiLog('  衣物ref: 關閉，改用文字描述', 'info');
 
     requestParts.push({text: finalPrompt});
 
     if(refNote) apiLog('  refs: ' + refNote.trim(), 'info');
-    if(avatarRefB64) apiLog('  人物ref: 固定頭像', 'ok');
+    if(isMannequinMode) apiLog('  人物模式: 假人 mannequin (pure text)', 'info');
+    else if(avatarRefB64) apiLog('  人物ref: 固定頭像', 'ok');
 
     const imageResult = await requestGeminiImage(requestParts, key);
     addTokenUsage(0,0,'gemini_img');
@@ -4142,6 +4162,10 @@ async function genImg(idx, outfit, occ, sea) {
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
           <span>Instagram</span>
         </button>
+        <button class="shr-btn shr-xhs" onclick="shareToXHSSafe(${idx})">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.5 7.5h-2.25v1.5H17.5V11h-2.25v6h-2V11H12V9h1.25V7.5C13.25 5.567 14.817 4 16.75 4H17.5v2.5h-.75a.75.75 0 00-.75.75V7.5H17.5z"/></svg>
+          <span>小紅書</span>
+        </button>
         <button class="shr-btn shr-save" onclick="saveImgSafe(${idx})">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           <span>儲存相片</span>
@@ -4174,13 +4198,65 @@ function shareToFB(outfit) {
   var url = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent('https://4hyzc9kt57-spec.github.io/fitto') + '&quote=' + encodeURIComponent('今日穿搭：' + outfit + ' #Fitto穿搭');
   window.open(url, '_blank');
 }
+function shareToXHSSafe(idx) {
+  var c = window._fittoImgCache && window._fittoImgCache[idx];
+  if(c) shareToXHS(c.imgSrc);
+}
+function shareToXHS(imgSrc) {
+  addWatermark(imgSrc, function(wSrc) {
+    var ov = document.createElement('div');
+    ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px';
+    ov.innerHTML =
+      '<p style="color:#fff;font-size:14px;font-family:sans-serif;text-align:center;line-height:1.6;margin:0">📕 長按圖片儲存<br>再到小紅書App貼文上傳</p>' +
+      '<img src="' + wSrc + '" style="max-width:100%;max-height:60vh;border-radius:12px;display:block">' +
+      '<a href="xiaohongshu://app" style="display:block;padding:10px 28px;background:#FF2442;color:white;border-radius:20px;font-weight:700;font-size:.82rem;text-decoration:none;text-align:center">開啟小紅書 App</a>' +
+      '<button style="padding:8px 24px;background:rgba(255,255,255,.15);color:white;border:none;border-radius:20px;font-weight:700;font-size:.78rem;cursor:pointer" onclick="document.body.removeChild(this.closest(\'div[style*=fixed]\'))">✕ 關閉</button>';
+    ov.addEventListener('click', function(e){ if(e.target===ov) document.body.removeChild(ov); });
+    document.body.appendChild(ov);
+  });
+}
+
+// 浮水印：在圖片右下角疊加 Fitto logo 文字
+function addWatermark(imgSrc, callback) {
+  var img = new Image();
+  img.onload = function() {
+    var canvas = document.createElement('canvas');
+    canvas.width = img.width;
+    canvas.height = img.height;
+    var ctx = canvas.getContext('2d');
+    ctx.drawImage(img, 0, 0);
+    var fontSize = Math.max(16, Math.round(img.width * 0.038));
+    ctx.font = 'bold ' + fontSize + 'px "Inter", Arial, sans-serif';
+    ctx.textAlign = 'right';
+    ctx.textBaseline = 'bottom';
+    var pad = Math.round(fontSize * 0.6);
+    // 半透明背景底板
+    var text = '✦ FITTO';
+    var tw = ctx.measureText(text).width;
+    ctx.fillStyle = 'rgba(0,0,0,0.38)';
+    ctx.beginPath();
+    ctx.roundRect(img.width - tw - pad*2, img.height - fontSize - pad*1.6, tw + pad*2, fontSize + pad*1.2, 6);
+    ctx.fill();
+    // 文字
+    ctx.fillStyle = 'rgba(255,255,255,0.92)';
+    ctx.fillText(text, img.width - pad, img.height - pad*0.7);
+    callback(canvas.toDataURL('image/jpeg', 0.92));
+  };
+  img.onerror = function() { callback(imgSrc); };
+  img.src = imgSrc;
+}
+
 function shareToIG(imgSrc) {
-  // IG 不支援直接帶圖分享，先儲存再提示
-  saveImgLocal(imgSrc, 'fitto_outfit');
-  showToast('📷 圖片已儲存，請至 IG 上傳！');
+  addWatermark(imgSrc, function(wSrc) {
+    saveImgLocal(wSrc, 'fitto_outfit');
+    showToast('📷 圖片已儲存，請至 IG 上傳！');
+  });
 }
 async function saveImgLocal(src, name) {
+  // 先加浮水印
+  var wSrc = await new Promise(function(resolve) { addWatermark(src, resolve); });
   var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
+  src = wSrc;
 
   // 優先嘗試 Web Share API（iOS 15+ Safari 支援，可直接存到相簿）
   if(navigator.share && isIOS) {
@@ -4251,7 +4327,7 @@ function populateCustomSelects() {
   const btmEl = document.getElementById('custom-btm');
   const outEl = document.getElementById('custom-out');
   const aiOpt = '<option value="__AI__">✨ AI 挑選（+1🪙）</option>';
-  if(topEl) topEl.innerHTML = buildOpts(tops, '— 不指定 —');
+  if(topEl) topEl.innerHTML = '<option value="">— 不指定 —</option>' + aiOpt + tops.map(i=>`<option value="${i.color}${i.type}${i.note?'（'+i.note+'）':''}">${i.color}${i.type}${i.note?' · '+i.note:''}</option>`).join('');
   if(btmEl) btmEl.innerHTML = '<option value="">— 不指定 —</option>' + aiOpt + btms.map(i=>`<option value="${i.color}${i.type}${i.note?'（'+i.note+'）':''}">${i.color}${i.type}${i.note?' · '+i.note:''}</option>`).join('');
   if(outEl) outEl.innerHTML = `<option value="">— 不加外套 —</option>` + aiOpt + outs.map(i=>`<option value="${i.color}${i.type}${i.note?'（'+i.note+'）':''}">${i.color}${i.type}${i.note?' · '+i.note:''}</option>`).join('');
 
@@ -4325,20 +4401,23 @@ async function genCustomOutfitImgWithAI(topVal, btmVal, outVal) {
 
   try {
     // 決定哪些欄位需要 AI 挑選
-    const fixedParts = [topVal !== '__AI__' ? topVal : null, btmVal !== '__AI__' ? btmVal : null, outVal !== '__AI__' ? outVal : null].filter(Boolean);
+    const needTop = topVal === '__AI__';
     const needBtm = btmVal === '__AI__';
     const needOut = outVal === '__AI__';
+    const fixedParts = [!needTop ? topVal : null, !needBtm ? btmVal : null, !needOut ? outVal : null].filter(Boolean);
     const wj = buildWardrobePromptText();
     const year = new Date().getFullYear();
     const seaEl = document.getElementById('ssea');
     const sea = (seaEl ? seaEl.value : '').replace(/[🌸☀️🍂❄️]\s*/,'') || '春';
 
+    const needList = [needTop?'推薦一件上衣':null, needBtm?'推薦一件下身':null, needOut?'推薦一件外套':null].filter(Boolean).join('、');
     const aiPrompt = `你是專業造型師。用戶已選好：${fixedParts.join('、') || '尚未選擇'}。
 衣櫃清單：${wj}
 現在是${year}年${sea}季。
-請為用戶${needBtm ? '推薦一件搭配的下身單品' : ''}${needBtm && needOut ? '，以及' : ''}${needOut ? '推薦一件外套' : ''}，符合當季潮流且和已選單品協調。
+請為用戶${needList}，符合當季潮流且和已選單品協調。
 每行一個欄位：
-${needBtm ? 'btm: 推薦下身（顏色+種類+材質，15字內）' : ''}
+${needTop ? 'top: 推薦上衣（顏色+種類，15字內）' : ''}
+${needBtm ? 'btm: 推薦下身（顏色+種類，15字內）' : ''}
 ${needOut ? 'out: 推薦外套（顏色+種類，15字內）' : ''}
 reason: 搭配理由（15字內）
 只輸出以上行，不要說明。`;
@@ -4350,6 +4429,7 @@ reason: 搭配理由（15字內）
       if(m) aiKV[m[1].trim()] = m[2].trim();
     });
 
+    const finalTop = needTop ? (aiKV.top || '白色上衣') : topVal;
     const finalBtm = needBtm ? (aiKV.btm || '深色下身') : btmVal;
     const finalOut = needOut ? (aiKV.out || '') : outVal;
     const aiReason = aiKV.reason || '';
@@ -4358,7 +4438,7 @@ reason: 搭配理由（15字內）
     const chipAccs = window._customAccSel ? Array.from(window._customAccSel) : [];
     const manualAcc = ((document.getElementById('custom-acc')||{}).value || '').trim();
     const accParts = [...chipAccs, ...(manualAcc ? [manualAcc] : [])];
-    const mainOutfit = [topVal !== '__AI__' ? topVal : null, finalBtm, finalOut !== '__AI__' ? finalOut : null].filter(Boolean).join(', ');
+    const mainOutfit = [finalTop, finalBtm, finalOut].filter(Boolean).join(', ');
     const accDesc = accParts.map(a => {
       if(/帽/.test(a)) return a + ' worn on head';
       if(/鞋|靴/.test(a)) return a + ' on feet';
@@ -4368,20 +4448,34 @@ reason: 搭配理由（15字內）
     }).join(', ');
     const outfit = [mainOutfit, ...accParts].filter(Boolean).join('＋');
 
+    // 生成選購連結
+    const aiPickedItems = [needTop?finalTop:null, needBtm?finalBtm:null, needOut?finalOut:null].filter(Boolean);
+    const shopLinksHtml = aiPickedItems.length ? `<div style="margin-top:6px;padding:6px 8px;background:rgba(200,160,80,.08);border:1px solid rgba(200,160,80,.2);border-radius:8px">
+      <div style="font-size:.54rem;color:var(--gold);font-weight:800;margin-bottom:4px">🛍 AI 挑選單品 · 選購參考</div>
+      <div style="display:flex;flex-wrap:wrap;gap:4px">${aiPickedItems.map(item=>{
+        const q = encodeURIComponent(item + ' 購買');
+        const uq = encodeURIComponent(item);
+        const gq = encodeURIComponent(item + ' 穿搭 site:uniqlo.com OR site:muji.com OR site:zara.com');
+        return `<a href="https://www.google.com/search?q=${q}" target="_blank" style="font-size:.58rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,rgba(139,92,32,.7),rgba(201,144,74,.7));border-radius:5px;padding:3px 8px">${item}</a>`;
+      }).join('')}</div>
+    </div>` : '';
+
     box.innerHTML = '<div class="img-loading"><div class="img-spinner"></div><span>生成示意圖…</span></div>';
 
     const hairDesc = HAIRSTYLE_PROMPTS[selectedHairstyle] || '';
     const avatarDesc = getAvatarPromptDesc() + (hairDesc ? ', ' + hairDesc : '');
+    const isMannequinMode = !userAvatar || userAvatar === '👤';
+    const mannequinPrefix = isMannequinMode ? 'White featureless store display mannequin, smooth oval head, clean white plastic body, full body front view. ' : '';
     const pose = getRandomPose(false);
     const accessoryClause = accDesc ? ` Accessories: ${accDesc}.` : '';
-    const imgPrompt = `High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Wearing: ${mainOutfit}.${accessoryClause} Clean minimal white studio background, no vignette, no circular frame, no black border, rectangular photo. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS. Professional studio lighting, full body front view, Vogue-quality photography, 4K detail.`;
+    const imgPrompt = `${mannequinPrefix}High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Wearing: ${mainOutfit}.${accessoryClause} Clean minimal white studio background, no vignette, no circular frame, no black border, rectangular photo. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS. Professional studio lighting, full body front view, Vogue-quality photography, 4K detail.`;
 
     const avatarRef = getSelectedAvatarRefData();
-    if(!avatarRef || !avatarRef.b64) throw new Error('請先選擇頭像');
-    const requestParts = [
-      {inlineData:{mimeType:avatarRef.mimeType, data:avatarRef.b64}},
-      {text:'Image 1 is the fixed person reference. Keep exact same face and body. Only change clothing. ' + imgPrompt}
-    ];
+    const avatarRefB64 = avatarRef && avatarRef.b64 ? avatarRef.b64 : null;
+    if(!avatarRefB64 && !isMannequinMode) throw new Error('請先選擇頭像');
+    const requestParts = avatarRefB64
+      ? [{inlineData:{mimeType:avatarRef.mimeType, data:avatarRefB64}}, {text:'Image 1 is the fixed person reference. Keep exact same face and body. Only change clothing. ' + imgPrompt}]
+      : [{text: imgPrompt}];
     const imageResult = await requestGeminiImage(requestParts, key);
     const imgSrc = 'data:' + imageResult.mimeType + ';base64,' + imageResult.data;
     addTokenUsage(0,0,'gemini_img');
@@ -4390,12 +4484,25 @@ reason: 搭配理由（15字內）
 
     box.innerHTML = `<div class="outfit-img-wrap" style="margin-bottom:8px">
       <div style="background:rgba(200,160,80,.1);border:1px solid rgba(200,160,80,.25);border-radius:8px;padding:7px 10px;margin-bottom:6px;font-size:.65rem;color:var(--ink2)">
-        <span style="color:var(--gold);font-weight:800">✨ AI 挑選：</span>${needBtm?'下身 '+finalBtm+' ':''  }${needOut?'外套 '+finalOut+' ':''}${aiReason ? '· '+aiReason : ''}
+        <span style="color:var(--gold);font-weight:800">✨ AI 挑選：</span>${needTop?'上衣 '+finalTop+' ':''}${needBtm?'下身 '+finalBtm+' ':''}${needOut?'外套 '+finalOut+' ':''}${aiReason ? '· '+aiReason : ''}
       </div>
-      <img src="${imgSrc}" class="outfit-img" onclick="openImgFull(this.src)" style="cursor:zoom-in">
+      ${shopLinksHtml}
+      <img src="${imgSrc}" class="outfit-img" onclick="openImgFull(this.src)" style="cursor:zoom-in;margin-top:6px">
       <div class="img-cost-note">🪙 -3 （含AI挑選）</div>
-      <div style="display:flex;gap:8px;margin-top:6px">
-        <button onclick="saveImgSafe('custom')" style="flex:1;padding:7px;border:1px solid var(--border2);border-radius:8px;background:transparent;color:var(--ink2);font-size:.68rem;font-weight:700;cursor:pointer">💾 儲存圖片</button>
+      <div style="font-size:.52rem;color:var(--muted);opacity:0.7;text-align:center;padding:4px 8px;line-height:1.5">⚠️ AI 生成圖僅供參考，實際服裝色彩與細節可能不符</div>
+      <div class="share-bar">
+        <button class="shr-btn shr-ig" onclick="shareToIG(window._fittoImgCache['custom']&&window._fittoImgCache['custom'].imgSrc)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+          <span>Instagram</span>
+        </button>
+        <button class="shr-btn shr-xhs" onclick="shareToXHS(window._fittoImgCache['custom']&&window._fittoImgCache['custom'].imgSrc)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.5 7.5h-2.25v1.5H17.5V11h-2.25v6h-2V11H12V9h1.25V7.5C13.25 5.567 14.817 4 16.75 4H17.5v2.5h-.75a.75.75 0 00-.75.75V7.5H17.5z"/></svg>
+          <span>小紅書</span>
+        </button>
+        <button class="shr-btn shr-save" onclick="saveImgSafe('custom')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>儲存相片</span>
+        </button>
       </div>
     </div>`;
   } catch(e) {
@@ -4415,7 +4522,7 @@ async function genCustomOutfitImg() {
   const topVal = (document.getElementById('custom-top')||{}).value || '';
   const btmVal = (document.getElementById('custom-btm')||{}).value || '';
   const outVal = (document.getElementById('custom-out')||{}).value || '';
-  const needAI = btmVal === '__AI__' || outVal === '__AI__';
+  const needAI = topVal === '__AI__' || btmVal === '__AI__' || outVal === '__AI__';
   if(needAI) { genCustomOutfitImgWithAI(topVal, btmVal, outVal); return; }
   const chipAccs = window._customAccSel ? Array.from(window._customAccSel) : [];
   const manualAcc = ((document.getElementById('custom-acc')||{}).value || '').trim();
@@ -4447,17 +4554,19 @@ async function genCustomOutfitImg() {
     if(!key) throw new Error('請先設定 Gemini Key');
     if(!checkAndSpend()) { box.innerHTML=''; return; }
     const hairDesc = HAIRSTYLE_PROMPTS[selectedHairstyle] || '';
-  const avatarDesc = getAvatarPromptDesc() + (hairDesc ? ', ' + hairDesc : '');
+    const avatarDesc = getAvatarPromptDesc() + (hairDesc ? ', ' + hairDesc : '');
+    const isMannequinMode = !userAvatar || userAvatar === '👤';
+    const mannequinPrefix = isMannequinMode ? 'White featureless store display mannequin, smooth oval head, clean white plastic body, full body front view. ' : '';
     const pose = getRandomPose(false);
     // 明確把配件穿戴位置寫進 prompt
     const accessoryClause = accDesc ? ` Accessories being worn: ${accDesc}.` : '';
-    const imgPrompt = `High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Wearing: ${mainOutfit || outfit}.${accessoryClause} All accessories must be clearly visible and properly worn. Clean minimal white or light grey studio background, no vignette, no circular frame, no black border, rectangular photo format. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS anywhere in the image. Professional studio lighting, sharp focus on full outfit including accessories, full body front view, Vogue-quality photography, 4K detail.`;
+    const imgPrompt = `${mannequinPrefix}High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Wearing: ${mainOutfit || outfit}.${accessoryClause} All accessories must be clearly visible and properly worn. Clean minimal white or light grey studio background, no vignette, no circular frame, no black border, rectangular photo format. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS anywhere in the image. Professional studio lighting, sharp focus on full outfit including accessories, full body front view, Vogue-quality photography, 4K detail.`;
     const avatarRef = getSelectedAvatarRefData();
-    if(!avatarRef || !avatarRef.b64) throw new Error('缺少頭像 reference，請在商店選擇頭像');
-    const requestParts = [
-      {inlineData:{mimeType:avatarRef.mimeType, data:avatarRef.b64}},
-      {text:'Image 1 is the fixed person reference. Keep the exact same face, hairstyle, body identity. Only change clothing and accessories. ' + imgPrompt}
-    ];
+    const avatarRefB64 = avatarRef && avatarRef.b64 ? avatarRef.b64 : null;
+    if(!avatarRefB64 && !isMannequinMode) throw new Error('缺少頭像 reference，請在商店選擇頭像');
+    const requestParts = avatarRefB64
+      ? [{inlineData:{mimeType:avatarRef.mimeType, data:avatarRefB64}}, {text:'Image 1 is the fixed person reference. Keep the exact same face, hairstyle, body identity. Only change clothing and accessories. ' + imgPrompt}]
+      : [{text: imgPrompt}];
     const imageResult = await requestGeminiImage(requestParts, key);
     addTokenUsage(0,0,'gemini_img');
     const imgSrc = 'data:' + imageResult.mimeType + ';base64,' + imageResult.data;
@@ -4469,8 +4578,20 @@ async function genCustomOutfitImg() {
     box.innerHTML = `<div class="outfit-img-wrap" style="margin-bottom:8px">
       <img src="${imgSrc}" class="outfit-img" onclick="openImgFull(this.src)" style="cursor:zoom-in">
       <div class="img-cost-note">🪙 -2</div>
-      <div style="display:flex;gap:8px;margin-top:6px">
-        <button onclick="saveImgSafe('custom')" style="flex:1;padding:7px;border:1px solid var(--border2);border-radius:8px;background:transparent;color:var(--ink2);font-size:.68rem;font-weight:700;cursor:pointer">💾 儲存圖片</button>
+      <div style="font-size:.52rem;color:var(--muted);opacity:0.7;text-align:center;padding:4px 8px;line-height:1.5">⚠️ AI 生成圖僅供參考，實際服裝色彩與細節可能不符</div>
+      <div class="share-bar">
+        <button class="shr-btn shr-ig" onclick="shareToIG(window._fittoImgCache['custom']&&window._fittoImgCache['custom'].imgSrc)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
+          <span>Instagram</span>
+        </button>
+        <button class="shr-btn shr-xhs" onclick="shareToXHS(window._fittoImgCache['custom']&&window._fittoImgCache['custom'].imgSrc)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.5 7.5h-2.25v1.5H17.5V11h-2.25v6h-2V11H12V9h1.25V7.5C13.25 5.567 14.817 4 16.75 4H17.5v2.5h-.75a.75.75 0 00-.75.75V7.5H17.5z"/></svg>
+          <span>小紅書</span>
+        </button>
+        <button class="shr-btn shr-save" onclick="saveImgSafe('custom')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>儲存相片</span>
+        </button>
       </div>
       <details style="margin-top:8px;font-size:.62rem;color:var(--muted)">
         <summary style="cursor:pointer;color:var(--gold);font-weight:700;list-style:none">▸ 查看生圖 Prompt</summary>
@@ -4778,7 +4899,8 @@ tip: 整體升級方向（20字內）`;
         </div>
       </div>`;
   } catch(e) {
-    res.innerHTML = `<div style="color:var(--red);font-size:.72rem">⚠️ 分析失敗：${(e.message||'').substring(0,80)}</div>`;
+    const errMsg = (e.message || '未知錯誤').substring(0, 120);
+    res.innerHTML = `<div style="color:var(--red);font-size:.7rem;line-height:1.6;padding:10px 0">⚠️ 分析失敗：${errMsg}<br><button onclick="analyzeClosetInsights()" style="margin-top:8px;padding:8px 20px;background:linear-gradient(135deg,#8A5C20,#C9904A);border:none;border-radius:8px;font-size:.7rem;font-weight:800;color:#FAF7F2;cursor:pointer">🔄 重新分析 AI 衣櫃洞察</button></div>`;
   } finally {
     btn.textContent = '🔍 重新分析 AI 衣櫃洞察'; btn.disabled = false;
   }
