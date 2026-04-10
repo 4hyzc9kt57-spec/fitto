@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-15 · AI 智能穿搭</title>
+<title>Fitto VD4-16 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -705,7 +705,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-15</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-16</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1040,7 +1040,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-15 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-16 · 2026.04</div>
   </div>
 </div>
 
@@ -1302,7 +1302,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-15 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-16 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1816,7 +1816,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-15 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-16 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -2266,7 +2266,7 @@ async function geminiText(prompt, maxTokens) {
   var preview = prompt.replace(/[\n\r]/g,' ').substring(0, 60);
   apiLog('→ 文字請求: ' + preview + '…', 'prompt');
   var lastErr = null;
-  var delays = [0, 3000, 6000];
+  var delays = [0, 4000, 10000];
   for(var attempt = 0; attempt < delays.length; attempt++) {
     if(delays[attempt] > 0) {
       apiLog('⏳ 高需求重試 (' + attempt + ')…', 'info');
@@ -2280,7 +2280,7 @@ async function geminiText(prompt, maxTokens) {
       var d = await res.json();
       if(d.error) {
         var emsg = d.error.message || 'Gemini error';
-        if(/high demand|overloaded|503|quota/i.test(emsg) && attempt < delays.length - 1) {
+        if(/high demand|overloaded|503|quota|busy|unavailable|try again|temporarily/i.test(emsg) && attempt < delays.length - 1) {
           lastErr = new Error(emsg);
           apiLog('⚠️ ' + emsg.substring(0,60) + ' → 重試', 'err');
           continue;
@@ -2296,7 +2296,7 @@ async function geminiText(prompt, maxTokens) {
       if(!tp) throw new Error('Gemini 回傳空文字');
       return tp.text.trim();
     } catch(fetchErr) {
-      if(attempt < delays.length - 1 && /high demand|overloaded|503/i.test(fetchErr.message)) {
+      if(attempt < delays.length - 1 && /high demand|overloaded|503|busy|unavailable|try again|temporarily/i.test(fetchErr.message)) {
         lastErr = fetchErr; continue;
       }
       throw fetchErr;
@@ -4251,21 +4251,53 @@ function addWatermark(imgSrc, callback) {
     canvas.height = img.height;
     var ctx = canvas.getContext('2d');
     ctx.drawImage(img, 0, 0);
-    var fontSize = Math.max(16, Math.round(img.width * 0.038));
-    ctx.font = 'bold ' + fontSize + 'px "Inter", Arial, sans-serif';
+    var w = img.width, h = img.height;
+
+    // ── 1. 全圖斜紋浮水印（難以裁切）──
+    var diagFontSize = Math.max(11, Math.round(w * 0.028));
+    ctx.save();
+    ctx.font = 'bold ' + diagFontSize + 'px "Inter", Arial, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.11)';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    var diagText = 'FITTO';
+    var step = diagFontSize * 5.5;
+    ctx.translate(w / 2, h / 2);
+    ctx.rotate(-Math.PI / 5.5);
+    for(var row = -Math.ceil(h / step) - 2; row <= Math.ceil(h / step) + 2; row++) {
+      for(var col = -Math.ceil(w / step) - 2; col <= Math.ceil(w / step) + 2; col++) {
+        ctx.fillText(diagText, col * step, row * step);
+      }
+    }
+    ctx.restore();
+
+    // ── 2. 底部品牌欄（時尚橫條）──
+    var barH = Math.round(h * 0.055);
+    var barY = h - barH;
+    // 漸層底條
+    var grad = ctx.createLinearGradient(0, barY, 0, h);
+    grad.addColorStop(0, 'rgba(0,0,0,0)');
+    grad.addColorStop(0.3, 'rgba(0,0,0,0.55)');
+    grad.addColorStop(1, 'rgba(0,0,0,0.75)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, barY - Math.round(barH * 0.8), w, barH + Math.round(barH * 0.8));
+
+    // 左側 FITTO 品牌字
+    var brandSize = Math.max(12, Math.round(barH * 0.52));
+    ctx.font = '800 ' + brandSize + 'px "Inter", Arial, sans-serif';
+    ctx.fillStyle = 'rgba(255,255,255,0.95)';
+    ctx.textAlign = 'left';
+    ctx.textBaseline = 'middle';
+    var pad = Math.round(brandSize * 0.7);
+    ctx.fillText('FITTO', pad, barY + barH * 0.42);
+
+    // 右側 slogan
+    var sloganSize = Math.max(8, Math.round(brandSize * 0.52));
+    ctx.font = '400 ' + sloganSize + 'px "Inter", Arial, sans-serif';
+    ctx.fillStyle = 'rgba(212,160,80,0.9)';
     ctx.textAlign = 'right';
-    ctx.textBaseline = 'bottom';
-    var pad = Math.round(fontSize * 0.6);
-    // 半透明背景底板
-    var text = '✦ FITTO';
-    var tw = ctx.measureText(text).width;
-    ctx.fillStyle = 'rgba(0,0,0,0.38)';
-    ctx.beginPath();
-    ctx.roundRect(img.width - tw - pad*2, img.height - fontSize - pad*1.6, tw + pad*2, fontSize + pad*1.2, 6);
-    ctx.fill();
-    // 文字
-    ctx.fillStyle = 'rgba(255,255,255,0.92)';
-    ctx.fillText(text, img.width - pad, img.height - pad*0.7);
+    ctx.fillText('AI 智能穿搭', w - pad, barY + barH * 0.42);
+
     callback(canvas.toDataURL('image/jpeg', 0.92));
   };
   img.onerror = function() { callback(imgSrc); };
@@ -4507,8 +4539,12 @@ reason: 搭配理由（15字內）
     window._fittoImgCache['custom'] = {imgSrc, outfit};
 
     box.innerHTML = `<div class="outfit-img-wrap" style="margin-bottom:8px">
-      <div style="background:rgba(200,160,80,.1);border:1px solid rgba(200,160,80,.25);border-radius:8px;padding:7px 10px;margin-bottom:6px;font-size:.65rem;color:var(--ink2)">
-        <span style="color:var(--gold);font-weight:800">✨ AI 挑選：</span>${needTop?'上衣 '+finalTop+' ':''}${needBtm?'下身 '+finalBtm+' ':''}${needOut?'外套 '+finalOut+' ':''}${aiReason ? '· '+aiReason : ''}
+      <div style="background:rgba(200,160,80,.1);border:1px solid rgba(200,160,80,.25);border-radius:8px;padding:8px 10px;margin-bottom:6px">
+        <div style="font-size:.58rem;color:var(--gold);font-weight:800;margin-bottom:4px">✨ AI 挑選結果</div>
+        ${needTop?'<div style="font-size:.68rem;color:var(--ink);line-height:1.6;word-break:break-all"><span style="color:var(--muted);font-size:.55rem">上衣：</span>'+finalTop+'</div>':''}
+        ${needBtm?'<div style="font-size:.68rem;color:var(--ink);line-height:1.6;word-break:break-all"><span style="color:var(--muted);font-size:.55rem">下身：</span>'+finalBtm+'</div>':''}
+        ${needOut?'<div style="font-size:.68rem;color:var(--ink);line-height:1.6;word-break:break-all"><span style="color:var(--muted);font-size:.55rem">外套：</span>'+finalOut+'</div>':''}
+        ${aiReason?'<div style="font-size:.6rem;color:var(--ink2);margin-top:3px;font-style:italic">'+aiReason+'</div>':''}
       </div>
       ${shopLinksHtml}
       <img src="${imgSrc}" class="outfit-img" onclick="openImgFull(this.src)" style="cursor:zoom-in;margin-top:6px">
@@ -4932,8 +4968,12 @@ tip: 整體升級方向（20字內）`;
         </div>
       </div>`;
   } catch(e) {
-    const errMsg = (e.message || '未知錯誤').substring(0, 120);
-    res.innerHTML = `<div style="color:var(--red);font-size:.7rem;line-height:1.6;padding:10px 0">⚠️ 分析失敗：${errMsg}<br><button onclick="analyzeClosetInsights()" style="margin-top:8px;padding:8px 20px;background:linear-gradient(135deg,#8A5C20,#C9904A);border:none;border-radius:8px;font-size:.7rem;font-weight:800;color:#FAF7F2;cursor:pointer">🔄 重新分析 AI 衣櫃洞察</button></div>`;
+    var emsg = e.message || '未知錯誤';
+    var isHighDemand = /high demand|overloaded|503|busy|unavailable|try again|temporarily/i.test(emsg);
+    var displayMsg = isHighDemand
+      ? 'Gemini 服務目前繁忙（已自動重試3次），請稍後幾分鐘再試'
+      : emsg.substring(0, 120);
+    res.innerHTML = `<div style="color:var(--red);font-size:.7rem;line-height:1.6;padding:10px 0">⚠️ 分析失敗：${displayMsg}<br><button onclick="analyzeClosetInsights()" style="margin-top:8px;padding:8px 20px;background:linear-gradient(135deg,#8A5C20,#C9904A);border:none;border-radius:8px;font-size:.7rem;font-weight:800;color:#FAF7F2;cursor:pointer">🔄 重新分析 AI 衣櫃洞察</button></div>`;
   } finally {
     btn.textContent = '🔍 重新分析 AI 衣櫃洞察'; btn.disabled = false;
   }
@@ -5183,7 +5223,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-15<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-16<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -5207,7 +5247,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-15',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-16',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -5453,7 +5493,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-15 新功能：髮型購買、VIP衣櫃、整合設定頁
+// VD4-16 新功能：髮型購買、VIP衣櫃、整合設定頁
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
