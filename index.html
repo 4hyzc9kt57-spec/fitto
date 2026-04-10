@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-17 · AI 智能穿搭</title>
+<title>Fitto VD4-18 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -705,7 +705,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-17</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-18</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1045,7 +1045,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-17 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-18 · 2026.04</div>
   </div>
 </div>
 
@@ -1307,7 +1307,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-17 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-18 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1821,7 +1821,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-17 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-18 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -4865,8 +4865,9 @@ async function aiInsightLayer1(key) {
 Wardrobe items:
 ${itemsList}
 (Format: item name, category, primary color)
-Respond in Traditional Chinese with JSON format:
-{"style_distribution":[{"style":"風格名稱","percentage":數字}],"color_palette":[{"color":"色系名稱","percentage":數字}],"overall_rating":數字,"summary":"一句話總結衣櫃風格定位","top_gap":"最明顯的一個缺口"}`;
+Respond ONLY in valid JSON (no markdown, no explanation). Use Traditional Chinese for text values. Schema:
+{"style_distribution":[{"style":"string","percentage":0}],"color_palette":[{"color":"string","percentage":0}],"overall_rating":0,"summary":"string","top_gap":"string"}
+Rules: percentage values must be integers 0-100, overall_rating must be integer 1-10, provide 3-5 styles and 3-5 colors that sum to ~100%.`;
 
   const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
     method:'POST', headers:{'Content-Type':'application/json'},
@@ -4877,10 +4878,15 @@ Respond in Traditional Chinese with JSON format:
   });
   const d = await res.json();
   if(d.error) throw new Error(d.error.message || 'Gemini error');
-  var raw = ((((d.candidates||[])[0]||{}).content||{}).parts||[])[0];
-  if(!raw || !raw.text) throw new Error('Gemini 無回傳');
+  var cand = (d.candidates||[])[0];
+  if(!cand) throw new Error('Gemini 無候選回應');
+  var raw = ((cand.content||{}).parts||[])[0];
+  if(!raw || !raw.text) throw new Error('Gemini 回傳空內容 (finishReason:' + (cand.finishReason||'?') + ')');
   var txt = raw.text.replace(/```json|```/g,'').trim();
-  return JSON.parse(txt);
+  // 用 indexOf/lastIndexOf 取出第一個完整 JSON 物件
+  var fi = txt.indexOf('{'), li = txt.lastIndexOf('}');
+  if(fi === -1 || li === -1) throw new Error('回傳非 JSON：' + txt.substring(0,60));
+  return JSON.parse(txt.slice(fi, li+1));
 }
 
 function renderInsightLayer1(l1, res) {
@@ -4981,10 +4987,10 @@ Deeply analyze the following wardrobe category and provide actionable insights.
 Category: ${category}
 Items:
 ${itemsDetail}
-(Format: name, color, material, fit, style tags)
 User's overall wardrobe style: ${overallStyle}
-Respond in Traditional Chinese with JSON format:
-{"category_rating":數字,"strengths":["優點1","優點2"],"weaknesses":["缺點1","缺點2"],"occasion_coverage":{"daily":數字,"work":數字,"date":數字,"formal":數字,"outdoor":數字},"missing_items":[{"item":"缺少單品","reason":"原因","priority":"high/medium/low"}],"recommendation":"具體建議一段話"}`;
+Respond ONLY in valid JSON (no markdown). Use Traditional Chinese for all text values. Schema:
+{"category_rating":0,"strengths":["string","string"],"weaknesses":["string","string"],"occasion_coverage":{"daily":0,"work":0,"date":0,"formal":0,"outdoor":0},"missing_items":[{"item":"string","reason":"string","priority":"high"}],"recommendation":"string"}
+Rules: category_rating is integer 1-10, occasion_coverage values are integers 0-100, priority must be exactly "high", "medium", or "low", provide 2-3 strengths, 2-3 weaknesses, 2-3 missing items.`;
 
     const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -4995,9 +5001,14 @@ Respond in Traditional Chinese with JSON format:
     });
     const d = await res.json();
     if(d.error) throw new Error(d.error.message || 'Gemini error');
-    var raw = ((((d.candidates||[])[0]||{}).content||{}).parts||[])[0];
-    var txt = (raw&&raw.text||'').replace(/```json|```/g,'').trim();
-    var l2 = JSON.parse(txt);
+    var cand2 = (d.candidates||[])[0];
+    if(!cand2) throw new Error('Gemini 無候選回應');
+    var rawPart2 = ((cand2.content||{}).parts||[])[0];
+    if(!rawPart2||!rawPart2.text) throw new Error('Gemini 回傳空內容 ('+( cand2.finishReason||'?')+')');
+    var txt2 = rawPart2.text.replace(/```json|```/g,'').trim();
+    var fi2 = txt2.indexOf('{'), li2 = txt2.lastIndexOf('}');
+    if(fi2===-1||li2===-1) throw new Error('回傳非 JSON：'+txt2.substring(0,60));
+    var l2 = JSON.parse(txt2.slice(fi2,li2+1));
     renderInsightLayer2(l2, category, l2el);
   } catch(e) {
     coins += 1; saveProgress(); updateCoinUI();
@@ -5065,17 +5076,17 @@ async function triggerLayer3() {
       return 'id:'+(idx+1)+', '+(i.color||'')+(i.type||'')+(i.note?'（'+i.note+'）':'')+', 類別:'+(i.type||'')+', 顏色:'+(i.color||'')+', 材質:'+(i.material||'未知')+', 版型:'+(i.fit||'未知')+', 風格:'+(i.style||'未知');
     }).join('\n');
     const prompt = `You are a professional fashion stylist. Calculate the outfit potential of this wardrobe.
-All wardrobe items:
+All wardrobe items (id starts from 1):
 ${allDetail}
-(Format: id, name, category, color, material, fit, style tags)
 Tasks:
 1. Calculate total possible outfit combinations (top + bottom, optional outerwear + shoes)
-2. Identify isolated items (items that match with fewer than 2 others)
-3. Find the most versatile items (items that match with the most others)
+2. Identify isolated items (match with fewer than 2 others)
+3. Find the most versatile items (match with most others)
 4. Identify the best 3 outfit combinations
 5. Suggest what single item would increase combinations the most
-Respond in Traditional Chinese with JSON format:
-{"total_combinations":數字,"isolated_items":[{"id":"id","name":"名稱","reason":"孤立原因"}],"versatile_items":[{"id":"id","name":"名稱","match_count":數字}],"best_outfits":[{"items":["item_id1","item_id2"],"occasion":"場合","description":"搭配描述"}],"recommended_addition":{"item":"建議新增單品","estimated_new_combinations":數字,"reason":"原因"}}`;
+Respond ONLY in valid JSON (no markdown). Use Traditional Chinese for text values. Schema:
+{"total_combinations":0,"isolated_items":[{"id":"1","name":"string","reason":"string"}],"versatile_items":[{"id":"1","name":"string","match_count":0}],"best_outfits":[{"items":["1","2"],"occasion":"string","description":"string"}],"recommended_addition":{"item":"string","estimated_new_combinations":0,"reason":"string"}}
+Rules: total_combinations and match_count and estimated_new_combinations are integers, provide up to 3 isolated items, top 3 versatile items, exactly 3 best outfits.`;
 
     const res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
       method:'POST', headers:{'Content-Type':'application/json'},
@@ -5086,9 +5097,14 @@ Respond in Traditional Chinese with JSON format:
     });
     const d = await res.json();
     if(d.error) throw new Error(d.error.message || 'Gemini error');
-    var raw = ((((d.candidates||[])[0]||{}).content||{}).parts||[])[0];
-    var txt = (raw&&raw.text||'').replace(/```json|```/g,'').trim();
-    var l3 = JSON.parse(txt);
+    var cand3 = (d.candidates||[])[0];
+    if(!cand3) throw new Error('Gemini 無候選回應');
+    var rawPart3 = ((cand3.content||{}).parts||[])[0];
+    if(!rawPart3||!rawPart3.text) throw new Error('Gemini 回傳空內容 ('+(cand3.finishReason||'?')+')');
+    var txt3 = rawPart3.text.replace(/```json|```/g,'').trim();
+    var fi3 = txt3.indexOf('{'), li3 = txt3.lastIndexOf('}');
+    if(fi3===-1||li3===-1) throw new Error('回傳非 JSON：'+txt3.substring(0,60));
+    var l3 = JSON.parse(txt3.slice(fi3,li3+1));
     renderInsightLayer3(l3, l3el);
   } catch(e) {
     coins += 2; saveProgress(); updateCoinUI();
@@ -5392,7 +5408,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-17<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-18<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -5416,7 +5432,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-17',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-18',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -5662,7 +5678,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-17 新功能：髮型購買、VIP衣櫃、整合設定頁
+// VD4-18 新功能：髮型購買、VIP衣櫃、整合設定頁
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
