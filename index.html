@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-25 · AI 智能穿搭</title>
+<title>Fitto VD4-26 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -705,7 +705,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-25</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-26</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1044,7 +1044,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-25 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-26 · 2026.04</div>
   </div>
 </div>
 
@@ -1306,7 +1306,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-25 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-26 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -4979,10 +4979,8 @@ async function aiInsightLayer1(key) {
     + '"overall_rating":7,"summary":"以休閒為主的實用衣櫃","top_gap":"缺乏正式場合單品"}\n'
     + '規則：繁體中文，style_distribution 2-4項，color_palette 3-5項，各加總~100，rating整數1-10';
 
-  var raw = await geminiText(prompt, 500);
-  var fi = raw.indexOf('{'), li = raw.lastIndexOf('}');
-  if(fi === -1 || li === -1) throw new Error('回傳格式錯誤：' + raw.substring(0,60));
-  var result = safeParseJson(raw.slice(fi, li+1));
+  var raw = await geminiJson(prompt, 500);
+  var result = safeParseJson(raw);
   if(!result) throw new Error('JSON 解析失敗，請重試');
   return {
     style_distribution: result.style_distribution || [],
@@ -5083,10 +5081,8 @@ async function triggerLayer2(category) {
 輸出:{"category_rating":7,"strengths":["優點"],"weaknesses":["缺點"],"occasion_coverage":{"daily":70,"work":40,"date":50,"formal":10,"outdoor":30},"missing_items":[{"item":"單品","reason":"原因","priority":"high"}],"recommendation":"建議"}
 規則:rating為1-10整數,coverage為0-100整數,priority只能high/medium/low,繁體中文`;
 
-    var raw2 = await geminiText(prompt, 1800);
-    var fi2 = raw2.indexOf('{'), li2 = raw2.lastIndexOf('}');
-    if(fi2===-1||li2===-1) throw new Error('AI 回傳格式錯誤，請重試。原文：'+raw2.substring(0,60));
-    var l2 = safeParseJson(raw2.slice(fi2,li2+1));
+    var raw2 = await geminiJson(prompt, 1800);
+    var l2 = safeParseJson(raw2);
     if(!l2) throw new Error('JSON 解析失敗，請重試');
     renderInsightLayer2(l2, category, l2el);
   } catch(e) {
@@ -5387,7 +5383,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-25<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-26<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -5411,7 +5407,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-25',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-26',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
