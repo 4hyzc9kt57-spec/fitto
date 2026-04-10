@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-24 · AI 智能穿搭</title>
+<title>Fitto VD4-25 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -705,7 +705,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-24</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-25</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -931,11 +931,10 @@ body{background:var(--bg);color:var(--ink);}
   <!-- 衣櫃分析 -->
   <div class="card" style="margin-top:14px">
     <div style="font-size:.78rem;font-weight:800;color:var(--ink);margin-bottom:4px">🧠 AI 衣櫃洞察</div>
-    <div style="font-size:.6rem;color:var(--muted);margin-bottom:6px">三層分析：快速掃描（免費）→ 類別深入（🪙-1）→ 搭配潛力（🪙-2）</div>
+    <div style="font-size:.6rem;color:var(--muted);margin-bottom:6px">兩層分析：整體掃描（免費）→ 類別深入（🪙-1）</div>
     <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
-      <span style="font-size:.56rem;background:rgba(76,175,125,.1);border:1px solid rgba(76,175,125,.25);border-radius:6px;padding:2px 7px;color:#4CAF7D;font-weight:700">第一層免費</span>
-      <span style="font-size:.56rem;background:rgba(201,165,80,.12);border:1px solid rgba(201,165,80,.3);border-radius:6px;padding:2px 7px;color:var(--gold);font-weight:700">第二層 1 幣</span>
-      <span style="font-size:.56rem;background:rgba(201,165,80,.12);border:1px solid rgba(201,165,80,.3);border-radius:6px;padding:2px 7px;color:var(--gold);font-weight:700">第三層 2 幣</span>
+      <span style="font-size:.56rem;background:rgba(76,175,125,.1);border:1px solid rgba(76,175,125,.25);border-radius:6px;padding:2px 7px;color:#4CAF7D;font-weight:700">整體掃描免費</span>
+      <span style="font-size:.56rem;background:rgba(201,165,80,.12);border:1px solid rgba(201,165,80,.3);border-radius:6px;padding:2px 7px;color:var(--gold);font-weight:700">類別深入 1 幣</span>
     </div>
     <div id="analysis-result" style="display:none"></div>
     <button class="btn-ghost" onclick="analyzeClosetInsights()" id="analysis-btn">🔍 開始 AI 衣櫃洞察</button>
@@ -1045,7 +1044,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-24 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-25 · 2026.04</div>
   </div>
 </div>
 
@@ -1307,7 +1306,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-24 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-25 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1821,7 +1820,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-24 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-25 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -4921,7 +4920,7 @@ async function analyzeClosetInsights() {
     l1 = buildLocalL1Fallback();
     window._insightL1 = l1;
   }
-  // 無論第一層成功與否，都渲染 UI（讓第二三層按鈕可用）
+  // 無論第一層成功與否，都渲染 UI（讓第二層按鈕可用）
   renderInsightLayer1(l1, res, l1Error);
   btn.textContent = '🔍 重新分析'; btn.disabled = false;
 }
@@ -4960,27 +4959,39 @@ function buildLocalL1Fallback() {
 
 // ═══ 三層洞察：第一層 ═══
 async function aiInsightLayer1(key) {
-  const itemsList = wardrobe.map(function(i, idx) {
-    return (idx+1) + '. ' + (i.color||'') + (i.type||'') + (i.note?'('+i.note+')':'') + ' | ' + (i.type||'未知') + ' | ' + (i.color||'未知');
-  }).join('\n');
-  const prompt = `你是專業造型師，請分析以下衣櫃清單並以繁體中文回傳 JSON。
+  var typeCount = {}, colorCount = {}, styleCount = {};
+  wardrobe.forEach(function(i) {
+    var t = i.type||'其他'; typeCount[t] = (typeCount[t]||0)+1;
+    var c = i.color||'其他'; colorCount[c] = (colorCount[c]||0)+1;
+    var s = i.style||''; if(s) styleCount[s] = (styleCount[s]||0)+1;
+  });
+  function topN(map,n){ return Object.keys(map).sort(function(a,b){return map[b]-map[a];}).slice(0,n); }
+  var stats = '件數:'+wardrobe.length
+    +' 種類:'+topN(typeCount,6).join('/')
+    +' 顏色:'+topN(colorCount,6).join('/')
+    +' 風格:'+topN(styleCount,4).join('/');
 
-衣櫃清單：
-${itemsList}
+  // 單一請求，避免同時發送觸發 rate limit
+  var prompt = '你是造型師。根據以下衣櫃統計，分析風格與色系，只輸出JSON不要其他：\n'
+    + stats + '\n'
+    + '{"style_distribution":[{"style":"休閒風","percentage":55},{"style":"商務休閒","percentage":30}],'
+    + '"color_palette":[{"color":"白色","percentage":30},{"color":"深藍","percentage":25},{"color":"黑色","percentage":20}],'
+    + '"overall_rating":7,"summary":"以休閒為主的實用衣櫃","top_gap":"缺乏正式場合單品"}\n'
+    + '規則：繁體中文，style_distribution 2-4項，color_palette 3-5項，各加總~100，rating整數1-10';
 
-請只輸出以下格式的 JSON，不要有任何說明文字或 markdown：
-{"style_distribution":[{"style":"休閒風","percentage":40},{"style":"商務風","percentage":30}],"color_palette":[{"color":"深色系","percentage":50},{"color":"淺色系","percentage":30}],"overall_rating":7,"summary":"以休閒為主的實用衣櫃","top_gap":"缺乏正式場合單品"}
-
-注意：percentage 為整數、overall_rating 為 1-10 整數、提供 3-5 種風格和色系。`;
-
-  var raw = await geminiText(prompt, 1200);
+  var raw = await geminiText(prompt, 500);
   var fi = raw.indexOf('{'), li = raw.lastIndexOf('}');
-  if(fi === -1 || li === -1) throw new Error('AI 回傳格式錯誤，請重試。原文：' + raw.substring(0,60));
-  var l1result = safeParseJson(raw.slice(fi, li+1));
-  if(!l1result) throw new Error('JSON 解析失敗，請重試');
-  return l1result;
+  if(fi === -1 || li === -1) throw new Error('回傳格式錯誤：' + raw.substring(0,60));
+  var result = safeParseJson(raw.slice(fi, li+1));
+  if(!result) throw new Error('JSON 解析失敗，請重試');
+  return {
+    style_distribution: result.style_distribution || [],
+    color_palette: result.color_palette || [],
+    overall_rating: result.overall_rating || 5,
+    summary: result.summary || '衣櫃分析完成',
+    top_gap: result.top_gap || ''
+  };
 }
-
 function renderInsightLayer1(l1, res, errorMsg) {
   errorMsg = errorMsg || '';
   // 星等
@@ -5015,7 +5026,7 @@ function renderInsightLayer1(l1, res, errorMsg) {
         <span style="font-size:.68rem;font-weight:800;color:var(--gold)">🧠 整體掃描${l1._isLocal?'（本地統計）':'（免費）'}</span>
         <span style="font-size:.7rem;color:#FFD700;letter-spacing:1px" title="${rating}/10">${stars}</span>
       </div>
-      ${errorMsg ? '<div style="font-size:.6rem;color:var(--muted);background:rgba(239,68,68,.06);border-radius:6px;padding:4px 8px;margin-bottom:6px">⚠️ AI 繁忙，已改用本地統計。第二三層仍可正常使用。<button onclick="analyzeClosetInsights()" style="margin-left:8px;padding:2px 8px;background:rgba(201,165,80,.2);border:none;border-radius:4px;font-size:.58rem;color:var(--gold);cursor:pointer;font-weight:700">重試AI</button></div>' : ''}
+      ${errorMsg ? '<div style="font-size:.6rem;color:var(--muted);background:rgba(239,68,68,.06);border-radius:6px;padding:4px 8px;margin-bottom:6px">⚠️ AI 繁忙，已改用本地統計。第二層類別分析仍可正常使用。<button onclick="analyzeClosetInsights()" style="margin-left:8px;padding:2px 8px;background:rgba(201,165,80,.2);border:none;border-radius:4px;font-size:.58rem;color:var(--gold);cursor:pointer;font-weight:700">重試AI</button></div>' : ''}
       <div style="font-size:.72rem;color:var(--ink);font-weight:700;margin-bottom:4px">${l1.summary||''}</div>
       <div style="font-size:.62rem;color:var(--red);background:rgba(239,68,68,.08);border-radius:6px;padding:4px 8px;margin-bottom:10px">⚠️ 最大缺口：${l1.top_gap||''}</div>
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px">
@@ -5040,17 +5051,7 @@ function renderInsightLayer1(l1, res, errorMsg) {
       <div style="display:flex;gap:6px;flex-wrap:wrap" id="l2-cat-btns">${catBtns}</div>
       <div id="l2-result" style="margin-top:8px"></div>
     </div>
-
-    <!-- L3 觸發 -->
-    <div style="background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:12px">
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
-        <span style="font-size:.68rem;font-weight:800;color:var(--ink)">🎯 搭配潛力計算</span>
-        <span style="font-size:.58rem;color:var(--gold);background:rgba(201,165,80,.12);border-radius:6px;padding:2px 7px">🪙 -2 金幣</span>
-      </div>
-      <div style="font-size:.6rem;color:var(--muted);margin-bottom:8px">計算全衣櫃可搭組合數、孤立單品與最佳搭配</div>
-      <button onclick="triggerLayer3()" style="width:100%;padding:9px;background:linear-gradient(135deg,rgba(139,92,32,.6),rgba(201,144,74,.6));border:none;border-radius:8px;font-size:.7rem;font-weight:800;color:#FAF7F2;cursor:pointer">🎯 計算搭配潛力</button>
-      <div id="l3-result" style="margin-top:8px"></div>
-    </div>`;
+`;
 }
 
 // ═══ 第二層：類別深入 ═══
@@ -5141,98 +5142,6 @@ function renderInsightLayer2(l2, category, el) {
     </div>`;
 }
 
-// ═══ 第三層：搭配潛力 ═══
-async function triggerLayer3() {
-  if(!spendCoin(2,'搭配潛力計算')) return;
-  const l3el = document.getElementById('l3-result');
-  if(!l3el) return;
-  l3el.innerHTML = '<div style="font-size:.68rem;color:var(--muted);padding:8px 0">🎯 計算中，需要稍等…</div>';
-  try {
-    const key = localStorage.getItem('fitto_gemini_key') || '';
-    if(!key) throw new Error('請先設定 Gemini Key');
-    var allDetail = wardrobe.map(function(i,idx){
-      return 'id:'+(idx+1)+', '+(i.color||'')+(i.type||'')+(i.note?'（'+i.note+'）':'')+', 類別:'+(i.type||'')+', 顏色:'+(i.color||'')+', 材質:'+(i.material||'未知')+', 版型:'+(i.fit||'未知')+', 風格:'+(i.style||'未知');
-    }).join('\n');
-    const prompt = `你是專業造型師，請計算以下衣櫃的搭配潛力並以繁體中文回傳 JSON。
-
-衣櫃單品（id 從 1 開始）：
-${allDetail}
-
-任務：
-1. 計算可搭配的組合總數（上衣+下身，可選外套+鞋子）
-2. 找出孤立單品（與少於2件可搭配的單品）
-3. 找出最萬用單品（可與最多件搭配）
-4. 列出最佳3套搭配
-5. 建議新增哪件單品能最大化組合數
-
-請只輸出以下格式的 JSON，不要有任何說明或 markdown：
-{"total_combinations":15,"isolated_items":[{"id":"3","name":"紫色絲質上衣","reason":"色系過於突出難以搭配"}],"versatile_items":[{"id":"1","name":"白色T恤","match_count":8},{"id":"2","name":"黑色牛仔褲","match_count":7}],"best_outfits":[{"items":["1","2"],"occasion":"日常","description":"白T搭黑牛仔褲，簡約百搭"},{"items":["1","4"],"occasion":"約會","description":"白T搭卡其褲，清爽有型"},{"items":["5","2"],"occasion":"工作","description":"藍色襯衫搭黑褲，商務簡潔"}],"recommended_addition":{"item":"白色運動鞋","estimated_new_combinations":8,"reason":"可搭配衣櫃中大多數上下身組合"}}
-
-注意：所有數字為整數，items 陣列中填寫單品的 id 字串。`;
-
-    var raw3 = await geminiText(prompt, 2000);
-    var fi3 = raw3.indexOf('{'), li3 = raw3.lastIndexOf('}');
-    if(fi3===-1||li3===-1) throw new Error('AI 回傳格式錯誤，請重試。原文：'+raw3.substring(0,60));
-    var l3 = safeParseJson(raw3.slice(fi3,li3+1));
-    if(!l3) throw new Error('JSON 解析失敗，請重試');
-    renderInsightLayer3(l3, l3el);
-  } catch(e) {
-    coins += 2; saveProgress(); updateCoinUI();
-    l3el.innerHTML = `<div style="color:var(--red);font-size:.65rem;padding:6px 0">⚠️ ${(e.message||'計算失敗').substring(0,80)}<br><span style="font-size:.58rem;color:var(--green)">✅ 已退回 2 金幣</span></div>`;
-  }
-}
-
-function renderInsightLayer3(l3, el) {
-  // 最佳搭配
-  var outfitsHtml = (l3.best_outfits||[]).map(function(o,i){
-    var itemNames = (o.items||[]).map(function(id){
-      var found = wardrobe[parseInt(id)-1];
-      return found ? (found.color||'')+(found.type||'') : 'id:'+id;
-    }).join(' ＋ ');
-    return `<div style="background:rgba(201,165,80,.07);border-radius:8px;padding:7px 9px;margin-bottom:5px">
-      <div style="font-size:.62rem;font-weight:800;color:var(--gold);margin-bottom:2px">#${i+1} ${o.occasion||''}</div>
-      <div style="font-size:.65rem;color:var(--ink);margin-bottom:2px">${itemNames}</div>
-      <div style="font-size:.6rem;color:var(--ink2)">${o.description||''}</div>
-    </div>`;
-  }).join('');
-  // 孤立單品
-  var isoHtml = (l3.isolated_items||[]).map(function(it){
-    return `<div style="font-size:.62rem;color:var(--ink2);margin-bottom:2px">· <span style="color:var(--red)">${it.name||it.id}</span> — ${it.reason||''}</div>`;
-  }).join('') || '<div style="font-size:.62rem;color:#4CAF7D">✅ 無孤立單品，衣櫃搭配性良好</div>';
-  // 萬用單品
-  var verHtml = (l3.versatile_items||[]).slice(0,3).map(function(it,i){
-    var medals = ['🥇','🥈','🥉'];
-    return `<div style="font-size:.62rem;color:var(--ink);margin-bottom:2px">${medals[i]||''} ${it.name||it.id} <span style="color:var(--muted)">（可搭 ${it.match_count||'?'} 件）</span></div>`;
-  }).join('');
-  var rec = l3.recommended_addition || {};
-  var recQ = encodeURIComponent((rec.item||'')+ ' 購買 2026');
-
-  el.innerHTML = `
-    <div style="border-top:1px solid var(--border);padding-top:8px;margin-top:4px">
-      <div style="text-align:center;padding:10px 0 8px">
-        <div style="font-size:1.6rem;font-weight:900;color:var(--gold)">${l3.total_combinations||0}</div>
-        <div style="font-size:.6rem;color:var(--muted)">可搭配組合數</div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:10px">
-        <div>
-          <div style="font-size:.56rem;color:#EF5350;font-weight:800;margin-bottom:4px">⚠️ 孤立單品</div>
-          ${isoHtml}
-        </div>
-        <div>
-          <div style="font-size:.56rem;color:#4CAF7D;font-weight:800;margin-bottom:4px">🌟 萬用單品</div>
-          ${verHtml}
-        </div>
-      </div>
-      <div style="font-size:.62rem;font-weight:800;color:var(--gold);margin-bottom:6px">🏆 最佳搭配推薦</div>
-      ${outfitsHtml}
-      <div style="background:linear-gradient(135deg,rgba(139,92,32,.15),rgba(201,144,74,.1));border:1px solid rgba(201,165,80,.3);border-radius:8px;padding:9px;margin-top:2px">
-        <div style="font-size:.62rem;font-weight:800;color:var(--gold);margin-bottom:4px">💡 加入這件最能提升搭配數</div>
-        <div style="font-size:.7rem;color:var(--ink);font-weight:700;margin-bottom:2px">${rec.item||''}</div>
-        <div style="font-size:.6rem;color:var(--ink2);margin-bottom:5px">${rec.reason||''} · 預估新增 <span style="color:var(--gold);font-weight:800">${rec.estimated_new_combinations||'?'}</span> 組合</div>
-        <a href="https://www.google.com/search?q=${recQ}" target="_blank" style="display:inline-block;font-size:.62rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#8A5C20,#C9904A);border-radius:6px;padding:4px 12px">🛍 立即選購</a>
-      </div>
-    </div>`;
-}
 
 // SAVE
 function compressImgSrc(src, maxW, cb) {
@@ -5478,7 +5387,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-24<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-25<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -5502,7 +5411,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-24',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-25',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -5748,7 +5657,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-24 新功能：髮型購買、VIP衣櫃、整合設定頁
+// VD4-25 新功能：髮型購買、VIP衣櫃、整合設定頁
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
