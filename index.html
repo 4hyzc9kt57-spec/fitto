@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-13 · AI 智能穿搭</title>
+<title>Fitto VD4-15 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -705,7 +705,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-13</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-15</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1040,7 +1040,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-13 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-15 · 2026.04</div>
   </div>
 </div>
 
@@ -1302,7 +1302,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-13 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-15 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1816,7 +1816,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-13 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-15 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -2265,23 +2265,46 @@ async function geminiText(prompt, maxTokens) {
   if(!key) throw new Error('請先設定 Gemini Key');
   var preview = prompt.replace(/[\n\r]/g,' ').substring(0, 60);
   apiLog('→ 文字請求: ' + preview + '…', 'prompt');
-  var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens,temperature:0.7}})
-  });
-  var d = await res.json();
-  if(d.error) {
-    apiLog('✗ 錯誤: ' + (d.error.message||'').substring(0,50), 'err');
-    throw new Error(d.error.message || 'Gemini error');
+  var lastErr = null;
+  var delays = [0, 3000, 6000];
+  for(var attempt = 0; attempt < delays.length; attempt++) {
+    if(delays[attempt] > 0) {
+      apiLog('⏳ 高需求重試 (' + attempt + ')…', 'info');
+      await new Promise(function(r){ setTimeout(r, delays[attempt]); });
+    }
+    try {
+      var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
+        method:'POST', headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({contents:[{role:'user',parts:[{text:prompt}]}],generationConfig:{maxOutputTokens:maxTokens,temperature:0.7}})
+      });
+      var d = await res.json();
+      if(d.error) {
+        var emsg = d.error.message || 'Gemini error';
+        if(/high demand|overloaded|503|quota/i.test(emsg) && attempt < delays.length - 1) {
+          lastErr = new Error(emsg);
+          apiLog('⚠️ ' + emsg.substring(0,60) + ' → 重試', 'err');
+          continue;
+        }
+        apiLog('✗ 錯誤: ' + emsg.substring(0,50), 'err');
+        throw new Error(emsg);
+      }
+      addTokenUsage((d.usageMetadata||{}).promptTokenCount||0,(d.usageMetadata||{}).candidatesTokenCount||0,'gemini_text');
+      var cand = (d.candidates||[])[0];
+      if(!cand || !cand.content) throw new Error('Gemini 無回傳內容 (finishReason:' + (cand && cand.finishReason||'NONE') + ')');
+      var parts = cand.content.parts || [];
+      var tp = parts.find(function(p){ return typeof p.text === 'string' && p.text.trim(); });
+      if(!tp) throw new Error('Gemini 回傳空文字');
+      return tp.text.trim();
+    } catch(fetchErr) {
+      if(attempt < delays.length - 1 && /high demand|overloaded|503/i.test(fetchErr.message)) {
+        lastErr = fetchErr; continue;
+      }
+      throw fetchErr;
+    }
   }
-  addTokenUsage((d.usageMetadata||{}).promptTokenCount||0,(d.usageMetadata||{}).candidatesTokenCount||0,'gemini_text');
-  var cand = (d.candidates||[])[0];
-  if(!cand || !cand.content) throw new Error('Gemini 無回傳內容 (finishReason:' + (cand && cand.finishReason||'NONE') + ')');
-  var parts = cand.content.parts || [];
-  var tp = parts.find(function(p){ return typeof p.text === 'string' && p.text.trim(); });
-  if(!tp) throw new Error('Gemini 回傳空文字');
-  return tp.text.trim();
+  throw lastErr || new Error('Gemini 服務暫時繁忙，請稍後再試');
 }
+
 async function geminiJson(prompt, maxTokens) {
   maxTokens = maxTokens || 1400;
   var key = localStorage.getItem('fitto_gemini_key') || '';
@@ -4126,13 +4149,15 @@ async function genImg(idx, outfit, occ, sea) {
 
     const imageResult = await requestGeminiImage(requestParts, key);
     addTokenUsage(0,0,'gemini_img');
-    const imgSrc = 'data:' + imageResult.mimeType + ';base64,' + imageResult.data;
+    const imgSrcRaw = 'data:' + imageResult.mimeType + ';base64,' + imageResult.data;
     // Track for missions
     const tc = parseInt(localStorage.getItem('fitto_total_imgs')||'0') + 1;
     localStorage.setItem('fitto_total_imgs', String(tc));
     checkAutoMissions();
-    const metaTxt = (sea||'') + ' · ' + (occ||'');
     apiLog('✓ 生圖完成: ' + imageResult.model, 'ok');
+
+    // 加浮水印後再顯示和存入 cache
+    const imgSrc = await new Promise(function(resolve){ addWatermark(imgSrcRaw, resolve); });
 
     // 儲存圖片供收藏用
     if(lastRes && lastRes.days && lastRes.days[idx]) {
@@ -4203,7 +4228,8 @@ function shareToXHSSafe(idx) {
   if(c) shareToXHS(c.imgSrc);
 }
 function shareToXHS(imgSrc) {
-  addWatermark(imgSrc, function(wSrc) {
+  // 圖片已含浮水印，直接顯示
+  (function(wSrc) {
     var ov = document.createElement('div');
     ov.style.cssText = 'position:fixed;inset:0;background:rgba(0,0,0,.93);z-index:9999;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;padding:20px';
     ov.innerHTML =
@@ -4213,7 +4239,7 @@ function shareToXHS(imgSrc) {
       '<button style="padding:8px 24px;background:rgba(255,255,255,.15);color:white;border:none;border-radius:20px;font-weight:700;font-size:.78rem;cursor:pointer" onclick="document.body.removeChild(this.closest(\'div[style*=fixed]\'))">✕ 關閉</button>';
     ov.addEventListener('click', function(e){ if(e.target===ov) document.body.removeChild(ov); });
     document.body.appendChild(ov);
-  });
+  })(imgSrc);
 }
 
 // 浮水印：在圖片右下角疊加 Fitto logo 文字
@@ -4247,16 +4273,13 @@ function addWatermark(imgSrc, callback) {
 }
 
 function shareToIG(imgSrc) {
-  addWatermark(imgSrc, function(wSrc) {
-    saveImgLocal(wSrc, 'fitto_outfit');
-    showToast('📷 圖片已儲存，請至 IG 上傳！');
-  });
+  // 圖片已含浮水印，直接儲存
+  saveImgLocal(imgSrc, 'fitto_outfit');
+  showToast('📷 圖片已儲存，請至 IG 上傳！');
 }
 async function saveImgLocal(src, name) {
-  // 先加浮水印
-  var wSrc = await new Promise(function(resolve) { addWatermark(src, resolve); });
+  // 圖片在生成時已加浮水印，直接儲存
   var isIOS = /iphone|ipad|ipod/i.test(navigator.userAgent);
-  src = wSrc;
 
   // 優先嘗試 Web Share API（iOS 15+ Safari 支援，可直接存到相簿）
   if(navigator.share && isIOS) {
@@ -4477,8 +4500,9 @@ reason: 搭配理由（15字內）
       ? [{inlineData:{mimeType:avatarRef.mimeType, data:avatarRefB64}}, {text:'Image 1 is the fixed person reference. Keep exact same face and body. Only change clothing. ' + imgPrompt}]
       : [{text: imgPrompt}];
     const imageResult = await requestGeminiImage(requestParts, key);
-    const imgSrc = 'data:' + imageResult.mimeType + ';base64,' + imageResult.data;
+    const imgSrcRaw = 'data:' + imageResult.mimeType + ';base64,' + imageResult.data;
     addTokenUsage(0,0,'gemini_img');
+    const imgSrc = await new Promise(function(resolve){ addWatermark(imgSrcRaw, resolve); });
     if(!window._fittoImgCache) window._fittoImgCache = {};
     window._fittoImgCache['custom'] = {imgSrc, outfit};
 
@@ -4491,6 +4515,10 @@ reason: 搭配理由（15字內）
       <div class="img-cost-note">🪙 -3 （含AI挑選）</div>
       <div style="font-size:.52rem;color:var(--muted);opacity:0.7;text-align:center;padding:4px 8px;line-height:1.5">⚠️ AI 生成圖僅供參考，實際服裝色彩與細節可能不符</div>
       <div class="share-bar">
+        <button class="shr-btn shr-fb" onclick="shareToFB(window._fittoImgCache['custom']&&window._fittoImgCache['custom'].outfit)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07z"/></svg>
+          <span>Facebook</span>
+        </button>
         <button class="shr-btn shr-ig" onclick="shareToIG(window._fittoImgCache['custom']&&window._fittoImgCache['custom'].imgSrc)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
           <span>Instagram</span>
@@ -4569,10 +4597,11 @@ async function genCustomOutfitImg() {
       : [{text: imgPrompt}];
     const imageResult = await requestGeminiImage(requestParts, key);
     addTokenUsage(0,0,'gemini_img');
-    const imgSrc = 'data:' + imageResult.mimeType + ';base64,' + imageResult.data;
+    const imgSrcRaw = 'data:' + imageResult.mimeType + ';base64,' + imageResult.data;
     const tc = parseInt(localStorage.getItem('fitto_total_imgs')||'0') + 1;
     localStorage.setItem('fitto_total_imgs', String(tc));
     checkAutoMissions();
+    const imgSrc = await new Promise(function(resolve){ addWatermark(imgSrcRaw, resolve); });
     if(!window._fittoImgCache) window._fittoImgCache = {};
     window._fittoImgCache['custom'] = {imgSrc, outfit};
     box.innerHTML = `<div class="outfit-img-wrap" style="margin-bottom:8px">
@@ -4580,6 +4609,10 @@ async function genCustomOutfitImg() {
       <div class="img-cost-note">🪙 -2</div>
       <div style="font-size:.52rem;color:var(--muted);opacity:0.7;text-align:center;padding:4px 8px;line-height:1.5">⚠️ AI 生成圖僅供參考，實際服裝色彩與細節可能不符</div>
       <div class="share-bar">
+        <button class="shr-btn shr-fb" onclick="shareToFB(window._fittoImgCache['custom']&&window._fittoImgCache['custom'].outfit)">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07z"/></svg>
+          <span>Facebook</span>
+        </button>
         <button class="shr-btn shr-ig" onclick="shareToIG(window._fittoImgCache['custom']&&window._fittoImgCache['custom'].imgSrc)">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
           <span>Instagram</span>
@@ -5150,7 +5183,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-13<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-15<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -5174,7 +5207,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-13',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-15',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -5420,7 +5453,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-13 新功能：髮型購買、VIP衣櫃、整合設定頁
+// VD4-15 新功能：髮型購買、VIP衣櫃、整合設定頁
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
