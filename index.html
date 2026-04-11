@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-30 · AI 智能穿搭</title>
+<title>Fitto VD4-31 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -705,7 +705,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-30</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-31</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1044,7 +1044,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-30 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-31 · 2026.04</div>
   </div>
 </div>
 
@@ -1306,7 +1306,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-30 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-31 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1820,7 +1820,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-30 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-31 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -3409,6 +3409,14 @@ priceRange: 推薦單品預估NT$總價範圍
     window._trendRec = rec;
     window._trendRecItems = recItems;
 
+    // 組合選購 URL（使用 outfit 或第一件推薦單品作為關鍵字）
+    var _trendKw = rec.outfit || (recItems.length ? recItems[0].name : rec.baseItem) || '穿搭';
+    var imgSearchUrl  = 'https://www.google.com/search?q=' + encodeURIComponent(_trendKw + ' 穿搭') + '&tbm=isch';
+    var shopSearchUrl = 'https://www.google.com/search?q=' + encodeURIComponent(_trendKw + ' 購買') + '&tbm=shop';
+    var uniqloUrl     = 'https://www.google.com/search?q=' + encodeURIComponent(_trendKw + ' site:uniqlo.com/tw') + '&tbm=shop';
+    var mujiUrl       = 'https://www.google.com/search?q=' + encodeURIComponent(_trendKw + ' site:muji.com/tw') + '&tbm=shop';
+    var zaraUrl       = 'https://www.google.com/search?q=' + encodeURIComponent(_trendKw + ' site:zara.com/tw') + '&tbm=shop';
+
     res.innerHTML = `
       <div style="background:linear-gradient(135deg,rgba(200,160,80,.12),rgba(200,160,80,.06));border:1px solid rgba(200,160,80,.35);border-radius:14px;padding:14px;margin-bottom:10px">
         <div style="font-size:.58rem;font-weight:800;color:var(--gold);letter-spacing:.1em;margin-bottom:4px">🔥 ${year}年${seaLabel}季潮流推薦</div>
@@ -4145,15 +4153,20 @@ const DEMO_IMGS = [
 // ── 生圖後購買連結 ──
 function buildImgBuyLinks(outfitText) {
   if(!outfitText) return '';
-  var parts = outfitText.split(/[＋+、，,]/).map(function(p){ return p.trim().replace(/<[^>]+>/g,''); }).filter(Boolean);
+  var parts = outfitText.split(/[＋+、，,◆♦▶►]/).map(function(p){ return p.trim().replace(/<[^>]+>/g,'').replace(/^[◆♦▶►\s]+/,''); }).filter(function(p){ return p.length >= 2; });
   if(!parts.length) return '';
 
-  // 比對衣櫃：color+type 都出現在 part 裡才算「已有」
+  // 比對衣櫃：color+type 都出現在 part 裡，且 part 長度不超過 item 描述長度的 2 倍才算「已有」
   function isInWardrobe(part) {
     return wardrobe.some(function(item) {
       var color = item.color || '';
       var type  = item.type  || '';
-      return color && type && part.indexOf(color) !== -1 && part.indexOf(type) !== -1;
+      if(!color || !type) return false;
+      var matched = part.indexOf(color) !== -1 && part.indexOf(type) !== -1;
+      if(!matched) return false;
+      // 收緊：part 不能比 color+type 組合長太多（避免長描述句誤 match 短衣物）
+      var refLen = (color + type).length;
+      return part.length <= refLen * 3 + 4;
     });
   }
 
@@ -5479,7 +5492,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-30<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-31<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -5503,7 +5516,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-30',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-31',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -5749,7 +5762,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-30 新功能：髮型購買、VIP衣櫃、整合設定頁
+// VD4-31 修復：潮流搭配URL變數未定義、一週搭配推薦單品缺字、isInWardrobe過濾邏輯收緊
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
