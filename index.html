@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-34 · AI 智能穿搭</title>
+<title>Fitto VD4-35 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -716,7 +716,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-33</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-35</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1079,7 +1079,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-34 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-35 · 2026.04</div>
   </div>
 </div>
 
@@ -1341,7 +1341,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-34 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-35 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1855,7 +1855,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-33 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-35 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -3352,14 +3352,27 @@ function toggleTrendBaseSelect() {
   const sel = document.getElementById('trend-base-select');
   const btn = document.getElementById('trend-base-toggle-btn');
   if(sel.style.display === 'none') {
-    // 填充衣櫃選項
+    const groups = [
+      { label: '👕 上衣', types: ['上衣','T恤','襯衫','毛衣'] },
+      { label: '👖 褲子・裙子', types: ['褲子','牛仔褲','裙子','洋裝'] },
+      { label: '🧥 外套', types: ['外套','夾克'] },
+      { label: '👟 鞋子', types: ['鞋子'] },
+      { label: '💍 配件', types: ['配件'] },
+    ];
     sel.innerHTML = '<option value="">— AI 自動挑選 —</option>';
-    wardrobe.forEach(function(item) {
-      const label = (item.color||'') + (item.type||'') + (item.note ? ' ' + item.note : '');
-      const opt = document.createElement('option');
-      opt.value = item.id;
-      opt.textContent = label;
-      sel.appendChild(opt);
+    groups.forEach(function(g) {
+      const items = wardrobe.filter(function(i){ return g.types.includes(i.type); });
+      if(!items.length) return;
+      const grp = document.createElement('optgroup');
+      grp.label = g.label;
+      items.forEach(function(item) {
+        const label = (item.color||'') + (item.type||'') + (item.note ? '（' + item.note + '）' : '');
+        const opt = document.createElement('option');
+        opt.value = item.id;
+        opt.textContent = label;
+        grp.appendChild(opt);
+      });
+      sel.appendChild(grp);
     });
     sel.style.display = 'block';
     btn.textContent = '收起';
@@ -3469,16 +3482,14 @@ priceRange: 推薦新購單品預估NT$總價
     if(!rec.baseItem && !rec.outfit) throw new Error('AI 回應無法解析，請重試');
     rec.baseItem = rec.baseItem || (fixedBase ? (fixedBase.color||'')+(fixedBase.type||'') : '衣櫃核心單品');
     rec.trendContext = rec.trendContext || `${year}年${seaLabel}季${styleDirLabel}`;
-    rec.outfit = rec.outfit || rec.baseItem;
+    if(!rec.outfit) throw new Error('AI 搭配描述解析失敗，請重試');
     rec.styleLabel = rec.styleLabel || styleDirLabel;
     rec.priceRange = rec.priceRange || '';
-    // JS 層保障：若用戶有指定核心單品，確保它出現在 outfit 第一位
     if(anchorName && rec.outfit) {
       var outfitHasAnchor = rec.outfit.indexOf(fixedBase.color||'') !== -1 && rec.outfit.indexOf(fixedBase.type||'') !== -1;
       if(!outfitHasAnchor) {
         rec.outfit = anchorName + '＋' + rec.outfit;
       } else {
-        // 已在 outfit 中但不在首位，移到首位
         var outfitParts = rec.outfit.split(/[＋+]/).map(function(p){ return p.trim(); }).filter(Boolean);
         var anchorIdx = outfitParts.findIndex(function(p){ return p.indexOf(fixedBase.color||'') !== -1 && p.indexOf(fixedBase.type||'') !== -1; });
         if(anchorIdx > 0) {
@@ -3606,9 +3617,12 @@ async function genTrendOutfitImg() {
       <div class="outfit-img-wrap" style="margin-bottom:6px">
         <img src="${imgSrc}" class="outfit-img" onclick="openImgFull(this.src)" style="cursor:zoom-in">
         <div class="img-cost-note">🪙 -2 · AI 示意圖僅供參考</div>
-        <div style="display:flex;gap:6px;margin-top:6px">
-          <button onclick="saveImgSafe('trend')" style="flex:1;padding:7px;border:1px solid var(--border2);border-radius:8px;background:transparent;color:var(--ink2);font-size:.65rem;font-weight:700;cursor:pointer">💾 儲存圖片</button>
-        </div>
+      <div class="share-bar">
+        <button class="shr-btn shr-save" style="flex:1;justify-content:center;gap:6px" onclick="shareImgSafe('trend')">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          <span>儲存・分享圖片</span>
+        </button>
+      </div>
       </div>`;
   } catch(e) {
     if(box) box.innerHTML = `<div class="img-error">⚠️ 生成失敗：${(e.message||'').substring(0,60)}<br><button class="btn-gen-img" onclick="genTrendOutfitImg()">重試</button></div>`;
@@ -4201,7 +4215,7 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
 
   document.getElementById('wscroll').innerHTML=(r.days||[]).map((d,idx)=>{
     // 使用 AI 明確標記的 recommend 欄位產生購買連結
-    // JS 層二次過濾：排除衣櫃已有的單品（顏色+類型都 match 的視為已有）
+    // JS 層二次過濾：排除衣櫃已有的單品
     const recItems = (d.recommend||'').split(/[,，、]/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length >= 2; }).filter(function(s){
       return !wardrobe.some(function(item){
         var color = item.color||''; var type = item.type||'';
@@ -4502,21 +4516,9 @@ async function genImg(idx, outfit, occ, sea) {
         <div id="${debugId}" style="margin-top:6px;padding:8px;background:rgba(0,0,0,.3);border-radius:8px;line-height:1.6;word-break:break-all;white-space:pre-wrap;font-size:.6rem;color:#ccc;user-select:all">${imgPrompt}</div>
       </details>
       <div class="share-bar">
-        <button class="shr-btn shr-fb" onclick="shareToFBSafe(${idx})">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07z"/></svg>
-          <span>Facebook</span>
-        </button>
-        <button class="shr-btn shr-ig" onclick="shareToIGSafe(${idx})">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-          <span>Instagram</span>
-        </button>
-        <button class="shr-btn shr-xhs" onclick="shareToXHSSafe(${idx})">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.5 7.5h-2.25v1.5H17.5V11h-2.25v6h-2V11H12V9h1.25V7.5C13.25 5.567 14.817 4 16.75 4H17.5v2.5h-.75a.75.75 0 00-.75.75V7.5H17.5z"/></svg>
-          <span>小紅書</span>
-        </button>
-        <button class="shr-btn shr-save" onclick="saveImgSafe(${idx})">
+        <button class="shr-btn shr-save" style="flex:1;justify-content:center;gap:6px" onclick="shareImgSafe(${idx})">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span>儲存相片</span>
+          <span>儲存・分享圖片</span>
         </button>
       </div>
     </div>`;
@@ -4542,9 +4544,11 @@ function saveImgSafe(idx) {
 }
 
 // 分享功能
-function shareToFB(outfit) {
-  var url = 'https://www.facebook.com/sharer/sharer.php?u=' + encodeURIComponent('https://4hyzc9kt57-spec.github.io/fitto') + '&quote=' + encodeURIComponent('今日穿搭：' + outfit + ' #Fitto穿搭');
-  window.open(url, '_blank');
+function shareToFB(outfit) { /* 已移除 */ }
+function shareImgSafe(cacheKey) {
+  var c = window._fittoImgCache && window._fittoImgCache[cacheKey];
+  if(!c || !c.imgSrc) { showToast('尚無圖片可分享'); return; }
+  saveImgLocal(c.imgSrc, 'fitto_outfit');
 }
 function shareToXHSSafe(idx) {
   var c = window._fittoImgCache && window._fittoImgCache[idx];
@@ -4876,21 +4880,9 @@ reason: 搭配理由（15字內）
       <div class="img-cost-note">🪙 -3 （含AI挑選）</div>
       <div style="font-size:.52rem;color:var(--muted);opacity:0.7;text-align:center;padding:4px 8px;line-height:1.5">⚠️ AI 生成圖僅供參考，實際服裝色彩與細節可能不符</div>
       <div class="share-bar">
-        <button class="shr-btn shr-fb" onclick="shareToFB(window._fittoImgCache['custom']&&window._fittoImgCache['custom'].outfit)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07z"/></svg>
-          <span>Facebook</span>
-        </button>
-        <button class="shr-btn shr-ig" onclick="shareToIG(window._fittoImgCache['custom']&&window._fittoImgCache['custom'].imgSrc)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-          <span>Instagram</span>
-        </button>
-        <button class="shr-btn shr-xhs" onclick="shareToXHS(window._fittoImgCache['custom']&&window._fittoImgCache['custom'].imgSrc)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.5 7.5h-2.25v1.5H17.5V11h-2.25v6h-2V11H12V9h1.25V7.5C13.25 5.567 14.817 4 16.75 4H17.5v2.5h-.75a.75.75 0 00-.75.75V7.5H17.5z"/></svg>
-          <span>小紅書</span>
-        </button>
-        <button class="shr-btn shr-save" onclick="saveImgSafe('custom')">
+        <button class="shr-btn shr-save" style="flex:1;justify-content:center;gap:6px" onclick="shareImgSafe('custom')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span>儲存相片</span>
+          <span>儲存・分享圖片</span>
         </button>
       </div>
     </div>`;
@@ -4973,21 +4965,9 @@ async function genCustomOutfitImg() {
       <div style="font-size:.52rem;color:var(--muted);opacity:0.7;text-align:center;padding:4px 8px;line-height:1.5">⚠️ AI 生成圖僅供參考，實際服裝色彩與細節可能不符</div>
       ${buildImgBuyLinks(outfit)}
       <div class="share-bar">
-        <button class="shr-btn shr-fb" onclick="shareToFB(window._fittoImgCache['custom']&&window._fittoImgCache['custom'].outfit)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.07C24 5.41 18.63 0 12 0S0 5.4 0 12.07C0 18.1 4.39 23.1 10.13 24v-8.44H7.08v-3.49h3.04V9.41c0-3.02 1.8-4.7 4.54-4.7 1.31 0 2.68.24 2.68.24v2.97h-1.5c-1.5 0-1.96.93-1.96 1.89v2.26h3.32l-.53 3.5h-2.8V24C19.62 23.1 24 18.1 24 12.07z"/></svg>
-          <span>Facebook</span>
-        </button>
-        <button class="shr-btn shr-ig" onclick="shareToIG(window._fittoImgCache['custom']&&window._fittoImgCache['custom'].imgSrc)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z"/></svg>
-          <span>Instagram</span>
-        </button>
-        <button class="shr-btn shr-xhs" onclick="shareToXHS(window._fittoImgCache['custom']&&window._fittoImgCache['custom'].imgSrc)">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 0C5.373 0 0 5.373 0 12s5.373 12 12 12 12-5.373 12-12S18.627 0 12 0zm5.5 7.5h-2.25v1.5H17.5V11h-2.25v6h-2V11H12V9h1.25V7.5C13.25 5.567 14.817 4 16.75 4H17.5v2.5h-.75a.75.75 0 00-.75.75V7.5H17.5z"/></svg>
-          <span>小紅書</span>
-        </button>
-        <button class="shr-btn shr-save" onclick="saveImgSafe('custom')">
+        <button class="shr-btn shr-save" style="flex:1;justify-content:center;gap:6px" onclick="shareImgSafe('custom')">
           <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-          <span>儲存相片</span>
+          <span>儲存・分享圖片</span>
         </button>
       </div>
       <details style="margin-top:8px;font-size:.62rem;color:var(--muted)">
@@ -5642,7 +5622,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-34<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-35<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -5666,7 +5646,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-34',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-35',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -5912,7 +5892,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-33 修復：潮流搭配URL變數未定義、一週搭配推薦單品缺字、isInWardrobe過濾邏輯收緊
+// VD4-35 修復：潮流搭配URL變數未定義、一週搭配推薦單品缺字、isInWardrobe過濾邏輯收緊
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
