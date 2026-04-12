@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-36 · AI 智能穿搭</title>
+<title>Fitto VD4-37 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -716,7 +716,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-36</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-37</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1079,7 +1079,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-36 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-37 · 2026.04</div>
   </div>
 </div>
 
@@ -1341,7 +1341,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-36 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-37 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1855,7 +1855,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-36 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-37 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -3932,7 +3932,7 @@ async function requestSingleDayPlan(basePrompt, dayLabel, usedOutfits) {
     : '';
   const accNames = selectedAccs.map(id=>{ const a=ACC_SHOP_ITEMS.find(x=>x.id===id); return a?a.name:''; }).filter(Boolean);
   const accRule = accNames.length ? `\n⚠️ 必須在 outfit 中帶入以下配件（全部都要寫進去）：${accNames.join('、')}` : '';
-  const outfitLimit = accNames.length ? 60 : 50;
+  const outfitLimit = accNames.length ? 90 : 80;
   const prompt = `${basePrompt}${avoidText}${accRule}
 現在只生成${dayLabel}這一天。
 請不要回 JSON、不要 markdown、不要前言、不要解釋。
@@ -4163,7 +4163,7 @@ function buildOutfitBuyLinks(outfitText) {
 function formatOutfitLines(outfitText) {
   if(!outfitText) return outfitText;
   // 以常見分隔符切割（含換行、◆ 等 AI 常用格式）
-  var parts = outfitText.split(/[＋+、，,\r\n◆♦▶►]/).map(function(p){ return p.trim().replace(/^[◆♦▶►\-\*•]\s*/,''); }).filter(function(p){ return p.length >= 2; });
+  var parts = outfitText.split(/[＋+、，,\r\n◆♦▶►]/).map(function(p){ return p.trim().replace(/^[◆♦▶►\-\*•]\s*/,''); }).filter(function(p){ return p.length >= 4; });
   if(parts.length <= 1) return outfitText;
 
   var ICONS = {
@@ -4318,7 +4318,7 @@ const DEMO_IMGS = [
 // ── 生圖後購買連結 ──
 function buildImgBuyLinks(outfitText) {
   if(!outfitText) return '';
-  var parts = outfitText.split(/[＋+、，,◆♦▶►]/).map(function(p){ return p.trim().replace(/<[^>]+>/g,'').replace(/^[◆♦▶►\s]+/,''); }).filter(function(p){ return p.length >= 2; });
+  var parts = outfitText.split(/[＋+、，,◆♦▶►]/).map(function(p){ return p.trim().replace(/<[^>]+>/g,'').replace(/^[◆♦▶►\s]+/,''); }).filter(function(p){ return p.length >= 4; });
   if(!parts.length) return '';
 
   // 比對衣櫃：color+type 都出現在 part 裡，且 part 長度不超過 item 描述長度的 2 倍才算「已有」
@@ -5623,7 +5623,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-36<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-37<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -5647,7 +5647,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-36',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-37',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -5893,7 +5893,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-36 修復：潮流搭配URL變數未定義、一週搭配推薦單品缺字、isInWardrobe過濾邏輯收緊
+// VD4-37 修復：潮流搭配URL變數未定義、一週搭配推薦單品缺字、isInWardrobe過濾邏輯收緊
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
@@ -6027,6 +6027,10 @@ function renderProfAvatarRow() {
     {emoji:'☀️', label:'陽光', key:'sunny'},
     {emoji:'🌙', label:'韓系', key:'korean'},
     {emoji:'⚡', label:'街頭', key:'rugged'},
+    {emoji:'🌸', label:'韓系女', key:'girl1'},
+    {emoji:'🌺', label:'甜美女', key:'girl2'},
+    {emoji:'👑', label:'御姐', key:'queen'},
+    {emoji:'⭐', label:'時尚女', key:'star'},
   ];
   var pmap = {'☀️':'sunny','🌙':'korean','⚡':'rugged','🌸':'girl1','🌺':'girl2'};
   row.innerHTML = '';
