@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-38 · AI 智能穿搭</title>
+<title>Fitto VD4-39 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -716,7 +716,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-38</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-39</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1079,7 +1079,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-38 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-39 · 2026.04</div>
   </div>
 </div>
 
@@ -1341,7 +1341,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-38 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-39 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1878,7 +1878,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-38 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-39 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -3441,54 +3441,52 @@ async function genTrendStyling() {
     const wj = buildWardrobePromptText();
     const seed = Math.floor(Math.random()*9000)+1000;
     const styleDir = getSelectedTrendStyle();
+    const prof = getProfile();
+    const gender = prof.g === 'female' ? '女性' : '男性';
+    const h = prof.h || '170'; const w = prof.w || '65';
 
     // 核心單品：用戶指定 or AI 自動
     const selEl = document.getElementById('trend-base-select');
     const selId = selEl ? selEl.value : '';
     const fixedBase = selId ? wardrobe.find(function(w){ return w.id === selId; }) : null;
-    const baseItemHint = fixedBase
-      ? `核心單品（用戶指定，必須使用）：${(fixedBase.color||'')}${(fixedBase.type||'')}${fixedBase.note?' '+fixedBase.note:''}`
-      : '核心單品：從衣櫃中自行挑選最適合此風格的一件';
+    const anchorName = fixedBase ? ((fixedBase.color||'')+(fixedBase.type||'')+(fixedBase.note?' '+fixedBase.note:'')) : '';
 
-    // 若選「本季潮流」先動態取得潮流名稱
+    // ── 階段一：本季潮流命名 or 指定風格 ──
     let styleDirLabel = styleDir;
     if(styleDir === '本季潮流') {
+      apiLog('→ 階段1：命名本季潮流風格', 'prompt');
       const trendNameRaw = await geminiText(
         `你是時尚編輯。現在是${year}年${seaLabel}季。用4-6個繁體中文字，命名一個最具代表性的當季潮流風格方向（例如：極簡機能、復古學院、都市游牧）。只輸出風格名稱，不要其他文字。`, 30);
       styleDirLabel = trendNameRaw.replace(/```/g,'').trim().substring(0,10) || '當季潮流';
-      // 更新按鈕顯示
       const seasonBtn = document.getElementById('trend-seasonal-btn');
       if(seasonBtn) seasonBtn.textContent = '🔥 ' + styleDirLabel;
     }
+    apiLog('✓ 風格方向: ' + styleDirLabel, 'ok');
 
-    const anchorName = fixedBase ? ((fixedBase.color||'')+(fixedBase.type||'')+(fixedBase.note?' '+fixedBase.note:'')) : '';
-    const prompt = `你是專業時尚造型師。現在是${year}年${seaLabel}季（種子:${seed}）。
-風格方向：${styleDirLabel}
+    // ── 階段二：取得結構化潮流資訊 + 衣櫃契合度分析 ──
+    apiLog('→ 階段2：潮流資訊 + 衣櫃契合度分析', 'prompt');
+    const trendAnalysisPrompt = `你是專業時尚造型師。現在是${year}年${seaLabel}季，風格方向：${styleDirLabel}。
 
-用戶衣櫃：${wj}
+【任務1】描述此風格的搭配規則：
+- 色彩方向：列出2-3個具體色名（例：霧灰、奶茶米）
+- 材質信號：列出2個（例：亞麻、尼龍）
+- 版型原則：具體說明（例：寬上窄下，oversized上衣配直筒褲）
+- 搭配禁忌：1句（例：避免鮮豔撞色）
 
-${baseItemHint}
+【任務2】分析以下衣櫃，找出契合度：
+用戶衣櫃（${gender}，身高${h}cm，體重${w}kg）：${wj}
 
-任務：以核心單品為基礎，搭配${styleDirLabel}風格，設計一套完整穿搭。
-衣櫃已有的單品不需要購買，只列出需要「新購入」的搭配單品。
+請輸出以下格式（key: value，每行一個）：
+colors: 色彩方向（逗號分隔色名）
+materials: 材質信號（逗號分隔）
+silhouette: 版型原則
+avoid: 搭配禁忌
+matchItems: 最契合此風格的衣櫃單品（最多3件，格式：顏色+類型，逗號分隔）
+conflictItems: 風格衝突、此次應避免的單品（最多2件，可留空）
+bodyTip: 針對用戶體型的版型建議（1句，15字內）`;
 
-請依以下格式逐行輸出，不要多餘說明：
-baseItem: 核心單品（顏色+種類，來自衣櫃，必須與上方核心單品完全一致）
-styleLabel: ${styleDirLabel}
-trendContext: 本季${styleDirLabel}風格重點（15字內）
-outfit: 完整穿搭描述，核心單品必須放在第一位，用＋連接各單品（50字內），每個單品須同時寫顏色＋類型
-recommend1: 第一件新購推薦單品（顏色+名稱，絕對不可是衣櫃已有單品）
-recommend1why: 搭配理由（10字內）
-recommend2: 第二件新購推薦單品（顏色+名稱，可留空）
-recommend2why: 搭配理由（10字內，可留空）
-recommend3: 第三件新購推薦單品或配件（可留空）
-recommend3why: 搭配理由（10字內，可留空）
-priceRange: 推薦新購單品預估NT$總價
-
-只輸出以上11行，格式「欄位名: 內容」，不要其他文字。`;
-
-    const raw = await geminiText(prompt, 800);
-    apiLog('  潮流回應長度: ' + raw.length + ' 字', 'info');
+    const stageRaw = await geminiText(trendAnalysisPrompt, 500);
+    apiLog('✓ 階段2完成，長度: ' + stageRaw.length, 'ok');
 
     // 解析 key-value
     function parseKV(text) {
@@ -3499,16 +3497,74 @@ priceRange: 推薦新購單品預估NT$總價
       });
       return out;
     }
+    const stageData = parseKV(stageRaw.replace(/```/g,'').trim());
+    const trendColors = stageData.colors || '';
+    const trendMaterials = stageData.materials || '';
+    const trendSilhouette = stageData.silhouette || '';
+    const trendAvoid = stageData.avoid || '';
+    const matchItems = stageData.matchItems || '';
+    const conflictItems = stageData.conflictItems || '';
+    const bodyTip = stageData.bodyTip || '';
+
+    // ── 階段三：搭配建議生成（注入完整脈絡）──
+    apiLog('→ 階段3：生成搭配建議（含推理鏈）', 'prompt');
+    const baseItemHint = fixedBase
+      ? `核心單品（用戶指定，必須使用）：${anchorName}`
+      : (matchItems ? `核心單品建議從以下契合單品中挑選一件：${matchItems}` : '核心單品：從衣櫃中自行挑選最契合此風格的一件');
+
+    const prompt = `你是專業時尚造型師。現在是${year}年${seaLabel}季（種子:${seed}）。
+風格方向：${styleDirLabel}
+
+【本季風格規則】
+色彩方向：${trendColors}
+材質信號：${trendMaterials}
+版型原則：${trendSilhouette}
+搭配禁忌：${trendAvoid}
+體型建議：${bodyTip}
+
+【衣櫃分析結果】
+契合單品：${matchItems || '請從衣櫃自行挑選'}
+應避免：${conflictItems || '無'}
+
+用戶衣櫃：${wj}
+
+${baseItemHint}
+
+任務：嚴格遵守上方風格規則，以核心單品為基礎設計完整穿搭。衣櫃已有的單品不需購買，只列出「新購入」推薦。
+必須說明每個搭配選擇的推理依據（色彩/材質/版型哪一條規則）。
+
+請依以下格式逐行輸出，不要多餘說明：
+baseItem: 核心單品（顏色+種類，來自衣櫃）
+styleLabel: ${styleDirLabel}
+trendContext: 本季${styleDirLabel}風格重點（15字內）
+outfit: 完整穿搭，核心單品第一位，用＋連接（每件須含顏色+類型，50字內）
+reasoning: 搭配邏輯說明（色彩/版型/材質各一點，30字內）
+recommend1: 第一件新購推薦（顏色+名稱，不可是衣櫃已有）
+recommend1why: 搭配理由（10字內）
+recommend2: 第二件新購推薦（可留空）
+recommend2why: 搭配理由（10字內，可留空）
+recommend3: 第三件新購推薦或配件（可留空）
+recommend3why: 搭配理由（10字內，可留空）
+priceRange: 推薦新購預估NT$總價
+
+只輸出以上12行，格式「欄位名: 內容」，不要其他文字。`;
+
+    const raw = await geminiText(prompt, 900);
+    apiLog('  潮流回應長度: ' + raw.length + ' 字', 'info');
+
     const cleaned = raw.replace(/```/g,'').trim();
     let rec = parseKV(cleaned);
 
     if(!rec.baseItem && !rec.outfit) throw new Error('AI 回應無法解析，請重試');
-    rec.baseItem = rec.baseItem || (fixedBase ? (fixedBase.color||'')+(fixedBase.type||'') : '衣櫃核心單品');
+    rec.baseItem = rec.baseItem || (fixedBase ? anchorName : '衣櫃核心單品');
     rec.trendContext = rec.trendContext || `${year}年${seaLabel}季${styleDirLabel}`;
     rec.outfit = rec.outfit || (rec.baseItem ? rec.baseItem + '（搭配描述未完整回傳，可重試）' : null);
     if(!rec.outfit) throw new Error('AI 回應無法解析，請重試');
     rec.styleLabel = rec.styleLabel || styleDirLabel;
+    rec.reasoning = rec.reasoning || '';
     rec.priceRange = rec.priceRange || '';
+
+    // 確保核心單品排第一
     if(anchorName && rec.outfit) {
       var outfitHasAnchor = rec.outfit.indexOf(fixedBase.color||'') !== -1 && rec.outfit.indexOf(fixedBase.type||'') !== -1;
       if(!outfitHasAnchor) {
@@ -3529,23 +3585,22 @@ priceRange: 推薦新購單品預估NT$總價
     for(var _ri = 1; _ri <= 3; _ri++) {
       var _n = rec['recommend'+_ri];
       if(_n && _n.trim() && _n.trim().length > 1) {
-        recItems.push({
-          name: _n.trim(),
-          why:  rec['recommend'+_ri+'why'] || ''
-        });
+        recItems.push({ name: _n.trim(), why: rec['recommend'+_ri+'why'] || '' });
       }
     }
 
     window._trendRec = rec;
     window._trendRecItems = recItems;
+    // 儲存階段2分析結果供 UI 顯示
+    window._trendStageData = { trendColors, trendMaterials, trendSilhouette, trendAvoid, bodyTip, matchItems, conflictItems };
 
     // 渲染推薦單品購買卡
     function renderRecItem(it) {
-      var q   = encodeURIComponent(it.name + ' 購買');
-      var iq  = encodeURIComponent(it.name + ' 穿搭');
-      var uq  = encodeURIComponent(it.name + ' site:uniqlo.com/tw');
-      var mq  = encodeURIComponent(it.name + ' site:muji.com/tw');
-      var zq  = encodeURIComponent(it.name + ' site:zara.com/tw');
+      var q  = encodeURIComponent(it.name + ' 購買');
+      var iq = encodeURIComponent(it.name + ' 穿搭');
+      var uq = encodeURIComponent(it.name + ' site:uniqlo.com/tw');
+      var mq = encodeURIComponent(it.name + ' site:muji.com/tw');
+      var zq = encodeURIComponent(it.name + ' site:zara.com/tw');
       return '<div style="background:rgba(200,160,80,.08);border:1px solid rgba(200,160,80,.25);border-radius:10px;padding:9px 11px;margin-bottom:7px">'
         + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:5px">'
           + '<span style="font-size:.76rem;font-weight:800;color:var(--gold)">' + it.name + '</span>'
@@ -3561,21 +3616,34 @@ priceRange: 推薦新購單品預估NT$總價
       + '</div>';
     }
 
+    // 風格規則標籤列
+    const ruleTagsHtml = [
+      trendColors ? '<span style="background:rgba(200,160,80,.12);color:var(--gold);border-radius:5px;padding:2px 7px;font-size:.56rem;font-weight:700">🎨 ' + trendColors + '</span>' : '',
+      trendSilhouette ? '<span style="background:rgba(61,170,106,.1);color:var(--green);border-radius:5px;padding:2px 7px;font-size:.56rem;font-weight:700">📐 ' + trendSilhouette + '</span>' : '',
+      trendAvoid ? '<span style="background:rgba(224,82,82,.08);color:var(--red);border-radius:5px;padding:2px 7px;font-size:.56rem;font-weight:700">⚠️ ' + trendAvoid + '</span>' : '',
+      bodyTip ? '<span style="background:rgba(91,155,213,.1);color:#5B9BD5;border-radius:5px;padding:2px 7px;font-size:.56rem;font-weight:700">👤 ' + bodyTip + '</span>' : ''
+    ].filter(Boolean).join('');
+
     res.innerHTML = `
       <div style="background:linear-gradient(135deg,rgba(200,160,80,.12),rgba(200,160,80,.06));border:1px solid rgba(200,160,80,.35);border-radius:14px;padding:14px;margin-bottom:10px">
-        <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px">
+        <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
           <div style="font-size:.58rem;font-weight:800;color:var(--gold);letter-spacing:.08em">🔥 ${year}年${seaLabel}季</div>
           <div style="font-size:.6rem;font-weight:800;color:#FAF7F2;background:linear-gradient(135deg,#7B5E2A,#C9904A);border-radius:10px;padding:2px 8px">${rec.styleLabel}</div>
         </div>
+        ${ruleTagsHtml ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">' + ruleTagsHtml + '</div>' : ''}
         <div style="font-size:.62rem;color:var(--muted);margin-bottom:10px;padding:5px 8px;background:rgba(200,160,80,.08);border-radius:6px">${rec.trendContext}</div>
         <div style="margin-bottom:8px">
           <div style="font-size:.56rem;color:var(--muted);margin-bottom:3px">衣櫃核心單品</div>
           <div style="font-size:.82rem;font-weight:800;color:var(--ink)">👗 ${rec.baseItem}</div>
         </div>
-        <div style="background:var(--surface2);border-radius:8px;padding:9px 12px;margin-bottom:10px">
+        <div style="background:var(--surface2);border-radius:8px;padding:9px 12px;margin-bottom:8px">
           <div style="font-size:.56rem;font-weight:800;color:var(--muted);margin-bottom:3px">✦ 完整穿搭</div>
           <div style="font-size:.74rem;color:var(--ink);font-weight:700;line-height:1.6">${rec.outfit}</div>
         </div>
+        ${rec.reasoning ? `<div style="background:rgba(61,170,106,.07);border:1px solid rgba(61,170,106,.2);border-radius:8px;padding:8px 12px;margin-bottom:10px">
+          <div style="font-size:.54rem;font-weight:800;color:var(--green);margin-bottom:3px">💡 搭配邏輯</div>
+          <div style="font-size:.66rem;color:var(--ink2);line-height:1.6">${rec.reasoning}</div>
+        </div>` : ''}
         ${recItems.length ? `
         <div style="margin-bottom:10px">
           <div style="font-size:.6rem;font-weight:800;color:var(--gold);margin-bottom:6px">🛍 AI 推薦新購單品（${recItems.length} 件）${rec.priceRange ? '<span style="color:var(--muted);font-weight:600;margin-left:6px">預估 ' + rec.priceRange + '</span>' : ''}</div>
@@ -3584,7 +3652,7 @@ priceRange: 推薦新購單品預估NT$總價
         <div id="trend-imgbox" style="margin-bottom:10px"></div>
       </div>`;
     res.style.display = 'block';
-    apiLog('✓ 潮流搭配生成完成，自動觸發生圖', 'ok');
+    apiLog('✓ 潮流搭配三段式生成完成，自動觸發生圖', 'ok');
     setTimeout(function(){ genTrendOutfitImg(); }, 300);
 
   } catch(e) {
@@ -3666,17 +3734,23 @@ async function genTrendOutfitImg() {
 async function fetchTrend(sea) {
   const seaLabel = sea.replace(/[🌸☀️🍂❄️]\s*/,'');
   const year = new Date().getFullYear();
-  const prompt = `你是時尚採購顧問。現在是${year}年${seaLabel}季。請列出5個當季最流行的穿搭趨勢，包含趨勢名稱、一句話說明、以及1~2個具體推薦的服裝單品名稱（例如：亞麻寬褲、條紋短袖Polo衫）。只輸出JSON陣列，格式：[{"trend":"趨勢名","desc":"一句說明","items":["單品1","單品2"]}]`;
+  const prompt = `你是資深時尚編輯。現在是${year}年${seaLabel}季。請列出4個當季最具代表性的穿搭趨勢，每個趨勢必須包含以下欄位：
+trend: 趨勢名稱（4-6字）
+desc: 一句核心描述（15字內）
+colors: 主要色彩方向（列出2-3個具體色名，例如：霧灰、奶茶米、深森綠）
+materials: 材質信號（列出2個，例如：亞麻、尼龍）
+silhouette: 關鍵版型（例如：寬上窄下、oversized上衣配窄褲）
+avoid: 搭配禁忌（1句，例如：避免鮮豔撞色、避免過度正式感）
+items: 代表單品（2-3個具體名稱）
+只輸出JSON陣列，格式：[{"trend":"","desc":"","colors":[],"materials":[],"silhouette":"","avoid":"","items":[]}]`;
   try {
-    // 用 geminiJson 強制 application/json，避免 Gemini 加 markdown fence
-    const raw = await geminiJson(prompt, 700);
+    const raw = await geminiJson(prompt, 1000);
     const cleaned = raw.replace(/```json|```/gi,'').trim();
     const s = cleaned.indexOf('['), e = cleaned.lastIndexOf(']');
     if(s !== -1 && e !== -1) {
       const arr = JSON.parse(cleaned.slice(s, e+1));
       if(Array.isArray(arr) && arr.length > 0) return {type:'structured', data: arr};
     }
-    // geminiJson 有時回傳 {days:[...]} 格式，嘗試找物件內的陣列
     const os = cleaned.indexOf('{'), oe = cleaned.lastIndexOf('}');
     if(os !== -1 && oe !== -1) {
       const obj = JSON.parse(cleaned.slice(os, oe+1));
@@ -3684,9 +3758,8 @@ async function fetchTrend(sea) {
       if(nested && nested.length > 0) return {type:'structured', data: nested};
     }
   } catch(e2) { /* fall through to text */ }
-  // 最終備援：文字模式（把整段文字逐行顯示）
   try {
-    const raw2 = await geminiText(`今是${new Date().getFullYear()}年${seaLabel}季。請用繁體中文列出5個流行穿搭趨勢，每項一行格式「趨勢名：說明」，不要加前言。`, 300);
+    const raw2 = await geminiText(`今是${new Date().getFullYear()}年${seaLabel}季。請用繁體中文列出4個流行穿搭趨勢，每項一行格式「趨勢名：說明」，不要加前言。`, 300);
     return {type:'text', data: raw2.trim()};
   } catch(e3) { return {type:'text', data: ''}; }
 }
@@ -5667,7 +5740,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-38<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-39<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -5691,7 +5764,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-38',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-39',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -5937,7 +6010,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-38 修復：潮流搭配URL變數未定義、一週搭配推薦單品缺字、isInWardrobe過濾邏輯收緊
+// VD4-39 修復：潮流搭配URL變數未定義、一週搭配推薦單品缺字、isInWardrobe過濾邏輯收緊
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
