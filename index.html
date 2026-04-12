@@ -716,7 +716,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-37</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-38</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1878,7 +1878,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-37 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-38 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -5937,7 +5937,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-37 修復：潮流搭配URL變數未定義、一週搭配推薦單品缺字、isInWardrobe過濾邏輯收緊
+// VD4-38 修復：潮流搭配URL變數未定義、一週搭配推薦單品缺字、isInWardrobe過濾邏輯收緊
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
