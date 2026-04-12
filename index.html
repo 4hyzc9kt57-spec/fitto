@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VF-3 · AI 智能穿搭</title>
+<title>Fitto VF-4 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VF-3</span></div>
+<div class="logo">Fitto <span class="logo-badge">VF-4</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1088,7 +1088,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VF-3 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VF-4 · 2026.04</div>
   </div>
 </div>
 
@@ -1350,7 +1350,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VF-3 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VF-4 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1887,7 +1887,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VF-3 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VF-4 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -3744,6 +3744,7 @@ priceRange: 新購預估NT$總價，無需新購則留空`;
 
     window._trendRec = rec;
     window._trendRecItems = recItems;
+    window._trendAllRecItems = allRecItems;
     window._trendStageData = { trendColors, trendMaterials, trendSilhouette, trendAvoid, bodyTip, matchItems, conflictItems };
 
     // outfit tag HTML（區分衣櫃內/外）
@@ -3806,6 +3807,7 @@ priceRange: 新購預估NT$總價，無需新購則留空`;
 async function genTrendOutfitImg() {
   const rec = window._trendRec;
   const recItems = window._trendRecItems || [];
+  const allRecItems = window._trendAllRecItems || recItems;
   if(!rec) { showToast('⚠️ 請先生成潮流搭配結果'); return; }
   const key = localStorage.getItem('fitto_gemini_key') || '';
   if(!key) { showToast('請先設定 Gemini Key'); return; }
@@ -4688,7 +4690,18 @@ async function genImg(idx, outfit, occ, sea) {
     const mannequinPromptPrefix = isMannequinMode
       ? `White featureless store display mannequin, smooth oval head, clean white plastic body, ${_imgGenderWord} body proportions, full body front view. `
       : '';
-    const imgPrompt = `${mannequinPromptPrefix}High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Outfit: ${itemDetailStr}. Style: ${outfit}. Season: ${seaEn}. Setting: ${sceneDesc}. CRITICAL: The person MUST be wearing pants or trousers — NO bare legs, NO shorts unless explicitly stated. Full body shot from head to toe, shoes clearly visible, feet must appear in frame. No vignette, no circular frame, no black border, rectangular photo format. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS anywhere in the image. Professional studio lighting, sharp focus on clothing and shoes, fashion editorial quality, 4K detail.`;
+    // 動態裙長/褲長約束（取代硬編碼的「必須穿長褲」）
+    var weekHemConstraint = '';
+    if(/短裙|百褶短裙|迷你裙|短褲|mini/i.test(outfit)) {
+      weekHemConstraint = ' IMPORTANT: The outfit includes a SHORT skirt or shorts — hemline must be clearly above the knee. ';
+    } else if(/長裙|長褲|寬褲|直筒褲/.test(outfit)) {
+      weekHemConstraint = ' The pants or skirt must be full length, reaching the ankles. ';
+    } else if(/中裙|及膝裙/.test(outfit)) {
+      weekHemConstraint = ' The skirt hemline must be at or just below the knee. ';
+    } else {
+      weekHemConstraint = ' Full body shot from head to toe, shoes clearly visible. ';
+    }
+    const imgPrompt = `${mannequinPromptPrefix}High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Outfit: ${itemDetailStr}. Style: ${outfit}. Season: ${seaEn}. Setting: ${sceneDesc}.${weekHemConstraint}No vignette, no circular frame, no black border, rectangular photo format. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS anywhere in the image. Professional studio lighting, sharp focus on clothing and shoes, fashion editorial quality, 4K detail.`;
 
     apiLog('→ 生圖: ' + imgPrompt.substring(0, 60) + '…', 'prompt');
     apiLog('  頭像:' + userAvatar + ' 服裝:' + outfit.substring(0,20), 'info');
@@ -5899,7 +5912,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VF-3<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VF-4<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -5923,7 +5936,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VF-3',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VF-4',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -6169,7 +6182,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VF-3 修復：潮流搭配URL變數未定義、一週搭配推薦單品缺字、isInWardrobe過濾邏輯收緊
+// VF-4 修復：潮流搭配URL變數未定義、一週搭配推薦單品缺字、isInWardrobe過濾邏輯收緊
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
