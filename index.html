@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-37 · AI 智能穿搭</title>
+<title>Fitto VD4-38 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -1079,7 +1079,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-37 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-38 · 2026.04</div>
   </div>
 </div>
 
@@ -1341,7 +1341,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-37 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-38 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1561,17 +1561,40 @@ function getSelectedAvatarRefData() {
       };
     }
   }
-  var avatarPhotoMap = {'☀️':'sunny','🌙':'korean','⚡':'rugged','🌸':'girl1','🌺':'girl2'};
+  var avatarPhotoMap = {'☀️':'sunny','🌙':'korean','⚡':'rugged','🌸':'girl1','🌺':'girl2','👑':'girl1','⭐':'girl2'};
   var photoKey = avatarPhotoMap[userAvatar];
   if(photoKey && AVATAR_IMGS[photoKey]) {
+    var imgUrl = AVATAR_IMGS[photoKey];
+    // 若是遠端 URL（非 base64），回傳 url 標記，由 caller 用 fetchAvatarB64 處理
+    if(imgUrl.indexOf('http') === 0) {
+      return {src: imgUrl, b64: null, mimeType: 'image/jpeg', remoteUrl: imgUrl};
+    }
     return {
-      src: AVATAR_IMGS[photoKey],
-      b64: AVATAR_IMGS[photoKey].split(',')[1] || '',
-      mimeType: (AVATAR_IMGS[photoKey].match(/^data:([^;]+);base64,/) || [])[1] || 'image/jpeg'
+      src: imgUrl,
+      b64: imgUrl.split(',')[1] || '',
+      mimeType: (imgUrl.match(/^data:([^;]+);base64,/) || [])[1] || 'image/jpeg'
     };
   }
-  // 預設👤：使用假人 mannequin 純文字模式（無圖片 reference）
   return {src: null, b64: null, mimeType: null, isMannequin: true};
+}
+
+// 將遠端頭像 URL 轉成 base64（帶快取）
+var _avatarB64Cache = {};
+async function fetchAvatarB64(url) {
+  if(_avatarB64Cache[url]) return _avatarB64Cache[url];
+  var res = await fetch(url);
+  var blob = await res.blob();
+  return new Promise(function(resolve, reject) {
+    var reader = new FileReader();
+    reader.onload = function(e) {
+      var dataUrl = e.target.result;
+      var b64 = dataUrl.split(',')[1];
+      _avatarB64Cache[url] = {b64: b64, mimeType: blob.type || 'image/jpeg', src: dataUrl};
+      resolve(_avatarB64Cache[url]);
+    };
+    reader.onerror = reject;
+    reader.readAsDataURL(blob);
+  });
 }
 
 function spendCoin(amt, reason) {
@@ -1758,7 +1781,7 @@ function openAvatarPicker() {
     {emoji:'☀️',label:'陽光'},{emoji:'🌙',label:'韓系'},{emoji:'⚡',label:'街頭'},
     {emoji:'🌸',label:'韓系女'},{emoji:'🌺',label:'甜美女'},{emoji:'👑',label:'御姐'},{emoji:'⭐',label:'時尚女'}
   ];
-  var pmap={'☀️':'sunny','🌙':'korean','⚡':'rugged','🌸':'girl1','🌺':'girl2'};
+  var pmap={'☀️':'sunny','🌙':'korean','⚡':'rugged','🌸':'girl1','🌺':'girl2','👑':'girl1','⭐':'girl2'};
   // 只顯示免費或已購買的頭像
   var visibleAvatars = avatars.filter(function(a){
     return a.free || ownedAvatars.some(function(o){ return o === a.emoji; });
@@ -3601,12 +3624,19 @@ async function genTrendOutfitImg() {
     const imgPrompt = `High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Wearing: ${outfitDesc}. Trendy ${new Date().getFullYear()} seasonal style. Clean minimal white background, no vignette, no circular frame, rectangular photo. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS anywhere in the image. Professional studio lighting, full body front view head to toe, Vogue-quality photography, 4K detail.`;
 
     const avatarRef = getSelectedAvatarRefData();
-    if(!avatarRef || !avatarRef.b64) throw new Error('請先選擇頭像');
+    if(!avatarRef) throw new Error('請先選擇頭像');
+    var avatarB64Data = avatarRef.b64;
+    var avatarMime = avatarRef.mimeType || 'image/jpeg';
+    if(!avatarB64Data && avatarRef.remoteUrl) {
+      var fetched = await fetchAvatarB64(avatarRef.remoteUrl);
+      avatarB64Data = fetched.b64; avatarMime = fetched.mimeType;
+    }
+    if(!avatarB64Data && !avatarRef.isMannequin) throw new Error('請先選擇頭像');
 
-    const requestParts = [
-      {inlineData:{mimeType:avatarRef.mimeType, data:avatarRef.b64}},
-      {text:'Image 1 is the fixed person reference. Keep the exact same face and body. Only change clothing. ' + imgPrompt}
-    ];
+    const requestParts = avatarB64Data
+      ? [{inlineData:{mimeType:avatarMime, data:avatarB64Data}},
+         {text:'Image 1 is the fixed person reference. Keep the exact same face and body. Only change clothing. ' + imgPrompt}]
+      : [{text: imgPrompt}];
     const imageResult = await requestGeminiImage(requestParts, key);
     const imgSrc = 'data:' + imageResult.mimeType + ';base64,' + imageResult.data;
     addTokenUsage(0,0,'gemini_img');
@@ -4451,9 +4481,13 @@ async function genImg(idx, outfit, occ, sea) {
 
     // 頭像 reference：直接使用目前選中的商店頭像圖
     const avatarRef = getSelectedAvatarRefData();
-    const avatarRefB64 = avatarRef && avatarRef.b64 ? avatarRef.b64 : null;
-    const avatarRefMime = avatarRef && avatarRef.mimeType ? avatarRef.mimeType : 'image/jpeg';
-    // 假人模式不需要圖片 reference，有圖就帶圖
+    var avatarRefB64 = avatarRef && avatarRef.b64 ? avatarRef.b64 : null;
+    var avatarRefMime = avatarRef && avatarRef.mimeType ? avatarRef.mimeType : 'image/jpeg';
+    // 遠端 URL 頭像：先 fetch 轉 base64
+    if(!avatarRefB64 && avatarRef && avatarRef.remoteUrl) {
+      var _fetched = await fetchAvatarB64(avatarRef.remoteUrl);
+      avatarRefB64 = _fetched.b64; avatarRefMime = _fetched.mimeType;
+    }
     if(!avatarRefB64 && !isMannequinMode) throw new Error('缺少固定人物 reference，請先選擇可用頭像');
 
     // 衣物改用文字描述，優先固定人物並提升速度
@@ -4856,7 +4890,12 @@ reason: 搭配理由（15字內）
     const imgPrompt = `${mannequinPrefix}High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Wearing: ${mainOutfit}.${accessoryClause} Clean minimal white studio background, no vignette, no circular frame, no black border, rectangular photo. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS. Professional studio lighting, full body front view, Vogue-quality photography, 4K detail.`;
 
     const avatarRef = getSelectedAvatarRefData();
-    const avatarRefB64 = avatarRef && avatarRef.b64 ? avatarRef.b64 : null;
+    var avatarRefB64 = avatarRef && avatarRef.b64 ? avatarRef.b64 : null;
+    var avatarRefMime3 = avatarRef && avatarRef.mimeType ? avatarRef.mimeType : 'image/jpeg';
+    if(!avatarRefB64 && avatarRef && avatarRef.remoteUrl) {
+      var _fc3 = await fetchAvatarB64(avatarRef.remoteUrl);
+      avatarRefB64 = _fc3.b64; avatarRefMime3 = _fc3.mimeType;
+    }
     if(!avatarRefB64 && !isMannequinMode) throw new Error('請先選擇頭像');
     const requestParts = avatarRefB64
       ? [{inlineData:{mimeType:avatarRef.mimeType, data:avatarRefB64}}, {text:'Image 1 is the fixed person reference. Keep exact same face and body. Only change clothing. ' + imgPrompt}]
@@ -4946,7 +4985,12 @@ async function genCustomOutfitImg() {
     const accessoryClause = accDesc ? ` Accessories being worn: ${accDesc}.` : '';
     const imgPrompt = `${mannequinPrefix}High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Wearing: ${mainOutfit || outfit}.${accessoryClause} All accessories must be clearly visible and properly worn. Clean minimal white or light grey studio background, no vignette, no circular frame, no black border, rectangular photo format. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS anywhere in the image. Professional studio lighting, sharp focus on full outfit including accessories, full body front view, Vogue-quality photography, 4K detail.`;
     const avatarRef = getSelectedAvatarRefData();
-    const avatarRefB64 = avatarRef && avatarRef.b64 ? avatarRef.b64 : null;
+    var avatarRefB64 = avatarRef && avatarRef.b64 ? avatarRef.b64 : null;
+    var avatarRefMime2 = avatarRef && avatarRef.mimeType ? avatarRef.mimeType : 'image/jpeg';
+    if(!avatarRefB64 && avatarRef && avatarRef.remoteUrl) {
+      var _fc2 = await fetchAvatarB64(avatarRef.remoteUrl);
+      avatarRefB64 = _fc2.b64; avatarRefMime2 = _fc2.mimeType;
+    }
     if(!avatarRefB64 && !isMannequinMode) throw new Error('缺少頭像 reference，請在商店選擇頭像');
     const requestParts = avatarRefB64
       ? [{inlineData:{mimeType:avatarRef.mimeType, data:avatarRefB64}}, {text:'Image 1 is the fixed person reference. Keep the exact same face, hairstyle, body identity. Only change clothing and accessories. ' + imgPrompt}]
@@ -5623,7 +5667,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-37<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-38<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -5647,7 +5691,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-37',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-38',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -6032,7 +6076,7 @@ function renderProfAvatarRow() {
     {emoji:'👑', label:'御姐', key:'queen'},
     {emoji:'⭐', label:'時尚女', key:'star'},
   ];
-  var pmap = {'☀️':'sunny','🌙':'korean','⚡':'rugged','🌸':'girl1','🌺':'girl2'};
+  var pmap = {'☀️':'sunny','🌙':'korean','⚡':'rugged','🌸':'girl1','🌺':'girl2','👑':'girl1','⭐':'girl2'};
   row.innerHTML = '';
 
   // 自訂頭像
