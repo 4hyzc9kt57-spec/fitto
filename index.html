@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-42 · AI 智能穿搭</title>
+<title>Fitto VF-1 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-42</span></div>
+<div class="logo">Fitto <span class="logo-badge">VF-1</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1088,7 +1088,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-42 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VF-1 · 2026.04</div>
   </div>
 </div>
 
@@ -1350,7 +1350,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-42 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VF-1 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1887,7 +1887,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-42 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VF-1 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -3523,7 +3523,7 @@ async function genTrendStyling() {
     // parseKV：支援半形/全形冒號，只匹配已知欄位
     function parseKV(text) {
       const out = {};
-      const knownKeys = ['baseItem','styleLabel','trendContext','outfit','reasoning','recommend1','recommend1why','recommend2','recommend2why','recommend3','recommend3why','priceRange',
+      const knownKeys = ['baseItem','styleLabel','trendContext','outfit','reasoning','recommends','priceRange',
         'colors','materials','silhouette','avoid','dominantColors','dominantMaterials','fitProfile','styleProfile','keyItems','bodyTip','gaps'];
       text.split('\n').forEach(function(line) {
         const m = line.match(/^(\w+)[：:]\s*(.*)$/);
@@ -3598,31 +3598,25 @@ avoid: 搭配禁忌（1句）
 搭配禁忌：${trendAvoid}
 體型建議：${bodyTip}
 
-【衣櫃分析結果】
-衣櫃主色調：${cachedColors}
-衣櫃版型傾向：${cachedFitProfile}
-可用代表單品：${matchItems || cachedKeyItems || '請自行挑選'}
+【衣櫃可用單品】
+主色調：${cachedColors}
+版型傾向：${cachedFitProfile}
+代表單品：${matchItems || cachedKeyItems || '請自行挑選'}
 
 ${baseItemHint}
 
-任務：嚴格遵守上方風格規則，以核心單品為基礎設計完整穿搭。衣櫃已有的單品不需購買，只列出「新購入」推薦。
-必須說明每個搭配選擇的推理依據（色彩/材質/版型哪一條規則）。
+任務：嚴格遵守風格規則，以核心單品為基礎設計完整穿搭。
+規則：baseItem只寫「顏色+類型」，不加括號、英文、備註。
+outfit必須列出所有搭配單品（含核心單品），每件格式「顏色+類型」，用＋連接，至少2件。
 
-請依以下格式逐行輸出，不要多餘說明：
-baseItem: 核心單品（顏色+種類，來自衣櫃）
+請輸出以下7行，格式「欄位名: 內容」，不要其他文字：
+baseItem: 核心單品（顏色+類型，例：淺藍牛仔褲）
 styleLabel: ${styleDirLabel}
-trendContext: 本季${styleDirLabel}風格重點（15字內）
-outfit: 完整穿搭，核心單品第一位，用＋連接（每件須含顏色+類型，50字內）
-reasoning: 搭配邏輯說明（色彩/版型/材質各一點，30字內）
-recommend1: 第一件新購推薦（顏色+名稱，不可是衣櫃已有）
-recommend1why: 搭配理由（10字內）
-recommend2: 第二件新購推薦（可留空）
-recommend2why: 搭配理由（10字內，可留空）
-recommend3: 第三件新購推薦或配件（可留空）
-recommend3why: 搭配理由（10字內，可留空）
-priceRange: 推薦新購預估NT$總價
-
-只輸出以上12行，格式「欄位名: 內容」，不要其他文字。`;
+trendContext: 本季風格重點（15字內）
+outfit: 完整穿搭所有單品，用＋連接（例：淺藍牛仔褲＋白色棉T＋卡其帆布鞋）
+reasoning: 搭配邏輯（色彩+版型+材質各一點，25字內）
+recommends: 建議新購單品，格式「單品名（理由）」，多件用、分隔，無需新購則留空
+priceRange: 新購預估NT$總價，無需新購則留空`;
 
     const raw = await geminiText(prompt, 1200);
     storeRaw('stage3', raw);
@@ -3633,43 +3627,45 @@ priceRange: 推薦新購預估NT$總價
     apiLog('  解析: base=' + (rec.baseItem||'(空)').substring(0,15) + ' outfit=' + (rec.outfit||'(空)').substring(0,20), 'info');
 
     if(!rec.baseItem && !rec.outfit) throw new Error('AI 回應無法解析，請重試');
+
+    // baseItem 清理：移除括號內容、英文備註
+    if(rec.baseItem) rec.baseItem = rec.baseItem.replace(/\s*[\(（][^）)]*[）)]/g,'').replace(/\s*\+.*$/,'').trim();
     rec.baseItem = rec.baseItem || (fixedBase ? anchorName : '衣櫃核心單品');
     rec.trendContext = rec.trendContext || `${year}年${seaLabel}季${styleDirLabel}`;
     rec.outfit = rec.outfit || (rec.baseItem ? rec.baseItem + '（搭配描述未完整回傳，可重試）' : null);
     if(!rec.outfit) throw new Error('AI 回應無法解析，請重試');
+    // outfit 清理：移除括號備註
+    rec.outfit = rec.outfit.replace(/[\(（][^）)]*[）)]/g,'').replace(/\s+/g,' ').trim();
     rec.styleLabel = rec.styleLabel || styleDirLabel;
     rec.reasoning = rec.reasoning || '';
     rec.priceRange = rec.priceRange || '';
 
+    // 解析 recommends（格式：單品名（理由）、單品名（理由））
+    const recItems = [];
+    if(rec.recommends && rec.recommends.trim() && rec.recommends.trim() !== '無') {
+      rec.recommends.split(/[、,，]/).forEach(function(seg) {
+        seg = seg.trim();
+        if(!seg || seg.length < 2) return;
+        var m = seg.match(/^(.+?)[\(（]([^）)]+)[）)]$/);
+        if(m) recItems.push({ name: m[1].trim(), why: m[2].trim() });
+        else recItems.push({ name: seg, why: '' });
+      });
+    }
+
+    // outfit 拆解成 tag 陣列
+    const outfitTags = rec.outfit.split(/[＋+]/).map(function(p){ return p.trim(); }).filter(Boolean);
+
     // 確保核心單品排第一
-    if(anchorName && rec.outfit) {
+    if(anchorName && rec.outfit && fixedBase) {
       var outfitHasAnchor = rec.outfit.indexOf(fixedBase.color||'') !== -1 && rec.outfit.indexOf(fixedBase.type||'') !== -1;
       if(!outfitHasAnchor) {
-        rec.outfit = anchorName + '＋' + rec.outfit;
+        outfitTags.unshift(anchorName);
       } else {
-        var outfitParts = rec.outfit.split(/[＋+]/).map(function(p){ return p.trim(); }).filter(Boolean);
-        var anchorIdx = outfitParts.findIndex(function(p){ return p.indexOf(fixedBase.color||'') !== -1 && p.indexOf(fixedBase.type||'') !== -1; });
-        if(anchorIdx > 0) {
-          var anchorPart = outfitParts.splice(anchorIdx, 1)[0];
-          outfitParts.unshift(anchorPart);
-          rec.outfit = outfitParts.join('＋');
-        }
+        var anchorIdx = outfitTags.findIndex(function(p){ return p.indexOf(fixedBase.color||'') !== -1 && p.indexOf(fixedBase.type||'') !== -1; });
+        if(anchorIdx > 0) { var ap = outfitTags.splice(anchorIdx,1)[0]; outfitTags.unshift(ap); }
       }
+      rec.outfit = outfitTags.join('＋');
     }
-
-    // 組成推薦購買陣列
-    const recItems = [];
-    for(var _ri = 1; _ri <= 3; _ri++) {
-      var _n = rec['recommend'+_ri];
-      if(_n && _n.trim() && _n.trim().length > 1) {
-        recItems.push({ name: _n.trim(), why: rec['recommend'+_ri+'why'] || '' });
-      }
-    }
-
-    window._trendRec = rec;
-    window._trendRecItems = recItems;
-    // 儲存階段2分析結果供 UI 顯示
-    window._trendStageData = { trendColors, trendMaterials, trendSilhouette, trendAvoid, bodyTip, matchItems, conflictItems };
 
     // 渲染推薦單品購買卡
     function renderRecItem(it) {
@@ -3701,6 +3697,16 @@ priceRange: 推薦新購預估NT$總價
       bodyTip ? '<span style="background:rgba(91,155,213,.1);color:#5B9BD5;border-radius:5px;padding:2px 7px;font-size:.56rem;font-weight:700">👤 ' + bodyTip + '</span>' : ''
     ].filter(Boolean).join('');
 
+    window._trendRec = rec;
+    window._trendRecItems = recItems;
+    window._trendStageData = { trendColors, trendMaterials, trendSilhouette, trendAvoid, bodyTip, matchItems, conflictItems };
+
+    // outfit tag HTML
+    const outfitTagsHtml = outfitTags.map(function(tag, i) {
+      var isCore = i === 0;
+      return '<span style="display:inline-block;background:' + (isCore ? 'rgba(200,160,80,.2)' : 'var(--surface3)') + ';border:1px solid ' + (isCore ? 'rgba(200,160,80,.5)' : 'var(--border2)') + ';border-radius:6px;padding:3px 9px;font-size:.68rem;font-weight:700;color:' + (isCore ? 'var(--gold)' : 'var(--ink)') + ';margin:2px">' + tag + '</span>';
+    }).join('');
+
     res.innerHTML = `
       <div style="background:linear-gradient(135deg,rgba(200,160,80,.12),rgba(200,160,80,.06));border:1px solid rgba(200,160,80,.35);border-radius:14px;padding:14px;margin-bottom:10px">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
@@ -3709,13 +3715,10 @@ priceRange: 推薦新購預估NT$總價
         </div>
         ${ruleTagsHtml ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">' + ruleTagsHtml + '</div>' : ''}
         <div style="font-size:.62rem;color:var(--muted);margin-bottom:10px;padding:5px 8px;background:rgba(200,160,80,.08);border-radius:6px">${rec.trendContext}</div>
-        <div style="margin-bottom:8px">
-          <div style="font-size:.56rem;color:var(--muted);margin-bottom:3px">衣櫃核心單品</div>
-          <div style="font-size:.82rem;font-weight:800;color:var(--ink)">👗 ${rec.baseItem}</div>
-        </div>
-        <div style="background:var(--surface2);border-radius:8px;padding:9px 12px;margin-bottom:8px">
-          <div style="font-size:.56rem;font-weight:800;color:var(--muted);margin-bottom:3px">✦ 完整穿搭</div>
-          <div style="font-size:.74rem;color:var(--ink);font-weight:700;line-height:1.6">${rec.outfit}</div>
+        <div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:8px">
+          <div style="font-size:.56rem;font-weight:800;color:var(--muted);margin-bottom:6px">✦ 完整穿搭（共 ${outfitTags.length} 件）</div>
+          <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">${outfitTagsHtml}</div>
+          <div style="font-size:.54rem;color:var(--muted);margin-top:4px">🏷 金色 = 核心單品</div>
         </div>
         ${rec.reasoning ? `<div style="background:rgba(61,170,106,.07);border:1px solid rgba(61,170,106,.2);border-radius:8px;padding:8px 12px;margin-bottom:10px">
           <div style="font-size:.54rem;font-weight:800;color:var(--green);margin-bottom:3px">💡 搭配邏輯</div>
@@ -3723,13 +3726,13 @@ priceRange: 推薦新購預估NT$總價
         </div>` : ''}
         ${recItems.length ? `
         <div style="margin-bottom:10px">
-          <div style="font-size:.6rem;font-weight:800;color:var(--gold);margin-bottom:6px">🛍 AI 推薦新購單品（${recItems.length} 件）${rec.priceRange ? '<span style="color:var(--muted);font-weight:600;margin-left:6px">預估 ' + rec.priceRange + '</span>' : ''}</div>
+          <div style="font-size:.6rem;font-weight:800;color:var(--gold);margin-bottom:6px">🛍 AI 推薦新購（${recItems.length} 件）${rec.priceRange ? '<span style="color:var(--muted);font-weight:600;margin-left:6px">預估 ' + rec.priceRange + '</span>' : ''}</div>
           ${recItems.map(renderRecItem).join('')}
-        </div>` : '<div style="font-size:.62rem;color:var(--muted);margin-bottom:10px">✅ 此搭配全部來自你的衣櫃，無需新購</div>'}
+        </div>` : '<div style="font-size:.62rem;color:var(--green);margin-bottom:10px;padding:6px 10px;background:rgba(61,170,106,.07);border-radius:8px">✅ 此搭配全部來自你的衣櫃，無需新購</div>'}
         <div id="trend-imgbox" style="margin-bottom:10px"></div>
       </div>`;
     res.style.display = 'block';
-    apiLog('✓ 潮流搭配三段式生成完成，自動觸發生圖', 'ok');
+    apiLog('✓ 潮流搭配生成完成，outfit=' + outfitTags.length + '件，自動觸發生圖', 'ok');
     setTimeout(function(){ genTrendOutfitImg(); }, 300);
 
   } catch(e) {
@@ -5836,7 +5839,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-42<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VF-1<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -5860,7 +5863,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-42',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VF-1',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -6106,7 +6109,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-42 修復：潮流搭配URL變數未定義、一週搭配推薦單品缺字、isInWardrobe過濾邏輯收緊
+// VF-1 修復：潮流搭配URL變數未定義、一週搭配推薦單品缺字、isInWardrobe過濾邏輯收緊
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
