@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VD4-40 · AI 智能穿搭</title>
+<title>Fitto VD4-41 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -637,12 +637,14 @@ body{background:var(--bg);color:var(--ink);}
 
 /* ── API LOG ── */
 #tf-log {
-  max-height: 120px;
+  max-height: 220px;
   overflow-y: auto;
   margin-top: 6px;
-  scrollbar-width: none;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border2) transparent;
 }
-#tf-log::-webkit-scrollbar { display: none; }
+#tf-log::-webkit-scrollbar { width: 3px; }
+#tf-log::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 .tf-log-entry {
   font-size: 0.55rem;
   font-family: 'Inter', monospace;
@@ -716,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VD4-40</span></div>
+<div class="logo">Fitto <span class="logo-badge">VD4-41</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1072,14 +1074,21 @@ body{background:var(--bg);color:var(--ink);}
       <span class="tf-val green" id="tf-profit" style="font-size:0.88rem">NT$0</span>
     </div>
     <div class="tf-divider"></div>
-    <div style="font-size:0.55rem;font-weight:800;color:var(--muted);letter-spacing:0.06em;margin-bottom:3px">LOG</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">
+      <div style="font-size:0.55rem;font-weight:800;color:var(--muted);letter-spacing:0.06em">LOG</div>
+      <div onclick="event.stopPropagation();apiLogs=[];var el=document.getElementById('tf-log');if(el)el.innerHTML='';window._rawAiResponses={};" style="font-size:0.5rem;color:var(--muted);cursor:pointer;padding:1px 5px;border:1px solid var(--border);border-radius:4px">清除</div>
+    </div>
     <div id="tf-log"></div>
+    <div id="tf-raw-panel" style="display:none;margin-top:6px;background:rgba(0,0,0,.3);border:1px solid var(--border2);border-radius:6px;padding:6px;max-height:180px;overflow-y:auto">
+      <div style="font-size:0.5rem;font-weight:800;color:var(--gold);margin-bottom:4px">📄 AI 原始回傳</div>
+      <div id="tf-raw-content" style="font-size:0.5rem;color:var(--ink2);line-height:1.7;white-space:pre-wrap;word-break:break-all"></div>
+    </div>
     <div style="display:flex;justify-content:space-between;margin-top:6px">
       <div class="tf-reset" onclick="event.stopPropagation();resetTokenCount()">↺ 重置</div>
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-40 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VD4-41 · 2026.04</div>
   </div>
 </div>
 
@@ -1341,7 +1350,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VD4-40 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VD4-41 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1878,7 +1887,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VD4-40 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VD4-41 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -3487,6 +3496,7 @@ bodyTip: 針對用戶體型的版型建議（1句，15字內）`;
 
     const stageRaw = await geminiText(trendAnalysisPrompt, 500);
     apiLog('✓ 階段2完成，長度: ' + stageRaw.length, 'ok');
+    storeRaw('stage2', stageRaw);
 
     // 解析 key-value
     function parseKV(text) {
@@ -3503,7 +3513,7 @@ bodyTip: 針對用戶體型的版型建議（1句，15字內）`;
       return out;
     }
     const stageData = parseKV(stageRaw.replace(/```/g,'').trim());
-    apiLog('  階段2解析: colors=' + (stageData.colors||'(空)').substring(0,20) + ' match=' + (stageData.matchItems||'(空)').substring(0,20), 'info');
+    apiLog('  階段2解析: colors=' + (stageData.colors||'(空)').substring(0,20) + ' match=' + (stageData.matchItems||'(空)').substring(0,20), 'info', 'stage2');
     const trendColors = stageData.colors || '';
     const trendMaterials = stageData.materials || '';
     const trendSilhouette = stageData.silhouette || '';
@@ -3556,7 +3566,8 @@ priceRange: 推薦新購預估NT$總價
 只輸出以上12行，格式「欄位名: 內容」，不要其他文字。`;
 
     const raw = await geminiText(prompt, 900);
-    apiLog('  階段3原文: ' + raw.replace(/\n/g,'|').substring(0,120), 'info');
+    storeRaw('stage3', raw);
+    apiLog('  階段3原文 (' + raw.length + '字)', 'info', 'stage3');
 
     const cleaned = raw.replace(/```/g,'').trim();
     let rec = parseKV(cleaned);
@@ -5636,21 +5647,39 @@ function addFromCat(idx,type,color,style,name,btn){if(wardrobe.length>=wardrobeL
 
 // ═══ API LOG ═══
 var apiLogs = [];
-function apiLog(msg, type) {
+var _rawAiResponses = {};  // 存完整 AI 原文 {key: fullText}
+
+function apiLog(msg, type, rawKey) {
   type = type || 'info';
   var now = new Date();
   var ts = now.getHours().toString().padStart(2,'0') + ':' +
             now.getMinutes().toString().padStart(2,'0') + ':' +
             now.getSeconds().toString().padStart(2,'0');
-  var entry = {ts: ts, msg: msg, type: type};
+  var entry = {ts: ts, msg: msg, type: type, rawKey: rawKey || null};
   apiLogs.unshift(entry);
-  if(apiLogs.length > 30) apiLogs.pop();
+  if(apiLogs.length > 60) apiLogs.pop();
   var el = document.getElementById('tf-log');
   if(!el) return;
   el.innerHTML = apiLogs.map(function(e){
+    var expandBtn = e.rawKey && _rawAiResponses[e.rawKey]
+      ? ' <span onclick="event.stopPropagation();showRaw(\'' + e.rawKey + '\')" style="color:var(--gold);cursor:pointer;border:1px solid var(--gold);border-radius:3px;padding:0 4px;font-size:.48rem">展開</span>'
+      : '';
     return '<div class="tf-log-entry ' + e.type + '">' +
-           '<span style="opacity:.5">' + e.ts + '</span> ' + e.msg + '</div>';
+           '<span style="opacity:.5">' + e.ts + '</span> ' + e.msg + expandBtn + '</div>';
   }).join('');
+}
+
+function showRaw(key) {
+  var content = _rawAiResponses[key] || '(無內容)';
+  var panel = document.getElementById('tf-raw-panel');
+  var el = document.getElementById('tf-raw-content');
+  if(!panel || !el) return;
+  el.textContent = content;
+  panel.style.display = panel.style.display === 'none' ? 'block' : 'none';
+}
+
+function storeRaw(key, text) {
+  _rawAiResponses[key] = text;
 }
 
 // ═══ 下載原始碼 ═══
@@ -5748,7 +5777,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VD4-40<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VD4-41<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -5772,7 +5801,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VD4-40',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VD4-41',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -6018,7 +6047,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VD4-40 修復：潮流搭配URL變數未定義、一週搭配推薦單品缺字、isInWardrobe過濾邏輯收緊
+// VD4-41 修復：潮流搭配URL變數未定義、一週搭配推薦單品缺字、isInWardrobe過濾邏輯收緊
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
