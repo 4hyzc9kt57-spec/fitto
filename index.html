@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VF-1 · AI 智能穿搭</title>
+<title>Fitto VF-2 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VF-1</span></div>
+<div class="logo">Fitto <span class="logo-badge">VF-2</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1088,7 +1088,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VF-1 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VF-2 · 2026.04</div>
   </div>
 </div>
 
@@ -1350,7 +1350,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VF-1 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VF-2 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1887,7 +1887,7 @@ function updateBanner() {
   updateCoinUI();
 }
 
-// openNameModal 已在 VF-1 新功能區塊重新定義（整合設定頁）
+// openNameModal 已在 VF-2 新功能區塊重新定義（整合設定頁）
 function openNameModal_legacy_unused() {
   document.getElementById('name-inp').value = USER_NAME;
   var p = JSON.parse(localStorage.getItem('fitto_profile') || '{}');
@@ -3535,8 +3535,9 @@ async function genTrendStyling() {
     // 核心單品：用戶指定 or AI 自動
     const selEl = document.getElementById('trend-base-select');
     const selId = selEl ? selEl.value : '';
-    const fixedBase = selId ? wardrobe.find(function(w){ return w.id === selId; }) : null;
+    const fixedBase = selId ? wardrobe.find(function(w){ return String(w.id) === String(selId); }) : null;
     const anchorName = fixedBase ? ((fixedBase.color||'')+(fixedBase.type||'')+(fixedBase.note?' '+fixedBase.note:'')) : '';
+    apiLog('  指定單品: ' + (fixedBase ? anchorName : '無（AI自選）'), 'info');
 
     // ── 階段一：本季潮流命名 or 指定風格 ──
     let styleDirLabel = styleDir;
@@ -3585,8 +3586,14 @@ avoid: 搭配禁忌（1句）
     // ── 階段三：搭配建議生成（不帶完整衣櫃清單）──
     apiLog('→ 階段3：生成搭配建議（含推理鏈）', 'prompt');
     const baseItemHint = fixedBase
-      ? `核心單品（用戶指定，必須使用）：${anchorName}`
-      : (matchItems ? `核心單品建議從以下契合單品中挑選一件：${matchItems}` : '核心單品：從衣櫃中自行挑選最契合此風格的一件');
+      ? `⚠️ 核心單品【強制指定，不可更換】：${anchorName}\n此單品必須出現在 baseItem 和 outfit 的第一位，不得替換為其他單品。`
+      : (matchItems ? `核心單品建議從以下衣櫃單品中挑選一件：${matchItems}` : '核心單品：從衣櫃代表單品中自行挑選最契合風格的一件');
+
+    // 若有指定單品，從代表單品清單移除避免干擾
+    const availableItems = fixedBase
+      ? (matchItems || cachedKeyItems || '').split(/[,，]/).map(function(s){ return s.trim(); })
+          .filter(function(s){ return s && s.indexOf(fixedBase.type||'NONE') === -1; }).join('、')
+      : (matchItems || cachedKeyItems || '請自行挑選');
 
     const prompt = `你是專業時尚造型師。現在是${year}年${seaLabel}季（種子:${seed}）。
 風格方向：${styleDirLabel}
@@ -3601,7 +3608,7 @@ avoid: 搭配禁忌（1句）
 【衣櫃可用單品】
 主色調：${cachedColors}
 版型傾向：${cachedFitProfile}
-代表單品：${matchItems || cachedKeyItems || '請自行挑選'}
+搭配用單品：${availableItems}
 
 ${baseItemHint}
 
@@ -3704,7 +3711,7 @@ priceRange: 新購預估NT$總價，無需新購則留空`;
     // outfit tag HTML
     const outfitTagsHtml = outfitTags.map(function(tag, i) {
       var isCore = i === 0;
-      return '<span style="display:inline-block;background:' + (isCore ? 'rgba(200,160,80,.2)' : 'var(--surface3)') + ';border:1px solid ' + (isCore ? 'rgba(200,160,80,.5)' : 'var(--border2)') + ';border-radius:6px;padding:3px 9px;font-size:.68rem;font-weight:700;color:' + (isCore ? 'var(--gold)' : 'var(--ink)') + ';margin:2px">' + tag + '</span>';
+      return '<span style="display:inline-block;background:' + (isCore ? 'rgba(200,160,80,.2)' : 'rgba(255,255,255,.07)') + ';border:1px solid ' + (isCore ? 'rgba(200,160,80,.5)' : 'rgba(255,255,255,.15)') + ';border-radius:6px;padding:3px 9px;font-size:.68rem;font-weight:700;color:' + (isCore ? 'var(--gold)' : 'var(--ink)') + ';margin:2px">' + tag + '</span>';
     }).join('');
 
     res.innerHTML = `
@@ -5839,7 +5846,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VF-1<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VF-2<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -5863,7 +5870,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VF-1',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VF-2',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -6109,7 +6116,7 @@ function addUQItem(id, btn) {
 }
 
 // ═══════════════════════════════════════
-// VF-1 修復：潮流搭配URL變數未定義、一週搭配推薦單品缺字、isInWardrobe過濾邏輯收緊
+// VF-2 修復：潮流搭配URL變數未定義、一週搭配推薦單品缺字、isInWardrobe過濾邏輯收緊
 // ═══════════════════════════════════════
 
 // ── 髮型系統 ──
