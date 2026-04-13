@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-13 · AI 智能穿搭</title>
+<title>Fitto VG-14 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-13</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-14</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1024,12 +1024,14 @@ body{background:var(--bg);color:var(--ink);}
 
   <!-- 評分結果 -->
   <div id="scoring-result" style="display:none">
-    <!-- 雷達圖 -->
+    <!-- 合成評分卡 -->
     <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;text-align:center">
-      <div style="font-size:.72rem;font-weight:800;color:var(--muted);margin-bottom:10px;letter-spacing:.06em">FITTO SCORE</div>
-      <canvas id="scoring-radar" width="260" height="260" style="max-width:100%"></canvas>
-      <div id="scoring-total" style="font-family:'Inter',sans-serif;font-weight:900;font-size:2.8rem;color:var(--gold);margin-top:8px">--</div>
-      <div style="font-size:.65rem;color:var(--muted)">/ 100</div>
+      <div style="font-size:.72rem;font-weight:800;color:var(--muted);margin-bottom:10px;letter-spacing:.06em">📸 穿搭評分卡</div>
+      <canvas id="scoring-card-canvas" style="max-width:100%;border-radius:10px;display:block;margin:0 auto"></canvas>
+      <div style="display:flex;gap:8px;margin-top:10px">
+        <button class="btn-s" style="flex:1" onclick="saveScoringCard()">💾 儲存圖片</button>
+        <button class="btn-s" style="flex:1" onclick="shareScoringCard()">📤 分享</button>
+      </div>
     </div>
 
     <!-- 維度分數 -->
@@ -1161,7 +1163,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-13 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-14 · 2026.04</div>
   </div>
 </div>
 
@@ -1423,7 +1425,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-13 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-14 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -6036,7 +6038,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-13<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-14<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6060,7 +6062,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-13',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-14',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -6662,7 +6664,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-13)
+// 穿搭評分功能 (VG-14)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
@@ -6812,6 +6814,10 @@ function submitScoring() {
     document.getElementById('scoring-result').style.display = 'block';
     document.getElementById('scoring-total').textContent = total;
 
+    // 合成評分卡
+    var photoSrc = document.getElementById('scoring-preview-img').src;
+    generateScoringCard(photoSrc, [cs, ss, os, ys], total, null);
+
     // 雷達圖
     drawScoringRadar([cs, ss, os, ys]);
 
@@ -6879,6 +6885,122 @@ function submitScoring() {
     });
   }
   doScoringFetch(0);
+}
+
+function generateScoringCard(photoSrc, scores, total, dims) {
+  var canvas = document.getElementById('scoring-card-canvas');
+  if (!canvas) return;
+  var W = 400, H = 600;
+  canvas.width = W; canvas.height = H;
+  var ctx = canvas.getContext('2d');
+
+  var img = new Image();
+  img.onload = function() {
+    // 背景
+    ctx.fillStyle = '#1A1408';
+    ctx.fillRect(0, 0, W, H);
+
+    // 照片（上半部，裁切正方形）
+    var photoH = 340;
+    var srcW = img.width, srcH = img.height;
+    var srcSize = Math.min(srcW, srcH);
+    var sx = (srcW - srcSize) / 2, sy = 0;
+    ctx.save();
+    ctx.beginPath();
+    ctx.rect(0, 0, W, photoH);
+    ctx.clip();
+    ctx.drawImage(img, sx, sy, srcSize, srcSize * (photoH / W), 0, 0, W, photoH);
+    ctx.restore();
+
+    // 照片漸層遮罩
+    var grad = ctx.createLinearGradient(0, photoH - 80, 0, photoH);
+    grad.addColorStop(0, 'rgba(26,20,8,0)');
+    grad.addColorStop(1, 'rgba(26,20,8,1)');
+    ctx.fillStyle = grad;
+    ctx.fillRect(0, photoH - 80, W, 80);
+
+    // FITTO 標誌
+    ctx.font = '700 13px Inter, sans-serif';
+    ctx.fillStyle = '#C9904A';
+    ctx.textAlign = 'left';
+    ctx.fillText('FITTO', 16, 28);
+    ctx.font = '500 10px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(201,144,74,.6)';
+    ctx.fillText('SCORE', 55, 28);
+
+    // 總分
+    ctx.textAlign = 'center';
+    ctx.font = '900 72px Inter, sans-serif';
+    ctx.fillStyle = '#C9904A';
+    ctx.fillText(total, W / 2, photoH - 16);
+    ctx.font = '500 12px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(201,144,74,.5)';
+    ctx.fillText('/ 100', W / 2, photoH + 4);
+
+    // 分隔線
+    ctx.strokeStyle = 'rgba(201,144,74,.2)';
+    ctx.lineWidth = 1;
+    ctx.beginPath();
+    ctx.moveTo(16, photoH + 18);
+    ctx.lineTo(W - 16, photoH + 18);
+    ctx.stroke();
+
+    // 四維度分數
+    var dimY = photoH + 36;
+    var labels = ['色彩協調', '版型平衡', '場合適合', '整體風格'];
+    var barW = W - 32;
+    labels.forEach(function(label, i) {
+      var score = scores[i];
+      var pct = score / 25;
+      // Label + 分數
+      ctx.textAlign = 'left';
+      ctx.font = '600 11px Noto Sans TC, Inter, sans-serif';
+      ctx.fillStyle = '#FAF7F2';
+      ctx.fillText(label, 16, dimY);
+      ctx.textAlign = 'right';
+      ctx.font = '700 11px Inter, sans-serif';
+      ctx.fillStyle = '#C9904A';
+      ctx.fillText(score + '/25', W - 16, dimY);
+      // 進度條背景
+      ctx.fillStyle = 'rgba(255,255,255,.07)';
+      ctx.fillRect(16, dimY + 4, barW, 5);
+      // 進度條
+      var barGrad = ctx.createLinearGradient(16, 0, 16 + barW * pct, 0);
+      barGrad.addColorStop(0, '#C9904A');
+      barGrad.addColorStop(1, '#e8b86d');
+      ctx.fillStyle = barGrad;
+      ctx.fillRect(16, dimY + 4, barW * pct, 5);
+      dimY += 30;
+    });
+
+    // 底部 watermark
+    ctx.textAlign = 'center';
+    ctx.font = '500 10px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(201,144,74,.3)';
+    ctx.fillText('fitto.ai · AI 智能穿搭', W / 2, H - 12);
+  };
+  img.src = photoSrc;
+}
+
+function saveScoringCard() {
+  var canvas = document.getElementById('scoring-card-canvas');
+  if (!canvas) return;
+  var dataUrl = canvas.toDataURL('image/jpeg', 0.92);
+  if (navigator.share) {
+    canvas.toBlob(function(blob) {
+      var file = new File([blob], 'fitto-score.jpg', { type: 'image/jpeg' });
+      navigator.share({ files: [file], title: 'Fitto 穿搭評分' }).catch(function(){});
+    }, 'image/jpeg', 0.92);
+  } else {
+    var a = document.createElement('a');
+    a.href = dataUrl;
+    a.download = 'fitto-score.jpg';
+    a.click();
+  }
+}
+
+function shareScoringCard() {
+  saveScoringCard();
 }
 
 function drawScoringRadar(scores) {
