@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-4 · AI 智能穿搭</title>
+<title>Fitto VG-5 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-4</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-5</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1158,10 +1158,10 @@ body{background:var(--bg);color:var(--ink);}
     </div>
     <div style="display:flex;justify-content:space-between;margin-top:6px">
       <div class="tf-reset" onclick="event.stopPropagation();resetTokenCount()">↺ 重置</div>
-      <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
+      <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-4 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-5 · 2026.04</div>
   </div>
 </div>
 
@@ -1423,7 +1423,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-4 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-5 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -5946,6 +5946,30 @@ function downloadSource() {
 
 
 // ═══ 複製原始碼到剪貼簿 ═══
+function copyLog() {
+  if (!apiLogs || !apiLogs.length) { showToast('⚠️ 目前沒有 LOG 記錄'); return; }
+  var txt = apiLogs.slice().reverse().map(function(e) {
+    return e.ts + ' [' + (e.type || 'info').toUpperCase() + '] ' + e.msg;
+  }).join('\n');
+  if (navigator.clipboard && navigator.clipboard.writeText) {
+    navigator.clipboard.writeText(txt).then(function() {
+      showToast('✅ LOG 已複製到剪貼簿');
+    }).catch(function() { fallbackCopyText(txt); });
+  } else {
+    fallbackCopyText(txt);
+  }
+}
+function fallbackCopyText(txt) {
+  var ta = document.createElement('textarea');
+  ta.value = txt;
+  ta.style.cssText = 'position:fixed;top:0;left:0;width:1px;height:1px;opacity:0';
+  document.body.appendChild(ta);
+  ta.focus(); ta.select();
+  try { document.execCommand('copy'); showToast('✅ LOG 已複製'); }
+  catch(e) { showToast('⚠️ 複製失敗，請長按 LOG 手動選取'); }
+  document.body.removeChild(ta);
+}
+
 function copySource() {
   var src = '<!DOCTYPE html>\n' + document.documentElement.outerHTML;
   if(navigator.clipboard && navigator.clipboard.writeText) {
@@ -6012,7 +6036,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-4<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-5<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6036,7 +6060,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-4',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-5',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -6638,7 +6662,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-4)
+// 穿搭評分功能 (VG-5)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
