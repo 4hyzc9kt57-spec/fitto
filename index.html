@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VF-5 · AI 智能穿搭</title>
+<title>Fitto VG1 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -2525,6 +2525,46 @@ const EMOJIS={'上衣':'👕','T恤':'👕','襯衫':'👔','毛衣':'🧶','外
 const TOPS=['上衣','T恤','襯衫','毛衣'],BTMS=['褲子','牛仔褲','裙子','洋裝'],OUTS=['外套','夾克'];
 
 let wardrobe=JSON.parse(localStorage.getItem('fitto_w')||'[]');
+
+// ── Style Guide 準則系統 ──────────────────────────────
+var _styleGuideUrl = 'https://4hyzc9kt57-spec.github.io/fitto/data/style_guide.json';
+
+function buildStylePrompt() {
+  try {
+    var raw = localStorage.getItem('fitto_style_guide');
+    if (!raw) return '';
+    var g = JSON.parse(raw);
+    var u = g.universal, s = g.seasonal;
+    return [
+      'STYLING RULES ' + g.meta.version + ' (' + s.keywords + '):',
+      'PRIORITY: ' + g.priority_order.join(' > '),
+      'COLOR: ' + u.color.join('. ') + '.',
+      'SILHOUETTE: ' + u.silhouette.join('. ') + '.',
+      'MATERIAL: ' + u.material.join('. ') + '.',
+      'OCCASION: ' + u.occasion.join('. ') + '.',
+      'SEASON COLORS: ' + s.colors.join(' / ') + '.',
+      'SEASON MATERIALS: ' + s.materials.join(' / ') + '.',
+      'SEASON LAYERING: ' + s.layering.join('. ') + '.',
+      'SEASON OCCASION: ' + s.occasion_weight.join('. ') + '.'
+    ].join('\n');
+  } catch(e) { return ''; }
+}
+
+async function fetchStyleGuide() {
+  try {
+    var localVer = localStorage.getItem('fitto_style_guide_ver') || '';
+    var res = await fetch(_styleGuideUrl);
+    if (!res.ok) return;
+    var guide = await res.json();
+    var remoteVer = (guide.meta || {}).version || '';
+    if (remoteVer && remoteVer !== localVer) {
+      localStorage.setItem('fitto_style_guide', JSON.stringify(guide));
+      localStorage.setItem('fitto_style_guide_ver', remoteVer);
+      console.log('[Fitto] Style guide updated to', remoteVer);
+    }
+  } catch(e) { console.log('[Fitto] Style guide fetch failed:', e.message); }
+}
+// ─────────────────────────────────────────────────────
 let saved=JSON.parse(localStorage.getItem('fitto_s')||'[]');
 let nid=parseInt(localStorage.getItem('fitto_id')||'1');
 let scanB64=null,scanMime="image/jpeg",catB64=null,catMime="image/jpeg",lastRes=null;
@@ -4366,10 +4406,12 @@ async function genOutfit(){
 
   const wj=buildWardrobePromptText();
   const accText = buildSelectedAccsText();
+  const styleRules = buildStylePrompt();
+  const styleSection = styleRules ? '\n\n【搭配準則】\n' + styleRules : '';
   const trendSection = trendContext
     ? `\n\n【當季流行趨勢參考】\n${trendContext}\n以上趨勢若衣櫃內有對應單品請優先選用；若無，可在tip中建議補充哪類單品。`
     : '';
-  const prompt=`你是一位擁有十年經驗的專業服裝設計師，擅長色彩搭配、材質協調與風格整合。衣櫃清單：${wj}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合規劃工作日搭配，每天考慮以下要素：\n1. 色系協調性（主色與配色的搭配邏輯）\n2. 材質相容性（避免材質風格衝突）\n3. 場合適合度（日常／工作／約會）\n4. 整體風格一致性${trendSection}${accText ? '\n' + accText : ''}\n請優先挑選衣櫃裡明確存在的單品名稱與顏色，不要虛構新品。回覆要精簡。`;
+  const prompt=`你是一位擁有十年經驗的專業服裝設計師，擅長色彩搭配、材質協調與風格整合。衣櫃清單：${wj}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合規劃工作日搭配，每天考慮以下要素：\n1. 色系協調性（主色與配色的搭配邏輯）\n2. 材質相容性（避免材質風格衝突）\n3. 場合適合度（日常／工作／約會）\n4. 整體風格一致性${styleSection}${trendSection}${accText ? '\n' + accText : ''}\n請優先挑選衣櫃裡明確存在的單品名稱與顏色，不要虛構新品。回覆要精簡。`;
   try{
     const isWeekend = occ.indexOf('週末') !== -1;
     const parsed = await requestWeekPlanByDays(prompt, isWeekend);
@@ -4720,7 +4762,8 @@ async function genImg(idx, outfit, occ, sea) {
     } else {
       weekHemConstraint = ' Full body shot from head to toe, shoes clearly visible. ';
     }
-    const imgPrompt = `${mannequinPromptPrefix}High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Outfit: ${itemDetailStr}. Style: ${outfit}. Season: ${seaEn}. Setting: ${sceneDesc}.${weekHemConstraint}No vignette, no circular frame, no black border, rectangular photo format. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS anywhere in the image. Professional studio lighting, sharp focus on clothing and shoes, fashion editorial quality, 4K detail.`;
+    const styleRulesImg = buildStylePrompt();
+    const imgPrompt = `${mannequinPromptPrefix}High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Outfit: ${itemDetailStr}. Style: ${outfit}. Season: ${seaEn}. Setting: ${sceneDesc}.${weekHemConstraint}No vignette, no circular frame, no black border, rectangular photo format. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS anywhere in the image. Professional studio lighting, sharp focus on clothing and shoes, fashion editorial quality, 4K detail.${styleRulesImg ? ' [STYLING CONTEXT: ' + styleRulesImg.split('\n').slice(2,6).join(' ') + ']' : ''}`;
 
     apiLog('→ 生圖: ' + imgPrompt.substring(0, 60) + '…', 'prompt');
     apiLog('  頭像:' + userAvatar + ' 服裝:' + outfit.substring(0,20), 'info');
@@ -5229,7 +5272,8 @@ async function genCustomOutfitImg() {
     const pose = getRandomPose(false);
     // 明確把配件穿戴位置寫進 prompt
     const accessoryClause = accDesc ? ` Accessories being worn: ${accDesc}.` : '';
-    const imgPrompt = `${mannequinPrefix}High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Wearing: ${mainOutfit || outfit}.${accessoryClause} All accessories must be clearly visible and properly worn. Clean minimal white or light grey studio background, no vignette, no circular frame, no black border, rectangular photo format. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS anywhere in the image. Professional studio lighting, sharp focus on full outfit including accessories, full body front view, Vogue-quality photography, 4K detail.`;
+    const styleRulesCustom = buildStylePrompt();
+    const imgPrompt = `${mannequinPrefix}High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Wearing: ${mainOutfit || outfit}.${accessoryClause} All accessories must be clearly visible and properly worn. Clean minimal white or light grey studio background, no vignette, no circular frame, no black border, rectangular photo format. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS anywhere in the image. Professional studio lighting, sharp focus on full outfit including accessories, full body front view, Vogue-quality photography, 4K detail.${styleRulesCustom ? ' [STYLING CONTEXT: ' + styleRulesCustom.split('\n').slice(2,6).join(' ') + ']' : ''}`;
     const avatarRef = getSelectedAvatarRefData();
     var avatarRefB64 = avatarRef && avatarRef.b64 ? avatarRef.b64 : null;
     var avatarRefMime2 = avatarRef && avatarRef.mimeType ? avatarRef.mimeType : 'image/jpeg';
@@ -6549,6 +6593,7 @@ document.addEventListener('DOMContentLoaded', function() {
     renderVipWrdSelector();
     updateHairQuickBtn();
     setTimeout(renderMissions, 300);
+    fetchStyleGuide();
     // 恢復髮型按鈕選中狀態（預設 avatar）
     var _hInit = selectedHairstyle || 'avatar';
     var hbtn = document.getElementById('hbtn-' + _hInit);
