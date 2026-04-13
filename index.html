@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-2 · AI 智能穿搭</title>
+<title>Fitto VG-3 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-2</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-3</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1161,7 +1161,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copySource()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VF-4 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-3 · 2026.04</div>
   </div>
 </div>
 
@@ -1423,7 +1423,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-2 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-3 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -6012,7 +6012,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VF-4<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-3<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6036,7 +6036,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VF-4',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-3',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -6638,7 +6638,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-2)
+// 穿搭評分功能 (VG-3)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
@@ -6647,14 +6647,30 @@ var _scoringImageMime = 'image/jpeg';
 function onScoringImageSelected(evt) {
   var file = evt.target.files[0];
   if (!file) return;
-  _scoringImageMime = file.type || 'image/jpeg';
+  _scoringImageMime = 'image/jpeg'; // 壓縮後統一用 jpeg
   var reader = new FileReader();
   reader.onload = function(e) {
-    _scoringImageB64 = e.target.result.split(',')[1];
-    document.getElementById('scoring-preview-img').src = e.target.result;
+    var originalSrc = e.target.result;
+    // 顯示原圖預覽（清晰）
+    document.getElementById('scoring-preview-img').src = originalSrc;
     document.getElementById('scoring-preview-wrap').style.display = 'block';
     document.getElementById('scoring-upload-area').style.display = 'none';
     document.getElementById('scoring-result').style.display = 'none';
+    // 用 canvas 壓縮後存 base64（送 API 用）
+    var img = new Image();
+    img.onload = function() {
+      var maxW = 800;
+      var scale = Math.min(1, maxW / img.width);
+      var w = Math.round(img.width * scale);
+      var h = Math.round(img.height * scale);
+      var canvas = document.createElement('canvas');
+      canvas.width = w; canvas.height = h;
+      var ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, w, h);
+      var compressed = canvas.toDataURL('image/jpeg', 0.75);
+      _scoringImageB64 = compressed.split(',')[1];
+    };
+    img.src = originalSrc;
   };
   reader.readAsDataURL(file);
 }
@@ -6713,7 +6729,7 @@ function submitScoring() {
     document.getElementById('scoring-loading').style.display = 'none';
     var text = '';
     try { text = data.candidates[0].content.parts[0].text; } catch(e) {}
-    if (!text) { alert('評分失敗，請重試'); resetScoring(); return; }
+    if (!text) { addCoins(1); alert('評分失敗，已退還 1 🪙，請重試'); resetScoring(); return; }
 
     // parse key: value
     var parsed = {};
@@ -6795,7 +6811,8 @@ function submitScoring() {
   })
   .catch(function(err) {
     document.getElementById('scoring-loading').style.display = 'none';
-    alert('評分失敗：' + err.message);
+    addCoins(1);
+    alert('評分失敗，已退還 1 🪙\n' + err.message);
     resetScoring();
   });
 }
