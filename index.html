@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VF-4 · AI 智能穿搭</title>
+<title>Fitto VF-5 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VF-4</span></div>
+<div class="logo">Fitto <span class="logo-badge">VF-5</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1350,7 +1350,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VF-4 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VF-5 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -3583,17 +3583,17 @@ avoid: 搭配禁忌（1句）
     const matchItems = fixedBase ? anchorName : cachedKeyItems;
     const conflictItems = wardrobeBase.gaps || '';
 
-    // ── 階段三：搭配建議生成（不帶完整衣櫃清單）──
-    apiLog('→ 階段3：生成搭配建議（含推理鏈）', 'prompt');
-    const baseItemHint = fixedBase
-      ? `⚠️ 核心單品【強制指定，不可更換】：${anchorName}\n此單品必須出現在 baseItem 和 outfit 的第一位，不得替換為其他單品。`
-      : (matchItems ? `核心單品建議從以下衣櫃單品中挑選一件：${matchItems}` : '核心單品：從衣櫃代表單品中自行挑選最契合風格的一件');
+    // ── 階段三：搭配建議生成（帶完整衣櫃清單，強制只用衣櫃內單品）──
+    apiLog('→ 階段3：生成搭配建議（含完整衣櫃清單）', 'prompt');
 
-    // 若有指定單品，從代表單品清單移除避免干擾
-    const availableItems = fixedBase
-      ? (matchItems || cachedKeyItems || '').split(/[,，]/).map(function(s){ return s.trim(); })
-          .filter(function(s){ return s && s.indexOf(fixedBase.type||'NONE') === -1; }).join('、')
-      : (matchItems || cachedKeyItems || '請自行挑選');
+    // 建立完整衣物清單（每件用 ID:顏色+類型 格式，讓 AI 只能引用）
+    const fullWardrobeList = wardrobe.map(function(item, idx){
+      return (idx+1) + '.' + (item.color||'') + (item.type||'') + (item.note ? '（'+item.note+'）' : '');
+    }).join('；');
+
+    const baseItemHint = fixedBase
+      ? `⚠️ 核心單品【強制指定，不可更換】：${anchorName}\n此單品必須出現在 baseItem 和 outfit 的第一位，且必須完全符合衣櫃清單中的描述。`
+      : `核心單品：從【衣櫃清單】中挑選最契合本季風格的一件。`;
 
     const prompt = `你是專業時尚造型師。現在是${year}年${seaLabel}季（種子:${seed}）。
 風格方向：${styleDirLabel}
@@ -3605,24 +3605,25 @@ avoid: 搭配禁忌（1句）
 搭配禁忌：${trendAvoid}
 體型建議：${bodyTip}
 
-【衣櫃可用單品】
-主色調：${cachedColors}
-版型傾向：${cachedFitProfile}
-搭配用單品：${availableItems}
+【衣櫃清單（只能從這裡挑選 outfit 單品）】
+${fullWardrobeList}
 
 ${baseItemHint}
 
-任務：嚴格遵守風格規則，以核心單品為基礎設計完整穿搭。
-規則：baseItem只寫「顏色+類型」，不加括號、英文、備註。
-outfit必須列出所有搭配單品（含核心單品），每件格式「顏色+類型」，用＋連接，至少2件。
+⚠️ 嚴格規定：
+1. outfit 中的每件單品，必須完全來自上方【衣櫃清單】，逐字對應清單中的顏色+類型。
+2. 不得自創、不得使用清單以外的顏色或類型，不得推測或添加衣櫃沒有的單品。
+3. 若衣櫃清單不足以組成完整搭配，才可在 recommends 欄位建議新購單品（不得寫進 outfit）。
+4. baseItem 只寫「顏色+類型」，不加括號、英文、備註。
+5. outfit 必須列出所有搭配單品（含核心單品），每件格式「顏色+類型」，用＋連接，至少2件。
 
 請輸出以下7行，格式「欄位名: 內容」，不要其他文字：
 baseItem: 核心單品（顏色+類型，例：淺藍牛仔褲）
 styleLabel: ${styleDirLabel}
 trendContext: 本季風格重點（15字內）
-outfit: 完整穿搭所有單品，用＋連接（例：淺藍牛仔褲＋白色棉T＋卡其帆布鞋）
+outfit: 完整穿搭所有單品，用＋連接（例：淺藍牛仔褲＋白色T恤＋卡其鞋子），只用衣櫃清單內的單品
 reasoning: 搭配邏輯（色彩+版型+材質各一點，25字內）
-recommends: 建議新購單品，格式「單品名（理由）」，多件用、分隔，無需新購則留空
+recommends: 建議新購單品，格式「單品名（理由）」，多件用、分隔，衣櫃已夠用則留空
 priceRange: 新購預估NT$總價，無需新購則留空`;
 
     const raw = await geminiText(prompt, 1200);
@@ -3663,6 +3664,16 @@ priceRange: 新購預估NT$總價，無需新購則留空`;
     const outfitTags = rec.outfit.split(/[＋+]/).map(function(p){ return p.trim(); }).filter(Boolean);
 
     // ── 衣櫃存在性驗證 ──
+    // 顏色語義模糊對應表（AI常用色名 → 衣櫃選項對應）
+    var COLOR_FUZZY_MAP = {
+      '鼠尾草':'綠色','鼠尾草綠':'綠色','薄荷':'綠色','薄荷綠':'綠色','墨綠':'綠色','橄欖':'橄欖綠',
+      '奶油':'米白','奶茶':'棕色','駝色':'卡其','沙漠':'卡其','焦糖':'棕色',
+      '霧灰':'灰色','煙灰':'灰色','石板':'深灰','炭灰':'深灰',
+      '冰藍':'淺藍','天藍':'淺藍','靛藍':'深藍','海軍藍':'深藍','數位藍':'深藍',
+      '茶色':'棕色','杏色':'米白','奶白':'米白','象牙':'米白',
+      '玫瑰':'粉色','珊瑚':'紅色','酒紅':'酒紅','磚紅':'紅色',
+      '黑色':'黑色','純白':'白色','米色':'米白','原色':'米白',
+    };
     // 對每個 outfit tag 做模糊比對，找出不在衣櫃的單品
     function isInWardrobe(tag) {
       if(!tag || tag.length < 2) return true; // 空白 tag 忽略
@@ -3671,8 +3682,16 @@ priceRange: 新購預估NT$總價，無需新購則留空`;
         var color = (item.color||'').replace(/\s/g,'').toLowerCase();
         var type  = (item.type||'').replace(/\s/g,'').toLowerCase();
         var note  = (item.note||'').replace(/\s/g,'').toLowerCase();
-        // 顏色和類型都命中，或 tag 包含衣物備註
+        // 直接比對
         var colorHit = color.length > 0 && tagLow.indexOf(color) !== -1;
+        // 模糊顏色比對：AI描述色名 → 對應衣櫃顏色
+        if(!colorHit) {
+          var mappedColor = '';
+          Object.keys(COLOR_FUZZY_MAP).forEach(function(fuzzy) {
+            if(tagLow.indexOf(fuzzy.toLowerCase()) !== -1) mappedColor = COLOR_FUZZY_MAP[fuzzy].toLowerCase();
+          });
+          if(mappedColor) colorHit = color === mappedColor;
+        }
         var typeHit  = type.length > 0  && tagLow.indexOf(type)  !== -1;
         var noteHit  = note.length > 1  && tagLow.indexOf(note)  !== -1;
         return (colorHit && typeHit) || noteHit;
