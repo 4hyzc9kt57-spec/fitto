@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG1 · AI 智能穿搭</title>
+<title>Fitto VG-1 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VF-5</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-1</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -757,9 +757,9 @@ body{background:var(--bg);color:var(--ink);}
       <span class="fc-icon">✨</span><div class="fc-title">本週搭配</div>
       <div class="fc-sub">AI 規劃工作日穿著</div><div class="fc-badge">AI</div>
     </div>
-    <div class="feature-card" onclick="goNav('catalog')">
-      <span class="fc-icon">📋</span><div class="fc-title">UNIQLO 型錄</div>
-      <div class="fc-sub">2026 春夏精選</div><div class="fc-badge">新</div>
+    <div class="feature-card" onclick="goNav('scoring')">
+      <span class="fc-icon">📸</span><div class="fc-title">穿搭評分</div>
+      <div class="fc-sub">AI 分析 · 獲得 Fitto Score</div><div class="fc-badge">AI</div>
     </div>
   </div>
   <div class="limit-bar">
@@ -984,6 +984,79 @@ body{background:var(--bg);color:var(--ink);}
   <div id="saved-wrap"></div>
 </div>
 
+<!-- ⑥ 穿搭評分 -->
+<div class="view" id="view-scoring">
+  <div class="phd"><h1>📸 今日穿搭評分</h1><p>上傳穿搭照，獲得 AI Fitto Score</p></div>
+
+  <!-- 拍照引導提示 -->
+  <div id="scoring-tips" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:14px;">
+    <div style="font-size:.72rem;font-weight:800;color:var(--gold);margin-bottom:8px;letter-spacing:.05em">📷 拍出高分穿搭照的小技巧</div>
+    <div style="font-size:.7rem;color:var(--ink2);line-height:2">
+      ✦ 光線充足，自然光或明亮室內為佳<br>
+      ✦ 拍攝全身照，包含鞋子在內<br>
+      ✦ 站姿自然，正面或 45 度角<br>
+      ✦ 背景簡潔，避免雜亂環境<br>
+      ✦ 確保服裝平整，無明顯皺褶
+    </div>
+  </div>
+
+  <!-- 上傳區 -->
+  <div id="scoring-upload-area" style="border:2px dashed var(--border);border-radius:var(--r);padding:28px 14px;text-align:center;margin-bottom:14px;cursor:pointer;background:var(--surface)" onclick="document.getElementById('scoring-file-input').click()">
+    <div style="font-size:2.2rem;margin-bottom:8px">👗</div>
+    <div style="font-weight:800;font-size:.88rem;color:var(--ink);margin-bottom:4px">點擊上傳今日穿搭照</div>
+    <div style="font-size:.68rem;color:var(--muted)">JPG / PNG · 建議全身照</div>
+    <input type="file" id="scoring-file-input" accept="image/*" style="display:none" onchange="onScoringImageSelected(event)">
+  </div>
+
+  <!-- 預覽圖 -->
+  <div id="scoring-preview-wrap" style="display:none;margin-bottom:14px;text-align:center">
+    <img id="scoring-preview-img" style="max-width:100%;max-height:320px;border-radius:var(--r);border:1px solid var(--border)" alt="穿搭預覽">
+    <div style="margin-top:8px">
+      <button class="btn-p" id="scoring-submit-btn" onclick="submitScoring()">✦ 開始評分（消耗 1 🪙）</button>
+    </div>
+  </div>
+
+  <!-- 評分中 spinner -->
+  <div id="scoring-loading" style="display:none;text-align:center;padding:24px 0">
+    <div class="spinner"></div>
+    <div style="font-size:.75rem;color:var(--muted);margin-top:10px">AI 正在分析你的穿搭…</div>
+  </div>
+
+  <!-- 評分結果 -->
+  <div id="scoring-result" style="display:none">
+    <!-- 雷達圖 -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:16px;margin-bottom:12px;text-align:center">
+      <div style="font-size:.72rem;font-weight:800;color:var(--muted);margin-bottom:10px;letter-spacing:.06em">FITTO SCORE</div>
+      <canvas id="scoring-radar" width="260" height="260" style="max-width:100%"></canvas>
+      <div id="scoring-total" style="font-family:'Inter',sans-serif;font-weight:900;font-size:2.8rem;color:var(--gold);margin-top:8px">--</div>
+      <div style="font-size:.65rem;color:var(--muted)">/ 100</div>
+    </div>
+
+    <!-- 維度分數 -->
+    <div id="scoring-dims" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px"></div>
+
+    <!-- 整體評語 -->
+    <div id="scoring-comment" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;font-size:.78rem;line-height:1.8;color:var(--ink2)"></div>
+
+    <!-- 造型師建議 -->
+    <div id="scoring-advice" style="background:var(--tag-gold-bg);border:1px solid var(--gold);border-radius:var(--r);padding:14px;margin-bottom:12px"></div>
+
+    <!-- 推薦配件 -->
+    <div id="scoring-items" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px"></div>
+
+    <!-- 再次評分 -->
+    <button class="btn-s" style="width:100%;margin-bottom:16px" onclick="resetScoring()">📸 重新上傳評分</button>
+  </div>
+
+  <!-- 歷史評分記錄 -->
+  <div style="margin-top:4px">
+    <div style="font-size:.72rem;font-weight:800;color:var(--muted);margin-bottom:10px;letter-spacing:.06em">📊 歷史評分記錄</div>
+    <div id="scoring-history-list">
+      <div style="text-align:center;color:var(--muted);padding:20px 0;font-size:.72rem">尚無評分記錄</div>
+    </div>
+  </div>
+</div>
+
 <!-- ④ 型錄 -->
 <div class="view" id="view-catalog">
   <div class="phd"><h1>型錄</h1><p>品牌春夏精選 · 一鍵加入衣櫃</p></div>
@@ -1201,7 +1274,7 @@ body{background:var(--bg);color:var(--ink);}
   <button class="nb active" onclick="goNav('wardrobe')"><span class="ni">🧺</span><span class="nl">衣櫃</span></button>
   <button class="nb" onclick="goNav('styling')"><span class="ni">✨</span><span class="nl">搭配</span></button>
   <button class="nb" onclick="goNav('saved')"><span class="ni">🔖</span><span class="nl">收藏</span></button>
-  <button class="nb" onclick="goNav('catalog')"><span class="ni">📋</span><span class="nl">型錄</span></button>
+  <button class="nb" onclick="goNav('catalog')" style="display:none"><span class="ni">📋</span><span class="nl">型錄</span></button>
   <button class="nb" onclick="goNav('shop')"><span class="ni">🪙</span><span class="nl">商店</span></button>
 </nav>
 
@@ -1350,7 +1423,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VF-5 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-1 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1857,12 +1930,13 @@ function goNav(name) {
   document.querySelectorAll('.nb').forEach(function(b){ b.classList.remove('active'); });
   var view = document.getElementById('view-' + name);
   if(view) view.classList.add('active');
-  var navMap = {wardrobe:0,styling:1,saved:2,catalog:3,shop:4};
+  var navMap = {wardrobe:0,styling:1,saved:2,catalog:3,shop:4,scoring:-1};
   var nbs = document.querySelectorAll('.nb');
-  if(navMap[name] !== undefined && nbs[navMap[name]]) nbs[navMap[name]].classList.add('active');
+  if(navMap[name] !== undefined && navMap[name] >= 0 && nbs[navMap[name]]) nbs[navMap[name]].classList.add('active');
   if(name === 'saved') renderSaved();
   if(name === 'shop') { renderMissions(); renderShop(); }
   if(name === 'styling') { populateCustomSelects(); renderAccChips(); }
+  if(name === 'scoring') { renderScoringHistory(); }
 }
 
 function goShop() { goNav('shop'); }
@@ -2525,46 +2599,6 @@ const EMOJIS={'上衣':'👕','T恤':'👕','襯衫':'👔','毛衣':'🧶','外
 const TOPS=['上衣','T恤','襯衫','毛衣'],BTMS=['褲子','牛仔褲','裙子','洋裝'],OUTS=['外套','夾克'];
 
 let wardrobe=JSON.parse(localStorage.getItem('fitto_w')||'[]');
-
-// ── Style Guide 準則系統 ──────────────────────────────
-var _styleGuideUrl = 'https://4hyzc9kt57-spec.github.io/fitto/data/style_guide.json';
-
-function buildStylePrompt() {
-  try {
-    var raw = localStorage.getItem('fitto_style_guide');
-    if (!raw) return '';
-    var g = JSON.parse(raw);
-    var u = g.universal, s = g.seasonal;
-    return [
-      'STYLING RULES ' + g.meta.version + ' (' + s.keywords + '):',
-      'PRIORITY: ' + g.priority_order.join(' > '),
-      'COLOR: ' + u.color.join('. ') + '.',
-      'SILHOUETTE: ' + u.silhouette.join('. ') + '.',
-      'MATERIAL: ' + u.material.join('. ') + '.',
-      'OCCASION: ' + u.occasion.join('. ') + '.',
-      'SEASON COLORS: ' + s.colors.join(' / ') + '.',
-      'SEASON MATERIALS: ' + s.materials.join(' / ') + '.',
-      'SEASON LAYERING: ' + s.layering.join('. ') + '.',
-      'SEASON OCCASION: ' + s.occasion_weight.join('. ') + '.'
-    ].join('\n');
-  } catch(e) { return ''; }
-}
-
-async function fetchStyleGuide() {
-  try {
-    var localVer = localStorage.getItem('fitto_style_guide_ver') || '';
-    var res = await fetch(_styleGuideUrl);
-    if (!res.ok) return;
-    var guide = await res.json();
-    var remoteVer = (guide.meta || {}).version || '';
-    if (remoteVer && remoteVer !== localVer) {
-      localStorage.setItem('fitto_style_guide', JSON.stringify(guide));
-      localStorage.setItem('fitto_style_guide_ver', remoteVer);
-      console.log('[Fitto] Style guide updated to', remoteVer);
-    }
-  } catch(e) { console.log('[Fitto] Style guide fetch failed:', e.message); }
-}
-// ─────────────────────────────────────────────────────
 let saved=JSON.parse(localStorage.getItem('fitto_s')||'[]');
 let nid=parseInt(localStorage.getItem('fitto_id')||'1');
 let scanB64=null,scanMime="image/jpeg",catB64=null,catMime="image/jpeg",lastRes=null;
@@ -4406,12 +4440,10 @@ async function genOutfit(){
 
   const wj=buildWardrobePromptText();
   const accText = buildSelectedAccsText();
-  const styleRules = buildStylePrompt();
-  const styleSection = styleRules ? '\n\n【搭配準則】\n' + styleRules : '';
   const trendSection = trendContext
     ? `\n\n【當季流行趨勢參考】\n${trendContext}\n以上趨勢若衣櫃內有對應單品請優先選用；若無，可在tip中建議補充哪類單品。`
     : '';
-  const prompt=`你是一位擁有十年經驗的專業服裝設計師，擅長色彩搭配、材質協調與風格整合。衣櫃清單：${wj}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合規劃工作日搭配，每天考慮以下要素：\n1. 色系協調性（主色與配色的搭配邏輯）\n2. 材質相容性（避免材質風格衝突）\n3. 場合適合度（日常／工作／約會）\n4. 整體風格一致性${styleSection}${trendSection}${accText ? '\n' + accText : ''}\n請優先挑選衣櫃裡明確存在的單品名稱與顏色，不要虛構新品。回覆要精簡。`;
+  const prompt=`你是一位擁有十年經驗的專業服裝設計師，擅長色彩搭配、材質協調與風格整合。衣櫃清單：${wj}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合規劃工作日搭配，每天考慮以下要素：\n1. 色系協調性（主色與配色的搭配邏輯）\n2. 材質相容性（避免材質風格衝突）\n3. 場合適合度（日常／工作／約會）\n4. 整體風格一致性${trendSection}${accText ? '\n' + accText : ''}\n請優先挑選衣櫃裡明確存在的單品名稱與顏色，不要虛構新品。回覆要精簡。`;
   try{
     const isWeekend = occ.indexOf('週末') !== -1;
     const parsed = await requestWeekPlanByDays(prompt, isWeekend);
@@ -4762,8 +4794,7 @@ async function genImg(idx, outfit, occ, sea) {
     } else {
       weekHemConstraint = ' Full body shot from head to toe, shoes clearly visible. ';
     }
-    const styleRulesImg = buildStylePrompt();
-    const imgPrompt = `${mannequinPromptPrefix}High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Outfit: ${itemDetailStr}. Style: ${outfit}. Season: ${seaEn}. Setting: ${sceneDesc}.${weekHemConstraint}No vignette, no circular frame, no black border, rectangular photo format. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS anywhere in the image. Professional studio lighting, sharp focus on clothing and shoes, fashion editorial quality, 4K detail.${styleRulesImg ? ' [STYLING CONTEXT: ' + styleRulesImg.split('\n').slice(2,6).join(' ') + ']' : ''}`;
+    const imgPrompt = `${mannequinPromptPrefix}High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Outfit: ${itemDetailStr}. Style: ${outfit}. Season: ${seaEn}. Setting: ${sceneDesc}.${weekHemConstraint}No vignette, no circular frame, no black border, rectangular photo format. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS anywhere in the image. Professional studio lighting, sharp focus on clothing and shoes, fashion editorial quality, 4K detail.`;
 
     apiLog('→ 生圖: ' + imgPrompt.substring(0, 60) + '…', 'prompt');
     apiLog('  頭像:' + userAvatar + ' 服裝:' + outfit.substring(0,20), 'info');
@@ -5272,8 +5303,7 @@ async function genCustomOutfitImg() {
     const pose = getRandomPose(false);
     // 明確把配件穿戴位置寫進 prompt
     const accessoryClause = accDesc ? ` Accessories being worn: ${accDesc}.` : '';
-    const styleRulesCustom = buildStylePrompt();
-    const imgPrompt = `${mannequinPrefix}High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Wearing: ${mainOutfit || outfit}.${accessoryClause} All accessories must be clearly visible and properly worn. Clean minimal white or light grey studio background, no vignette, no circular frame, no black border, rectangular photo format. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS anywhere in the image. Professional studio lighting, sharp focus on full outfit including accessories, full body front view, Vogue-quality photography, 4K detail.${styleRulesCustom ? ' [STYLING CONTEXT: ' + styleRulesCustom.split('\n').slice(2,6).join(' ') + ']' : ''}`;
+    const imgPrompt = `${mannequinPrefix}High-end fashion magazine editorial photo. ${avatarDesc}. Pose: ${pose}. Wearing: ${mainOutfit || outfit}.${accessoryClause} All accessories must be clearly visible and properly worn. Clean minimal white or light grey studio background, no vignette, no circular frame, no black border, rectangular photo format. NO TEXT, NO LABELS, NO CAPTIONS, NO WATERMARKS anywhere in the image. Professional studio lighting, sharp focus on full outfit including accessories, full body front view, Vogue-quality photography, 4K detail.`;
     const avatarRef = getSelectedAvatarRefData();
     var avatarRefB64 = avatarRef && avatarRef.b64 ? avatarRef.b64 : null;
     var avatarRefMime2 = avatarRef && avatarRef.mimeType ? avatarRef.mimeType : 'image/jpeg';
@@ -6593,13 +6623,330 @@ document.addEventListener('DOMContentLoaded', function() {
     renderVipWrdSelector();
     updateHairQuickBtn();
     setTimeout(renderMissions, 300);
-    fetchStyleGuide();
     // 恢復髮型按鈕選中狀態（預設 avatar）
     var _hInit = selectedHairstyle || 'avatar';
     var hbtn = document.getElementById('hbtn-' + _hInit);
     if(hbtn){ hbtn.style.border = '1.5px solid var(--gold)'; hbtn.style.background = 'rgba(201,144,74,.15)'; }
   } catch(e) { console.error('Init error:', e.message); }
 });
+
+// ═══════════════════════════════════════
+// 穿搭評分功能 (VG-1)
+// ═══════════════════════════════════════
+
+var _scoringImageB64 = null;
+var _scoringImageMime = 'image/jpeg';
+
+function onScoringImageSelected(evt) {
+  var file = evt.target.files[0];
+  if (!file) return;
+  _scoringImageMime = file.type || 'image/jpeg';
+  var reader = new FileReader();
+  reader.onload = function(e) {
+    _scoringImageB64 = e.target.result.split(',')[1];
+    document.getElementById('scoring-preview-img').src = e.target.result;
+    document.getElementById('scoring-preview-wrap').style.display = 'block';
+    document.getElementById('scoring-result').style.display = 'none';
+  };
+  reader.readAsDataURL(file);
+}
+
+function resetScoring() {
+  _scoringImageB64 = null;
+  document.getElementById('scoring-preview-wrap').style.display = 'none';
+  document.getElementById('scoring-result').style.display = 'none';
+  document.getElementById('scoring-file-input').value = '';
+  document.getElementById('scoring-upload-area').style.display = 'block';
+}
+
+function submitScoring() {
+  if (!_scoringImageB64) { alert('請先上傳穿搭照片'); return; }
+  if (!spendCoin(1, '穿搭評分')) return;
+
+  document.getElementById('scoring-loading').style.display = 'block';
+  document.getElementById('scoring-preview-wrap').style.display = 'none';
+  document.getElementById('scoring-result').style.display = 'none';
+
+  var apiKey = (localStorage.getItem('fitto_key') || '').trim();
+  if (!apiKey) { alert('請先設定 Gemini API Key'); document.getElementById('scoring-loading').style.display = 'none'; return; }
+
+  var prompt = [
+    '你是一位專業時尚造型師，請分析這張穿搭照片，依照以下四個維度進行評分（每項滿分25分），並給出配件推薦。',
+    '請嚴格以下列 key: value 格式輸出，每行一個，不要其他說明：',
+    'color_score: 色彩協調度分數（0-25的整數）',
+    'color_reason: 色彩協調度扣分原因（1-2句）',
+    'silhouette_score: 版型平衡分數（0-25的整數）',
+    'silhouette_reason: 版型平衡扣分原因（1-2句）',
+    'occasion_score: 場合適合度分數（0-25的整數）',
+    'occasion_reason: 場合適合度扣分原因（1-2句）',
+    'style_score: 整體風格感分數（0-25的整數）',
+    'style_reason: 整體風格感扣分原因（1-2句）',
+    'comment: 整體評語（2-3句，專業但親切的繁體中文）',
+    'advice: 造型師建議（具體指出可以改善的方向，不保證加分，繁體中文）',
+    'item1: 推薦配件1名稱（繁體中文，例如：米白針織圍巾）',
+    'item2: 推薦配件2名稱（繁體中文）',
+    'item3: 推薦配件3名稱（繁體中文）',
+    'photo_quality: 照片品質備註（如果光線太暗、角度不佳或非全身照請說明，否則留空）'
+  ].join('\n');
+
+  fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      contents: [{ parts: [
+        { inline_data: { mime_type: _scoringImageMime, data: _scoringImageB64 } },
+        { text: prompt }
+      ]}],
+      generationConfig: { temperature: 0.3, maxOutputTokens: 1024 }
+    })
+  })
+  .then(function(r){ return r.json(); })
+  .then(function(data) {
+    document.getElementById('scoring-loading').style.display = 'none';
+    var text = '';
+    try { text = data.candidates[0].content.parts[0].text; } catch(e) {}
+    if (!text) { alert('評分失敗，請重試'); resetScoring(); return; }
+
+    // parse key: value
+    var parsed = {};
+    text.split('\n').forEach(function(line) {
+      var idx = line.indexOf(':');
+      if (idx < 0) return;
+      var k = line.substring(0, idx).trim();
+      var v = line.substring(idx + 1).trim();
+      parsed[k] = v;
+    });
+
+    var cs = parseInt(parsed.color_score) || 0;
+    var ss = parseInt(parsed.silhouette_score) || 0;
+    var os = parseInt(parsed.occasion_score) || 0;
+    var ys = parseInt(parsed.style_score) || 0;
+    var total = cs + ss + os + ys;
+
+    // 顯示結果
+    document.getElementById('scoring-result').style.display = 'block';
+    document.getElementById('scoring-total').textContent = total;
+
+    // 雷達圖
+    drawScoringRadar([cs, ss, os, ys]);
+
+    // 維度分數
+    var dims = [
+      { label: '色彩協調', score: cs, reason: parsed.color_reason || '' },
+      { label: '版型平衡', score: ss, reason: parsed.silhouette_reason || '' },
+      { label: '場合適合', score: os, reason: parsed.occasion_reason || '' },
+      { label: '整體風格', score: ys, reason: parsed.style_reason || '' }
+    ];
+    var dimsHtml = dims.map(function(d) {
+      var pct = Math.round(d.score / 25 * 100);
+      return '<div style="margin-bottom:12px">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
+        + '<span style="font-size:.74rem;font-weight:700;color:var(--ink)">' + d.label + '</span>'
+        + '<span style="font-family:Inter;font-weight:800;font-size:.84rem;color:var(--gold)">' + d.score + '<span style="font-size:.58rem;color:var(--muted)">/25</span></span>'
+        + '</div>'
+        + '<div style="background:var(--bg);border-radius:4px;height:6px;overflow:hidden;margin-bottom:4px">'
+        + '<div style="width:' + pct + '%;height:100%;background:linear-gradient(90deg,var(--gold),#e8b86d);border-radius:4px;transition:width .6s"></div>'
+        + '</div>'
+        + (d.reason ? '<div style="font-size:.64rem;color:var(--muted);line-height:1.5">' + d.reason + '</div>' : '')
+        + '</div>';
+    }).join('');
+    document.getElementById('scoring-dims').innerHTML = dimsHtml;
+
+    // 整體評語
+    document.getElementById('scoring-comment').innerHTML =
+      '<div style="font-size:.68rem;font-weight:800;color:var(--gold);margin-bottom:6px;letter-spacing:.05em">✦ 整體評語</div>'
+      + '<div style="font-size:.78rem;line-height:1.8;color:var(--ink2)">' + (parsed.comment || '') + '</div>';
+
+    // 造型師建議
+    document.getElementById('scoring-advice').innerHTML =
+      '<div style="font-size:.68rem;font-weight:800;color:var(--gold);margin-bottom:6px;letter-spacing:.05em">💡 Fitto 造型師建議</div>'
+      + '<div style="font-size:.76rem;line-height:1.8;color:var(--ink)">' + (parsed.advice || '') + '</div>';
+
+    // 推薦配件
+    var itemsHtml = '<div style="font-size:.68rem;font-weight:800;color:var(--gold);margin-bottom:10px;letter-spacing:.05em">🛍️ 推薦配件</div>';
+    [parsed.item1, parsed.item2, parsed.item3].filter(Boolean).forEach(function(item) {
+      var q = encodeURIComponent(item);
+      var shopUrl = 'https://www.google.com/search?q=' + q + '&tbm=shop';
+      itemsHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:7px">'
+        + '<span style="font-size:.76rem;color:var(--ink);font-weight:600">' + item + '</span>'
+        + '<a href="' + shopUrl + '" target="_blank" style="font-size:.6rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,var(--gold),#b8860b);border-radius:5px;padding:3px 9px;font-weight:700;white-space:nowrap">購買</a>'
+        + '</div>';
+    });
+
+    // 照片品質警告
+    if (parsed.photo_quality && parsed.photo_quality.trim() && parsed.photo_quality.trim() !== '（留空）' && parsed.photo_quality.trim().length > 2) {
+      itemsHtml += '<div style="margin-top:10px;padding:8px 10px;background:rgba(201,144,74,.12);border:1px solid var(--gold);border-radius:var(--r-sm);font-size:.67rem;color:var(--gold)">⚠️ ' + parsed.photo_quality + '<br><span style="color:var(--muted)">重新拍攝可能獲得更準確的評分</span></div>';
+    }
+
+    document.getElementById('scoring-items').innerHTML = itemsHtml;
+
+    // 儲存歷史 & 獎勵
+    saveScoringRecord(total, parsed);
+    checkScoringReward(total);
+    renderScoringHistory();
+  })
+  .catch(function(err) {
+    document.getElementById('scoring-loading').style.display = 'none';
+    alert('評分失敗：' + err.message);
+    resetScoring();
+  });
+}
+
+function drawScoringRadar(scores) {
+  var canvas = document.getElementById('scoring-radar');
+  if (!canvas) return;
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  ctx.clearRect(0, 0, W, H);
+  var cx = W / 2, cy = H / 2, r = Math.min(W, H) * 0.38;
+  var labels = ['色彩協調', '版型平衡', '場合適合', '整體風格'];
+  var n = 4;
+  var gold = '#C9904A';
+  var muted = '#888';
+
+  // 網格
+  for (var g = 1; g <= 4; g++) {
+    ctx.beginPath();
+    for (var i = 0; i < n; i++) {
+      var angle = (Math.PI * 2 / n) * i - Math.PI / 2;
+      var gr = r * g / 4;
+      var x = cx + gr * Math.cos(angle);
+      var y = cy + gr * Math.sin(angle);
+      if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+    }
+    ctx.closePath();
+    ctx.strokeStyle = 'rgba(136,136,136,0.25)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // 軸線
+  for (var i = 0; i < n; i++) {
+    var angle = (Math.PI * 2 / n) * i - Math.PI / 2;
+    ctx.beginPath();
+    ctx.moveTo(cx, cy);
+    ctx.lineTo(cx + r * Math.cos(angle), cy + r * Math.sin(angle));
+    ctx.strokeStyle = 'rgba(136,136,136,0.3)';
+    ctx.lineWidth = 1;
+    ctx.stroke();
+  }
+
+  // 數據多邊形
+  ctx.beginPath();
+  for (var i = 0; i < n; i++) {
+    var angle = (Math.PI * 2 / n) * i - Math.PI / 2;
+    var val = Math.min(scores[i] / 25, 1);
+    var x = cx + r * val * Math.cos(angle);
+    var y = cy + r * val * Math.sin(angle);
+    if (i === 0) ctx.moveTo(x, y); else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fillStyle = 'rgba(201,144,74,0.18)';
+  ctx.fill();
+  ctx.strokeStyle = gold;
+  ctx.lineWidth = 2;
+  ctx.stroke();
+
+  // 頂點點
+  for (var i = 0; i < n; i++) {
+    var angle = (Math.PI * 2 / n) * i - Math.PI / 2;
+    var val = Math.min(scores[i] / 25, 1);
+    var x = cx + r * val * Math.cos(angle);
+    var y = cy + r * val * Math.sin(angle);
+    ctx.beginPath();
+    ctx.arc(x, y, 4, 0, Math.PI * 2);
+    ctx.fillStyle = gold;
+    ctx.fill();
+  }
+
+  // 標籤
+  ctx.font = '700 11px Noto Sans TC, Inter, sans-serif';
+  ctx.fillStyle = muted;
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  for (var i = 0; i < n; i++) {
+    var angle = (Math.PI * 2 / n) * i - Math.PI / 2;
+    var lx = cx + (r + 22) * Math.cos(angle);
+    var ly = cy + (r + 22) * Math.sin(angle);
+    ctx.fillText(labels[i], lx, ly);
+  }
+}
+
+function saveScoringRecord(total, parsed) {
+  var records = JSON.parse(localStorage.getItem('fitto_scoring') || '[]');
+  records.unshift({
+    date: new Date().toLocaleDateString('zh-TW'),
+    total: total,
+    color: parseInt(parsed.color_score) || 0,
+    silhouette: parseInt(parsed.silhouette_score) || 0,
+    occasion: parseInt(parsed.occasion_score) || 0,
+    style: parseInt(parsed.style_score) || 0,
+    comment: parsed.comment || ''
+  });
+  if (records.length > 20) records = records.slice(0, 20);
+  localStorage.setItem('fitto_scoring', JSON.stringify(records));
+}
+
+function checkScoringReward(total) {
+  var meta = JSON.parse(localStorage.getItem('fitto_scoring_meta') || '{}');
+  var prevBest = meta.best || 0;
+  var got80 = meta.got80 || false;
+  var got90 = meta.got90 || false;
+  var got100 = meta.got100 || false;
+  var reward = 0;
+  var msgs = [];
+
+  if (total >= 100 && !got100) {
+    reward += 10; msgs.push('🏆 首次滿分！+10 🪙');
+    meta.got100 = true;
+  } else if (total >= 90 && !got90) {
+    reward += 5; msgs.push('🌟 首次達 90 分！+5 🪙');
+    meta.got90 = true;
+  } else if (total >= 80 && !got80) {
+    reward += 3; msgs.push('✨ 首次達 80 分！+3 🪙');
+    meta.got80 = true;
+  } else if (total > prevBest && prevBest > 0) {
+    reward += 2; msgs.push('📈 破個人記錄！+2 🪙');
+  }
+
+  if (total > prevBest) meta.best = total;
+  localStorage.setItem('fitto_scoring_meta', JSON.stringify(meta));
+
+  if (reward > 0) {
+    addCoins(reward);
+    setTimeout(function() { alert(msgs.join('\n') + '\n已獲得 ' + reward + ' 枚金幣！'); }, 400);
+  }
+}
+
+function addCoins(n) {
+  coins += n;
+  localStorage.setItem('fitto_coins', coins);
+  updateCoinDisplay();
+}
+
+function renderScoringHistory() {
+  var records = JSON.parse(localStorage.getItem('fitto_scoring') || '[]');
+  var el = document.getElementById('scoring-history-list');
+  if (!el) return;
+  if (!records.length) {
+    el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px 0;font-size:.72rem">尚無評分記錄</div>';
+    return;
+  }
+  el.innerHTML = records.map(function(r, idx) {
+    var scoreColor = r.total >= 90 ? '#4CAF50' : r.total >= 80 ? 'var(--gold)' : 'var(--muted)';
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">'
+      + '<div>'
+      + '<div style="font-size:.65rem;color:var(--muted);margin-bottom:3px">' + r.date + '</div>'
+      + '<div style="font-size:.72rem;color:var(--ink2);line-height:1.5">'
+      + '色彩 ' + r.color + ' · 版型 ' + r.silhouette + ' · 場合 ' + r.occasion + ' · 風格 ' + r.style
+      + '</div>'
+      + '</div>'
+      + '<div style="font-family:Inter;font-weight:900;font-size:1.6rem;color:' + scoreColor + '">' + r.total + '</div>'
+      + '</div>';
+  }).join('');
+}
+
+
 </script>
 </body>
 </html>
