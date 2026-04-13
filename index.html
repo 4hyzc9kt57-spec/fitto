@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-1 · AI 智能穿搭</title>
+<title>Fitto VG-2 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-1</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-2</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1423,7 +1423,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-1 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-2 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -3679,23 +3679,24 @@ avoid: 搭配禁忌（1句）
 搭配禁忌：${trendAvoid}
 體型建議：${bodyTip}
 
-【衣櫃清單（只能從這裡挑選 outfit 單品）】
+【衣櫃清單（優先從這裡挑選單品）】
 ${fullWardrobeList}
 
 ${baseItemHint}
 
-⚠️ 嚴格規定：
-1. outfit 中的每件單品，必須完全來自上方【衣櫃清單】，逐字對應清單中的顏色+類型。
-2. 不得自創、不得使用清單以外的顏色或類型，不得推測或添加衣櫃沒有的單品。
-3. 若衣櫃清單不足以組成完整搭配，才可在 recommends 欄位建議新購單品（不得寫進 outfit）。
+⚠️ 規定：
+1. outfit 優先使用【衣櫃清單】內的單品，逐字對應清單中的顏色+類型。
+2. 若衣櫃清單不足以組成完整搭配（少於2件），可自行補全缺少的單品，補全單品需標記為「*建議購買*」。
+3. outfit 格式：衣櫃內單品直接寫「顏色+類型」，補全單品寫「*顏色+類型*」（加星號標記）。
 4. baseItem 只寫「顏色+類型」，不加括號、英文、備註。
-5. outfit 必須列出所有搭配單品（含核心單品），每件格式「顏色+類型」，用＋連接，至少2件。
+5. outfit 必須列出完整搭配（含核心單品），每件格式如上，用＋連接，至少2件。
+6. recommends 只填補全單品的購買建議（含理由），衣櫃已夠用則留空。
 
 請輸出以下7行，格式「欄位名: 內容」，不要其他文字：
 baseItem: 核心單品（顏色+類型，例：淺藍牛仔褲）
 styleLabel: ${styleDirLabel}
 trendContext: 本季風格重點（15字內）
-outfit: 完整穿搭所有單品，用＋連接（例：淺藍牛仔褲＋白色T恤＋卡其鞋子），只用衣櫃清單內的單品
+outfit: 完整穿搭所有單品，用＋連接（衣櫃內單品直接寫，補全單品加*星號*標記，例：藍色上衣＋*白色牛仔褲*＋*白色球鞋*）
 reasoning: 搭配邏輯（色彩+版型+材質各一點，25字內）
 recommends: 建議新購單品，格式「單品名（理由）」，多件用、分隔，衣櫃已夠用則留空
 priceRange: 新購預估NT$總價，無需新購則留空`;
@@ -3735,7 +3736,13 @@ priceRange: 新購預估NT$總價，無需新購則留空`;
     }
 
     // outfit 拆解成 tag 陣列
+    // 解析 outfit，星號標記單品直接視為建議購買
     const outfitTags = rec.outfit.split(/[＋+]/).map(function(p){ return p.trim(); }).filter(Boolean);
+    const outfitTagsParsed = outfitTags.map(function(tag) {
+      var isSuggested = /^\*.*\*$/.test(tag);
+      var cleanTag = tag.replace(/^\*|\*$/g, '').trim();
+      return { raw: tag, tag: cleanTag, forceBuy: isSuggested };
+    });
 
     // ── 衣櫃存在性驗證 ──
     // 顏色語義模糊對應表（AI常用色名 → 衣櫃選項對應）
@@ -3772,15 +3779,15 @@ priceRange: 新購預估NT$總價，無需新購則留空`;
       });
     }
 
-    // 把不在衣櫃的 outfit 單品移入購買推薦
-    const verifiedOutfitTags = [];   // 確認在衣櫃的
-    const autoRecItems = [];         // 自動偵測到的非衣櫃單品
-    outfitTags.forEach(function(tag, i) {
-      if(i === 0 || isInWardrobe(tag)) {
-        verifiedOutfitTags.push({ tag: tag, inWardrobe: true });
-      } else {
-        verifiedOutfitTags.push({ tag: tag, inWardrobe: false });
-        autoRecItems.push({ name: tag, why: 'AI搭配推薦', auto: true });
+    // 把不在衣櫃的 outfit 單品移入購買推薦（星號標記直接視為建議購買）
+    const verifiedOutfitTags = [];
+    const autoRecItems = [];
+    outfitTagsParsed.forEach(function(item, i) {
+      var tag = item.tag;
+      var inWrd = item.forceBuy ? false : (i === 0 || isInWardrobe(tag));
+      verifiedOutfitTags.push({ tag: tag, inWardrobe: inWrd });
+      if (!inWrd) {
+        autoRecItems.push({ name: tag, why: item.forceBuy ? '補全搭配建議購買' : 'AI搭配推薦', auto: true });
       }
     });
 
@@ -3792,7 +3799,7 @@ priceRange: 新購預估NT$總價，無需新購則留空`;
     });
 
     var hasNonWardrobe = verifiedOutfitTags.some(function(t){ return !t.inWardrobe; });
-    apiLog('  衣櫃驗證: outfit' + outfitTags.length + '件，非衣櫃' + autoRecItems.length + '件', hasNonWardrobe ? 'info' : 'ok');
+    apiLog('  衣櫃驗證: outfit' + outfitTagsParsed.length + '件，非衣櫃' + autoRecItems.length + '件', hasNonWardrobe ? 'info' : 'ok');
 
     // 確保核心單品排第一
     if(anchorName && fixedBase) {
@@ -3879,7 +3886,7 @@ priceRange: 新購預估NT$總價，無需新購則留空`;
         <div id="trend-imgbox" style="margin-bottom:10px"></div>
       </div>`;
     res.style.display = 'block';
-    apiLog('✓ 潮流搭配生成完成，outfit=' + outfitTags.length + '件，自動觸發生圖', 'ok');
+    apiLog('✓ 潮流搭配生成完成，outfit=' + outfitTagsParsed.length + '件，自動觸發生圖', 'ok');
     setTimeout(function(){ genTrendOutfitImg(); }, 300);
 
   } catch(e) {
@@ -6631,7 +6638,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-1)
+// 穿搭評分功能 (VG-2)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
@@ -6646,6 +6653,7 @@ function onScoringImageSelected(evt) {
     _scoringImageB64 = e.target.result.split(',')[1];
     document.getElementById('scoring-preview-img').src = e.target.result;
     document.getElementById('scoring-preview-wrap').style.display = 'block';
+    document.getElementById('scoring-upload-area').style.display = 'none';
     document.getElementById('scoring-result').style.display = 'none';
   };
   reader.readAsDataURL(file);
@@ -6667,7 +6675,7 @@ function submitScoring() {
   document.getElementById('scoring-preview-wrap').style.display = 'none';
   document.getElementById('scoring-result').style.display = 'none';
 
-  var apiKey = (localStorage.getItem('fitto_key') || '').trim();
+  var apiKey = (localStorage.getItem('fitto_gemini_key') || '').trim();
   if (!apiKey) { alert('請先設定 Gemini API Key'); document.getElementById('scoring-loading').style.display = 'none'; return; }
 
   var prompt = [
