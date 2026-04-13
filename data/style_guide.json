@@ -1,1 +1,66 @@
+{
+  "meta": {
+    "version": "2026-Q2",
+    "effective_date": "2026-04-01",
+    "next_revision": "2026-07-01",
+    "reviewed_by": "Gemini Stylist AI"
+  },
 
+  "priority_order": [
+    "personal_preference",
+    "occasion_requirement",
+    "universal",
+    "seasonal"
+  ],
+
+  "universal": {
+    "color": [
+      "Max 3 colors, ratio 60:30:10",
+      "Neutrals (black/white/grey/beige) pair with anything",
+      "Tone-on-tone is safest and most elevated",
+      "Avoid 3 high-saturation colors simultaneously"
+    ],
+    "silhouette": [
+      "Balance loose top with fitted bottom or vice versa",
+      "Long tops pair with slim pants",
+      "Avoid double oversized",
+      "Straight-leg and sculptural cuts allowed"
+    ],
+    "material": [
+      "Avoid same fabric top and bottom",
+      "Exception: raw denim full set allowed if tone is consistent",
+      "Formal fabrics do not mix with casual cotton tees",
+      "Layer light over heavy"
+    ],
+    "occasion": [
+      "Formal: no prints, no sportswear fabrics",
+      "Casual: mixing allowed but maintain overall coherence",
+      "Formality level must be consistent across all pieces"
+    ]
+  },
+
+  "seasonal": {
+    "keywords": "發光色 × 結構",
+    "colors": [
+      "Butter yellow (neutral base alternative)",
+      "Sage green",
+      "Misty rose",
+      "Electric purple (use as 10% accent only)"
+    ],
+    "materials": [
+      "Cotton linen",
+      "Sheer chiffon",
+      "3D textured fabric",
+      "Light leather"
+    ],
+    "layering": [
+      "Spring: thin blazer or vest as third layer",
+      "Summer: use structural cuts instead of volume layering",
+      "Linen should be structured, not slouchy"
+    ],
+    "occasion_weight": [
+      "Q2: increase casual and date occasion weight",
+      "Formal: prefer light blazer over heavy suiting"
+    ]
+  }
+}
