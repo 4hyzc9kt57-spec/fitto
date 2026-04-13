@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-17 · AI 智能穿搭</title>
+<title>Fitto VG-18 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-17</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-18</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1163,7 +1163,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-17 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-18 · 2026.04</div>
   </div>
 </div>
 
@@ -1425,7 +1425,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-17 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-18 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -6038,7 +6038,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-17<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-18<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6062,7 +6062,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-17',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-18',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -6664,7 +6664,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-17)
+// 穿搭評分功能 (VG-18)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
@@ -6852,9 +6852,15 @@ function submitScoring() {
       + '<div style="font-size:.78rem;line-height:1.8;color:var(--ink2)">' + (parsed.comment || '') + '</div>';
 
     // 造型師建議
-    document.getElementById('scoring-advice').innerHTML =
-      '<div style="font-size:.68rem;font-weight:800;color:var(--gold);margin-bottom:6px;letter-spacing:.05em">💡 Fitto 造型師建議</div>'
-      + '<div style="font-size:.76rem;line-height:1.8;color:var(--ink)">' + (parsed.advice || '') + '</div>';
+    var adviceEl = document.getElementById('scoring-advice');
+    if (parsed.advice && parsed.advice.trim()) {
+      adviceEl.style.display = 'block';
+      adviceEl.innerHTML =
+        '<div style="font-size:.68rem;font-weight:800;color:var(--gold);margin-bottom:6px;letter-spacing:.05em">💡 Fitto 造型師建議</div>'
+        + '<div style="font-size:.76rem;line-height:1.8;color:var(--ink)">' + parsed.advice + '</div>';
+    } else {
+      adviceEl.style.display = 'none';
+    }
 
     // 推薦配件
     var itemsHtml = '<div style="font-size:.68rem;font-weight:800;color:var(--gold);margin-bottom:10px;letter-spacing:.05em">🛍️ 推薦配件</div>';
@@ -6893,9 +6899,13 @@ function submitScoring() {
 function generateScoringCard(photoSrc, scores, total, dims) {
   var canvas = document.getElementById('scoring-card-canvas');
   if (!canvas) return;
-  var W = 400, H = 620;
-  canvas.width = W; canvas.height = H;
+  // 2x 解析度提升清晰度
+  var DPR = 2;
+  var W = 400, H = 580;
+  canvas.width = W * DPR; canvas.height = H * DPR;
+  canvas.style.width = W + 'px'; canvas.style.height = H + 'px';
   var ctx = canvas.getContext('2d');
+  ctx.scale(DPR, DPR);
 
   var img = new Image();
   img.onload = function() {
@@ -6903,7 +6913,7 @@ function generateScoringCard(photoSrc, scores, total, dims) {
     ctx.fillStyle = '#1A1408';
     ctx.fillRect(0, 0, W, H);
 
-    // 照片區
+    // 照片區（上半部）
     var photoH = 360;
     var srcW = img.width, srcH = img.height;
     // contain 模式：整張圖完整顯示，置中
@@ -6922,70 +6932,72 @@ function generateScoringCard(photoSrc, scores, total, dims) {
     ctx.restore();
 
     // 照片底部漸層遮罩
-    var grad = ctx.createLinearGradient(0, photoH - 100, 0, photoH);
+    var grad = ctx.createLinearGradient(0, photoH - 120, 0, photoH);
     grad.addColorStop(0, 'rgba(26,20,8,0)');
-    grad.addColorStop(1, 'rgba(26,20,8,0.9)');
+    grad.addColorStop(1, 'rgba(26,20,8,0.92)');
     ctx.fillStyle = grad;
-    ctx.fillRect(0, photoH - 100, W, 100);
+    ctx.fillRect(0, photoH - 120, W, 120);
 
     // FITTO 標誌（左上角）
-    ctx.font = '700 14px Inter, sans-serif';
+    ctx.font = '700 13px Inter, sans-serif';
     ctx.fillStyle = '#C9904A';
     ctx.textAlign = 'left';
-    ctx.fillText('FITTO', 16, 32);
-    ctx.font = '500 10px Inter, sans-serif';
+    ctx.fillText('FITTO', 14, 28);
+    ctx.font = '500 9px Inter, sans-serif';
     ctx.fillStyle = 'rgba(201,144,74,.6)';
-    ctx.fillText('SCORE', 62, 32);
+    ctx.fillText('SCORE', 58, 28);
 
-    // 總分（右下角疊在照片上，大字）
+    // 總分（右下角疊在照片上）
     ctx.textAlign = 'right';
-    ctx.font = '900 88px Inter, sans-serif';
+    ctx.font = '900 64px Inter, sans-serif';
     ctx.fillStyle = '#C9904A';
-    ctx.shadowColor = 'rgba(0,0,0,0.6)';
-    ctx.shadowBlur = 10;
-    ctx.fillText(total, W - 14, photoH - 8);
+    ctx.shadowColor = 'rgba(0,0,0,0.7)';
+    ctx.shadowBlur = 8;
+    ctx.fillText(total, W - 14, photoH - 12);
     ctx.shadowBlur = 0;
-    ctx.font = '500 13px Inter, sans-serif';
+    ctx.font = '500 11px Inter, sans-serif';
     ctx.fillStyle = 'rgba(201,144,74,.55)';
-    ctx.fillText('/ 100', W - 14, photoH + 14);
+    ctx.fillText('/ 100', W - 14, photoH + 6);
 
     // 分隔線
-    ctx.strokeStyle = 'rgba(201,144,74,.2)';
+    ctx.strokeStyle = 'rgba(201,144,74,.18)';
     ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.moveTo(16, photoH + 28);
-    ctx.lineTo(W - 16, photoH + 28);
+    ctx.moveTo(14, photoH + 20);
+    ctx.lineTo(W - 14, photoH + 20);
     ctx.stroke();
 
     // 四維度分數
-    var dimY = photoH + 46;
+    var dimY = photoH + 36;
     var labels = ['色彩協調', '版型平衡', '場合適合', '整體風格'];
-    var barW = W - 32;
+    var barW = W - 28;
     labels.forEach(function(label, i) {
       var score = scores[i];
       var pct = score / 25;
       ctx.textAlign = 'left';
-      ctx.font = '600 12px Noto Sans TC, Inter, sans-serif';
+      ctx.font = '600 11px Noto Sans TC, Inter, sans-serif';
       ctx.fillStyle = '#FAF7F2';
-      ctx.fillText(label, 16, dimY);
+      ctx.fillText(label, 14, dimY);
       ctx.textAlign = 'right';
-      ctx.font = '700 12px Inter, sans-serif';
+      ctx.font = '700 11px Inter, sans-serif';
       ctx.fillStyle = '#C9904A';
-      ctx.fillText(score + '/25', W - 16, dimY);
-      ctx.fillStyle = 'rgba(255,255,255,.07)';
-      ctx.fillRect(16, dimY + 5, barW, 5);
-      var barGrad = ctx.createLinearGradient(16, 0, 16 + barW * pct, 0);
+      ctx.fillText(score + '/25', W - 14, dimY);
+      // 進度條背景
+      ctx.fillStyle = 'rgba(255,255,255,.08)';
+      ctx.fillRect(14, dimY + 5, barW, 6);
+      // 進度條
+      var barGrad = ctx.createLinearGradient(14, 0, 14 + barW, 0);
       barGrad.addColorStop(0, '#C9904A');
       barGrad.addColorStop(1, '#e8b86d');
       ctx.fillStyle = barGrad;
-      ctx.fillRect(16, dimY + 5, Math.max(0, barW * pct), 5);
-      dimY += 32;
+      ctx.fillRect(14, dimY + 5, Math.max(0, barW * pct), 6);
+      dimY += 30;
     });
 
     // 底部 watermark
     ctx.textAlign = 'center';
-    ctx.font = '500 10px Inter, sans-serif';
-    ctx.fillStyle = 'rgba(201,144,74,.3)';
+    ctx.font = '500 9px Inter, sans-serif';
+    ctx.fillStyle = 'rgba(201,144,74,.25)';
     ctx.fillText('fitto.ai · AI 智能穿搭', W / 2, H - 10);
   };
   img.src = photoSrc;
