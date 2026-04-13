@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-5 · AI 智能穿搭</title>
+<title>Fitto VG-6 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-5</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-6</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1161,7 +1161,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-5 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-6 · 2026.04</div>
   </div>
 </div>
 
@@ -1423,7 +1423,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-5 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-6 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -6036,7 +6036,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-5<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-6<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6060,7 +6060,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-5',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-6',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -6662,7 +6662,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-5)
+// 穿搭評分功能 (VG-6)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
@@ -6720,14 +6720,17 @@ function resetScoring() {
 
 function submitScoring() {
   if (!_scoringImageB64) { alert('請先上傳穿搭照片'); return; }
+
+  var apiKey = (localStorage.getItem('fitto_gemini_key') || '').trim();
+  if (!apiKey) { alert('請先設定 Gemini API Key'); return; }
+
   if (!spendCoin(1, '穿搭評分')) return;
 
   document.getElementById('scoring-loading').style.display = 'block';
   document.getElementById('scoring-preview-wrap').style.display = 'none';
   document.getElementById('scoring-result').style.display = 'none';
 
-  var apiKey = (localStorage.getItem('fitto_gemini_key') || '').trim();
-  if (!apiKey) { alert('請先設定 Gemini API Key'); document.getElementById('scoring-loading').style.display = 'none'; return; }
+  apiLog('→ 開始評分，圖片大小：' + Math.round(_scoringImageB64.length / 1024) + 'KB', 'info');
 
   var prompt = [
     '你是一位專業時尚造型師，請分析這張穿搭照片，依照以下四個維度進行評分（每項滿分25分），並給出配件推薦。',
@@ -6748,6 +6751,7 @@ function submitScoring() {
     'photo_quality: 照片品質備註（如果光線太暗、角度不佳或非全身照請說明，否則留空）'
   ].join('\n');
 
+  apiLog('→ 送出 Gemini Vision 請求…', 'info');
   fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + apiKey, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -6759,11 +6763,17 @@ function submitScoring() {
       generationConfig: { temperature: 0.3, maxOutputTokens: 1024 }
     })
   })
-  .then(function(r){ return r.json(); })
+  .then(function(r){
+    apiLog('← HTTP 回應 ' + r.status, r.ok ? 'info' : 'err');
+    return r.json();
+  })
   .then(function(data) {
     document.getElementById('scoring-loading').style.display = 'none';
     var text = '';
-    try { text = data.candidates[0].content.parts[0].text; } catch(e) {}
+    try { text = data.candidates[0].content.parts[0].text; } catch(e) {
+      apiLog('✗ 解析回傳失敗: ' + JSON.stringify(data).substring(0, 100), 'err');
+    }
+    if (text) apiLog('← 回傳文字 ' + text.length + ' 字', 'ok');
     if (!text) { addCoins(1); alert('評分失敗，已退還 1 🪙，請重試'); resetScoring(); return; }
 
     // parse key: value
@@ -6846,6 +6856,7 @@ function submitScoring() {
   })
   .catch(function(err) {
     document.getElementById('scoring-loading').style.display = 'none';
+    apiLog('✗ fetch 錯誤: ' + err.message, 'err');
     addCoins(1);
     alert('評分失敗，已退還 1 🪙\n' + err.message);
     resetScoring();
