@@ -3793,7 +3793,7 @@ priceRange: 新購預估NT$總價`;
     rec.reasoning = rec.reasoning || '';
     rec.priceRange = rec.priceRange || '';
 
-    // 解析 recommends（格式：單品名（理由）、單品名（理由））
+    // 解析 recommends
     const recItems = [];
     if(rec.recommends && rec.recommends.trim() && rec.recommends.trim() !== '無') {
       rec.recommends.split(/[、,，]/).forEach(function(seg) {
@@ -3807,15 +3807,14 @@ priceRange: 新購預估NT$總價`;
 
     // [VG-23] T1+T2 新定位：outfit 解析
     // 第一件 = 核心單品（來自衣櫃，inWardrobe:true）
-    // 其餘全部 = 星號標記建議購買（inWardrobe:false），不再做 isInWardrobe() 比對
+    // 其餘全部 = 建議購買（inWardrobe:false），不再做 isInWardrobe() 比對
     const outfitTags = rec.outfit.split(/[＋+]/).map(function(p){ return p.trim(); }).filter(Boolean);
     const verifiedOutfitTags = outfitTags.map(function(tag, i) {
       var cleanTag = tag.replace(/^\*|\*$/g, '').trim();
-      var isCore = i === 0; // 第一件固定為核心單品（衣櫃內）
-      return { tag: cleanTag, inWardrobe: isCore };
+      return { tag: cleanTag, inWardrobe: i === 0 };
     });
 
-    // 確保核心單品排第一（若 AI 沒把 baseItem 排第一則強制調整）
+    // 確保核心單品排第一
     if(anchorName && fixedBase) {
       var anchorIdx2 = verifiedOutfitTags.findIndex(function(t){
         return t.tag.indexOf(fixedBase.color||'') !== -1 && t.tag.indexOf(fixedBase.type||'') !== -1;
@@ -3824,7 +3823,6 @@ priceRange: 新購預估NT$總價`;
         var ap2 = verifiedOutfitTags.splice(anchorIdx2, 1)[0];
         ap2.inWardrobe = true;
         verifiedOutfitTags.unshift(ap2);
-        // 第一件已是核心單品，其餘全部設為非衣櫃
         verifiedOutfitTags.forEach(function(t, i){ if(i > 0) t.inWardrobe = false; });
       } else if(anchorIdx2 === -1) {
         verifiedOutfitTags.unshift({ tag: anchorName, inWardrobe: true });
@@ -3846,9 +3844,6 @@ priceRange: 新購預估NT$總價`;
 
     var nonWardrobeCount = verifiedOutfitTags.filter(function(t){ return !t.inWardrobe; }).length;
     apiLog('  新定位驗證: outfit' + verifiedOutfitTags.length + '件，核心1件，建議購買' + nonWardrobeCount + '件', 'ok');
-        verifiedOutfitTags.unshift({ tag: anchorName, inWardrobe: true });
-      }
-    }
 
     // 渲染推薦單品購買卡
     function renderRecItem(it) {
@@ -3898,6 +3893,7 @@ priceRange: 新購預估NT$總價`;
 
     var wardrobeCount = verifiedOutfitTags.filter(function(t){ return t.inWardrobe; }).length;
     var nonWardrobeCount = verifiedOutfitTags.filter(function(t){ return !t.inWardrobe; }).length;
+
     res.innerHTML = `
       <div style="background:linear-gradient(135deg,rgba(200,160,80,.12),rgba(200,160,80,.06));border:1px solid rgba(200,160,80,.35);border-radius:14px;padding:14px;margin-bottom:10px">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
