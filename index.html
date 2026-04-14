@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-23 · AI 智能穿搭</title>
+<title>Fitto VG-24 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-23</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-24</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1163,7 +1163,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-23 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-24 · 2026.04</div>
   </div>
 </div>
 
@@ -1425,7 +1425,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-23 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-24 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -3758,7 +3758,8 @@ ${baseItemHint}
 1. baseItem 是唯一來自衣櫃的單品，outfit 第一位，直接寫「顏色+類型」不加星號。
 2. outfit 其餘單品由 AI 依本季風格自由搭配，不限衣櫃，但不可與【衣櫃清單】重複。
 3. 所有非核心單品一律加 *星號* 標記（代表建議購買）。
-4. outfit 格式：核心單品＋*建議單品A*＋*建議單品B*＋… 用＋連接，至少3件。
+4. outfit 格式：核心單品＋*建議單品A*＋*建議單品B*＋… 用＋連接。
+5. outfit 必須包含上衣、下身、鞋子三個類別，缺一不可，共至少 3 件。
 5. recommends 列出所有 * 建議購買單品，格式「單品名（理由）」，用、分隔。
 6. baseItem 只寫「顏色+類型」，不加括號、英文、備註。
 
@@ -3766,12 +3767,12 @@ ${baseItemHint}
 baseItem: 核心單品（顏色+類型，例：淺藍牛仔褲）
 styleLabel: ${styleDirLabel}
 trendContext: 本季風格重點（15字內）
-outfit: 完整穿搭，格式：核心單品＋*建議A*＋*建議B*＋…（至少3件）
+outfit: 完整穿搭，必須含上衣+下身+鞋子，格式：核心單品＋*建議A*＋*建議B*＋…（至少3件）
 reasoning: 搭配邏輯（色彩+版型+材質各一點，25字內）
 recommends: 所有建議購買單品，格式「單品名（理由）」，用、分隔
 priceRange: 新購預估NT$總價`;
 
-    const raw = await geminiText(prompt, 1200);
+    const raw = await geminiText(prompt, 2000); // [VG-24] P1 從 1200 提高到 2000，避免 outfit 截斷
     storeRaw('stage3', raw);
     apiLog('  階段3原文 (' + raw.length + '字)', 'info', 'stage3');
 
@@ -3808,7 +3809,26 @@ priceRange: 新購預估NT$總價`;
     // [VG-23] T1+T2 新定位：outfit 解析
     // 第一件 = 核心單品（來自衣櫃，inWardrobe:true）
     // 其餘全部 = 建議購買（inWardrobe:false），不再做 isInWardrobe() 比對
-    const outfitTags = rec.outfit.split(/[＋+]/).map(function(p){ return p.trim(); }).filter(Boolean);
+    let outfitTags = rec.outfit.split(/[＋+]/).map(function(p){ return p.trim(); }).filter(Boolean);
+
+    // [VG-24] P2 程式層驗證：outfit 不足 3 件時自動重試一次
+    if(outfitTags.length < 3) {
+      apiLog('  outfit 只有 ' + outfitTags.length + ' 件，自動重試…', 'info');
+      const raw2 = await geminiText(prompt, 2000);
+      storeRaw('stage3_retry', raw2);
+      const rec2 = parseKV(raw2.replace(/```/g,'').trim());
+      if(rec2.outfit) {
+        const tags2 = rec2.outfit.split(/[＋+]/).map(function(p){ return p.trim(); }).filter(Boolean);
+        if(tags2.length > outfitTags.length) {
+          rec.outfit = rec2.outfit;
+          outfitTags = tags2;
+          apiLog('  重試成功：outfit 現在 ' + outfitTags.length + ' 件', 'ok');
+        } else {
+          apiLog('  重試結果未改善，繼續使用原結果', 'info');
+        }
+      }
+    }
+
     const verifiedOutfitTags = outfitTags.map(function(tag, i) {
       var cleanTag = tag.replace(/^\*|\*$/g, '').trim();
       return { tag: cleanTag, inWardrobe: i === 0 };
@@ -3919,7 +3939,7 @@ priceRange: 新購預估NT$總價`;
         <div id="trend-imgbox" style="margin-bottom:10px"></div>
       </div>`;
     res.style.display = 'block';
-    apiLog('✓ 潮流搭配生成完成，outfit=' + outfitTagsParsed.length + '件，自動觸發生圖', 'ok');
+    apiLog('✓ 潮流搭配生成完成，outfit=' + verifiedOutfitTags.length + '件，自動觸發生圖', 'ok');
     setTimeout(function(){ genTrendOutfitImg(); }, 300);
 
   } catch(e) {
@@ -5939,17 +5959,18 @@ function apiLog(msg, type, rawKey) {
             now.getMinutes().toString().padStart(2,'0') + ':' +
             now.getSeconds().toString().padStart(2,'0');
   var entry = {ts: ts, msg: msg, type: type, rawKey: rawKey || null};
-  apiLogs.unshift(entry);
-  if(apiLogs.length > 60) apiLogs.pop();
+  apiLogs.push(entry); // [VG-23] 改為 push，最新在下，複製順序與時間一致
+  if(apiLogs.length > 60) apiLogs.shift();
   var el = document.getElementById('tf-log');
   if(!el) return;
-  el.innerHTML = apiLogs.map(function(e){
+  el.innerHTML = apiLogs.slice().reverse().map(function(e){ // 畫面顯示仍維持最新在上
     var expandBtn = e.rawKey && _rawAiResponses[e.rawKey]
       ? ' <span onclick="event.stopPropagation();showRaw(\'' + e.rawKey + '\')" style="color:var(--gold);cursor:pointer;border:1px solid var(--gold);border-radius:3px;padding:0 4px;font-size:.48rem">展開</span>'
       : '';
     return '<div class="tf-log-entry ' + e.type + '">' +
            '<span style="opacity:.5">' + e.ts + '</span> ' + e.msg + expandBtn + '</div>';
   }).join('');
+  // 不自動捲動，讓使用者保持在當前位置
 }
 
 function showRaw(key) {
@@ -5996,12 +6017,12 @@ function downloadSource() {
 // ═══ 複製原始碼到剪貼簿 ═══
 function copyLog() {
   if (!apiLogs || !apiLogs.length) { showToast('⚠️ 目前沒有 LOG 記錄'); return; }
-  var txt = apiLogs.slice().reverse().map(function(e) {
+  var txt = '=== Fitto Log ===\n' + apiLogs.map(function(e) {
     return e.ts + ' [' + (e.type || 'info').toUpperCase() + '] ' + e.msg;
   }).join('\n');
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(txt).then(function() {
-      showToast('✅ LOG 已複製到剪貼簿');
+      showToast('✅ LOG 已複製（' + apiLogs.length + ' 筆）');
     }).catch(function() { fallbackCopyText(txt); });
   } else {
     fallbackCopyText(txt);
@@ -6084,7 +6105,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-23<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-24<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6108,7 +6129,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-23',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-24',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
