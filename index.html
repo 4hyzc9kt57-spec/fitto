@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-21 · AI 智能穿搭</title>
+<title>Fitto VG-23 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-21</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-23</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -2742,14 +2742,22 @@ function renderW(){
   const suggestBar = document.getElementById('wardrobe-suggest-bar');
   if(suggestBar) suggestBar.style.display = 'none';
   const g=document.getElementById('cgrid');
-  let ct=0,cb=0,co=0;
+  let ct=0,cb=0,co=0,cs=0,ca=0;
   g.innerHTML='';
   // Count all for stats
-  wardrobe.forEach(i=>{if(['上衣','T恤','襯衫','毛衣'].includes(i.type))ct++;if(['褲子','牛仔褲','裙子','洋裝'].includes(i.type))cb++;if(['外套','夾克'].includes(i.type))co++;});
+  wardrobe.forEach(i=>{
+    if(['上衣','T恤','襯衫','毛衣'].includes(i.type))ct++;
+    if(['褲子','牛仔褲','裙子','洋裝'].includes(i.type))cb++;
+    if(['外套','夾克'].includes(i.type))co++;
+    if(['鞋子','球鞋','皮鞋','靴子'].includes(i.type))cs++;
+    if(['包包','墨鏡','帽子','腰帶','配件'].includes(i.type))ca++;
+  });
   document.getElementById('cnt-a').textContent=wardrobe.length;
   document.getElementById('cnt-t').textContent=ct;
   document.getElementById('cnt-b').textContent=cb;
   document.getElementById('cnt-o').textContent=co;
+  // [VG-22] L3 印出衣櫃總件數與各類別分布
+  apiLog('衣櫃分布: 總' + wardrobe.length + '件 | 上衣' + ct + ' 下身' + cb + ' 外套' + co + ' 鞋子' + cs + ' 配件' + ca, 'info');
   const displayW = activeCat==='全部' ? wardrobe : wardrobe.filter(i=>(CAT_MAP[activeCat]||[]).includes(i.type));
   if(!displayW.length){
     g.innerHTML='<div class="empty"><div class="ei">'+(wardrobe.length?'🔍':'🧺')+'</div><p>'+(wardrobe.length?'此分類沒有衣物':'衣櫃還是空的<br>拍照或手動新增第一件衣服！')+'</p></div>';
@@ -3301,6 +3309,8 @@ function buildItemImgPromptFromAI(item, avatarDesc) {
 
 function renderMultiScanResult(items) {
   window._scanItems = items;
+  // [VG-22] L2 印出暫存件數與各單品摘要
+  apiLog('暫存單品: ' + items.length + ' 件（' + items.map(function(i){ return i.color + i.type; }).join('、') + '）', 'info');
   const list = document.getElementById('scan-multi-list');
   const avatarDesc = getAvatarPromptDesc();
   list.innerHTML = items.map((item, i) => _buildScanItemCardHtml(item, i, avatarDesc)).join('');
@@ -3717,17 +3727,17 @@ avoid: 搭配禁忌（1句）
     const matchItems = fixedBase ? anchorName : cachedKeyItems;
     const conflictItems = wardrobeBase.gaps || '';
 
-    // ── 階段三：搭配建議生成（帶完整衣櫃清單，強制只用衣櫃內單品）──
-    apiLog('→ 階段3：生成搭配建議（含完整衣櫃清單）', 'prompt');
+    // ── 階段三：搭配建議生成（[VG-23] T1 新定位：1件衣櫃核心單品 × AI自由搭配）──
+    apiLog('→ 階段3：生成搭配建議（新定位：核心單品×AI自由搭配）', 'prompt');
 
-    // 建立完整衣物清單（每件用 ID:顏色+類型 格式，讓 AI 只能引用）
+    // 衣櫃清單：僅供 AI 參考「已有什麼」，避免推薦重複
     const fullWardrobeList = wardrobe.map(function(item, idx){
       return (idx+1) + '.' + (item.color||'') + (item.type||'') + (item.note ? '（'+item.note+'）' : '');
     }).join('；');
 
     const baseItemHint = fixedBase
-      ? `⚠️ 核心單品【強制指定，不可更換】：${anchorName}\n此單品必須出現在 baseItem 和 outfit 的第一位，且必須完全符合衣櫃清單中的描述。`
-      : `核心單品：從【衣櫃清單】中挑選最契合本季風格的一件。`;
+      ? `⚠️ 核心單品【強制指定，不可更換】：${anchorName}`
+      : `核心單品：從【衣櫃清單】中挑選最契合本季風格的 1 件。`;
 
     const prompt = `你是專業時尚造型師。現在是${year}年${seaLabel}季（種子:${seed}）。
 風格方向：${styleDirLabel}
@@ -3739,27 +3749,27 @@ avoid: 搭配禁忌（1句）
 搭配禁忌：${trendAvoid}
 體型建議：${bodyTip}
 
-【衣櫃清單（優先從這裡挑選單品）】
+【使用者衣櫃（僅供參考，避免重複推薦已有單品）】
 ${fullWardrobeList}
 
 ${baseItemHint}
 
 ⚠️ 規定：
-1. outfit 優先使用【衣櫃清單】內的單品，逐字對應清單中的顏色+類型。
-2. 若衣櫃清單不足以組成完整搭配（少於2件），可自行補全缺少的單品，補全單品需標記為「*建議購買*」。
-3. outfit 格式：衣櫃內單品直接寫「顏色+類型」，補全單品寫「*顏色+類型*」（加星號標記）。
-4. baseItem 只寫「顏色+類型」，不加括號、英文、備註。
-5. outfit 必須列出完整搭配（含核心單品），每件格式如上，用＋連接，至少2件。
-6. recommends 只填補全單品的購買建議（含理由），衣櫃已夠用則留空。
+1. baseItem 是唯一來自衣櫃的單品，outfit 第一位，直接寫「顏色+類型」不加星號。
+2. outfit 其餘單品由 AI 依本季風格自由搭配，不限衣櫃，但不可與【衣櫃清單】重複。
+3. 所有非核心單品一律加 *星號* 標記（代表建議購買）。
+4. outfit 格式：核心單品＋*建議單品A*＋*建議單品B*＋… 用＋連接，至少3件。
+5. recommends 列出所有 * 建議購買單品，格式「單品名（理由）」，用、分隔。
+6. baseItem 只寫「顏色+類型」，不加括號、英文、備註。
 
 請輸出以下7行，格式「欄位名: 內容」，不要其他文字：
 baseItem: 核心單品（顏色+類型，例：淺藍牛仔褲）
 styleLabel: ${styleDirLabel}
 trendContext: 本季風格重點（15字內）
-outfit: 完整穿搭所有單品，用＋連接（衣櫃內單品直接寫，補全單品加*星號*標記，例：藍色上衣＋*白色牛仔褲*＋*白色球鞋*）
+outfit: 完整穿搭，格式：核心單品＋*建議A*＋*建議B*＋…（至少3件）
 reasoning: 搭配邏輯（色彩+版型+材質各一點，25字內）
-recommends: 建議新購單品，格式「單品名（理由）」，多件用、分隔，衣櫃已夠用則留空
-priceRange: 新購預估NT$總價，無需新購則留空`;
+recommends: 所有建議購買單品，格式「單品名（理由）」，用、分隔
+priceRange: 新購預估NT$總價`;
 
     const raw = await geminiText(prompt, 1200);
     storeRaw('stage3', raw);
@@ -3795,79 +3805,47 @@ priceRange: 新購預估NT$總價，無需新購則留空`;
       });
     }
 
-    // outfit 拆解成 tag 陣列
-    // 解析 outfit，星號標記單品直接視為建議購買
+    // [VG-23] T1+T2 新定位：outfit 解析
+    // 第一件 = 核心單品（來自衣櫃，inWardrobe:true）
+    // 其餘全部 = 星號標記建議購買（inWardrobe:false），不再做 isInWardrobe() 比對
     const outfitTags = rec.outfit.split(/[＋+]/).map(function(p){ return p.trim(); }).filter(Boolean);
-    const outfitTagsParsed = outfitTags.map(function(tag) {
-      var isSuggested = /^\*.*\*$/.test(tag);
+    const verifiedOutfitTags = outfitTags.map(function(tag, i) {
       var cleanTag = tag.replace(/^\*|\*$/g, '').trim();
-      return { raw: tag, tag: cleanTag, forceBuy: isSuggested };
+      var isCore = i === 0; // 第一件固定為核心單品（衣櫃內）
+      return { tag: cleanTag, inWardrobe: isCore };
     });
 
-    // ── 衣櫃存在性驗證 ──
-    // 顏色語義模糊對應表（AI常用色名 → 衣櫃選項對應）
-    var COLOR_FUZZY_MAP = {
-      '鼠尾草':'綠色','鼠尾草綠':'綠色','薄荷':'綠色','薄荷綠':'綠色','墨綠':'綠色','橄欖':'橄欖綠',
-      '奶油':'米白','奶茶':'棕色','駝色':'卡其','沙漠':'卡其','焦糖':'棕色',
-      '霧灰':'灰色','煙灰':'灰色','石板':'深灰','炭灰':'深灰',
-      '冰藍':'淺藍','天藍':'淺藍','靛藍':'深藍','海軍藍':'深藍','數位藍':'深藍',
-      '茶色':'棕色','杏色':'米白','奶白':'米白','象牙':'米白',
-      '玫瑰':'粉色','珊瑚':'紅色','酒紅':'酒紅','磚紅':'紅色',
-      '黑色':'黑色','純白':'白色','米色':'米白','原色':'米白',
-    };
-    // 對每個 outfit tag 做模糊比對，找出不在衣櫃的單品
-    function isInWardrobe(tag) {
-      if(!tag || tag.length < 2) return true; // 空白 tag 忽略
-      var tagLow = tag.replace(/\s/g,'').toLowerCase();
-      return wardrobe.some(function(item) {
-        var color = (item.color||'').replace(/\s/g,'').toLowerCase();
-        var type  = (item.type||'').replace(/\s/g,'').toLowerCase();
-        var note  = (item.note||'').replace(/\s/g,'').toLowerCase();
-        // 直接比對
-        var colorHit = color.length > 0 && tagLow.indexOf(color) !== -1;
-        // 模糊顏色比對：AI描述色名 → 對應衣櫃顏色
-        if(!colorHit) {
-          var mappedColor = '';
-          Object.keys(COLOR_FUZZY_MAP).forEach(function(fuzzy) {
-            if(tagLow.indexOf(fuzzy.toLowerCase()) !== -1) mappedColor = COLOR_FUZZY_MAP[fuzzy].toLowerCase();
-          });
-          if(mappedColor) colorHit = color === mappedColor;
-        }
-        var typeHit  = type.length > 0  && tagLow.indexOf(type)  !== -1;
-        var noteHit  = note.length > 1  && tagLow.indexOf(note)  !== -1;
-        return (colorHit && typeHit) || noteHit;
+    // 確保核心單品排第一（若 AI 沒把 baseItem 排第一則強制調整）
+    if(anchorName && fixedBase) {
+      var anchorIdx2 = verifiedOutfitTags.findIndex(function(t){
+        return t.tag.indexOf(fixedBase.color||'') !== -1 && t.tag.indexOf(fixedBase.type||'') !== -1;
       });
+      if(anchorIdx2 > 0) {
+        var ap2 = verifiedOutfitTags.splice(anchorIdx2, 1)[0];
+        ap2.inWardrobe = true;
+        verifiedOutfitTags.unshift(ap2);
+        // 第一件已是核心單品，其餘全部設為非衣櫃
+        verifiedOutfitTags.forEach(function(t, i){ if(i > 0) t.inWardrobe = false; });
+      } else if(anchorIdx2 === -1) {
+        verifiedOutfitTags.unshift({ tag: anchorName, inWardrobe: true });
+        verifiedOutfitTags.forEach(function(t, i){ if(i > 0) t.inWardrobe = false; });
+      }
     }
 
-    // 把不在衣櫃的 outfit 單品移入購買推薦（星號標記直接視為建議購買）
-    const verifiedOutfitTags = [];
-    const autoRecItems = [];
-    outfitTagsParsed.forEach(function(item, i) {
-      var tag = item.tag;
-      var inWrd = item.forceBuy ? false : (i === 0 || isInWardrobe(tag));
-      verifiedOutfitTags.push({ tag: tag, inWardrobe: inWrd });
-      if (!inWrd) {
-        autoRecItems.push({ name: tag, why: item.forceBuy ? '補全搭配建議購買' : 'AI搭配推薦', auto: true });
-      }
+    // 非核心單品自動加入購買推薦（與 AI recommends 合併去重）
+    const autoRecItems = verifiedOutfitTags.slice(1).map(function(t){
+      return { name: t.tag, why: 'AI潮流搭配推薦', auto: true };
     });
-
-    // 合併：AI 手動推薦 + 自動偵測非衣櫃單品（去重）
     const allRecItems = recItems.slice();
     autoRecItems.forEach(function(ar) {
-      var already = allRecItems.some(function(r){ return r.name.indexOf(ar.name) !== -1 || ar.name.indexOf(r.name) !== -1; });
+      var already = allRecItems.some(function(r){
+        return r.name.indexOf(ar.name) !== -1 || ar.name.indexOf(r.name) !== -1;
+      });
       if(!already) allRecItems.push(ar);
     });
 
-    var hasNonWardrobe = verifiedOutfitTags.some(function(t){ return !t.inWardrobe; });
-    apiLog('  衣櫃驗證: outfit' + outfitTagsParsed.length + '件，非衣櫃' + autoRecItems.length + '件', hasNonWardrobe ? 'info' : 'ok');
-
-    // 確保核心單品排第一
-    if(anchorName && fixedBase) {
-      var anchorIdx2 = verifiedOutfitTags.findIndex(function(t){ return t.tag.indexOf(fixedBase.color||'') !== -1 && t.tag.indexOf(fixedBase.type||'') !== -1; });
-      if(anchorIdx2 > 0) {
-        var ap2 = verifiedOutfitTags.splice(anchorIdx2, 1)[0];
-        verifiedOutfitTags.unshift(ap2);
-      } else if(anchorIdx2 === -1) {
+    var nonWardrobeCount = verifiedOutfitTags.filter(function(t){ return !t.inWardrobe; }).length;
+    apiLog('  新定位驗證: outfit' + verifiedOutfitTags.length + '件，核心1件，建議購買' + nonWardrobeCount + '件', 'ok');
         verifiedOutfitTags.unshift({ tag: anchorName, inWardrobe: true });
       }
     }
@@ -3920,7 +3898,6 @@ priceRange: 新購預估NT$總價，無需新購則留空`;
 
     var wardrobeCount = verifiedOutfitTags.filter(function(t){ return t.inWardrobe; }).length;
     var nonWardrobeCount = verifiedOutfitTags.filter(function(t){ return !t.inWardrobe; }).length;
-
     res.innerHTML = `
       <div style="background:linear-gradient(135deg,rgba(200,160,80,.12),rgba(200,160,80,.06));border:1px solid rgba(200,160,80,.35);border-radius:14px;padding:14px;margin-bottom:10px">
         <div style="display:flex;align-items:center;gap:6px;margin-bottom:8px">
@@ -3930,9 +3907,9 @@ priceRange: 新購預估NT$總價，無需新購則留空`;
         ${ruleTagsHtml ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">' + ruleTagsHtml + '</div>' : ''}
         <div style="font-size:.62rem;color:var(--muted);margin-bottom:10px;padding:5px 8px;background:rgba(200,160,80,.08);border-radius:6px">${rec.trendContext}</div>
         <div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:8px">
-          <div style="font-size:.56rem;font-weight:800;color:var(--muted);margin-bottom:6px">✦ 完整穿搭（共 ${verifiedOutfitTags.length} 件）${nonWardrobeCount > 0 ? '<span style="color:var(--red);margin-left:6px">🛍 ' + nonWardrobeCount + ' 件需購買</span>' : '<span style="color:var(--green);margin-left:6px">全部來自衣櫃</span>'}</div>
+          <div style="font-size:.56rem;font-weight:800;color:var(--muted);margin-bottom:6px">✦ 完整穿搭（共 ${verifiedOutfitTags.length} 件）${nonWardrobeCount > 0 ? '<span style="color:var(--red);margin-left:6px">🛍 ' + nonWardrobeCount + ' 件建議購買</span>' : ''}</div>
           <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">${outfitTagsHtml}</div>
-          <div style="font-size:.54rem;color:var(--muted);margin-top:4px">🏷 金色=核心單品　🛍 紅色=建議購買</div>
+          <div style="font-size:.54rem;color:var(--muted);margin-top:4px">🏷 金色=你的衣櫃單品　🛍 紅色=AI推薦購買</div>
         </div>
         ${rec.reasoning ? `<div style="background:rgba(61,170,106,.07);border:1px solid rgba(61,170,106,.2);border-radius:8px;padding:8px 12px;margin-bottom:10px">
           <div style="font-size:.54rem;font-weight:800;color:var(--green);margin-bottom:3px">💡 搭配邏輯</div>
@@ -3940,9 +3917,9 @@ priceRange: 新購預估NT$總價，無需新購則留空`;
         </div>` : ''}
         ${allRecItems.length ? `
         <div style="margin-bottom:10px">
-          <div style="font-size:.6rem;font-weight:800;color:var(--gold);margin-bottom:6px">🛍 推薦購買（${allRecItems.length} 件）${rec.priceRange ? '<span style="color:var(--muted);font-weight:600;margin-left:6px">預估 ' + rec.priceRange + '</span>' : ''}</div>
+          <div style="font-size:.6rem;font-weight:800;color:var(--gold);margin-bottom:6px">🛍 AI 推薦購買（${allRecItems.length} 件）${rec.priceRange ? '<span style="color:var(--muted);font-weight:600;margin-left:6px">預估 ' + rec.priceRange + '</span>' : ''}</div>
           ${allRecItems.map(renderRecItem).join('')}
-        </div>` : '<div style="font-size:.62rem;color:var(--green);margin-bottom:10px;padding:6px 10px;background:rgba(61,170,106,.07);border-radius:8px">✅ 此搭配全部來自你的衣櫃，無需新購</div>'}
+        </div>` : ''}
         <div id="trend-imgbox" style="margin-bottom:10px"></div>
       </div>`;
     res.style.display = 'block';
@@ -4299,7 +4276,7 @@ function buildWardrobePromptText() {
     '鞋子類': ['鞋子','球鞋','皮鞋','靴子'],
     '配件類': ['包包','墨鏡','帽子','腰帶','配件'],
   };
-  return GROUP_ORDER.map(function(label) {
+  var result = GROUP_ORDER.map(function(label) {
     var types = GROUP_MAP[label];
     var items = wardrobe.filter(function(i){ return types.indexOf(i.type) >= 0; });
     if(!items.length) return label + '：0件';
@@ -4309,6 +4286,9 @@ function buildWardrobePromptText() {
     var suffix = items.length > 4 ? '等' : '';
     return label + '×' + items.length + '件（' + preview + suffix + '）';
   }).join('；');
+  // [VG-22] L1 印出送給 AI 的衣櫃摘要
+  apiLog('衣櫃摘要: ' + result.substring(0, 150) + (result.length > 150 ? '…' : ''), 'info');
+  return result;
 }
 function buildSelectedAccsText() {
   if(!selectedAccs.length) return '';
