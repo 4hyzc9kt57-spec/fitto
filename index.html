@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-19 · AI 智能穿搭</title>
+<title>Fitto VG-21 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-19</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-21</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -2596,6 +2596,31 @@ async function geminiVisionScan(b64, mime) {
   return raw;
 }
 
+// [VG-20] retry 版本：temperature 提高 + 強調 prompt，避免與第一次完全相同結果
+async function geminiVisionScanRetry(b64, mime) {
+  mime = mime || 'image/jpeg';
+  var key = localStorage.getItem('fitto_gemini_key') || '';
+  if(!key) throw new Error('請先設定 Gemini Key');
+  apiLog('→ 多件掃描 retry（temperature:0.4）', 'prompt');
+  const prompt = buildScanPrompt() + '\n\n⚠️ 重要提醒：請仔細觀察照片，列出「所有」可見單品，至少3件，絕對不能只輸出1件。';
+  var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
+    method:'POST', headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({
+      contents:[{role:'user',parts:[{inlineData:{mimeType:mime,data:b64}},{text:prompt}]}],
+      generationConfig:{
+        maxOutputTokens:1500,
+        temperature:0.4
+      }
+    })
+  });
+  var d = await res.json();
+  if(d.error) throw new Error(d.error.message || 'Gemini error');
+  addTokenUsage((d.usageMetadata||{}).promptTokenCount||0,(d.usageMetadata||{}).candidatesTokenCount||0,'gemini_text');
+  var parts = (((d.candidates||[])[0]||{}).content||{}).parts||[];
+  var textPart = parts.find(p=>typeof p.text==='string');
+  return textPart ? textPart.text.trim() : '';
+}
+
 const COLORS={'白色':'#F8F8F8','米白':'#F0E6D3','淺灰':'#D0D0D0','灰色':'#9E9E9E','深灰':'#4A4A4A','黑色':'#2C2C2C','淺藍':'#90CAF9','深藍':'#1A237E','卡其':'#C8A96E','棕色':'#6D4C41','紅色':'#EF5350','酒紅':'#7B1C2E','粉色':'#F48FB1','綠色':'#66BB6A','橄欖綠':'#6B7A3A','花紋/條紋':'repeating-linear-gradient(45deg,#ddd,#ddd 4px,#bbb 4px,#bbb 8px)'};
 const EMOJIS={'上衣':'👕','T恤':'👕','襯衫':'👔','毛衣':'🧶','外套':'🧥','夾克':'🧥','褲子':'👖','牛仔褲':'👖','裙子':'👗','洋裝':'👗','鞋子':'👟','球鞋':'👟','皮鞋':'👞','靴子':'🥾','包包':'👜','墨鏡':'🕶️','帽子':'🧢','腰帶':'👔','配件':'💍'};
 const TOPS=['上衣','T恤','襯衫','毛衣'],BTMS=['褲子','牛仔褲','裙子','洋裝'],OUTS=['外套','夾克'];
@@ -2791,6 +2816,16 @@ async function openWardrobeSuggest() {
 
 function renderSuggestResult(d) {
   const el = document.getElementById('suggest-result');
+  // [VG-21] #4 程式層去重：過濾掉衣櫃已有的推薦單品（color+type 完全相符）
+  if(d.gaps && d.gaps.length) {
+    const ownedSet = new Set(wardrobe.map(function(i){ return (i.color||'')+(i.type||''); }));
+    const before = d.gaps.length;
+    d.gaps = d.gaps.filter(function(g){
+      return !ownedSet.has((g.color||'')+(g.item||''));
+    });
+    const filtered = before - d.gaps.length;
+    if(filtered > 0) apiLog('  推薦去重：過濾 ' + filtered + ' 件已擁有單品', 'info');
+  }
   el.innerHTML = buildSuggestResultHtml(d);
   el.style.display = 'block';
 }
@@ -2936,7 +2971,8 @@ async function processNextScanQueue() {
   let newItems = [];
   try {
     const beforeLen = (window._scanItems || []).length;
-    await aiScanAndAppend();
+    const photoDataUrl = 'data:' + (scanMime||'image/jpeg') + ';base64,' + scanB64; // [VG-21] #3
+    await aiScanAndAppend(photoDataUrl); // [VG-21] #3 傳入當張 dataUrl
     newItems = (window._scanItems || []).slice(beforeLen);
   } catch(ex) {
     apiLog('✗ 第'+cur+'張失敗: '+(ex.message||'').substring(0,40), 'err');
@@ -3042,16 +3078,25 @@ function _refreshMultiScanFooter() {
 }
 
 // 辨識並把結果 append 到 window._scanItems（多張模式用）
-async function aiScanAndAppend() {
+// [VG-21] #3 修縮圖 bug：接收 sourceDataUrl 參數，存入每個 item，不再依賴全域 scanB64
+async function aiScanAndAppend(sourceDataUrl) {
   if(!scanB64) return;
   const gk = localStorage.getItem('fitto_gemini_key')||'';
   if(!gk) {
     if(!window._scanItems) window._scanItems = [];
-    window._scanItems.push({type:'上衣',color:'白色',style:'休閒',note:'（示範）',backPrint:false});
+    window._scanItems.push({type:'上衣',color:'白色',style:'休閒',note:'（示範）',backPrint:false, _sourceDataUrl: sourceDataUrl||null});
     return;
   }
   const raw = await geminiVisionScan(scanB64, scanMime);
   let items = parseMultiScanItems(raw);
+  if(items.length <= 1) {
+    try {
+      // [VG-20] 先用差異化 retry（temperature:0.4），再 fallback 文字備援
+      const raw2 = await geminiVisionScanRetry(scanB64, scanMime);
+      const items2 = parseMultiScanItems(raw2);
+      items = items2.length > items.length ? items2 : items;
+    } catch(ex) {}
+  }
   if(items.length <= 1) {
     try {
       items = await fallbackMultiScanItems();
@@ -3063,7 +3108,8 @@ async function aiScanAndAppend() {
   items = items.map(i=>({
     type: i.type||'上衣', color: i.color||'白色', style: i.style||'休閒',
     material: i.material||'', fit: i.fit||'', note: i.note||'', placement: i.placement||'', backPrint: !!i.backPrint,
-    imgPrompt: i.imgPrompt||''
+    imgPrompt: i.imgPrompt||'',
+    _sourceDataUrl: sourceDataUrl || null  // [VG-21] #3 每件存自己那張照片的 dataUrl
   }));
   if(!window._scanItems) window._scanItems = [];
   window._scanItems = window._scanItems.concat(items);
@@ -3110,9 +3156,9 @@ async function aiScan(){
     apiLog('  辨識原文: ' + raw.substring(0,120).replace(/\n/g,' '), 'info');
     let items = parseMultiScanItems(raw);
     if(items.length <= 1) {
-      apiLog('  結果不足，retry中…', 'info');
+      apiLog('  結果不足，retry中（temperature:0.4）…', 'info');
       try {
-        const raw2 = await geminiVisionScan(scanB64, scanMime);
+        const raw2 = await geminiVisionScanRetry(scanB64, scanMime); // [VG-20] 改用差異化 retry
         const items2 = parseMultiScanItems(raw2);
         if(items2.length > items.length) items = items2;
       } catch(e) {}
@@ -3292,9 +3338,9 @@ function confirmSingleScanItem(i) {
     note:item.note||'', placement:item.placement||'', backPrint:!!item.backPrint,
     hasPhoto:false, imgPrompt:prebuiltPrompt, aiItemPrompt:item.imgPrompt||''};
 
-  // 用原圖縮圖（同 confirmMultiScan 邏輯）
-  if(scanB64) {
-    const fullDataUrl = 'data:' + (scanMime||'image/jpeg') + ';base64,' + scanB64;
+  // [VG-21] #3 縮圖改從 item._sourceDataUrl 取，而非全域 scanB64（多張模式會被覆寫）
+  const thumbSrc = item._sourceDataUrl || (scanB64 ? ('data:' + (scanMime||'image/jpeg') + ';base64,' + scanB64) : null);
+  if(thumbSrc) {
     const imgEl = new Image();
     imgEl.onload = (function(wItem){ return function(){
       const canvas = document.createElement('canvas');
@@ -3306,7 +3352,7 @@ function confirmSingleScanItem(i) {
       wItem.hasPhoto = true;
       persist(); renderW();
     }; })(w);
-    imgEl.src = fullDataUrl;
+    imgEl.src = thumbSrc;
     w.thumb = null; w.hasPhoto = false;
   } else {
     const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="${bg}"/><text x="100" y="120" font-size="80" text-anchor="middle" dominant-baseline="middle">${em}</text></svg>`;
@@ -3349,18 +3395,29 @@ function confirmMultiScan() {
   freeScansLeft = Math.max(0, freeScansLeft - freeUsed);
   saveProgress();
   if(freeUsed > 0 && paidCount === 0) showToast('🎁 免費辨識 ' + freeUsed + ' 件（剩餘免費次數：' + freeScansLeft + '）');
+
+  // [VG-21] #5 跨件去重：建立已加入 key 集合（type+color+note），本批次內也去重
+  const addedKeys = new Set(wardrobe.map(function(i){ return (i.type||'')+'|'+(i.color||'')+'|'+(i.note||''); }));
+  let dupCount = 0;
+
   items.forEach(item => {
     if(wardrobe.length >= wardrobeLimit){ showLimitAlert(); return; }
+
+    // [VG-21] #5 去重判斷
+    const itemKey = (item.type||'')+'|'+(item.color||'')+'|'+(item.note||'');
+    if(addedKeys.has(itemKey)) { dupCount++; return; }
+    addedKeys.add(itemKey);
+
     const prebuiltPrompt = item.imgPrompt
       ? buildItemImgPromptFromAI(item, avatarDesc)
       : buildItemImgPrompt(item, avatarDesc);
     const w = {id:nid++, type:item.type, color:item.color, style:item.style, material:item.material||'', fit:item.fit||'', note:item.note||'', placement:item.placement||'', backPrint:!!item.backPrint, hasPhoto:false, imgPrompt:prebuiltPrompt, aiItemPrompt:item.imgPrompt||''};
-    // Fix ②：縮圖改用 SVG 色塊 + emoji，而非整張人物照壓縮
     const bg = COLORS[item.color] || '#1A3326';
     const em = EMOJIS[item.type] || '🧺';
-    // 優先用辨識時的原圖縮圖（壓縮後存 thumb）
-    if(scanB64) {
-      const fullDataUrl = 'data:' + (scanMime||'image/jpeg') + ';base64,' + scanB64;
+
+    // [VG-21] #3 縮圖改從 item._sourceDataUrl 取，不用全域 scanB64
+    const thumbSrc = item._sourceDataUrl || (scanB64 ? ('data:' + (scanMime||'image/jpeg') + ';base64,' + scanB64) : null);
+    if(thumbSrc) {
       const imgEl = new Image();
       imgEl.onload = (function(wItem){ return function(){
         const canvas = document.createElement('canvas');
@@ -3372,8 +3429,8 @@ function confirmMultiScan() {
         wItem.hasPhoto = true;
         persist(); renderW();
       }; })(w);
-      imgEl.src = fullDataUrl;
-      w.thumb = null; w.hasPhoto = false; // 先暫存，onload後更新
+      imgEl.src = thumbSrc;
+      w.thumb = null; w.hasPhoto = false;
     } else {
       const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="${bg}"/><text x="100" y="120" font-size="80" text-anchor="middle" dominant-baseline="middle">${em}</text></svg>`;
       w.thumb = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
@@ -3383,7 +3440,8 @@ function confirmMultiScan() {
     added++;
   });
   persist(); renderW();
-  showToast('✅ 已加入 ' + added + ' 件衣物！');
+  const dupMsg = dupCount > 0 ? `（略過 ${dupCount} 件重複）` : '';
+  showToast('✅ 已加入 ' + added + ' 件衣物！' + dupMsg);
   closeScan();
   checkAutoMissions();
 }
@@ -4232,12 +4290,24 @@ function normalizeWeekPlanShape(parsed) {
   };
 }
 function buildWardrobePromptText() {
-  return wardrobe.slice(0, 24).map(function(item, index) {
-    var parts = [item.type, item.color, item.style];
-    if(item.material) parts.push(item.material);
-    if(item.fit) parts.push(item.fit + '版型');
-    if(item.note) parts.push(item.note);
-    return (index + 1) + '.' + parts.filter(Boolean).join('/');
+  // [VG-20] 方案二：分類摘要，取代 slice(0,24) 截斷，不管衣櫃幾件都完整呈現
+  var GROUP_ORDER = ['上衣類','下身類','外套類','鞋子類','配件類'];
+  var GROUP_MAP = {
+    '上衣類': ['上衣','T恤','襯衫','毛衣'],
+    '下身類': ['褲子','牛仔褲','裙子','洋裝'],
+    '外套類': ['外套','夾克'],
+    '鞋子類': ['鞋子','球鞋','皮鞋','靴子'],
+    '配件類': ['包包','墨鏡','帽子','腰帶','配件'],
+  };
+  return GROUP_ORDER.map(function(label) {
+    var types = GROUP_MAP[label];
+    var items = wardrobe.filter(function(i){ return types.indexOf(i.type) >= 0; });
+    if(!items.length) return label + '：0件';
+    var preview = items.slice(0, 4).map(function(i){
+      return i.color + i.type + (i.style ? '/' + i.style : '');
+    }).join('、');
+    var suffix = items.length > 4 ? '等' : '';
+    return label + '×' + items.length + '件（' + preview + suffix + '）';
   }).join('；');
 }
 function buildSelectedAccsText() {
