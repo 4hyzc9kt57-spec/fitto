@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-23 · AI 智能穿搭</title>
+<title>Fitto VG-24 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -220,7 +220,7 @@ header{
 .week-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:none}
 .week-scroll::-webkit-scrollbar{display:none}
 .dc{
-  flex:0 0 200px;
+  flex:0 0 220px;
   background:var(--surface2);border:1px solid var(--border2);
   border-radius:var(--r-sm);padding:12px;
   min-width:0;overflow:hidden;
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-23</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-24</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1174,7 +1174,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-23 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-24 · 2026.04</div>
   </div>
 </div>
 
@@ -1436,7 +1436,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-23 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-24 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -4704,7 +4704,7 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
   }
 
   function renderSlotRow(icon, label, items) {
-    // #11: 標籤行獨佔一行，內容換行顯示，文字有完整寬度不直排
+    // #15 #17: badge 移至標籤行旁，智慧對應顯示備註
     if(!items || !items.length) {
       return '<div style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
         + '<div style="display:flex;align-items:center;gap:6px">'
@@ -4714,27 +4714,74 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
         + '</div>'
         + '</div>';
     }
+
+    // #17: 智慧比對衣櫃，判斷是否需顯示備註
+    function getWardrobeMatchInfo(part) {
+      if(!part || part.length < 2) return { inWrd: true, note: '' };
+      var partLow = part.replace(/\s/g,'').toLowerCase();
+      var matched = [];
+      wardrobe.forEach(function(item) {
+        var color = (item.color||'').replace(/\s/g,'').toLowerCase();
+        var type  = (item.type||'').replace(/\s/g,'').toLowerCase();
+        var note  = (item.note||'').replace(/\s/g,'').toLowerCase();
+        var colorHit = color.length > 0 && partLow.indexOf(color) !== -1;
+        if(!colorHit) {
+          Object.keys(COLOR_FUZZY_MAP_W).forEach(function(fuzzy) {
+            if(partLow.indexOf(fuzzy.toLowerCase()) !== -1) {
+              var mapped = COLOR_FUZZY_MAP_W[fuzzy].toLowerCase();
+              if(color === mapped) colorHit = true;
+            }
+          });
+        }
+        var typeHit = type.length > 0 && partLow.indexOf(type) !== -1;
+        var noteHit = note.length > 1 && partLow.indexOf(note) !== -1;
+        if((colorHit && typeHit) || noteHit) matched.push(item);
+      });
+      if(!matched.length) return { inWrd: false, note: '' };
+      // 同顏色+類型超過一件 → 顯示 note 備註區分
+      if(matched.length > 1) {
+        var best = matched.find(function(m){
+          return m.note && partLow.indexOf((m.note||'').toLowerCase()) !== -1;
+        }) || matched[0];
+        return { inWrd: true, note: best.note || '' };
+      }
+      return { inWrd: true, note: '' };
+    }
+
     return items.map(function(part, pi) {
-      var inWrd = isInWardrobeW(part);
+      var matchInfo = getWardrobeMatchInfo(part);
+      var inWrd = matchInfo.inWrd;
+      var extraNote = matchInfo.note;
+
+      // #15: badge 放標籤行旁
       var badge = inWrd
-        ? '<span style="font-size:.48rem;background:rgba(61,170,106,.2);color:var(--green);border-radius:4px;padding:1px 5px;font-weight:700;white-space:nowrap;flex-shrink:0">✅ 衣櫃</span>'
-        : '<span style="font-size:.48rem;background:rgba(224,82,82,.15);color:var(--red);border-radius:4px;padding:1px 5px;font-weight:700;white-space:nowrap;flex-shrink:0">🛍 推薦</span>';
-      // 標籤行（只有第一件顯示 icon + label）
+        ? '<span style="font-size:.46rem;background:rgba(61,170,106,.2);color:var(--green);border-radius:4px;padding:1px 5px;font-weight:700;white-space:nowrap">✅ 衣櫃</span>'
+        : '<span style="font-size:.46rem;background:rgba(224,82,82,.15);color:var(--red);border-radius:4px;padding:1px 5px;font-weight:700;white-space:nowrap">🛍 推薦</span>';
+
       var labelRow = pi === 0
-        ? '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">'
+        ? '<div style="display:flex;align-items:center;gap:5px;margin-bottom:2px">'
           + '<span style="font-size:.85rem;width:20px;text-align:center;flex-shrink:0">' + icon + '</span>'
           + '<span style="font-size:.56rem;color:var(--muted);font-weight:700">' + label + '</span>'
+          + badge
           + '</div>'
         : '';
-      // 內容行：全寬顯示，右側 badge
-      var contentRow = '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;padding-left:26px">'
-        + '<span style="font-size:.72rem;color:var(--ink);font-weight:600;line-height:1.5;flex:1;word-break:break-word">' + part + '</span>'
-        + badge
+
+      // #17: 同類型多件時顯示備註
+      var noteHtml = (inWrd && extraNote)
+        ? '<div style="font-size:.52rem;color:var(--muted);padding-left:26px;margin-top:1px;opacity:.8">・' + extraNote + '</div>'
+        : '';
+
+      var contentRow = '<div style="padding-left:26px">'
+        + '<span style="font-size:.72rem;color:var(--ink);font-weight:600;line-height:1.5;word-break:break-word">' + part + '</span>'
         + '</div>';
-      var borderStyle = (pi === items.length - 1) ? 'border-bottom:1px solid rgba(255,255,255,.05)' : '';
-      return '<div style="padding:5px 0;' + borderStyle + '">' + labelRow + contentRow + '</div>';
+
+      var borderStyle = pi === items.length - 1 ? 'border-bottom:1px solid rgba(255,255,255,.05)' : '';
+      return '<div style="padding:5px 0;' + borderStyle + '">'
+        + labelRow + contentRow + noteHtml
+        + '</div>';
     }).join('');
   }
+
 
   document.getElementById('wscroll').innerHTML=(r.days||[]).map((d,idx)=>{
     var slots = classifyOutfitParts(d.outfit || '');
@@ -6236,7 +6283,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-23<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-24<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6260,7 +6307,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-23',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-24',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -6865,7 +6912,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-23)
+// 穿搭評分功能 (VG-24)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
