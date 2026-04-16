@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-24 · AI 智能穿搭</title>
+<title>Fitto VG-20 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-24</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-20</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1034,8 +1034,19 @@ body{background:var(--bg);color:var(--ink);}
       </div>
     </div>
 
-    <!-- 維度分數 -->
-    <div id="scoring-dims" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px"></div>
+    <!-- 雷達圖 + 維度分數 並列 -->
+    <div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px">
+      <div style="display:flex;gap:12px;align-items:center;margin-bottom:12px">
+        <!-- 雷達圖 -->
+        <div style="flex:0 0 auto">
+          <canvas id="scoring-radar" width="140" height="140" style="display:block"></canvas>
+        </div>
+        <!-- 條狀圖（無 reason） -->
+        <div id="scoring-dims-bars" style="flex:1;min-width:0"></div>
+      </div>
+      <!-- reason 文字區 -->
+      <div id="scoring-dims-reasons"></div>
+    </div>
 
     <!-- 整體評語 -->
     <div id="scoring-comment" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;font-size:.78rem;line-height:1.8;color:var(--ink2)"></div>
@@ -1163,7 +1174,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-24 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-20 · 2026.04</div>
   </div>
 </div>
 
@@ -1425,7 +1436,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-24 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-20 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -2596,31 +2607,6 @@ async function geminiVisionScan(b64, mime) {
   return raw;
 }
 
-// [VG-20] retry 版本：temperature 提高 + 強調 prompt，避免與第一次完全相同結果
-async function geminiVisionScanRetry(b64, mime) {
-  mime = mime || 'image/jpeg';
-  var key = localStorage.getItem('fitto_gemini_key') || '';
-  if(!key) throw new Error('請先設定 Gemini Key');
-  apiLog('→ 多件掃描 retry（temperature:0.4）', 'prompt');
-  const prompt = buildScanPrompt() + '\n\n⚠️ 重要提醒：請仔細觀察照片，列出「所有」可見單品，至少3件，絕對不能只輸出1件。';
-  var res = await fetch('https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=' + key, {
-    method:'POST', headers:{'Content-Type':'application/json'},
-    body:JSON.stringify({
-      contents:[{role:'user',parts:[{inlineData:{mimeType:mime,data:b64}},{text:prompt}]}],
-      generationConfig:{
-        maxOutputTokens:1500,
-        temperature:0.4
-      }
-    })
-  });
-  var d = await res.json();
-  if(d.error) throw new Error(d.error.message || 'Gemini error');
-  addTokenUsage((d.usageMetadata||{}).promptTokenCount||0,(d.usageMetadata||{}).candidatesTokenCount||0,'gemini_text');
-  var parts = (((d.candidates||[])[0]||{}).content||{}).parts||[];
-  var textPart = parts.find(p=>typeof p.text==='string');
-  return textPart ? textPart.text.trim() : '';
-}
-
 const COLORS={'白色':'#F8F8F8','米白':'#F0E6D3','淺灰':'#D0D0D0','灰色':'#9E9E9E','深灰':'#4A4A4A','黑色':'#2C2C2C','淺藍':'#90CAF9','深藍':'#1A237E','卡其':'#C8A96E','棕色':'#6D4C41','紅色':'#EF5350','酒紅':'#7B1C2E','粉色':'#F48FB1','綠色':'#66BB6A','橄欖綠':'#6B7A3A','花紋/條紋':'repeating-linear-gradient(45deg,#ddd,#ddd 4px,#bbb 4px,#bbb 8px)'};
 const EMOJIS={'上衣':'👕','T恤':'👕','襯衫':'👔','毛衣':'🧶','外套':'🧥','夾克':'🧥','褲子':'👖','牛仔褲':'👖','裙子':'👗','洋裝':'👗','鞋子':'👟','球鞋':'👟','皮鞋':'👞','靴子':'🥾','包包':'👜','墨鏡':'🕶️','帽子':'🧢','腰帶':'👔','配件':'💍'};
 const TOPS=['上衣','T恤','襯衫','毛衣'],BTMS=['褲子','牛仔褲','裙子','洋裝'],OUTS=['外套','夾克'];
@@ -2742,22 +2728,14 @@ function renderW(){
   const suggestBar = document.getElementById('wardrobe-suggest-bar');
   if(suggestBar) suggestBar.style.display = 'none';
   const g=document.getElementById('cgrid');
-  let ct=0,cb=0,co=0,cs=0,ca=0;
+  let ct=0,cb=0,co=0;
   g.innerHTML='';
   // Count all for stats
-  wardrobe.forEach(i=>{
-    if(['上衣','T恤','襯衫','毛衣'].includes(i.type))ct++;
-    if(['褲子','牛仔褲','裙子','洋裝'].includes(i.type))cb++;
-    if(['外套','夾克'].includes(i.type))co++;
-    if(['鞋子','球鞋','皮鞋','靴子'].includes(i.type))cs++;
-    if(['包包','墨鏡','帽子','腰帶','配件'].includes(i.type))ca++;
-  });
+  wardrobe.forEach(i=>{if(['上衣','T恤','襯衫','毛衣'].includes(i.type))ct++;if(['褲子','牛仔褲','裙子','洋裝'].includes(i.type))cb++;if(['外套','夾克'].includes(i.type))co++;});
   document.getElementById('cnt-a').textContent=wardrobe.length;
   document.getElementById('cnt-t').textContent=ct;
   document.getElementById('cnt-b').textContent=cb;
   document.getElementById('cnt-o').textContent=co;
-  // [VG-22] L3 印出衣櫃總件數與各類別分布
-  apiLog('衣櫃分布: 總' + wardrobe.length + '件 | 上衣' + ct + ' 下身' + cb + ' 外套' + co + ' 鞋子' + cs + ' 配件' + ca, 'info');
   const displayW = activeCat==='全部' ? wardrobe : wardrobe.filter(i=>(CAT_MAP[activeCat]||[]).includes(i.type));
   if(!displayW.length){
     g.innerHTML='<div class="empty"><div class="ei">'+(wardrobe.length?'🔍':'🧺')+'</div><p>'+(wardrobe.length?'此分類沒有衣物':'衣櫃還是空的<br>拍照或手動新增第一件衣服！')+'</p></div>';
@@ -2824,16 +2802,6 @@ async function openWardrobeSuggest() {
 
 function renderSuggestResult(d) {
   const el = document.getElementById('suggest-result');
-  // [VG-21] #4 程式層去重：過濾掉衣櫃已有的推薦單品（color+type 完全相符）
-  if(d.gaps && d.gaps.length) {
-    const ownedSet = new Set(wardrobe.map(function(i){ return (i.color||'')+(i.type||''); }));
-    const before = d.gaps.length;
-    d.gaps = d.gaps.filter(function(g){
-      return !ownedSet.has((g.color||'')+(g.item||''));
-    });
-    const filtered = before - d.gaps.length;
-    if(filtered > 0) apiLog('  推薦去重：過濾 ' + filtered + ' 件已擁有單品', 'info');
-  }
   el.innerHTML = buildSuggestResultHtml(d);
   el.style.display = 'block';
 }
@@ -2979,8 +2947,7 @@ async function processNextScanQueue() {
   let newItems = [];
   try {
     const beforeLen = (window._scanItems || []).length;
-    const photoDataUrl = 'data:' + (scanMime||'image/jpeg') + ';base64,' + scanB64; // [VG-21] #3
-    await aiScanAndAppend(photoDataUrl); // [VG-21] #3 傳入當張 dataUrl
+    await aiScanAndAppend();
     newItems = (window._scanItems || []).slice(beforeLen);
   } catch(ex) {
     apiLog('✗ 第'+cur+'張失敗: '+(ex.message||'').substring(0,40), 'err');
@@ -3086,25 +3053,16 @@ function _refreshMultiScanFooter() {
 }
 
 // 辨識並把結果 append 到 window._scanItems（多張模式用）
-// [VG-21] #3 修縮圖 bug：接收 sourceDataUrl 參數，存入每個 item，不再依賴全域 scanB64
-async function aiScanAndAppend(sourceDataUrl) {
+async function aiScanAndAppend() {
   if(!scanB64) return;
   const gk = localStorage.getItem('fitto_gemini_key')||'';
   if(!gk) {
     if(!window._scanItems) window._scanItems = [];
-    window._scanItems.push({type:'上衣',color:'白色',style:'休閒',note:'（示範）',backPrint:false, _sourceDataUrl: sourceDataUrl||null});
+    window._scanItems.push({type:'上衣',color:'白色',style:'休閒',note:'（示範）',backPrint:false});
     return;
   }
   const raw = await geminiVisionScan(scanB64, scanMime);
   let items = parseMultiScanItems(raw);
-  if(items.length <= 1) {
-    try {
-      // [VG-20] 先用差異化 retry（temperature:0.4），再 fallback 文字備援
-      const raw2 = await geminiVisionScanRetry(scanB64, scanMime);
-      const items2 = parseMultiScanItems(raw2);
-      items = items2.length > items.length ? items2 : items;
-    } catch(ex) {}
-  }
   if(items.length <= 1) {
     try {
       items = await fallbackMultiScanItems();
@@ -3116,8 +3074,7 @@ async function aiScanAndAppend(sourceDataUrl) {
   items = items.map(i=>({
     type: i.type||'上衣', color: i.color||'白色', style: i.style||'休閒',
     material: i.material||'', fit: i.fit||'', note: i.note||'', placement: i.placement||'', backPrint: !!i.backPrint,
-    imgPrompt: i.imgPrompt||'',
-    _sourceDataUrl: sourceDataUrl || null  // [VG-21] #3 每件存自己那張照片的 dataUrl
+    imgPrompt: i.imgPrompt||''
   }));
   if(!window._scanItems) window._scanItems = [];
   window._scanItems = window._scanItems.concat(items);
@@ -3164,9 +3121,9 @@ async function aiScan(){
     apiLog('  辨識原文: ' + raw.substring(0,120).replace(/\n/g,' '), 'info');
     let items = parseMultiScanItems(raw);
     if(items.length <= 1) {
-      apiLog('  結果不足，retry中（temperature:0.4）…', 'info');
+      apiLog('  結果不足，retry中…', 'info');
       try {
-        const raw2 = await geminiVisionScanRetry(scanB64, scanMime); // [VG-20] 改用差異化 retry
+        const raw2 = await geminiVisionScan(scanB64, scanMime);
         const items2 = parseMultiScanItems(raw2);
         if(items2.length > items.length) items = items2;
       } catch(e) {}
@@ -3309,8 +3266,6 @@ function buildItemImgPromptFromAI(item, avatarDesc) {
 
 function renderMultiScanResult(items) {
   window._scanItems = items;
-  // [VG-22] L2 印出暫存件數與各單品摘要
-  apiLog('暫存單品: ' + items.length + ' 件（' + items.map(function(i){ return i.color + i.type; }).join('、') + '）', 'info');
   const list = document.getElementById('scan-multi-list');
   const avatarDesc = getAvatarPromptDesc();
   list.innerHTML = items.map((item, i) => _buildScanItemCardHtml(item, i, avatarDesc)).join('');
@@ -3348,9 +3303,9 @@ function confirmSingleScanItem(i) {
     note:item.note||'', placement:item.placement||'', backPrint:!!item.backPrint,
     hasPhoto:false, imgPrompt:prebuiltPrompt, aiItemPrompt:item.imgPrompt||''};
 
-  // [VG-21] #3 縮圖改從 item._sourceDataUrl 取，而非全域 scanB64（多張模式會被覆寫）
-  const thumbSrc = item._sourceDataUrl || (scanB64 ? ('data:' + (scanMime||'image/jpeg') + ';base64,' + scanB64) : null);
-  if(thumbSrc) {
+  // 用原圖縮圖（同 confirmMultiScan 邏輯）
+  if(scanB64) {
+    const fullDataUrl = 'data:' + (scanMime||'image/jpeg') + ';base64,' + scanB64;
     const imgEl = new Image();
     imgEl.onload = (function(wItem){ return function(){
       const canvas = document.createElement('canvas');
@@ -3362,7 +3317,7 @@ function confirmSingleScanItem(i) {
       wItem.hasPhoto = true;
       persist(); renderW();
     }; })(w);
-    imgEl.src = thumbSrc;
+    imgEl.src = fullDataUrl;
     w.thumb = null; w.hasPhoto = false;
   } else {
     const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="${bg}"/><text x="100" y="120" font-size="80" text-anchor="middle" dominant-baseline="middle">${em}</text></svg>`;
@@ -3405,29 +3360,18 @@ function confirmMultiScan() {
   freeScansLeft = Math.max(0, freeScansLeft - freeUsed);
   saveProgress();
   if(freeUsed > 0 && paidCount === 0) showToast('🎁 免費辨識 ' + freeUsed + ' 件（剩餘免費次數：' + freeScansLeft + '）');
-
-  // [VG-21] #5 跨件去重：建立已加入 key 集合（type+color+note），本批次內也去重
-  const addedKeys = new Set(wardrobe.map(function(i){ return (i.type||'')+'|'+(i.color||'')+'|'+(i.note||''); }));
-  let dupCount = 0;
-
   items.forEach(item => {
     if(wardrobe.length >= wardrobeLimit){ showLimitAlert(); return; }
-
-    // [VG-21] #5 去重判斷
-    const itemKey = (item.type||'')+'|'+(item.color||'')+'|'+(item.note||'');
-    if(addedKeys.has(itemKey)) { dupCount++; return; }
-    addedKeys.add(itemKey);
-
     const prebuiltPrompt = item.imgPrompt
       ? buildItemImgPromptFromAI(item, avatarDesc)
       : buildItemImgPrompt(item, avatarDesc);
     const w = {id:nid++, type:item.type, color:item.color, style:item.style, material:item.material||'', fit:item.fit||'', note:item.note||'', placement:item.placement||'', backPrint:!!item.backPrint, hasPhoto:false, imgPrompt:prebuiltPrompt, aiItemPrompt:item.imgPrompt||''};
+    // Fix ②：縮圖改用 SVG 色塊 + emoji，而非整張人物照壓縮
     const bg = COLORS[item.color] || '#1A3326';
     const em = EMOJIS[item.type] || '🧺';
-
-    // [VG-21] #3 縮圖改從 item._sourceDataUrl 取，不用全域 scanB64
-    const thumbSrc = item._sourceDataUrl || (scanB64 ? ('data:' + (scanMime||'image/jpeg') + ';base64,' + scanB64) : null);
-    if(thumbSrc) {
+    // 優先用辨識時的原圖縮圖（壓縮後存 thumb）
+    if(scanB64) {
+      const fullDataUrl = 'data:' + (scanMime||'image/jpeg') + ';base64,' + scanB64;
       const imgEl = new Image();
       imgEl.onload = (function(wItem){ return function(){
         const canvas = document.createElement('canvas');
@@ -3439,8 +3383,8 @@ function confirmMultiScan() {
         wItem.hasPhoto = true;
         persist(); renderW();
       }; })(w);
-      imgEl.src = thumbSrc;
-      w.thumb = null; w.hasPhoto = false;
+      imgEl.src = fullDataUrl;
+      w.thumb = null; w.hasPhoto = false; // 先暫存，onload後更新
     } else {
       const svgStr = `<svg xmlns="http://www.w3.org/2000/svg" width="200" height="200"><rect width="200" height="200" fill="${bg}"/><text x="100" y="120" font-size="80" text-anchor="middle" dominant-baseline="middle">${em}</text></svg>`;
       w.thumb = 'data:image/svg+xml;base64,' + btoa(unescape(encodeURIComponent(svgStr)));
@@ -3450,8 +3394,7 @@ function confirmMultiScan() {
     added++;
   });
   persist(); renderW();
-  const dupMsg = dupCount > 0 ? `（略過 ${dupCount} 件重複）` : '';
-  showToast('✅ 已加入 ' + added + ' 件衣物！' + dupMsg);
+  showToast('✅ 已加入 ' + added + ' 件衣物！');
   closeScan();
   checkAutoMissions();
 }
@@ -3727,17 +3670,17 @@ avoid: 搭配禁忌（1句）
     const matchItems = fixedBase ? anchorName : cachedKeyItems;
     const conflictItems = wardrobeBase.gaps || '';
 
-    // ── 階段三：搭配建議生成（[VG-23] T1 新定位：1件衣櫃核心單品 × AI自由搭配）──
-    apiLog('→ 階段3：生成搭配建議（新定位：核心單品×AI自由搭配）', 'prompt');
+    // ── 階段三：搭配建議生成（帶完整衣櫃清單，強制只用衣櫃內單品）──
+    apiLog('→ 階段3：生成搭配建議（含完整衣櫃清單）', 'prompt');
 
-    // 衣櫃清單：僅供 AI 參考「已有什麼」，避免推薦重複
+    // 建立完整衣物清單（每件用 ID:顏色+類型 格式，讓 AI 只能引用）
     const fullWardrobeList = wardrobe.map(function(item, idx){
       return (idx+1) + '.' + (item.color||'') + (item.type||'') + (item.note ? '（'+item.note+'）' : '');
     }).join('；');
 
     const baseItemHint = fixedBase
-      ? `⚠️ 核心單品【強制指定，不可更換】：${anchorName}`
-      : `核心單品：從【衣櫃清單】中挑選最契合本季風格的 1 件。`;
+      ? `⚠️ 核心單品【強制指定，不可更換】：${anchorName}\n此單品必須出現在 baseItem 和 outfit 的第一位，且必須完全符合衣櫃清單中的描述。`
+      : `核心單品：從【衣櫃清單】中挑選最契合本季風格的一件。`;
 
     const prompt = `你是專業時尚造型師。現在是${year}年${seaLabel}季（種子:${seed}）。
 風格方向：${styleDirLabel}
@@ -3749,30 +3692,29 @@ avoid: 搭配禁忌（1句）
 搭配禁忌：${trendAvoid}
 體型建議：${bodyTip}
 
-【使用者衣櫃（僅供參考，避免重複推薦已有單品）】
+【衣櫃清單（優先從這裡挑選單品）】
 ${fullWardrobeList}
 
 ${baseItemHint}
 
 ⚠️ 規定：
-1. baseItem 是唯一來自衣櫃的單品，outfit 第一位，直接寫「顏色+類型」不加星號。
-2. outfit 其餘單品由 AI 依本季風格自由搭配，不限衣櫃，但不可與【衣櫃清單】重複。
-3. 所有非核心單品一律加 *星號* 標記（代表建議購買）。
-4. outfit 格式：核心單品＋*建議單品A*＋*建議單品B*＋… 用＋連接。
-5. outfit 必須包含上衣、下身、鞋子三個類別，缺一不可，共至少 3 件。
-5. recommends 列出所有 * 建議購買單品，格式「單品名（理由）」，用、分隔。
-6. baseItem 只寫「顏色+類型」，不加括號、英文、備註。
+1. outfit 優先使用【衣櫃清單】內的單品，逐字對應清單中的顏色+類型。
+2. 若衣櫃清單不足以組成完整搭配（少於2件），可自行補全缺少的單品，補全單品需標記為「*建議購買*」。
+3. outfit 格式：衣櫃內單品直接寫「顏色+類型」，補全單品寫「*顏色+類型*」（加星號標記）。
+4. baseItem 只寫「顏色+類型」，不加括號、英文、備註。
+5. outfit 必須列出完整搭配（含核心單品），每件格式如上，用＋連接，至少2件。
+6. recommends 只填補全單品的購買建議（含理由），衣櫃已夠用則留空。
 
 請輸出以下7行，格式「欄位名: 內容」，不要其他文字：
 baseItem: 核心單品（顏色+類型，例：淺藍牛仔褲）
 styleLabel: ${styleDirLabel}
 trendContext: 本季風格重點（15字內）
-outfit: 完整穿搭，必須含上衣+下身+鞋子，格式：核心單品＋*建議A*＋*建議B*＋…（至少3件）
+outfit: 完整穿搭所有單品，用＋連接（衣櫃內單品直接寫，補全單品加*星號*標記，例：藍色上衣＋*白色牛仔褲*＋*白色球鞋*）
 reasoning: 搭配邏輯（色彩+版型+材質各一點，25字內）
-recommends: 所有建議購買單品，格式「單品名（理由）」，用、分隔
-priceRange: 新購預估NT$總價`;
+recommends: 建議新購單品，格式「單品名（理由）」，多件用、分隔，衣櫃已夠用則留空
+priceRange: 新購預估NT$總價，無需新購則留空`;
 
-    const raw = await geminiText(prompt, 2000); // [VG-24] P1 從 1200 提高到 2000，避免 outfit 截斷
+    const raw = await geminiText(prompt, 1200);
     storeRaw('stage3', raw);
     apiLog('  階段3原文 (' + raw.length + '字)', 'info', 'stage3');
 
@@ -3794,7 +3736,7 @@ priceRange: 新購預估NT$總價`;
     rec.reasoning = rec.reasoning || '';
     rec.priceRange = rec.priceRange || '';
 
-    // 解析 recommends
+    // 解析 recommends（格式：單品名（理由）、單品名（理由））
     const recItems = [];
     if(rec.recommends && rec.recommends.trim() && rec.recommends.trim() !== '無') {
       rec.recommends.split(/[、,，]/).forEach(function(seg) {
@@ -3806,64 +3748,82 @@ priceRange: 新購預估NT$總價`;
       });
     }
 
-    // [VG-23] T1+T2 新定位：outfit 解析
-    // 第一件 = 核心單品（來自衣櫃，inWardrobe:true）
-    // 其餘全部 = 建議購買（inWardrobe:false），不再做 isInWardrobe() 比對
-    let outfitTags = rec.outfit.split(/[＋+]/).map(function(p){ return p.trim(); }).filter(Boolean);
-
-    // [VG-24] P2 程式層驗證：outfit 不足 3 件時自動重試一次
-    if(outfitTags.length < 3) {
-      apiLog('  outfit 只有 ' + outfitTags.length + ' 件，自動重試…', 'info');
-      const raw2 = await geminiText(prompt, 2000);
-      storeRaw('stage3_retry', raw2);
-      const rec2 = parseKV(raw2.replace(/```/g,'').trim());
-      if(rec2.outfit) {
-        const tags2 = rec2.outfit.split(/[＋+]/).map(function(p){ return p.trim(); }).filter(Boolean);
-        if(tags2.length > outfitTags.length) {
-          rec.outfit = rec2.outfit;
-          outfitTags = tags2;
-          apiLog('  重試成功：outfit 現在 ' + outfitTags.length + ' 件', 'ok');
-        } else {
-          apiLog('  重試結果未改善，繼續使用原結果', 'info');
-        }
-      }
-    }
-
-    const verifiedOutfitTags = outfitTags.map(function(tag, i) {
+    // outfit 拆解成 tag 陣列
+    // 解析 outfit，星號標記單品直接視為建議購買
+    const outfitTags = rec.outfit.split(/[＋+]/).map(function(p){ return p.trim(); }).filter(Boolean);
+    const outfitTagsParsed = outfitTags.map(function(tag) {
+      var isSuggested = /^\*.*\*$/.test(tag);
       var cleanTag = tag.replace(/^\*|\*$/g, '').trim();
-      return { tag: cleanTag, inWardrobe: i === 0 };
+      return { raw: tag, tag: cleanTag, forceBuy: isSuggested };
     });
 
-    // 確保核心單品排第一
-    if(anchorName && fixedBase) {
-      var anchorIdx2 = verifiedOutfitTags.findIndex(function(t){
-        return t.tag.indexOf(fixedBase.color||'') !== -1 && t.tag.indexOf(fixedBase.type||'') !== -1;
+    // ── 衣櫃存在性驗證 ──
+    // 顏色語義模糊對應表（AI常用色名 → 衣櫃選項對應）
+    var COLOR_FUZZY_MAP = {
+      '鼠尾草':'綠色','鼠尾草綠':'綠色','薄荷':'綠色','薄荷綠':'綠色','墨綠':'綠色','橄欖':'橄欖綠',
+      '奶油':'米白','奶茶':'棕色','駝色':'卡其','沙漠':'卡其','焦糖':'棕色',
+      '霧灰':'灰色','煙灰':'灰色','石板':'深灰','炭灰':'深灰',
+      '冰藍':'淺藍','天藍':'淺藍','靛藍':'深藍','海軍藍':'深藍','數位藍':'深藍',
+      '茶色':'棕色','杏色':'米白','奶白':'米白','象牙':'米白',
+      '玫瑰':'粉色','珊瑚':'紅色','酒紅':'酒紅','磚紅':'紅色',
+      '黑色':'黑色','純白':'白色','米色':'米白','原色':'米白',
+    };
+    // 對每個 outfit tag 做模糊比對，找出不在衣櫃的單品
+    function isInWardrobe(tag) {
+      if(!tag || tag.length < 2) return true; // 空白 tag 忽略
+      var tagLow = tag.replace(/\s/g,'').toLowerCase();
+      return wardrobe.some(function(item) {
+        var color = (item.color||'').replace(/\s/g,'').toLowerCase();
+        var type  = (item.type||'').replace(/\s/g,'').toLowerCase();
+        var note  = (item.note||'').replace(/\s/g,'').toLowerCase();
+        // 直接比對
+        var colorHit = color.length > 0 && tagLow.indexOf(color) !== -1;
+        // 模糊顏色比對：AI描述色名 → 對應衣櫃顏色
+        if(!colorHit) {
+          var mappedColor = '';
+          Object.keys(COLOR_FUZZY_MAP).forEach(function(fuzzy) {
+            if(tagLow.indexOf(fuzzy.toLowerCase()) !== -1) mappedColor = COLOR_FUZZY_MAP[fuzzy].toLowerCase();
+          });
+          if(mappedColor) colorHit = color === mappedColor;
+        }
+        var typeHit  = type.length > 0  && tagLow.indexOf(type)  !== -1;
+        var noteHit  = note.length > 1  && tagLow.indexOf(note)  !== -1;
+        return (colorHit && typeHit) || noteHit;
       });
-      if(anchorIdx2 > 0) {
-        var ap2 = verifiedOutfitTags.splice(anchorIdx2, 1)[0];
-        ap2.inWardrobe = true;
-        verifiedOutfitTags.unshift(ap2);
-        verifiedOutfitTags.forEach(function(t, i){ if(i > 0) t.inWardrobe = false; });
-      } else if(anchorIdx2 === -1) {
-        verifiedOutfitTags.unshift({ tag: anchorName, inWardrobe: true });
-        verifiedOutfitTags.forEach(function(t, i){ if(i > 0) t.inWardrobe = false; });
-      }
     }
 
-    // 非核心單品自動加入購買推薦（與 AI recommends 合併去重）
-    const autoRecItems = verifiedOutfitTags.slice(1).map(function(t){
-      return { name: t.tag, why: 'AI潮流搭配推薦', auto: true };
+    // 把不在衣櫃的 outfit 單品移入購買推薦（星號標記直接視為建議購買）
+    const verifiedOutfitTags = [];
+    const autoRecItems = [];
+    outfitTagsParsed.forEach(function(item, i) {
+      var tag = item.tag;
+      var inWrd = item.forceBuy ? false : (i === 0 || isInWardrobe(tag));
+      verifiedOutfitTags.push({ tag: tag, inWardrobe: inWrd });
+      if (!inWrd) {
+        autoRecItems.push({ name: tag, why: item.forceBuy ? '補全搭配建議購買' : 'AI搭配推薦', auto: true });
+      }
     });
+
+    // 合併：AI 手動推薦 + 自動偵測非衣櫃單品（去重）
     const allRecItems = recItems.slice();
     autoRecItems.forEach(function(ar) {
-      var already = allRecItems.some(function(r){
-        return r.name.indexOf(ar.name) !== -1 || ar.name.indexOf(r.name) !== -1;
-      });
+      var already = allRecItems.some(function(r){ return r.name.indexOf(ar.name) !== -1 || ar.name.indexOf(r.name) !== -1; });
       if(!already) allRecItems.push(ar);
     });
 
-    var nonWardrobeCount = verifiedOutfitTags.filter(function(t){ return !t.inWardrobe; }).length;
-    apiLog('  新定位驗證: outfit' + verifiedOutfitTags.length + '件，核心1件，建議購買' + nonWardrobeCount + '件', 'ok');
+    var hasNonWardrobe = verifiedOutfitTags.some(function(t){ return !t.inWardrobe; });
+    apiLog('  衣櫃驗證: outfit' + outfitTagsParsed.length + '件，非衣櫃' + autoRecItems.length + '件', hasNonWardrobe ? 'info' : 'ok');
+
+    // 確保核心單品排第一
+    if(anchorName && fixedBase) {
+      var anchorIdx2 = verifiedOutfitTags.findIndex(function(t){ return t.tag.indexOf(fixedBase.color||'') !== -1 && t.tag.indexOf(fixedBase.type||'') !== -1; });
+      if(anchorIdx2 > 0) {
+        var ap2 = verifiedOutfitTags.splice(anchorIdx2, 1)[0];
+        verifiedOutfitTags.unshift(ap2);
+      } else if(anchorIdx2 === -1) {
+        verifiedOutfitTags.unshift({ tag: anchorName, inWardrobe: true });
+      }
+    }
 
     // 渲染推薦單品購買卡
     function renderRecItem(it) {
@@ -3923,9 +3883,9 @@ priceRange: 新購預估NT$總價`;
         ${ruleTagsHtml ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">' + ruleTagsHtml + '</div>' : ''}
         <div style="font-size:.62rem;color:var(--muted);margin-bottom:10px;padding:5px 8px;background:rgba(200,160,80,.08);border-radius:6px">${rec.trendContext}</div>
         <div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:8px">
-          <div style="font-size:.56rem;font-weight:800;color:var(--muted);margin-bottom:6px">✦ 完整穿搭（共 ${verifiedOutfitTags.length} 件）${nonWardrobeCount > 0 ? '<span style="color:var(--red);margin-left:6px">🛍 ' + nonWardrobeCount + ' 件建議購買</span>' : ''}</div>
+          <div style="font-size:.56rem;font-weight:800;color:var(--muted);margin-bottom:6px">✦ 完整穿搭（共 ${verifiedOutfitTags.length} 件）${nonWardrobeCount > 0 ? '<span style="color:var(--red);margin-left:6px">🛍 ' + nonWardrobeCount + ' 件需購買</span>' : '<span style="color:var(--green);margin-left:6px">全部來自衣櫃</span>'}</div>
           <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">${outfitTagsHtml}</div>
-          <div style="font-size:.54rem;color:var(--muted);margin-top:4px">🏷 金色=你的衣櫃單品　🛍 紅色=AI推薦購買</div>
+          <div style="font-size:.54rem;color:var(--muted);margin-top:4px">🏷 金色=核心單品　🛍 紅色=建議購買</div>
         </div>
         ${rec.reasoning ? `<div style="background:rgba(61,170,106,.07);border:1px solid rgba(61,170,106,.2);border-radius:8px;padding:8px 12px;margin-bottom:10px">
           <div style="font-size:.54rem;font-weight:800;color:var(--green);margin-bottom:3px">💡 搭配邏輯</div>
@@ -3933,13 +3893,13 @@ priceRange: 新購預估NT$總價`;
         </div>` : ''}
         ${allRecItems.length ? `
         <div style="margin-bottom:10px">
-          <div style="font-size:.6rem;font-weight:800;color:var(--gold);margin-bottom:6px">🛍 AI 推薦購買（${allRecItems.length} 件）${rec.priceRange ? '<span style="color:var(--muted);font-weight:600;margin-left:6px">預估 ' + rec.priceRange + '</span>' : ''}</div>
+          <div style="font-size:.6rem;font-weight:800;color:var(--gold);margin-bottom:6px">🛍 推薦購買（${allRecItems.length} 件）${rec.priceRange ? '<span style="color:var(--muted);font-weight:600;margin-left:6px">預估 ' + rec.priceRange + '</span>' : ''}</div>
           ${allRecItems.map(renderRecItem).join('')}
-        </div>` : ''}
+        </div>` : '<div style="font-size:.62rem;color:var(--green);margin-bottom:10px;padding:6px 10px;background:rgba(61,170,106,.07);border-radius:8px">✅ 此搭配全部來自你的衣櫃，無需新購</div>'}
         <div id="trend-imgbox" style="margin-bottom:10px"></div>
       </div>`;
     res.style.display = 'block';
-    apiLog('✓ 潮流搭配生成完成，outfit=' + verifiedOutfitTags.length + '件，自動觸發生圖', 'ok');
+    apiLog('✓ 潮流搭配生成完成，outfit=' + outfitTagsParsed.length + '件，自動觸發生圖', 'ok');
     setTimeout(function(){ genTrendOutfitImg(); }, 300);
 
   } catch(e) {
@@ -4283,28 +4243,13 @@ function normalizeWeekPlanShape(parsed) {
   };
 }
 function buildWardrobePromptText() {
-  // [VG-20] 方案二：分類摘要，取代 slice(0,24) 截斷，不管衣櫃幾件都完整呈現
-  var GROUP_ORDER = ['上衣類','下身類','外套類','鞋子類','配件類'];
-  var GROUP_MAP = {
-    '上衣類': ['上衣','T恤','襯衫','毛衣'],
-    '下身類': ['褲子','牛仔褲','裙子','洋裝'],
-    '外套類': ['外套','夾克'],
-    '鞋子類': ['鞋子','球鞋','皮鞋','靴子'],
-    '配件類': ['包包','墨鏡','帽子','腰帶','配件'],
-  };
-  var result = GROUP_ORDER.map(function(label) {
-    var types = GROUP_MAP[label];
-    var items = wardrobe.filter(function(i){ return types.indexOf(i.type) >= 0; });
-    if(!items.length) return label + '：0件';
-    var preview = items.slice(0, 4).map(function(i){
-      return i.color + i.type + (i.style ? '/' + i.style : '');
-    }).join('、');
-    var suffix = items.length > 4 ? '等' : '';
-    return label + '×' + items.length + '件（' + preview + suffix + '）';
+  return wardrobe.slice(0, 24).map(function(item, index) {
+    var parts = [item.type, item.color, item.style];
+    if(item.material) parts.push(item.material);
+    if(item.fit) parts.push(item.fit + '版型');
+    if(item.note) parts.push(item.note);
+    return (index + 1) + '.' + parts.filter(Boolean).join('/');
   }).join('；');
-  // [VG-22] L1 印出送給 AI 的衣櫃摘要
-  apiLog('衣櫃摘要: ' + result.substring(0, 150) + (result.length > 150 ? '…' : ''), 'info');
-  return result;
 }
 function buildSelectedAccsText() {
   if(!selectedAccs.length) return '';
@@ -5959,18 +5904,17 @@ function apiLog(msg, type, rawKey) {
             now.getMinutes().toString().padStart(2,'0') + ':' +
             now.getSeconds().toString().padStart(2,'0');
   var entry = {ts: ts, msg: msg, type: type, rawKey: rawKey || null};
-  apiLogs.push(entry); // [VG-23] 改為 push，最新在下，複製順序與時間一致
-  if(apiLogs.length > 60) apiLogs.shift();
+  apiLogs.unshift(entry);
+  if(apiLogs.length > 60) apiLogs.pop();
   var el = document.getElementById('tf-log');
   if(!el) return;
-  el.innerHTML = apiLogs.slice().reverse().map(function(e){ // 畫面顯示仍維持最新在上
+  el.innerHTML = apiLogs.map(function(e){
     var expandBtn = e.rawKey && _rawAiResponses[e.rawKey]
       ? ' <span onclick="event.stopPropagation();showRaw(\'' + e.rawKey + '\')" style="color:var(--gold);cursor:pointer;border:1px solid var(--gold);border-radius:3px;padding:0 4px;font-size:.48rem">展開</span>'
       : '';
     return '<div class="tf-log-entry ' + e.type + '">' +
            '<span style="opacity:.5">' + e.ts + '</span> ' + e.msg + expandBtn + '</div>';
   }).join('');
-  // 不自動捲動，讓使用者保持在當前位置
 }
 
 function showRaw(key) {
@@ -6017,12 +5961,12 @@ function downloadSource() {
 // ═══ 複製原始碼到剪貼簿 ═══
 function copyLog() {
   if (!apiLogs || !apiLogs.length) { showToast('⚠️ 目前沒有 LOG 記錄'); return; }
-  var txt = '=== Fitto Log ===\n' + apiLogs.map(function(e) {
+  var txt = apiLogs.slice().reverse().map(function(e) {
     return e.ts + ' [' + (e.type || 'info').toUpperCase() + '] ' + e.msg;
   }).join('\n');
   if (navigator.clipboard && navigator.clipboard.writeText) {
     navigator.clipboard.writeText(txt).then(function() {
-      showToast('✅ LOG 已複製（' + apiLogs.length + ' 筆）');
+      showToast('✅ LOG 已複製到剪貼簿');
     }).catch(function() { fallbackCopyText(txt); });
   } else {
     fallbackCopyText(txt);
@@ -6105,7 +6049,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-24<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-20<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6129,7 +6073,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-24',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-20',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -6731,7 +6675,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-19)
+// 穿搭評分功能 (VG-20)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
@@ -6802,16 +6746,22 @@ function submitScoring() {
   apiLog('→ 開始評分，圖片大小：' + Math.round(_scoringImageB64.length / 1024) + 'KB', 'info');
 
   var prompt = [
-    '你是一位專業時尚造型師，請分析這張穿搭照片，依照以下四個維度進行評分（每項滿分25分），並給出配件推薦。',
+    '你是一位專業時尚造型師，請分析這張穿搭照片，依照以下四個維度進行嚴格評分（每項滿分25分），並給出配件推薦。',
+    '【評分基準】每個維度請按下列標準打分：',
+    '0-12分：有明顯問題（例如嚴重撞色、比例嚴重失衡、完全不符合場合）',
+    '13-17分：普通，無明顯亮點，穿著無誤但缺乏設計感',
+    '18-21分：不錯，有個人風格或細節用心',
+    '22-25分：專業級，接近難以挑剔的造型師標準',
+    '【重要】一般穿搭（無特別亮點）的期望總分約為60-70分，請據實評分，不要因為鼓勵而給予過高分數。',
     '請嚴格以下列 key: value 格式輸出，每行一個，不要其他說明：',
-    'color_score: 色彩協調度分數（0-25的整數）',
-    'color_reason: 色彩協調度扣分原因（1-2句）',
-    'silhouette_score: 版型平衡分數（0-25的整數）',
-    'silhouette_reason: 版型平衡扣分原因（1-2句）',
-    'occasion_score: 場合適合度分數（0-25的整數）',
-    'occasion_reason: 場合適合度扣分原因（1-2句）',
-    'style_score: 整體風格感分數（0-25的整數）',
-    'style_reason: 整體風格感扣分原因（1-2句）',
+    'color_score: 色彩協調度分數（0-25的整數，依評分基準）',
+    'color_reason: 色彩協調度評析（一句優點＋一句可改善方向）',
+    'silhouette_score: 版型平衡分數（0-25的整數，依評分基準）',
+    'silhouette_reason: 版型平衡評析（一句優點＋一句可改善方向）',
+    'occasion_score: 場合適合度分數（0-25的整數，依評分基準）',
+    'occasion_reason: 場合適合度評析（一句優點＋一句可改善方向）',
+    'style_score: 整體風格感分數（0-25的整數，依評分基準）',
+    'style_reason: 整體風格感評析（一句優點＋一句可改善方向）',
     'comment: 整體評語（2-3句，專業但親切的繁體中文）',
     'advice: 造型師建議（必填，具體指出1-2個可改善方向，例如配件或單品建議，不保證加分，繁體中文，不可留空）',
     'item1: 推薦配件1名稱（繁體中文，例如：米白針織圍巾）',
@@ -6833,7 +6783,7 @@ function submitScoring() {
           { inline_data: { mime_type: _scoringImageMime, data: _scoringImageB64 } },
           { text: prompt }
         ]}],
-        generationConfig: { temperature: 0, maxOutputTokens: 2048 }
+        generationConfig: { temperature: retryCount > 0 ? 0.3 : 0, maxOutputTokens: 2048 }
       })
     })
     .then(function(r){
@@ -6879,6 +6829,14 @@ function submitScoring() {
     var ys = parseInt(parsed.style_score) || 0;
     var total = cs + ss + os + ys;
 
+    // 零分自動重試（AI 回傳異常保護）
+    if ((cs === 0 || ss === 0 || os === 0 || ys === 0) && retryCount < 1) {
+      apiLog('⚠️ 偵測到零分維度，自動重試（不扣幣）…', 'info');
+      document.getElementById('scoring-loading').style.display = 'block';
+      setTimeout(function() { doScoringFetch(retryCount + 1); }, 1500);
+      return;
+    }
+
     // 顯示結果
     document.getElementById('scoring-result').style.display = 'block';
     var totalEl = document.getElementById('scoring-total');
@@ -6891,27 +6849,45 @@ function submitScoring() {
     // 雷達圖
     drawScoringRadar([cs, ss, os, ys]);
 
-    // 維度分數
+    // 維度分數（條狀圖 + reason 分離）
     var dims = [
       { label: '色彩協調', score: cs, reason: parsed.color_reason || '' },
       { label: '版型平衡', score: ss, reason: parsed.silhouette_reason || '' },
       { label: '場合適合', score: os, reason: parsed.occasion_reason || '' },
       { label: '整體風格', score: ys, reason: parsed.style_reason || '' }
     ];
-    var dimsHtml = dims.map(function(d) {
+    // 條狀圖（緊湊，無 reason）
+    var barsHtml = dims.map(function(d) {
       var pct = Math.round(d.score / 25 * 100);
-      return '<div style="margin-bottom:12px">'
-        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:4px">'
-        + '<span style="font-size:.74rem;font-weight:700;color:var(--ink)">' + d.label + '</span>'
-        + '<span style="font-family:Inter;font-weight:800;font-size:.84rem;color:var(--gold)">' + d.score + '<span style="font-size:.58rem;color:var(--muted)">/25</span></span>'
+      return '<div style="margin-bottom:9px">'
+        + '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:3px">'
+        + '<span style="font-size:.68rem;font-weight:700;color:var(--ink)">' + d.label + '</span>'
+        + '<span style="font-family:Inter;font-weight:800;font-size:.78rem;color:var(--gold)">' + d.score + '<span style="font-size:.55rem;color:var(--muted)">/25</span></span>'
         + '</div>'
-        + '<div style="background:var(--bg);border-radius:4px;height:6px;overflow:hidden;margin-bottom:4px">'
+        + '<div style="background:var(--bg);border-radius:4px;height:5px;overflow:hidden">'
         + '<div style="width:' + pct + '%;height:100%;background:linear-gradient(90deg,var(--gold),#e8b86d);border-radius:4px;transition:width .6s"></div>'
         + '</div>'
-        + (d.reason ? '<div style="font-size:.64rem;color:var(--muted);line-height:1.5">' + d.reason + '</div>' : '')
         + '</div>';
     }).join('');
-    document.getElementById('scoring-dims').innerHTML = dimsHtml;
+    document.getElementById('scoring-dims-bars').innerHTML = barsHtml;
+    // reason 文字區（並列下方）
+    var reasonsHtml = dims.filter(function(d){ return d.reason; }).map(function(d) {
+      return '<div style="margin-bottom:5px">'
+        + '<span style="font-size:.63rem;font-weight:700;color:var(--gold)">' + d.label + '：</span>'
+        + '<span style="font-size:.63rem;color:var(--muted);line-height:1.6">' + d.reason + '</span>'
+        + '</div>';
+    }).join('');
+    var reasonsEl = document.getElementById('scoring-dims-reasons');
+    if (reasonsHtml) {
+      reasonsEl.style.borderTop = '1px solid var(--border)';
+      reasonsEl.style.paddingTop = '10px';
+      reasonsEl.style.marginTop = '2px';
+      reasonsEl.innerHTML = reasonsHtml;
+    } else {
+      reasonsEl.innerHTML = '';
+      reasonsEl.style.borderTop = '';
+      reasonsEl.style.paddingTop = '';
+    }
 
     // 整體評語
     document.getElementById('scoring-comment').innerHTML =
