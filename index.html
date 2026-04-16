@@ -61,7 +61,7 @@ header{
 
 /* ── BOTTOM NAV ── */
 .bottom-nav{
-  position:fixed;bottom:0;left:0;right:0;z-index:100;
+  position:fixed;bottom:0;left:0;right:0;z-index:300;
   background:var(--surface);border-top:1px solid var(--border);
   display:flex;padding:6px 0 max(6px,env(safe-area-inset-bottom));
 }
@@ -1584,7 +1584,20 @@ function checkPw() {
     const ls = document.getElementById('lock-screen');
     ls.style.transition = 'opacity .4s';
     ls.style.opacity = '0';
-    setTimeout(function(){ ls.style.display = 'none'; }, 400);
+    setTimeout(function(){
+      ls.style.display = 'none';
+      ls.style.pointerEvents = 'none';
+      // 強制 iOS Safari repaint：觸發 bottom-nav 和 fixed 元素重繪
+      var nav = document.querySelector('.bottom-nav');
+      if(nav) {
+        nav.style.display = 'none';
+        // eslint-disable-next-line no-unused-expressions
+        nav.offsetHeight; // 強制 reflow
+        nav.style.display = 'flex';
+      }
+      document.body.style.webkitTransform = 'translateZ(0)';
+      setTimeout(function(){ document.body.style.webkitTransform = ''; }, 100);
+    }, 400);
   } else {
     err.style.display = 'block';
     document.getElementById('lock-pw').value = '';
@@ -6810,7 +6823,10 @@ if(_savedHair && HAIRSTYLE_PROMPTS && HAIRSTYLE_PROMPTS[_savedHair] !== undefine
 // INIT
 document.addEventListener('DOMContentLoaded', function() {
   // Check lock
-  if(sessionStorage.getItem('fk')==='1') { var ls=document.getElementById('lock-screen'); if(ls)ls.style.display='none'; }
+  if(sessionStorage.getItem('fk')==='1') {
+    var ls=document.getElementById('lock-screen');
+    if(ls){ ls.style.display='none'; ls.style.pointerEvents='none'; }
+  }
   try {
     // 恢復上次使用的衣櫃
     if(activeWardrobeId !== 'main') {
