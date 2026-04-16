@@ -1436,7 +1436,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-20 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-22 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -4633,8 +4633,7 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
   var SKT_KW   = ['裙子','洋裝','裙','連衣裙'];
 
   function classifyOutfitParts(outfitText) {
-    var parts = outfitText.split(/[＋+、，,
-◆♦▶►]/)
+    var parts = outfitText.split(/[＋+、，,\r\n◆♦▶►]/)
       .map(function(p){ return p.trim().replace(/^[◆♦▶►\-\*•]\s*/,''); })
       .filter(function(p){ return p.length >= 2; });
     var slots = { top: [], btm: [], out: [], acc: [] };
@@ -6225,7 +6224,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-20<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-22<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6249,7 +6248,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-20',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-22',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -6854,7 +6853,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-20)
+// 穿搭評分功能 (VG-22)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
