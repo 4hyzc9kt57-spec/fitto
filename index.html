@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-20 · AI 智能穿搭</title>
+<title>Fitto VG-21 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -220,7 +220,7 @@ header{
 .week-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:none}
 .week-scroll::-webkit-scrollbar{display:none}
 .dc{
-  flex:0 0 160px;
+  flex:0 0 175px;
   background:var(--surface2);border:1px solid var(--border2);
   border-radius:var(--r-sm);padding:12px;
   min-width:0;overflow:hidden;
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-20</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-21</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1174,7 +1174,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-20 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-21 · 2026.04</div>
   </div>
 </div>
 
@@ -2012,9 +2012,9 @@ function getProfile() {
 // 頭像 emoji → 圖片生成用的人物描述
 var AVATAR_PROMPT_MAP = {
   '👤': 'white faceless mannequin figure, smooth featureless oval head, store display mannequin body, clean white surface',
-  '☀️': 'handsome young Asian man with warm smile, clean-cut appearance, sunny vibe',
-  '🌙': 'handsome Korean-style Asian man, sharp jawline, K-pop idol look',
-  '⚡': 'rugged Asian man, strong features, street-style edge',
+  '☀️': 'young Asian person with warm smile, clean-cut appearance, sunny vibe',
+  '🌙': 'Korean-style Asian person, sharp jawline, K-pop idol look',
+  '⚡': 'Asian person, strong features, street-style edge',
   '🌸': 'beautiful Asian woman with long straight dark hair and bangs, calm elegant expression, Korean beauty style',
   '🌺': 'cute Asian woman with short curly dark hair, bright smile, fresh youthful look',
   '👑': 'elegant mature Asian woman, sophisticated, confident beauty',
@@ -4463,7 +4463,22 @@ async function genOutfit(){
   const trendSection = trendContext
     ? `\n\n【當季流行趨勢參考】\n${trendContext}\n以上趨勢若衣櫃內有對應單品請優先選用；若無，可在tip中建議補充哪類單品。`
     : '';
-  const prompt=`你是一位擁有十年經驗的專業服裝設計師，擅長色彩搭配、材質協調與風格整合。衣櫃清單：${wj}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合規劃工作日搭配，每天考慮以下要素：\n1. 色系協調性（主色與配色的搭配邏輯）\n2. 材質相容性（避免材質風格衝突）\n3. 場合適合度（日常／工作／約會）\n4. 整體風格一致性${trendSection}${accText ? '\n' + accText : ''}\n請優先挑選衣櫃裡明確存在的單品名稱與顏色，不要虛構新品。回覆要精簡。`;
+
+  // ── #1 FIX: 取得衣櫃通用分析快取注入 prompt ──
+  let wardrobeProfileSection = '';
+  try {
+    const wBase = await analyzeWardrobeBase();
+    const profileParts = [];
+    if(wBase.dominantColors) profileParts.push('主色調：' + wBase.dominantColors);
+    if(wBase.fitProfile) profileParts.push('版型傾向：' + wBase.fitProfile);
+    if(wBase.styleProfile) profileParts.push('風格傾向：' + wBase.styleProfile);
+    if(wBase.bodyTip) profileParts.push('體型建議：' + wBase.bodyTip);
+    if(profileParts.length) {
+      wardrobeProfileSection = '\n\n【衣櫃整體輪廓】\n' + profileParts.join('，') + '\n請依此輪廓挑選最搭配的單品組合。';
+    }
+  } catch(e) { /* 快取取得失敗不影響主流程 */ }
+
+  const prompt=`你是一位擁有十年經驗的專業服裝設計師，擅長色彩搭配、材質協調與風格整合。衣櫃清單：${wj}${wardrobeProfileSection}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合規劃工作日搭配，每天考慮以下要素：\n1. 色系協調性（主色與配色的搭配邏輯）\n2. 材質相容性（避免材質風格衝突）\n3. 場合適合度（日常／工作／約會）\n4. 整體風格一致性${trendSection}${accText ? '\n' + accText : ''}\n請優先挑選衣櫃裡明確存在的單品名稱與顏色，不要虛構新品。回覆要精簡。`;
   try{
     const isWeekend = occ.indexOf('週末') !== -1;
     const parsed = await requestWeekPlanByDays(prompt, isWeekend);
@@ -4573,24 +4588,113 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
   // 把 outfit 資料存在 window 物件，避免特殊字符塞進 onclick 字串出錯
   window._fittoOutfits = (r.days||[]).map(d=>({outfit:d.outfit, occ:occ, sea:seaClean}));
 
-  document.getElementById('wscroll').innerHTML=(r.days||[]).map((d,idx)=>{
-    // 使用 AI 明確標記的 recommend 欄位產生購買連結
-    // JS 層二次過濾：排除衣櫃已有的單品
-    const recItems = (d.recommend||'').split(/[,，、]/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length >= 2; }).filter(function(s){
-      return !wardrobe.some(function(item){
-        var color = item.color||''; var type = item.type||'';
-        if(!color || !type) return false;
-        return s.indexOf(color) !== -1 && s.indexOf(type) !== -1;
-      });
+  // ── #2 FIX: 四槽位分類輔助函式 ──
+  function classifyOutfitParts(outfitText) {
+    var parts = outfitText.split(/[＋+、，,\r\n◆♦▶►]/)
+      .map(function(p){ return p.trim().replace(/^[◆♦▶►\-\*•]\s*/,''); })
+      .filter(function(p){ return p.length >= 2; });
+
+    var TOP_KW  = ['上衣','T恤','襯衫','毛衣','背心','POLO'];
+    var BTM_KW  = ['褲子','牛仔褲','裙子','洋裝','短褲','西裝褲','運動褲','工裝褲','哈倫褲','長褲','闊腿褲'];
+    var OUT_KW  = ['外套','夾克','風衣','大衣','西裝','羽絨衣','防風衣'];
+    var ACC_KW  = ['鞋子','球鞋','皮鞋','靴子','涼鞋','包包','托特包','墨鏡','帽子','腰帶','圍巾','手環','項鍊','配件','腕錶','手錶'];
+
+    var slots = { top: [], btm: [], out: [], acc: [] };
+    parts.forEach(function(p) {
+      var pl = p.toLowerCase();
+      if(OUT_KW.some(function(k){ return p.indexOf(k) !== -1; })) slots.out.push(p);
+      else if(TOP_KW.some(function(k){ return p.indexOf(k) !== -1; })) slots.top.push(p);
+      else if(BTM_KW.some(function(k){ return p.indexOf(k) !== -1 || pl.indexOf('褲') !== -1 || pl.indexOf('裙') !== -1; })) slots.btm.push(p);
+      else if(ACC_KW.some(function(k){ return p.indexOf(k) !== -1; })) slots.acc.push(p);
+      else slots.top.push(p); // 無法分類歸上衣
     });
-    const buyHtml = recItems.length ? '<div style="margin-top:6px;padding:6px 8px;background:rgba(200,160,80,.07);border:1px solid rgba(200,160,80,.2);border-radius:8px">'
+    return slots;
+  }
+
+  // 衣櫃比對（同 genTrendStyling 邏輯）
+  var COLOR_FUZZY_MAP_W = {
+    '鼠尾草':'綠色','鼠尾草綠':'綠色','薄荷':'綠色','薄荷綠':'綠色','墨綠':'綠色','橄欖':'橄欖綠',
+    '奶油':'米白','奶茶':'棕色','駝色':'卡其','沙漠':'卡其','焦糖':'棕色',
+    '霧灰':'灰色','煙灰':'灰色','石板':'深灰','炭灰':'深灰',
+    '冰藍':'淺藍','天藍':'淺藍','靛藍':'深藍','海軍藍':'深藍',
+    '茶色':'棕色','杏色':'米白','奶白':'米白','象牙':'米白',
+    '玫瑰':'粉色','珊瑚':'紅色','純白':'白色','米色':'米白','原色':'米白',
+  };
+  function isInWardrobeW(tag) {
+    if(!tag || tag.length < 2) return true;
+    var tagLow = tag.replace(/\s/g,'').toLowerCase();
+    return wardrobe.some(function(item) {
+      var color = (item.color||'').replace(/\s/g,'').toLowerCase();
+      var type  = (item.type||'').replace(/\s/g,'').toLowerCase();
+      var note  = (item.note||'').replace(/\s/g,'').toLowerCase();
+      var colorHit = color.length > 0 && tagLow.indexOf(color) !== -1;
+      if(!colorHit) {
+        var mappedColor = '';
+        Object.keys(COLOR_FUZZY_MAP_W).forEach(function(fuzzy) {
+          if(tagLow.indexOf(fuzzy.toLowerCase()) !== -1) mappedColor = COLOR_FUZZY_MAP_W[fuzzy].toLowerCase();
+        });
+        if(mappedColor) colorHit = color === mappedColor;
+      }
+      var typeHit = type.length > 0 && tagLow.indexOf(type) !== -1;
+      var noteHit = note.length > 1 && tagLow.indexOf(note) !== -1;
+      return (colorHit && typeHit) || noteHit;
+    });
+  }
+
+  function renderSlotRow(icon, label, items) {
+    if(!items || !items.length) {
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+        + '<span style="font-size:.9rem;width:22px;text-align:center;flex-shrink:0">' + icon + '</span>'
+        + '<span style="font-size:.58rem;color:var(--muted);font-weight:700;width:28px;flex-shrink:0">' + label + '</span>'
+        + '<span style="font-size:.68rem;color:var(--muted);flex:1">—</span>'
+        + '</div>';
+    }
+    return items.map(function(part, pi) {
+      var inWrd = isInWardrobeW(part);
+      var badge = inWrd
+        ? '<span style="font-size:.5rem;background:rgba(61,170,106,.2);color:var(--green);border-radius:4px;padding:1px 5px;font-weight:700;flex-shrink:0">✅ 衣櫃</span>'
+        : '<span style="font-size:.5rem;background:rgba(224,82,82,.15);color:var(--red);border-radius:4px;padding:1px 5px;font-weight:700;flex-shrink:0">🛍 推薦</span>';
+      return '<div style="display:flex;align-items:center;gap:8px;padding:6px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+        + (pi === 0 ? '<span style="font-size:.9rem;width:22px;text-align:center;flex-shrink:0">' + icon + '</span>'
+                    : '<span style="width:22px;flex-shrink:0"></span>')
+        + (pi === 0 ? '<span style="font-size:.58rem;color:var(--muted);font-weight:700;width:28px;flex-shrink:0">' + label + '</span>'
+                    : '<span style="width:28px;flex-shrink:0"></span>')
+        + '<span style="font-size:.72rem;color:var(--ink);flex:1;font-weight:600;line-height:1.4">' + part + '</span>'
+        + badge
+        + '</div>';
+    }).join('');
+  }
+
+  document.getElementById('wscroll').innerHTML=(r.days||[]).map((d,idx)=>{
+    // 分類 outfit 為四槽位
+    var slots = classifyOutfitParts(d.outfit || '');
+
+    // 統計非衣櫃單品（用於買建議）
+    var allParts = [].concat(slots.top, slots.btm, slots.out, slots.acc);
+    var nonWrdParts = allParts.filter(function(p){ return !isInWardrobeW(p); });
+
+    // 四槽位 HTML
+    var slotsHtml = '<div style="background:var(--surface2);border-radius:10px;padding:8px 10px;margin-bottom:8px">'
+      + renderSlotRow('👕','上衣', slots.top)
+      + renderSlotRow('👖','下身', slots.btm)
+      + renderSlotRow('🧥','外套', slots.out)
+      + renderSlotRow('💍','配件', slots.acc)
+      + '</div>';
+
+    // 購買推薦：AI 明確 recommend + 自動偵測非衣櫃
+    const aiRecItems = (d.recommend||'').split(/[,，、]/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length >= 2; });
+    const allRecParts = aiRecItems.slice();
+    nonWrdParts.forEach(function(p) {
+      var already = allRecParts.some(function(r){ return r.indexOf(p) !== -1 || p.indexOf(r) !== -1; });
+      if(!already) allRecParts.push(p);
+    });
+    const buyHtml = allRecParts.length ? '<div style="margin-top:6px;padding:6px 8px;background:rgba(200,160,80,.07);border:1px solid rgba(200,160,80,.2);border-radius:8px">'
       + '<div style="font-size:.52rem;color:var(--gold);font-weight:800;margin-bottom:4px">🛍 AI 推薦單品選購</div>'
-      + recItems.map(function(item){
+      + allRecParts.map(function(item){
           var q  = encodeURIComponent(item + ' 購買');
           var uq = encodeURIComponent(item + ' site:uniqlo.com/tw');
           var mq = encodeURIComponent(item + ' site:muji.com/tw');
           var zq = encodeURIComponent(item + ' site:zara.com/tw');
-          var gq = encodeURIComponent(item + ' 穿搭');
           return '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:3px">'
             + '<span style="font-size:.6rem;color:var(--ink2);font-weight:600;min-width:0;flex-shrink:1">' + item + '</span>'
             + '<a href="https://www.google.com/search?q=' + uq + '&tbm=shop" target="_blank" style="font-size:.54rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#5C6C7C,#8898A8);border-radius:4px;padding:2px 6px;font-weight:700;white-space:nowrap">UNIQLO</a>'
@@ -4602,7 +4706,7 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
       + '</div>' : '';
     return `<div class="dc" id="dc-${idx}">
       <div class="dn">${d.day}</div>
-      <div class="do" id="outfit-${idx}">${formatOutfitLines(d.outfit)}</div>
+      ${slotsHtml}
       <div class="dt">${d.tip}</div>
       ${buyHtml}
       <div class="img-box" id="imgbox-${idx}">
@@ -4790,11 +4894,21 @@ async function genImg(idx, outfit, occ, sea) {
     // 若 outfit 對應的衣物有 backPrint，使用背面側臉 pose
     const hasBackPrint = wardrobe.some(i => i.backPrint && outfit.indexOf(i.color) !== -1 && outfit.indexOf(i.type) !== -1);
     const pose = getRandomPose(hasBackPrint);
-    // 從衣櫃找出 outfit 中提到的單品詳細描述（AI辨識有 aiItemPrompt 最佳）
-    const matchedItems = wardrobe.filter(i => outfit.indexOf(i.color) !== -1 && outfit.indexOf(i.type) !== -1);
-    const itemDetailStr = matchedItems.length
-      ? matchedItems.map(i => i.aiItemPrompt || `${i.color} ${i.material||''} ${i.fit||''} ${i.type}${i.note?', '+i.note:''}`.trim()).join('; ')
-      : outfit;
+
+    // ── #3 FIX: outfit 完整描述 ──
+    // 把 outfit 文字所有單品都送進去，衣櫃有的補充詳細描述，衣櫃沒有的直接用文字
+    const outfitParts = outfit.split(/[＋+、，,\r\n◆♦▶►]/)
+      .map(function(p){ return p.trim().replace(/^[◆♦▶►\-\*•]\s*/,''); })
+      .filter(function(p){ return p.length >= 2; });
+    const itemDetailStr = outfitParts.map(function(part) {
+      // 嘗試在衣櫃中找到對應單品，補充詳細描述
+      var matched = wardrobe.find(function(i) {
+        return part.indexOf(i.color||'') !== -1 && part.indexOf(i.type||'') !== -1;
+      });
+      if(matched && matched.aiItemPrompt) return matched.aiItemPrompt;
+      if(matched) return [matched.color, matched.material||'', matched.fit||'', matched.type, matched.note||''].filter(Boolean).join(' ');
+      return part; // 衣櫃沒有的直接用 outfit 文字（不丟棄）
+    }).join('; ');
     const sceneMap = {'休閒':'casual street setting, natural daylight','工作':'modern office lobby, soft window light','約會':'cozy cafe, warm afternoon light','正式':'clean studio, professional lighting','運動':'outdoor park, morning light'};
     const sceneDesc = sceneMap[occ] || 'clean minimal background, natural daylight';
     const isMannequinMode = !_customAvatarEnabled && (!userAvatar || userAvatar === '👤');
