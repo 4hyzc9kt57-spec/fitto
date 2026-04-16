@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-22 · AI 智能穿搭</title>
+<title>Fitto VG-23 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-22</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-23</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1174,7 +1174,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-22 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-23 · 2026.04</div>
   </div>
 </div>
 
@@ -1436,7 +1436,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-22 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-23 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -4704,26 +4704,35 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
   }
 
   function renderSlotRow(icon, label, items) {
+    // #11: 標籤行獨佔一行，內容換行顯示，文字有完整寬度不直排
     if(!items || !items.length) {
-      return '<div style="display:flex;align-items:center;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+      return '<div style="padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
+        + '<div style="display:flex;align-items:center;gap:6px">'
         + '<span style="font-size:.85rem;width:20px;text-align:center;flex-shrink:0">' + icon + '</span>'
-        + '<span style="font-size:.56rem;color:var(--muted);font-weight:700;width:32px;flex-shrink:0;white-space:nowrap">' + label + '</span>'
-        + '<span style="font-size:.65rem;color:var(--muted);flex:1">—</span>'
+        + '<span style="font-size:.56rem;color:var(--muted);font-weight:700">' + label + '</span>'
+        + '<span style="font-size:.62rem;color:var(--muted)">—</span>'
+        + '</div>'
         + '</div>';
     }
     return items.map(function(part, pi) {
       var inWrd = isInWardrobeW(part);
       var badge = inWrd
-        ? '<span style="font-size:.48rem;background:rgba(61,170,106,.2);color:var(--green);border-radius:4px;padding:1px 4px;font-weight:700;flex-shrink:0;white-space:nowrap">✅ 衣櫃</span>'
-        : '<span style="font-size:.48rem;background:rgba(224,82,82,.15);color:var(--red);border-radius:4px;padding:1px 4px;font-weight:700;flex-shrink:0;white-space:nowrap">🛍 推薦</span>';
-      return '<div style="display:flex;align-items:flex-start;gap:6px;padding:5px 0;border-bottom:1px solid rgba(255,255,255,.05)">'
-        + (pi === 0 ? '<span style="font-size:.85rem;width:20px;text-align:center;flex-shrink:0;margin-top:1px">' + icon + '</span>'
-                    : '<span style="width:20px;flex-shrink:0"></span>')
-        + (pi === 0 ? '<span style="font-size:.56rem;color:var(--muted);font-weight:700;width:32px;flex-shrink:0;white-space:nowrap;margin-top:2px">' + label + '</span>'
-                    : '<span style="width:32px;flex-shrink:0"></span>')
-        + '<span style="font-size:.7rem;color:var(--ink);flex:1;font-weight:600;line-height:1.45;word-break:break-word;min-width:0">' + part + '</span>'
-        + '<span style="margin-top:2px">' + badge + '</span>'
+        ? '<span style="font-size:.48rem;background:rgba(61,170,106,.2);color:var(--green);border-radius:4px;padding:1px 5px;font-weight:700;white-space:nowrap;flex-shrink:0">✅ 衣櫃</span>'
+        : '<span style="font-size:.48rem;background:rgba(224,82,82,.15);color:var(--red);border-radius:4px;padding:1px 5px;font-weight:700;white-space:nowrap;flex-shrink:0">🛍 推薦</span>';
+      // 標籤行（只有第一件顯示 icon + label）
+      var labelRow = pi === 0
+        ? '<div style="display:flex;align-items:center;gap:6px;margin-bottom:2px">'
+          + '<span style="font-size:.85rem;width:20px;text-align:center;flex-shrink:0">' + icon + '</span>'
+          + '<span style="font-size:.56rem;color:var(--muted);font-weight:700">' + label + '</span>'
+          + '</div>'
+        : '';
+      // 內容行：全寬顯示，右側 badge
+      var contentRow = '<div style="display:flex;align-items:flex-start;justify-content:space-between;gap:6px;padding-left:26px">'
+        + '<span style="font-size:.72rem;color:var(--ink);font-weight:600;line-height:1.5;flex:1;word-break:break-word">' + part + '</span>'
+        + badge
         + '</div>';
+      var borderStyle = (pi === items.length - 1) ? 'border-bottom:1px solid rgba(255,255,255,.05)' : '';
+      return '<div style="padding:5px 0;' + borderStyle + '">' + labelRow + contentRow + '</div>';
     }).join('');
   }
 
@@ -4732,11 +4741,14 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
     var btmLabel = getBtmLabel(slots.btm);
     var allParts = [].concat(slots.top, slots.btm, slots.out, slots.acc);
     var nonWrdParts = allParts.filter(function(p){ return !isInWardrobeW(p); });
-    // #10: 四槽位重組 outfit 供生圖使用
+
+    // #13 FIX: rebuiltOutfit 在渲染時即寫回 _fittoOutfits，不等生圖點擊
     var rebuiltOutfit = allParts.filter(function(p){ return p && p.length >= 2; }).join('＋');
-    if(window._fittoOutfits && window._fittoOutfits[idx]) {
+    if(window._fittoOutfits) {
+      if(!window._fittoOutfits[idx]) window._fittoOutfits[idx] = { outfit: d.outfit, occ: '', sea: '' };
       window._fittoOutfits[idx].outfit = rebuiltOutfit || d.outfit;
     }
+
     var slotsHtml = '<div style="background:rgba(0,0,0,.15);border-radius:10px;padding:8px 10px;margin-bottom:8px">'
       + renderSlotRow('👕', '上衣', slots.top)
       + renderSlotRow('👖', btmLabel, slots.btm)
@@ -6224,7 +6236,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-22<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-23<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6248,7 +6260,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-22',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-23',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -6853,7 +6865,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-22)
+// 穿搭評分功能 (VG-23)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
