@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-24 · AI 智能穿搭</title>
+<title>Fitto VG-25 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -220,7 +220,7 @@ header{
 .week-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:none}
 .week-scroll::-webkit-scrollbar{display:none}
 .dc{
-  flex:0 0 220px;
+  flex:0 0 240px;
   background:var(--surface2);border:1px solid var(--border2);
   border-radius:var(--r-sm);padding:12px;
   min-width:0;overflow:hidden;
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-24</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-25</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1174,7 +1174,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-24 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-25 · 2026.04</div>
   </div>
 </div>
 
@@ -1436,7 +1436,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-24 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-25 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -4633,7 +4633,12 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
   var SKT_KW   = ['裙子','洋裝','裙','連衣裙'];
 
   function classifyOutfitParts(outfitText) {
-    var parts = outfitText.split(/[＋+、，,\r\n◆♦▶►]/)
+    // #18: 先把括號內容移除，避免括號內的＋被誤切成獨立片段
+    // 保留括號外的主要描述（顏色＋類型），括號細節由備註層處理
+    var cleaned = outfitText
+      .replace(/（[^）]*）/g, '')   // 移除全形括號內容
+      .replace(/\([^)]*\)/g, '');   // 移除半形括號內容
+    var parts = cleaned.split(/[＋+、，,\r\n◆♦▶►]/)
       .map(function(p){ return p.trim().replace(/^[◆♦▶►\-\*•]\s*/,''); })
       .filter(function(p){ return p.length >= 2; });
     var slots = { top: [], btm: [], out: [], acc: [] };
@@ -4772,7 +4777,7 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
         : '';
 
       var contentRow = '<div style="padding-left:26px">'
-        + '<span style="font-size:.72rem;color:var(--ink);font-weight:600;line-height:1.5;word-break:break-word">' + part + '</span>'
+        + '<span style="font-size:.68rem;color:var(--ink);font-weight:600;line-height:1.5;word-break:break-word">' + part + '</span>'
         + '</div>';
 
       var borderStyle = pi === items.length - 1 ? 'border-bottom:1px solid rgba(255,255,255,.05)' : '';
@@ -6283,7 +6288,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-24<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-25<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6307,7 +6312,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-24',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-25',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -6912,7 +6917,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-24)
+// 穿搭評分功能 (VG-25)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
