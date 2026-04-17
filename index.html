@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-36 · AI 智能穿搭</title>
+<title>Fitto VG-37 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -737,7 +737,7 @@ body{background:var(--bg);color:var(--ink);}
 </svg>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-36</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-37</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1201,7 +1201,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-36 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-37 · 2026.04</div>
   </div>
 </div>
 
@@ -1463,7 +1463,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-36 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-37 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -2505,9 +2505,8 @@ function safeParseJson(str) {
   return null;
 }
 
-// 確認可用的模型（2026.04）：flash 失敗1次後切換 lite
+// 全面使用 lite 模型測試（2026.04）：穩定度優先
 var GEMINI_TEXT_MODELS = [
-  'gemini-2.5-flash',
   'gemini-2.5-flash-lite'
 ];
 
@@ -4619,7 +4618,7 @@ async function genOutfit(){
     }
   } catch(e) { /* 收藏讀取失敗不影響主流程 */ }
 
-  const prompt=`你是一位擁有十年經驗的專業服裝設計師，擅長色彩搭配、材質協調與風格整合。衣櫃清單：${wj}${wardrobeProfileSection}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合規劃工作日搭配，每天考慮以下要素：\n1. 色系協調性（主色與配色的搭配邏輯）\n2. 材質相容性（避免材質風格衝突）\n3. 場合適合度（日常／工作／約會）\n4. 整體風格一致性${trendSection}${accText ? '\n' + accText : ''}${recentExcludeSection}\n請優先挑選衣櫃裡明確存在的單品名稱與顏色，不要虛構新品。回覆要精簡。`;
+  const prompt=`你是一位擁有十年經驗的專業服裝設計師，擅長色彩搭配、材質協調與風格整合。衣櫃清單：${wj}${wardrobeProfileSection}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合規劃工作日搭配，每天考慮以下要素：\n1. 色系協調性（主色與配色的搭配邏輯）\n2. 材質相容性（避免材質風格衝突）\n3. 場合適合度（日常／工作／約會）\n4. 整體風格一致性\n5. ⚠️ 每天的上衣必須不同，同一件單品整週只能出現一次${trendSection}${accText ? '\n' + accText : ''}${recentExcludeSection}\n請優先挑選衣櫃裡明確存在的單品名稱與顏色，不要虛構新品。回覆要精簡。`;
   try{
     const isWeekend = occ.indexOf('週末') !== -1;
     const parsed = await requestWeekPlanByDays(prompt, isWeekend);
@@ -5078,7 +5077,7 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
       ${buyHtml}
       <div class="img-box" id="imgbox-${idx}" style="margin-top:auto">
         <button class="btn-gen-img" onclick="genImgSafe(${idx})">
-          🎨 生成示意圖 (-2🪙)
+          🎨 生成示意圖 (-2<svg width="13" height="13" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-left:1px"><defs><radialGradient id="gc-genb${idx}" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#F5D97A"/><stop offset="40%" stop-color="#C9A550"/><stop offset="100%" stop-color="#7A5E1A"/></radialGradient><radialGradient id="gc-genf${idx}" cx="42%" cy="30%" r="60%"><stop offset="0%" stop-color="#F7E090"/><stop offset="60%" stop-color="#C9A550"/><stop offset="100%" stop-color="#9A7030"/></radialGradient><radialGradient id="gc-geni${idx}" cx="40%" cy="35%" r="55%"><stop offset="0%" stop-color="#F0D870"/><stop offset="100%" stop-color="#B8922A"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gc-genb${idx})"/><circle cx="32" cy="32" r="24" fill="url(#gc-genf${idx})"/><circle cx="32" cy="32" r="20" fill="url(#gc-geni${idx})"/><rect x="20" y="37.5" width="24" height="4" rx="1.5" fill="#FFF0B0"/><path d="M20 38 L20 30 L25 35 L32 24 L39 35 L44 30 L44 38 Z" fill="#FFF0B0"/></svg>)
         </button>
       </div>
     </div>`;
@@ -6530,7 +6529,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-36<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-37<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6554,7 +6553,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-36',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-37',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -7159,7 +7158,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-36)
+// 穿搭評分功能 (VG-37)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
