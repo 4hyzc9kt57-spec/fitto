@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-30 · AI 智能穿搭</title>
+<title>Fitto VG-31 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -717,7 +717,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-30</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-31</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -870,7 +870,10 @@ body{background:var(--bg);color:var(--ink);}
     </div>
 
     <button class="btn-gen" id="bgen" onclick="genOutfit()">
-      <div class="spinner"></div>✦ 生成本週搭配
+      <div class="spinner"></div>
+      <svg width="18" height="18" viewBox="0 0 64 64" fill="none" style="flex-shrink:0;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="gc-bg" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#F5D97A"/><stop offset="40%" stop-color="#C9A550"/><stop offset="100%" stop-color="#7A5E1A"/></radialGradient><radialGradient id="gc-face" cx="42%" cy="30%" r="60%"><stop offset="0%" stop-color="#F7E090"/><stop offset="60%" stop-color="#C9A550"/><stop offset="100%" stop-color="#9A7030"/></radialGradient><radialGradient id="gc-inner" cx="40%" cy="35%" r="55%"><stop offset="0%" stop-color="#F0D870"/><stop offset="100%" stop-color="#B8922A"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gc-bg)"/><circle cx="32" cy="32" r="30" fill="none" stroke="#F5D97A" stroke-width="1.2" opacity="0.6"/><circle cx="32" cy="32" r="24" fill="url(#gc-face)"/><circle cx="32" cy="32" r="20" fill="url(#gc-inner)"/><path d="M 16 22 Q 20 14 30 13" stroke="#FFF0A0" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.5"/><rect x="20" y="37.5" width="24" height="4" rx="1.5" fill="#FFF0B0"/><path d="M20 38 L20 30 L25 35 L32 24 L39 35 L44 30 L44 38 Z" fill="#FFF0B0"/><path d="M21 37 L21 31 L25.5 35.5 L32 25.5 L38.5 35.5 L43 31 L43 37 Z" fill="#E8C060" opacity="0.4"/><circle cx="32" cy="24" r="2" fill="#F5D97A" stroke="#FFF8D0" stroke-width="0.8"/><circle cx="20.5" cy="30.5" r="1.5" fill="#F5D97A" stroke="#FFF8D0" stroke-width="0.8"/><circle cx="43.5" cy="30.5" r="1.5" fill="#F5D97A" stroke="#FFF8D0" stroke-width="0.8"/></svg>
+      ✦ 生成本週搭配
+      <span style="background:rgba(0,0,0,.25);color:#F5D97A;font-size:.6rem;font-weight:800;padding:1px 6px;border-radius:5px;border:1px solid rgba(245,217,122,.3)">-2</span>
     </button>
   </div>
   <div class="res-card" id="rcard">
@@ -920,7 +923,10 @@ body{background:var(--bg);color:var(--ink);}
 
     <div id="trend-style-result" style="display:none;margin-bottom:10px"></div>
     <button class="btn-gen" id="trend-style-btn" onclick="genTrendStyling()" style="background:linear-gradient(135deg,#7B5E2A,#C9904A)">
-      <div class="spinner"></div>✦ 生成潮流搭配建議
+      <div class="spinner"></div>
+      <svg width="18" height="18" viewBox="0 0 64 64" fill="none" style="flex-shrink:0;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="gc-bg2" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#F5D97A"/><stop offset="40%" stop-color="#C9A550"/><stop offset="100%" stop-color="#7A5E1A"/></radialGradient><radialGradient id="gc-face2" cx="42%" cy="30%" r="60%"><stop offset="0%" stop-color="#F7E090"/><stop offset="60%" stop-color="#C9A550"/><stop offset="100%" stop-color="#9A7030"/></radialGradient><radialGradient id="gc-inner2" cx="40%" cy="35%" r="55%"><stop offset="0%" stop-color="#F0D870"/><stop offset="100%" stop-color="#B8922A"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gc-bg2)"/><circle cx="32" cy="32" r="30" fill="none" stroke="#F5D97A" stroke-width="1.2" opacity="0.6"/><circle cx="32" cy="32" r="24" fill="url(#gc-face2)"/><circle cx="32" cy="32" r="20" fill="url(#gc-inner2)"/><path d="M 16 22 Q 20 14 30 13" stroke="#FFF0A0" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.5"/><rect x="20" y="37.5" width="24" height="4" rx="1.5" fill="#FFF0B0"/><path d="M20 38 L20 30 L25 35 L32 24 L39 35 L44 30 L44 38 Z" fill="#FFF0B0"/><path d="M21 37 L21 31 L25.5 35.5 L32 25.5 L38.5 35.5 L43 31 L43 37 Z" fill="#E8C060" opacity="0.4"/><circle cx="32" cy="24" r="2" fill="#F5D97A" stroke="#FFF8D0" stroke-width="0.8"/><circle cx="20.5" cy="30.5" r="1.5" fill="#F5D97A" stroke="#FFF8D0" stroke-width="0.8"/><circle cx="43.5" cy="30.5" r="1.5" fill="#F5D97A" stroke="#FFF8D0" stroke-width="0.8"/></svg>
+      ✦ 生成潮流搭配建議
+      <span style="background:rgba(0,0,0,.25);color:#F5D97A;font-size:.6rem;font-weight:800;padding:1px 6px;border-radius:5px;border:1px solid rgba(245,217,122,.3)">-4</span>
     </button>
   </div>
 
@@ -960,7 +966,10 @@ body{background:var(--bg);color:var(--ink);}
     </div>
     <div id="custom-imgbox" style="margin-bottom:8px"></div>
     <button class="btn-gen" id="custom-gen-btn" onclick="genCustomOutfitImg()" style="margin-bottom:0">
-      <div class="spinner"></div>🎨 生成自訂搭配圖
+      <div class="spinner"></div>
+      <svg width="18" height="18" viewBox="0 0 64 64" fill="none" style="flex-shrink:0;vertical-align:middle" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="gc-bg3" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#F5D97A"/><stop offset="40%" stop-color="#C9A550"/><stop offset="100%" stop-color="#7A5E1A"/></radialGradient><radialGradient id="gc-face3" cx="42%" cy="30%" r="60%"><stop offset="0%" stop-color="#F7E090"/><stop offset="60%" stop-color="#C9A550"/><stop offset="100%" stop-color="#9A7030"/></radialGradient><radialGradient id="gc-inner3" cx="40%" cy="35%" r="55%"><stop offset="0%" stop-color="#F0D870"/><stop offset="100%" stop-color="#B8922A"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gc-bg3)"/><circle cx="32" cy="32" r="30" fill="none" stroke="#F5D97A" stroke-width="1.2" opacity="0.6"/><circle cx="32" cy="32" r="24" fill="url(#gc-face3)"/><circle cx="32" cy="32" r="20" fill="url(#gc-inner3)"/><path d="M 16 22 Q 20 14 30 13" stroke="#FFF0A0" stroke-width="1.5" stroke-linecap="round" fill="none" opacity="0.5"/><rect x="20" y="37.5" width="24" height="4" rx="1.5" fill="#FFF0B0"/><path d="M20 38 L20 30 L25 35 L32 24 L39 35 L44 30 L44 38 Z" fill="#FFF0B0"/><path d="M21 37 L21 31 L25.5 35.5 L32 25.5 L38.5 35.5 L43 31 L43 37 Z" fill="#E8C060" opacity="0.4"/><circle cx="32" cy="24" r="2" fill="#F5D97A" stroke="#FFF8D0" stroke-width="0.8"/><circle cx="20.5" cy="30.5" r="1.5" fill="#F5D97A" stroke="#FFF8D0" stroke-width="0.8"/><circle cx="43.5" cy="30.5" r="1.5" fill="#F5D97A" stroke="#FFF8D0" stroke-width="0.8"/></svg>
+      🎨 生成自訂搭配圖
+      <span style="background:rgba(0,0,0,.25);color:#F5D97A;font-size:.6rem;font-weight:800;padding:1px 6px;border-radius:5px;border:1px solid rgba(245,217,122,.3)">-2</span>
     </button>
   </div>
 
@@ -1173,7 +1182,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-30 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-31 · 2026.04</div>
   </div>
 </div>
 
@@ -1435,7 +1444,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-30 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-31 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -4343,18 +4352,20 @@ async function requestSingleDayPlan(basePrompt, dayLabel, usedOutfits) {
     : '';
   const accNames = selectedAccs.map(id=>{ const a=ACC_SHOP_ITEMS.find(x=>x.id===id); return a?a.name:''; }).filter(Boolean);
   const accRule = accNames.length ? `\n⚠️ 必須在 outfit 中帶入以下配件（全部都要寫進去）：${accNames.join('、')}` : '';
-  const outfitLimit = accNames.length ? 90 : 80;
   const prompt = `${basePrompt}${avoidText}${accRule}
 現在只生成${dayLabel}這一天。
 請不要回 JSON、不要 markdown、不要前言、不要解釋。
-只用以下格式回覆（共4行）：
-outfit: 完整搭配描述，用＋連接各單品，控制在 ${outfitLimit} 字內
+只用以下格式回覆（共4行，outfit 用多行 - 列舉）：
+outfit:
+- 顏色＋完整類型（例：白色低筒球鞋）
+- 顏色＋完整類型
+- （依此類推，每件單品獨立一行）
 wardrobe: 此搭配中來自用戶衣櫃的單品（逗號分隔，沒有則留空）
 recommend: 此搭配中需要新購入的單品（逗號分隔，沒有則留空）
 tip: 搭配理由（25字內，說明色系或風格亮點）
 
-規則：1. outfit 必須是完整的一行描述。2. 每個單品必須同時寫出顏色＋完整類型名稱（例如「白色低筒球鞋」「黑色托特包」），絕對不可只寫顏色（❌「白色」）、只寫類型（❌「球鞋」）、或截斷名稱（❌「白色低筒休」→ ✅「白色低筒球鞋」）。3. recommend 只填衣櫃沒有的新單品，顏色+名稱。4. 若全部單品都來自衣櫃，recommend 留空。5. ⚠️ outfit 必須同時包含【上衣】【下身（褲子或裙子）】【鞋子】各至少一件，缺少任何一類視為不完整，必須補全。`;
-  const raw = await geminiText(prompt, 500);
+規則：1. outfit 每件單品獨立一行，以 - 開頭。2. 每個單品必須同時寫出顏色＋完整類型名稱（例如「白色低筒球鞋」「黑色托特包」），絕對不可只寫顏色（❌「白色」）、只寫類型（❌「球鞋」）、或截斷名稱（❌「白色低筒休」→ ✅「白色低筒球鞋」）。3. recommend 只填衣櫃沒有的新單品，顏色+名稱。4. 若全部單品都來自衣櫃，recommend 留空。5. ⚠️ outfit 必須同時包含【上衣】【下身（褲子或裙子）】【鞋子】各至少一件，缺少任何一類視為不完整，必須補全。`;
+  const raw = await geminiText(prompt, 600);
   const parsed = parseSingleDayFallback(raw, dayLabel);
   return {
     day:       parsed.day       || dayLabel,
@@ -4394,12 +4405,36 @@ function parseSingleDayFallback(raw, dayLabel) {
       .join('＋');
   }
 
-  // 優先：解析 key: value 格式（新4行格式）
+  // #33: 優先：解析 key: value 格式，支援 outfit 多行 - 列舉
   const kvLines = {};
-  text.split(/\r?\n/).forEach(function(line) {
+  const allLines = text.split(/\r?\n/);
+  let currentKey = null;
+  let outfitLineBuffer = [];
+
+  allLines.forEach(function(line) {
     const m = line.match(/^(outfit|wardrobe|recommend|tip)[:：]\s*(.*)$/i);
-    if(m) kvLines[m[1].toLowerCase()] = m[2].trim();
+    if(m) {
+      currentKey = m[1].toLowerCase();
+      // outfit key 本行可能有值（舊格式）或空（新多行格式）
+      if(currentKey === 'outfit') {
+        outfitLineBuffer = m[2].trim() ? [m[2].trim()] : [];
+      } else {
+        kvLines[currentKey] = m[2].trim();
+        currentKey = null; // 非 outfit key 不做多行收集
+      }
+    } else if(currentKey === 'outfit') {
+      // outfit 多行子項：以 - 或 • 開頭
+      var sub = line.trim().replace(/^[-•*◆♦▶►]\s*/, '');
+      if(sub.length >= 2) outfitLineBuffer.push(sub);
+      // 遇到下一個 key 時停止收集（由上面的 match 處理）
+    }
   });
+
+  // 若收集到 outfit 多行，合併成 ＋ 連接字串
+  if(outfitLineBuffer.length > 0) {
+    kvLines['outfit'] = outfitLineBuffer.join('＋');
+  }
+
   if(kvLines.outfit) {
     return {
       day:       dayLabel,
@@ -4868,7 +4903,8 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
         return false;
       });
       if(fallbackBtm) {
-        slots.btm.push({ text: fallbackBtm.color + fallbackBtm.type, note: '⚠️ 自動補全' });
+        apiLog('  [#32] 下身自動補全: ' + fallbackBtm.color + fallbackBtm.type, 'info');
+        slots.btm.push({ text: fallbackBtm.color + fallbackBtm.type, note: '' });
       }
     }
 
@@ -4882,7 +4918,8 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
         return false;
       });
       if(fallbackShoe) {
-        slots.shoe.push({ text: fallbackShoe.color + fallbackShoe.type, note: '⚠️ 自動補全' });
+        apiLog('  [#32] 鞋子自動補全: ' + fallbackShoe.color + fallbackShoe.type, 'info');
+        slots.shoe.push({ text: fallbackShoe.color + fallbackShoe.type, note: '' });
       }
     }
 
@@ -4908,6 +4945,27 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
       if(repaired) return { text: repaired, note: note };
       // 找不到 → 末尾補「鞋」字讓顯示完整
       return { text: txt + '鞋', note: note };
+    });
+
+    // #27b: 外套殘字修補 — 文字末尾不含完整外套字根時補全
+    var OUT_SUFFIX = ['套','克','衣','風'];
+    slots.out = slots.out.map(function(partObj) {
+      var txt = typeof partObj === 'object' ? partObj.text : partObj;
+      var note = typeof partObj === 'object' ? partObj.note : '';
+      if(OUT_SUFFIX.some(function(s){ return txt.indexOf(s) !== -1; })) return partObj;
+      var repaired = null;
+      var txtLow = txt.replace(/\s/g,'').toLowerCase();
+      wardrobe.some(function(item) {
+        if(!OUT_KW.some(function(k){ return item.type && item.type.indexOf(k) !== -1; })) return false;
+        var color = (item.color||'').replace(/\s/g,'').toLowerCase();
+        if(color && txtLow.indexOf(color) !== -1) {
+          repaired = item.color + item.type;
+          return true;
+        }
+        return false;
+      });
+      if(repaired) { apiLog('  [#27b] 外套殘字修補: ' + txt + ' → ' + repaired, 'info'); return { text: repaired, note: note }; }
+      return { text: txt + '外套', note: note };
     });
 
     // #25c #26a: 有效性過濾 — 移除無類型關鍵字的殘字（「白色球」「黑色」等）
@@ -6424,7 +6482,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-30<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-31<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6448,7 +6506,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-30',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-31',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -7053,7 +7111,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-30)
+// 穿搭評分功能 (VG-31)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
