@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-27 · AI 智能穿搭</title>
+<title>Fitto VG-28 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -718,7 +718,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-27</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-28</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1174,7 +1174,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-27 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-28 · 2026.04</div>
   </div>
 </div>
 
@@ -1436,7 +1436,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-27 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-28 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -4661,7 +4661,9 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
   var TOP_KW  = ['上衣','T恤','襯衫','毛衣','背心','POLO','polo'];
   var BTM_KW  = ['褲子','牛仔褲','裙子','洋裝','短褲','西裝褲','運動褲','工裝褲','哈倫褲','長褲','闊腿褲','直筒褲','錐形褲','寬褲'];
   var OUT_KW  = ['外套','夾克','風衣','大衣','西裝外套','羽絨衣','防風衣','聯名外套','開衫'];
-  var ACC_KW  = ['鞋子','球鞋','皮鞋','靴子','涼鞋','包包','托特包','墨鏡','帽子','腰帶','圍巾','手環','項鍊','配件','腕錶','手錶','樂福鞋','德比鞋'];
+  // #25a: 補齊鞋類關鍵字，防止「白色低筒休閒鞋」等被誤分到上衣
+  var ACC_KW  = ['鞋子','球鞋','皮鞋','靴子','涼鞋','包包','托特包','墨鏡','帽子','腰帶','圍巾','手環','項鍊','配件','腕錶','手錶','樂福鞋','德比鞋',
+                 '低筒','高筒','休閒鞋','運動鞋','板鞋','慢跑鞋','跑鞋','涼拖','拖鞋','帆布鞋','老爹鞋','穆勒鞋','踝靴','切爾西靴','馬丁靴'];
   var BTM_CHAR = ['褲','裙'];
   var SKT_KW   = ['裙子','洋裝','裙','連衣裙'];
 
@@ -4851,6 +4853,30 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
 
   document.getElementById('wscroll').innerHTML=(r.days||[]).map((d,idx)=>{
     var slots = classifyOutfitParts(d.outfit || '');
+
+    // #25b: 下身強制補全 — AI 漏給下身時，從衣櫃找一件褲/裙補入
+    if(slots.btm.length === 0) {
+      var btmTypes = ['牛仔褲','褲子','西裝褲','短褲','運動褲','裙子','洋裝'];
+      var fallbackBtm = null;
+      btmTypes.some(function(t) {
+        var found = wardrobe.find(function(i){ return i.type === t; });
+        if(found) { fallbackBtm = found; return true; }
+        return false;
+      });
+      if(fallbackBtm) {
+        slots.btm.push({ text: fallbackBtm.color + fallbackBtm.type, note: '⚠️ 自動補全' });
+      }
+    }
+
+    // #25c: 配件有效性過濾 — 移除只有顏色/單字、無任何類型關鍵字的殘片
+    var ALL_TYPE_KW = TOP_KW.concat(BTM_KW).concat(OUT_KW).concat(ACC_KW).concat(BTM_CHAR);
+    slots.acc = slots.acc.filter(function(partObj) {
+      var txt = typeof partObj === 'object' ? partObj.text : partObj;
+      // 長度 < 3 視為無效（例如只有「黑色」「白」）
+      if(!txt || txt.length < 3) return false;
+      // 必須包含至少一個已知類型關鍵字
+      return ALL_TYPE_KW.some(function(k){ return txt.indexOf(k) !== -1; });
+    });
     var btmLabel = getBtmLabel(slots.btm);
     // slots 現在是 { text, note } 物件陣列，需取 text 做後續處理
     var allParts = [].concat(slots.top, slots.btm, slots.out, slots.acc);
@@ -6351,7 +6377,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-27<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-28<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6375,7 +6401,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-27',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-28',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -6980,7 +7006,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-27)
+// 穿搭評分功能 (VG-28)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
