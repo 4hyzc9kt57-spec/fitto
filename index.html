@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-31 · AI 智能穿搭</title>
+<title>Fitto VG-32 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -220,14 +220,14 @@ header{
 .week-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:none}
 .week-scroll::-webkit-scrollbar{display:none}
 .dc{
-  flex:0 0 220px;
-  background:var(--surface2);border:1px solid var(--border2);
+  flex:0 0 155px;
+  background:#F5F0E8;border:1px solid #DDD5C0;
   border-radius:var(--r-sm);padding:12px;
   min-width:0;overflow:hidden;
 }
-.dn{font-family:'Inter',sans-serif;font-weight:800;font-size:0.65rem;color:var(--gold);margin-bottom:5px;text-transform:uppercase;letter-spacing:0.08em}
-.do{font-size:0.75rem;line-height:1.55;font-weight:600;color:var(--ink);white-space:normal;word-break:break-word;overflow-wrap:break-word;max-width:100%}
-.dt{font-size:0.62rem;color:var(--muted);margin-top:5px;line-height:1.4;padding-top:5px;border-top:1px solid var(--border)}
+.dn{font-family:'Inter',sans-serif;font-weight:800;font-size:0.65rem;color:#8A6A20;margin-bottom:5px;text-transform:uppercase;letter-spacing:0.08em}
+.do{font-size:0.75rem;line-height:1.55;font-weight:600;color:#2A2A2A;white-space:normal;word-break:break-word;overflow-wrap:break-word;max-width:100%}
+.dt{font-size:0.62rem;color:#7A7060;margin-top:5px;line-height:1.4;padding-top:5px;border-top:1px solid #DDD5C0}
 
 .onote{
   background:var(--surface2);border:1px solid var(--border2);border-left:3px solid var(--gold);
@@ -389,12 +389,12 @@ header{
 /* ── IMAGE GENERATION ── */
 .btn-gen-img {
   width:100%; margin-top:8px; padding:7px;
-  background:transparent; border:1px dashed var(--border2);
+  background:transparent; border:1px dashed #C4B89A;
   border-radius:8px; font-size:0.68rem; font-weight:700;
-  color:var(--muted); cursor:pointer; transition:all .2s;
+  color:#8A7A60; cursor:pointer; transition:all .2s;
   font-family:'Noto Sans TC',sans-serif;
 }
-.btn-gen-img:hover { border-color:var(--gold); color:var(--gold); }
+.btn-gen-img:hover { border-color:#8A6A20; color:#8A6A20; }
 
 .trend-style-chip {
   font-size:.64rem; font-weight:800; cursor:pointer;
@@ -717,7 +717,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-31</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-32</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1182,7 +1182,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-31 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-32 · 2026.04</div>
   </div>
 </div>
 
@@ -1444,7 +1444,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-31 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-32 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -4510,6 +4510,10 @@ async function requestWeekPlanByDays(basePrompt, isWeekend) {
 async function genOutfit(){
   if(wardrobe.length<3){document.getElementById('wfew').classList.add('show');return}
   document.getElementById('wfew').classList.remove('show');
+
+  // ── 金幣檢查：首次免費，之後每次扣 2 幣 ──
+  if(!checkAndSpend()) return;
+
   const btn=document.getElementById('bgen');btn.classList.add('loading');btn.disabled=true;
   const occ=document.getElementById('socc').value,sea=document.getElementById('ssea').value;
   const trendOn = document.getElementById('trend-on').checked;
@@ -5030,7 +5034,7 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
       ${buyHtml}
       <div class="img-box" id="imgbox-${idx}">
         <button class="btn-gen-img" onclick="genImgSafe(${idx})">
-          🎨 生成示意圖
+          🎨 生成示意圖 (-2🪙)
         </button>
       </div>
     </div>`;
@@ -6482,7 +6486,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-31<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-32<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6506,7 +6510,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-31',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-32',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -7111,7 +7115,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-31)
+// 穿搭評分功能 (VG-32)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
