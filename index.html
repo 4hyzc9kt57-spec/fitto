@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-28 · AI 智能穿搭</title>
+<title>Fitto VG-29 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -220,7 +220,7 @@ header{
 .week-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:6px;margin-bottom:12px;scrollbar-width:none}
 .week-scroll::-webkit-scrollbar{display:none}
 .dc{
-  flex:0 0 240px;
+  flex:0 0 260px;
   background:var(--surface2);border:1px solid var(--border2);
   border-radius:var(--r-sm);padding:12px;
   min-width:0;overflow:hidden;
@@ -441,8 +441,7 @@ header{
   border-radius:8px; font-size:0.65rem; color:var(--red); line-height:1.6;
 }
 
-/* Make day cards a bit taller for image */
-.dc { flex:0 0 140px; }
+/* #26d: dc width set to 260px in main rule above */
 
 
 /* ── GOOGLE SIGN IN ── */
@@ -718,7 +717,7 @@ body{background:var(--bg);color:var(--ink);}
 <body>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-28</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-29</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1174,7 +1173,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-28 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-29 · 2026.04</div>
   </div>
 </div>
 
@@ -1436,7 +1435,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-28 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-29 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -4065,7 +4064,7 @@ function buildWardrobeWeekPlan(occ, sea, reason) {
   const bottoms = wardrobe.filter(i=>BTMS.includes(i.type) && i.type !== '洋裝');
   const dresses = wardrobe.filter(i=>i.type === '洋裝');
   const outers = wardrobe.filter(i=>OUTS.includes(i.type));
-  const shoes = wardrobe.filter(i=>i.type === '鞋子');
+  const shoes = wardrobe.filter(i=>['鞋子','球鞋','皮鞋','靴子','涼鞋'].includes(i.type));
   const accessories = wardrobe.filter(i=>i.type === '配件');
   const days = ['週一','週二','週三','週四','週五'];
   const notes = [
@@ -4353,7 +4352,7 @@ wardrobe: 此搭配中來自用戶衣櫃的單品（逗號分隔，沒有則留�
 recommend: 此搭配中需要新購入的單品（逗號分隔，沒有則留空）
 tip: 搭配理由（25字內，說明色系或風格亮點）
 
-規則：1. outfit 必須是完整的一行描述。2. 每個單品必須同時寫出顏色＋類型（例如「白色休閒球鞋」），絕對不可只寫顏色（❌錯誤：「白色」）或只寫類型（❌錯誤：「球鞋」）。3. recommend 只填衣櫃沒有的新單品，顏色+名稱。4. 若全部單品都來自衣櫃，recommend 留空。5. ⚠️ outfit 必須同時包含【上衣】和【下身（褲子或裙子）】各至少一件，缺少任何一類視為不完整，必須補全。`;
+規則：1. outfit 必須是完整的一行描述。2. 每個單品必須同時寫出顏色＋類型（例如「白色休閒球鞋」），絕對不可只寫顏色（❌錯誤：「白色」）或只寫類型（❌錯誤：「球鞋」）。3. recommend 只填衣櫃沒有的新單品，顏色+名稱。4. 若全部單品都來自衣櫃，recommend 留空。5. ⚠️ outfit 必須同時包含【上衣】【下身（褲子或裙子）】【鞋子】各至少一件，缺少任何一類視為不完整，必須補全。`;
   const raw = await geminiText(prompt, 500);
   const parsed = parseSingleDayFallback(raw, dayLabel);
   return {
@@ -4662,8 +4661,10 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
   var BTM_KW  = ['褲子','牛仔褲','裙子','洋裝','短褲','西裝褲','運動褲','工裝褲','哈倫褲','長褲','闊腿褲','直筒褲','錐形褲','寬褲'];
   var OUT_KW  = ['外套','夾克','風衣','大衣','西裝外套','羽絨衣','防風衣','聯名外套','開衫'];
   // #25a: 補齊鞋類關鍵字，防止「白色低筒休閒鞋」等被誤分到上衣
-  var ACC_KW  = ['鞋子','球鞋','皮鞋','靴子','涼鞋','包包','托特包','墨鏡','帽子','腰帶','圍巾','手環','項鍊','配件','腕錶','手錶','樂福鞋','德比鞋',
+  // #26c: 鞋類獨立為 SHOE_KW，不再放在 ACC_KW
+  var SHOE_KW = ['鞋子','球鞋','皮鞋','靴子','涼鞋','樂福鞋','德比鞋',
                  '低筒','高筒','休閒鞋','運動鞋','板鞋','慢跑鞋','跑鞋','涼拖','拖鞋','帆布鞋','老爹鞋','穆勒鞋','踝靴','切爾西靴','馬丁靴'];
+  var ACC_KW  = ['包包','托特包','墨鏡','帽子','腰帶','圍巾','手環','項鍊','配件','腕錶','手錶'];
   var BTM_CHAR = ['褲','裙'];
   var SKT_KW   = ['裙子','洋裝','裙','連衣裙'];
 
@@ -4698,25 +4699,27 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
       .map(function(p){ return p.trim().replace(/^[◆♦▶►\-\*•]\s*/,''); })
       .filter(function(p){ return p.length >= 2; });
 
-    var slots = { top: [], btm: [], out: [], acc: [] };
+    var slots = { top: [], btm: [], out: [], shoe: [], acc: [] };
 
     rawParts.forEach(function(p, pi) {
       var origP = originalParts[pi] || p;
       var extracted = stripAndExtractBrackets(origP);
       var partObj = { text: p, note: extracted.note };
 
-      if(OUT_KW.some(function(k){ return p.indexOf(k) !== -1; })) { slots.out.push(partObj); return; }
-      if(ACC_KW.some(function(k){ return p.indexOf(k) !== -1; })) { slots.acc.push(partObj); return; }
-      if(BTM_KW.some(function(k){ return p.indexOf(k) !== -1; })) { slots.btm.push(partObj); return; }
+      if(OUT_KW.some(function(k){ return p.indexOf(k) !== -1; }))  { slots.out.push(partObj);  return; }
+      if(SHOE_KW.some(function(k){ return p.indexOf(k) !== -1; })) { slots.shoe.push(partObj); return; }
+      if(ACC_KW.some(function(k){ return p.indexOf(k) !== -1; }))  { slots.acc.push(partObj);  return; }
+      if(BTM_KW.some(function(k){ return p.indexOf(k) !== -1; }))  { slots.btm.push(partObj);  return; }
       if(BTM_CHAR.some(function(c){ return p.indexOf(c) !== -1; })) { slots.btm.push(partObj); return; }
-      if(TOP_KW.some(function(k){ return p.indexOf(k) !== -1; })) { slots.top.push(partObj); return; }
+      if(TOP_KW.some(function(k){ return p.indexOf(k) !== -1; }))  { slots.top.push(partObj);  return; }
       var pLow = p.replace(/\s/g,'').toLowerCase();
       var inferredSlot = null;
       wardrobe.some(function(item) {
         var color = (item.color||'').replace(/\s/g,'').toLowerCase();
         if(color.length > 0 && pLow.indexOf(color) !== -1) {
           var t = item.type || '';
-          if(OUT_KW.some(function(k){ return t.indexOf(k) !== -1; }))       inferredSlot = 'out';
+          if(OUT_KW.some(function(k){ return t.indexOf(k) !== -1; }))        inferredSlot = 'out';
+          else if(SHOE_KW.some(function(k){ return t.indexOf(k) !== -1; }))  inferredSlot = 'shoe';
           else if(BTM_KW.some(function(k){ return t.indexOf(k) !== -1; }) ||
                   BTM_CHAR.some(function(c){ return t.indexOf(c) !== -1; })) inferredSlot = 'btm';
           else if(ACC_KW.some(function(k){ return t.indexOf(k) !== -1; }))   inferredSlot = 'acc';
@@ -4868,20 +4871,37 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
       }
     }
 
-    // #25c: 配件有效性過濾 — 移除只有顏色/單字、無任何類型關鍵字的殘片
-    var ALL_TYPE_KW = TOP_KW.concat(BTM_KW).concat(OUT_KW).concat(ACC_KW).concat(BTM_CHAR);
-    slots.acc = slots.acc.filter(function(partObj) {
+    // #26c: 鞋子補全 — AI 漏給鞋子時，從衣櫃找一件補入
+    if(slots.shoe.length === 0) {
+      var shoeTypes = ['鞋子','球鞋','皮鞋','靴子','涼鞋'];
+      var fallbackShoe = null;
+      shoeTypes.some(function(t) {
+        var found = wardrobe.find(function(i){ return i.type === t; });
+        if(found) { fallbackShoe = found; return true; }
+        return false;
+      });
+      if(fallbackShoe) {
+        slots.shoe.push({ text: fallbackShoe.color + fallbackShoe.type, note: '⚠️ 自動補全' });
+      }
+    }
+
+    // #25c #26a: 有效性過濾 — 移除無類型關鍵字的殘字（「白色球」「黑色」等）
+    var ALL_TYPE_KW = TOP_KW.concat(BTM_KW).concat(OUT_KW).concat(SHOE_KW).concat(ACC_KW).concat(BTM_CHAR);
+    function isValidPart(partObj) {
       var txt = typeof partObj === 'object' ? partObj.text : partObj;
-      // 長度 < 3 視為無效（例如只有「黑色」「白」）
       if(!txt || txt.length < 3) return false;
-      // 必須包含至少一個已知類型關鍵字
       return ALL_TYPE_KW.some(function(k){ return txt.indexOf(k) !== -1; });
-    });
+    }
+    slots.top  = slots.top.filter(isValidPart);
+    slots.acc  = slots.acc.filter(isValidPart);
+    // shoe/btm/out 不過濾（補全項目也要保留）
+
     var btmLabel = getBtmLabel(slots.btm);
-    // slots 現在是 { text, note } 物件陣列，需取 text 做後續處理
-    var allParts = [].concat(slots.top, slots.btm, slots.out, slots.acc);
+    // #26c: allParts 加入 shoe slot
+    var allParts = [].concat(slots.top, slots.btm, slots.out, slots.shoe, slots.acc);
     var allTexts = allParts.map(function(p){ return typeof p === 'object' ? p.text : p; });
-    var nonWrdParts = allTexts.filter(function(t){ return !isInWardrobeW(t); });
+    // #26b: nonWrdParts 同樣過濾無效殘字
+    var nonWrdParts = allTexts.filter(function(t){ return !isInWardrobeW(t) && t.length >= 3 && ALL_TYPE_KW.some(function(k){ return t.indexOf(k) !== -1; }); });
 
     // #13 FIX: rebuiltOutfit 用文字版重組
     var rebuiltOutfit = allTexts.filter(function(t){ return t && t.length >= 2; }).join('＋');
@@ -4890,10 +4910,12 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
       window._fittoOutfits[idx].outfit = rebuiltOutfit || d.outfit;
     }
 
+    // #26c: 五格 slot — 上衣 / 褲子 / 外套 / 鞋子 / 配件
     var slotsHtml = '<div style="background:rgba(0,0,0,.15);border-radius:10px;padding:8px 10px;margin-bottom:8px">'
       + renderSlotRow('👕', '上衣', slots.top)
       + renderSlotRow('👖', btmLabel, slots.btm)
       + renderSlotRow('🧥', '外套', slots.out)
+      + renderSlotRow('👟', '鞋子', slots.shoe)
       + renderSlotRow('💍', '配件', slots.acc)
       + '</div>';
     const aiRecItems = (d.recommend||'').split(/[,，、]/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length >= 2; });
@@ -6377,7 +6399,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-28<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-29<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6401,7 +6423,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-28',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-29',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -7006,7 +7028,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-28)
+// 穿搭評分功能 (VG-29)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
