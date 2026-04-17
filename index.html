@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-35 · AI 智能穿搭</title>
+<title>Fitto VG-36 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -737,7 +737,7 @@ body{background:var(--bg);color:var(--ink);}
 </svg>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-35</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-36</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -892,7 +892,7 @@ body{background:var(--bg);color:var(--ink);}
     <button class="btn-gen" id="bgen" onclick="genOutfit()">
       <div class="spinner"></div>
       ✦ 生成本週搭配
-      <span style="background:rgba(0,0,0,.25);color:#F5D97A;font-size:.6rem;font-weight:800;padding:1px 6px;border-radius:5px;border:1px solid rgba(245,217,122,.3);display:inline-flex;align-items:center;gap:3px"><svg width="14" height="14" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="url(#gcost-b)"/><circle cx="32" cy="32" r="24" fill="url(#gcost-f)"/><circle cx="32" cy="32" r="20" fill="url(#gcost-i)"/><rect x="20" y="37.5" width="24" height="4" rx="1.5" fill="#FFF0B0"/><path d="M20 38 L20 30 L25 35 L32 24 L39 35 L44 30 L44 38 Z" fill="#FFF0B0"/></svg>-2</span>
+      <span style="background:rgba(0,0,0,.25);color:#F5D97A;font-size:.6rem;font-weight:800;padding:1px 6px;border-radius:5px;border:1px solid rgba(245,217,122,.3);display:inline-flex;align-items:center;gap:3px"><svg width="14" height="14" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="gc-btn-b" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#F5D97A"/><stop offset="40%" stop-color="#C9A550"/><stop offset="100%" stop-color="#7A5E1A"/></radialGradient><radialGradient id="gc-btn-f" cx="42%" cy="30%" r="60%"><stop offset="0%" stop-color="#F7E090"/><stop offset="60%" stop-color="#C9A550"/><stop offset="100%" stop-color="#9A7030"/></radialGradient><radialGradient id="gc-btn-i" cx="40%" cy="35%" r="55%"><stop offset="0%" stop-color="#F0D870"/><stop offset="100%" stop-color="#B8922A"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gc-btn-b)"/><circle cx="32" cy="32" r="24" fill="url(#gc-btn-f)"/><circle cx="32" cy="32" r="20" fill="url(#gc-btn-i)"/><rect x="20" y="37.5" width="24" height="4" rx="1.5" fill="#FFF0B0"/><path d="M20 38 L20 30 L25 35 L32 24 L39 35 L44 30 L44 38 Z" fill="#FFF0B0"/></svg>-2</span>
     </button>
   </div>
   <div class="res-card" id="rcard">
@@ -1201,7 +1201,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-35 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-36 · 2026.04</div>
   </div>
 </div>
 
@@ -1463,7 +1463,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-35 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-36 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -5031,14 +5031,25 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
     }
 
     // #26c: 五格 slot — 上衣 / 褲子 / 外套 / 鞋子 / 配件
-    var slotsHtml = '<div style="background:#EDE8DE;border-radius:10px;padding:8px 10px;margin-bottom:8px">'
+    var slotsHtml = '<div style="background:#EDE8DE;border-radius:10px;padding:8px 10px;margin-bottom:8px;flex:1">'
       + renderSlotRow('👕', '上衣', slots.top)
       + renderSlotRow('👖', btmLabel, slots.btm)
       + renderSlotRow('🧥', '外套', slots.out)
       + renderSlotRow('👟', '鞋子', slots.shoe)
       + renderSlotRow('💍', '配件', slots.acc)
       + '</div>';
-    const aiRecItems = (d.recommend||'').split(/[,，、]/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length >= 2; });
+    const aiRecItems = (d.recommend||'').split(/[,，、]/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length >= 2; }).map(function(name) {
+      // 若名稱末尾缺少類型關鍵字，嘗試從 ALL_TYPE_KW 補全
+      var hasKw = ALL_TYPE_KW.some(function(k){ return name.indexOf(k) !== -1; });
+      if(!hasKw) return name; // 無法判斷，原樣保留
+      // 若最後一個字元是類型字根（不完整），嘗試在衣櫃找同名補全
+      var lastChar = name[name.length - 1];
+      var partialKw = ALL_TYPE_KW.filter(function(k){ return k.length > 1 && k.indexOf(lastChar) === k.length - 1 && name.indexOf(k) === -1; });
+      if(partialKw.length === 0) return name;
+      var found = wardrobe.find(function(w){ return w.type && name.length >= 2 && w.type.indexOf(name.substring(name.length-2)) !== -1; });
+      if(found) return (name.replace(/.$/, '') + found.type);
+      return name;
+    });
     const allRecParts = aiRecItems.slice();
     nonWrdParts.forEach(function(p) {
       var already = allRecParts.some(function(r){ return r.indexOf(p) !== -1 || p.indexOf(r) !== -1; });
@@ -5353,7 +5364,7 @@ async function genImg(idx, outfit, occ, sea) {
 
     box.innerHTML = `<div class="outfit-img-wrap">
       <img src="${imgSrc}" class="outfit-img" alt="穿搭示意圖" onclick="openImgFull(this.src)" style="cursor:zoom-in">
-      <div class="img-cost-note" style="display:flex;align-items:center;justify-content:center;gap:3px"><svg width="14" height="14" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="32" cy="32" r="30" fill="url(#gcost-b)"/><circle cx="32" cy="32" r="24" fill="url(#gcost-f)"/><circle cx="32" cy="32" r="20" fill="url(#gcost-i)"/><rect x="20" y="37.5" width="24" height="4" rx="1.5" fill="#FFF0B0"/><path d="M20 38 L20 30 L25 35 L32 24 L39 35 L44 30 L44 38 Z" fill="#FFF0B0"/></svg> -2</div>
+      <div class="img-cost-note" style="display:flex;align-items:center;justify-content:center;gap:3px"><svg width="14" height="14" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg"><defs><radialGradient id="gc-cost-b" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#F5D97A"/><stop offset="40%" stop-color="#C9A550"/><stop offset="100%" stop-color="#7A5E1A"/></radialGradient><radialGradient id="gc-cost-f" cx="42%" cy="30%" r="60%"><stop offset="0%" stop-color="#F7E090"/><stop offset="60%" stop-color="#C9A550"/><stop offset="100%" stop-color="#9A7030"/></radialGradient><radialGradient id="gc-cost-i" cx="40%" cy="35%" r="55%"><stop offset="0%" stop-color="#F0D870"/><stop offset="100%" stop-color="#B8922A"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gc-cost-b)"/><circle cx="32" cy="32" r="24" fill="url(#gc-cost-f)"/><circle cx="32" cy="32" r="20" fill="url(#gc-cost-i)"/><rect x="20" y="37.5" width="24" height="4" rx="1.5" fill="#FFF0B0"/><path d="M20 38 L20 30 L25 35 L32 24 L39 35 L44 30 L44 38 Z" fill="#FFF0B0"/></svg> -2</div>
       <div style="font-size:.52rem;color:var(--muted);opacity:0.7;text-align:center;padding:4px 8px;line-height:1.5">⚠️ AI 生成圖僅供參考，實際服裝色彩、圖案與細節可能與原品不符</div>
       ${_buyLinksHtml}
       <details style="margin:6px 0;font-size:.62rem;color:var(--muted)">
@@ -6519,7 +6530,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-35<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-36<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6543,7 +6554,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-35',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-36',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -7148,7 +7159,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-35)
+// 穿搭評分功能 (VG-36)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
