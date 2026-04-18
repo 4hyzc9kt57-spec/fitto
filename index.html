@@ -786,6 +786,11 @@ body{background:var(--bg);color:var(--ink);}
     <span><span class="lb-val" id="w-used">0</span> / <span id="w-max">20</span> 件</span>
     <button class="lb-btn" onclick="goShop()">🪙 擴充</button>
   </div>
+  <!-- VG-41 顏色統計條 -->
+  <div id="color-stats-bar" style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:8px 12px;margin-bottom:12px;display:none">
+    <div style="font-size:.58rem;font-weight:800;color:var(--muted);letter-spacing:.06em;margin-bottom:6px">🎨 衣櫃色系</div>
+    <div id="color-stats-content" style="display:flex;flex-wrap:wrap;gap:6px;align-items:center"></div>
+  </div>
   <!-- VIP 衣櫃切換 -->
   <div id="vip-wrd-row" style="display:none" class="wrd-switch-row">
     <span style="font-size:.6rem;font-weight:800;color:var(--gold);white-space:nowrap">👑</span>
@@ -848,9 +853,37 @@ body{background:var(--bg);color:var(--ink);}
 
 <!-- ② 搭配 -->
 <div class="view" id="view-styling">
-  <div class="phd"><h1>工作日搭配</h1><p>AI 規劃週一到週五穿著</p></div>
+  <div class="phd"><h1>搭配</h1><p>AI 規劃穿搭，讓每天都好看</p></div>
   <div class="warn" id="wfew">⚠️ 請先到「衣櫃」新增至少 3 件衣物再生成搭配</div>
-  <div class="card">
+
+  <!-- B-1 次要卡並列（點擊 scroll 到對應完整操作區） -->
+  <div style="display:flex;gap:10px;margin-bottom:14px">
+    <div onclick="document.getElementById('section-trend').scrollIntoView({behavior:'smooth'})"
+      style="flex:1;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r);padding:14px 12px;cursor:pointer;transition:border-color .2s"
+      onmouseenter="this.style.borderColor='var(--gold)'" onmouseleave="this.style.borderColor='var(--border2)'">
+      <div style="font-size:.8rem;font-weight:800;color:var(--ink);margin-bottom:4px">🔥 一件變整套</div>
+      <div style="font-size:.6rem;color:var(--muted);line-height:1.6;margin-bottom:8px">選一件單品，AI 搭配整套</div>
+      <div style="font-size:.58rem;color:var(--ink2);line-height:1.7">
+        <span style="color:#4CAF7D;font-weight:700">✓</span> 搜尋當季潮流<br>
+        <span style="color:#4CAF7D;font-weight:700">✓</span> 推薦可購買單品
+      </div>
+      <div style="margin-top:8px;font-size:.58rem;color:var(--gold);font-weight:800;background:rgba(200,160,80,.12);border:1px solid rgba(200,160,80,.3);border-radius:8px;padding:2px 8px;display:inline-block">4 🪙</div>
+    </div>
+    <div onclick="document.getElementById('section-custom').scrollIntoView({behavior:'smooth'})"
+      style="flex:1;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r);padding:14px 12px;cursor:pointer;transition:border-color .2s"
+      onmouseenter="this.style.borderColor='var(--gold)'" onmouseleave="this.style.borderColor='var(--border2)'">
+      <div style="font-size:.8rem;font-weight:800;color:var(--ink);margin-bottom:4px">🧍 我的 AI 模特兒</div>
+      <div style="font-size:.6rem;color:var(--muted);line-height:1.6;margin-bottom:8px">用你的頭像試穿搭配</div>
+      <div id="mini-avatar-preview" style="font-size:1.5rem;margin-bottom:4px">👤</div>
+      <div style="font-size:.58rem;color:var(--gold);font-weight:700">點我試穿 →</div>
+    </div>
+  </div>
+
+  <!-- B-1 工作日搭配旗艦大卡 -->
+  <div class="card" style="background:linear-gradient(135deg,#2A1F0A,#3D2B10);border:1.5px solid rgba(201,144,74,.5)">
+    <div style="font-size:.62rem;font-weight:800;color:var(--gold);letter-spacing:.1em;margin-bottom:8px;opacity:.8">★ 每週主打</div>
+    <div style="font-size:.92rem;font-weight:800;color:#F5E6C8;margin-bottom:4px">工作日搭配</div>
+    <div style="font-size:.65rem;color:rgba(245,230,200,.6);margin-bottom:14px">AI 規劃週一到週五的完整穿著</div>
     <div class="ctrl-row">
       <select id="socc" class="ctrl-sel"><option>日常上班</option><option>週末休閒</option><option>約會</option><option>混合</option></select>
       <select id="ssea" class="ctrl-sel"><option>🌸 春季</option><option>☀️ 夏季</option><option>🍂 秋季</option><option>❄️ 冬季</option></select>
@@ -906,13 +939,17 @@ body{background:var(--bg);color:var(--ink);}
       <button class="btn-save" id="bsave" onclick="saveOutfit()">🔖 收藏這週工作搭配</button>
     </div>
   </div>
+  </div><!-- /工作日旗艦大卡 wrapper -->
 
-  <!-- 潮流搭配 -->
-  <div class="card" style="margin-top:14px">
+  <!-- B-2 一件變整套（原：潮流搭配） -->
+  <div class="card" id="section-trend" style="margin-top:14px">
     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:8px">
       <div>
-        <div style="font-size:.78rem;font-weight:800;color:var(--ink)">🔥 潮流搭配推薦</div>
-        <div style="font-size:.62rem;color:var(--muted);margin-top:2px">選一件核心單品 × 風格方向，AI 生成完整搭配並列出可購買單品</div>
+        <div style="font-size:.78rem;font-weight:800;color:var(--ink)">🔥 一件變整套</div>
+        <div style="font-size:.62rem;color:var(--muted);margin-top:2px">選一件核心單品，AI 生成完整搭配</div>
+        <div style="font-size:.58rem;color:var(--ink2);margin-top:4px;line-height:1.7">
+          <span style="color:#4CAF7D;font-weight:700">✓</span> 搜尋當季潮流&nbsp;&nbsp;<span style="color:#4CAF7D;font-weight:700">✓</span> 推薦可購買單品
+        </div>
       </div>
       <div style="font-size:.6rem;font-weight:800;color:var(--gold);background:rgba(200,160,80,.15);border:1px solid rgba(200,160,80,.3);border-radius:12px;padding:3px 9px;white-space:nowrap">4 🪙</div>
     </div>
@@ -949,9 +986,19 @@ body{background:var(--bg);color:var(--ink);}
     </button>
   </div>
 
-  <!-- 自訂搭配模式 -->
-  <div class="card" style="margin-top:14px">
-    <div style="font-size:.78rem;font-weight:800;color:var(--ink);margin-bottom:4px">🎯 自訂搭配生圖</div>
+  <!-- B-3 我的 AI 模特兒（原：自訂搭配模式） -->
+  <div class="card" id="section-custom" style="margin-top:14px">
+    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:6px">
+      <div style="font-size:.78rem;font-weight:800;color:var(--ink)">🧍 我的 AI 模特兒</div>
+      <button onclick="goNav('shop')" style="font-size:.6rem;color:var(--gold);background:rgba(200,160,80,.12);border:1px solid rgba(200,160,80,.3);border-radius:8px;padding:3px 9px;font-weight:700;cursor:pointer">換頭像 →</button>
+    </div>
+    <div style="display:flex;align-items:center;gap:10px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:8px 12px;margin-bottom:10px">
+      <div id="custom-avatar-preview" style="font-size:1.8rem;line-height:1">👤</div>
+      <div>
+        <div style="font-size:.68rem;font-weight:700;color:var(--ink)">你的專屬模特兒</div>
+        <div style="font-size:.6rem;color:var(--muted)">自選單品，AI 生成穿搭示意圖</div>
+      </div>
+    </div>
     <div style="font-size:.62rem;color:var(--muted);margin-bottom:6px">自選上衣、下身、配件，直接生成一張穿搭示意圖</div>
     <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
       <span style="font-size:.58rem;background:rgba(201,165,80,.12);border:1px solid rgba(201,165,80,.3);border-radius:6px;padding:3px 8px;color:var(--gold);font-weight:700">🪙 生圖 -2 金幣</span>
@@ -992,17 +1039,7 @@ body{background:var(--bg);color:var(--ink);}
     </button>
   </div>
 
-  <!-- 衣櫃分析 -->
-  <div class="card" style="margin-top:14px">
-    <div style="font-size:.78rem;font-weight:800;color:var(--ink);margin-bottom:4px">🧠 AI 衣櫃洞察</div>
-    <div style="font-size:.6rem;color:var(--muted);margin-bottom:6px">兩層分析：整體掃描（免費）→ 類別深入（🪙-1）</div>
-    <div style="display:flex;gap:6px;margin-bottom:10px;flex-wrap:wrap">
-      <span style="font-size:.56rem;background:rgba(76,175,125,.1);border:1px solid rgba(76,175,125,.25);border-radius:6px;padding:2px 7px;color:#4CAF7D;font-weight:700">整體掃描免費</span>
-      <span style="font-size:.56rem;background:rgba(201,165,80,.12);border:1px solid rgba(201,165,80,.3);border-radius:6px;padding:2px 7px;color:var(--gold);font-weight:700">類別深入 1 幣</span>
-    </div>
-    <div id="analysis-result" style="display:none"></div>
-    <button class="btn-ghost" onclick="analyzeClosetInsights()" id="analysis-btn">🔍 開始 AI 衣櫃洞察</button>
-  </div>
+  <!-- 衣櫃洞察已移至衣櫃頁 (VG-41) -->
 </div>
 
 <!-- ③ 收藏 -->
@@ -1081,8 +1118,8 @@ body{background:var(--bg);color:var(--ink);}
     <!-- 造型師建議 -->
     <div id="scoring-advice" style="background:var(--tag-gold-bg);border:1px solid var(--gold);border-radius:var(--r);padding:14px;margin-bottom:12px"></div>
 
-    <!-- 推薦配件 -->
-    <div id="scoring-items" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px"></div>
+    <!-- 下次穿搭建議（VG-41：移除推薦配件，改純文字） -->
+    <div id="scoring-items" style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px;margin-bottom:12px;display:none"></div>
 
     <!-- 再次評分 -->
     <button class="btn-s" style="width:100%;margin-bottom:16px" onclick="resetScoring()">📸 重新上傳評分</button>
@@ -1300,8 +1337,8 @@ body{background:var(--bg);color:var(--ink);}
   <div style="font-size:.65rem;color:var(--muted);margin-bottom:10px;line-height:1.6">解鎖後可在搭配頁與個人設定切換，影響生圖髮型</div>
   <div class="shop-grid" id="hair-shop-store-grid"></div>
 
-  <div class="shop-sec">🎩 配件解鎖</div>
-  <div style="font-size:.65rem;color:var(--muted);margin-bottom:10px;line-height:1.6">購買後可在搭配時加入，生圖也會呈現配件效果</div>
+  <div class="shop-sec">🎩 配件（免費）</div>
+  <div style="font-size:.65rem;color:var(--muted);margin-bottom:10px;line-height:1.6">全部配件免費使用，可在搭配時加入，生圖也會呈現配件效果</div>
   <div class="shop-grid" id="acc-shop-grid"></div>
 
   <div class="shop-sec">🎯 任務中心</div>
@@ -1990,6 +2027,7 @@ function goNav(name) {
   if(name === 'shop') { renderMissions(); renderShop(); }
   if(name === 'styling') { populateCustomSelects(); renderAccChips(); }
   if(name === 'scoring') { renderScoringHistory(); }
+  if(name === 'wardrobe') { renderColorStats(); }
 }
 
 function goShop() { goNav('shop'); }
@@ -2012,6 +2050,48 @@ function updateBanner() {
   if(ne) ne.innerHTML = USER_NAME + ' <button class="name-edit-btn" onclick="openNameModal()">✏️</button>';
   if(ge) ge.textContent = getGreeting();
   updateCoinUI();
+  // VG-41: 同步搭配頁頭像預覽
+  var miniPrev = document.getElementById('mini-avatar-preview');
+  var custPrev = document.getElementById('custom-avatar-preview');
+  var photoKey = typeof avatarPhotoMap !== 'undefined' ? avatarPhotoMap[userAvatar] : null;
+  var dispHtml = photoKey
+    ? '<img src="' + photoKey + '" style="width:32px;height:32px;border-radius:50%;object-fit:cover">'
+    : '<span style="font-size:1.4rem">' + (userAvatar || '👤') + '</span>';
+  var custHtml = photoKey
+    ? '<img src="' + photoKey + '" style="width:40px;height:40px;border-radius:50%;object-fit:cover">'
+    : '<span style="font-size:1.8rem">' + (userAvatar || '👤') + '</span>';
+  if(miniPrev) miniPrev.innerHTML = dispHtml;
+  if(custPrev) custPrev.innerHTML = custHtml;
+  // VG-41: 顏色統計條
+  renderColorStats();
+}
+
+// VG-41: 極簡顏色統計條
+function renderColorStats() {
+  var bar = document.getElementById('color-stats-bar');
+  var content = document.getElementById('color-stats-content');
+  if(!bar || !content) return;
+  var wrd = JSON.parse(localStorage.getItem('fitto_wardrobe') || '[]');
+  if(!wrd.length){ bar.style.display='none'; return; }
+  var counts = {};
+  wrd.forEach(function(item){
+    var c = (item.color || '').replace(/色$/,'').trim();
+    if(!c) return;
+    counts[c] = (counts[c]||0) + 1;
+  });
+  var sorted = Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; }).slice(0,7);
+  if(!sorted.length){ bar.style.display='none'; return; }
+  var colorMap = {'白':'#F5F5F5','米白':'#F5ECD7','黑':'#333','深灰':'#555','灰':'#999','淺灰':'#CCC','藍':'#5B9BD5','深藍':'#1F3A6E','淺藍':'#A8C7E8','紅':'#D95F5F','酒紅':'#8B1A1A','粉':'#F4A7B9','綠':'#6BAA75','橄欖':'#6B7C45','棕':'#8B6551','卡其':'#C2A97D','橘':'#E07B3A','紫':'#8B6BB1','花紋':'#C9A550','條紋':'#8899AA'};
+  content.innerHTML = sorted.map(function(c){
+    var bg = colorMap[c] || '#C9A550';
+    var textC = ['白','米白','淺灰'].indexOf(c)>=0 ? '#555' : '#FAF7F2';
+    return '<div style="display:flex;align-items:center;gap:4px">'
+      + '<div style="width:12px;height:12px;border-radius:3px;background:' + bg + ';border:1px solid rgba(0,0,0,.15);flex-shrink:0"></div>'
+      + '<span style="font-size:.65rem;color:var(--ink2);font-weight:600">' + c + '</span>'
+      + '<span style="font-size:.65rem;color:var(--muted)">' + counts[c] + '</span>'
+      + '</div>';
+  }).join('<span style="color:var(--border2);margin:0 2px">·</span>');
+  bar.style.display='block';
 }
 
 // openNameModal 已在 VF-4 新功能區塊重新定義（整合設定頁）
@@ -2250,20 +2330,24 @@ const ACC_SHOP_ITEMS = [
   {id:'acc_belt',   icon:'👔', name:'腰帶',  desc:'皮帶/編織/鍊條', cost:6},
 ];
 var ownedAccs = JSON.parse(localStorage.getItem('fitto_accs') || '[]');
+// VG-41: 配件全部免費，確保所有 id 都在 ownedAccs
+(function(){
+  var allIds = ['acc_hat','acc_shoe','acc_scarf','acc_brace','acc_neck','acc_bag','acc_glass','acc_belt'];
+  var changed = false;
+  allIds.forEach(function(id){ if(ownedAccs.indexOf(id)<0){ ownedAccs.push(id); changed=true; } });
+  if(changed) localStorage.setItem('fitto_accs', JSON.stringify(ownedAccs));
+})();
 function saveAccs(){ localStorage.setItem('fitto_accs', JSON.stringify(ownedAccs)); }
 
 function renderAccShop(){
   var grid = document.getElementById('acc-shop-grid');
   if(!grid) return;
   grid.innerHTML = ACC_SHOP_ITEMS.map(function(a){
-    var owned = ownedAccs.indexOf(a.id) >= 0;
     return `<div class="shop-item">
       <span class="si-icon">${a.icon}</span>
       <div class="si-name">${a.name}</div>
       <div class="si-desc">${a.desc}</div>
-      ${owned
-        ? `<div class="si-owned">✓ 已解鎖</div>`
-        : `<button class="si-price" onclick="buyAcc('${a.id}',${a.cost})">🪙 ${a.cost}枚</button>`}
+      <div class="si-owned">✓ 免費使用</div>
     </div>`;
   }).join('');
 }
@@ -2282,12 +2366,8 @@ var selectedAccs = []; // 目前勾選的配件 id 列表
 function renderAccChips(){
   var wrap = document.getElementById('acc-chips');
   if(!wrap) return;
-  var available = ACC_SHOP_ITEMS.filter(function(a){ return ownedAccs.indexOf(a.id) >= 0; });
-  if(!available.length){
-    wrap.innerHTML = '<span style="font-size:.62rem;color:var(--muted)">商店購買配件後可在此加入搭配</span>';
-    return;
-  }
-  wrap.innerHTML = available.map(function(a){
+  // VG-41: 所有配件免費，直接顯示全部
+  wrap.innerHTML = ACC_SHOP_ITEMS.map(function(a){
     var sel = selectedAccs.indexOf(a.id) >= 0;
     return `<button onclick="toggleAccChip('${a.id}',this)"
       style="padding:5px 11px;border-radius:20px;font-size:.68rem;font-weight:700;cursor:pointer;transition:all .2s;
@@ -7301,27 +7381,30 @@ function submitScoring() {
   apiLog('→ 開始評分，圖片大小：' + Math.round(_scoringImageB64.length / 1024) + 'KB', 'info');
 
   var prompt = [
-    '你是一位專業時尚造型師，請分析這張穿搭照片，依照以下四個維度進行嚴格評分（每項滿分25分），並給出配件推薦。',
+    '你是一位專業時尚造型師，請分析這張穿搭照片，依照以下四個維度進行評分（每項滿分25分），並給出改進建議。',
     '【評分基準】每個維度請按下列標準打分：',
     '0-12分：有明顯問題（例如嚴重撞色、比例嚴重失衡、完全不符合場合）',
     '13-17分：普通，無明顯亮點，穿著無誤但缺乏設計感',
     '18-21分：不錯，有個人風格或細節用心',
     '22-25分：專業級，接近難以挑剔的造型師標準',
     '【重要】一般穿搭（無特別亮點）的期望總分約為60-70分，請據實評分，不要因為鼓勵而給予過高分數。',
+    '【語氣規則】',
+    '- 維度分數 ≥ 24：給予稱讚，肯定這個維度的表現，不需要給建議',
+    '- 維度分數 20-23：用溫和探索語氣給建議，例如「試試看…」「可以嘗試…」',
+    '- 維度分數 < 20：給具體可行的改進方向，例如「可以嘗試…」「下次試試…」',
+    '- 禁止使用「錯誤」「不適合」「缺乏」「失敗」等負面判決詞',
+    '- 所有建議都用向前探索的語氣，而非向後判決',
     '請嚴格以下列 key: value 格式輸出，每行一個，不要其他說明：',
     'color_score: 色彩協調度分數（0-25的整數，依評分基準）',
-    'color_reason: 色彩協調度評析（一句優點＋一句可改善方向）',
+    'color_reason: 色彩協調度回饋（依語氣規則，一句話）',
     'silhouette_score: 版型平衡分數（0-25的整數，依評分基準）',
-    'silhouette_reason: 版型平衡評析（一句優點＋一句可改善方向）',
+    'silhouette_reason: 版型平衡回饋（依語氣規則，一句話）',
     'occasion_score: 場合適合度分數（0-25的整數，依評分基準）',
-    'occasion_reason: 場合適合度評析（一句優點＋一句可改善方向）',
+    'occasion_reason: 場合適合度回饋（依語氣規則，一句話）',
     'style_score: 整體風格感分數（0-25的整數，依評分基準）',
-    'style_reason: 整體風格感評析（一句優點＋一句可改善方向）',
-    'comment: 整體評語（2-3句，專業但親切的繁體中文）',
-    'advice: 造型師建議（必填，具體指出1-2個可改善方向，例如配件或單品建議，不保證加分，繁體中文，不可留空）',
-    'item1: 推薦配件1名稱（繁體中文，例如：米白針織圍巾）',
-    'item2: 推薦配件2名稱（繁體中文）',
-    'item3: 推薦配件3名稱（繁體中文）',
+    'style_reason: 整體風格感回饋（依語氣規則，一句話）',
+    'comment: 整體評語（2-3句，專業但親切的繁體中文，先肯定再給方向）',
+    'advice: 下次穿搭建議（必填，具體指出1-2個可嘗試的方向，用探索語氣，繁體中文，不可留空）',
     'photo_quality: 照片品質備註（如果光線太暗、角度不佳或非全身照請說明，否則留空）'
   ].join('\n');
 
@@ -7425,10 +7508,11 @@ function submitScoring() {
         + '</div>';
     }).join('');
     document.getElementById('scoring-dims-bars').innerHTML = barsHtml;
-    // reason 文字區（並列下方）
+    // reason 文字區（C-3：改為「💡 改進建議」）
     var reasonsHtml = dims.filter(function(d){ return d.reason; }).map(function(d) {
+      var icon = d.score >= 24 ? '✨' : '💡';
       return '<div style="margin-bottom:5px">'
-        + '<span style="font-size:.63rem;font-weight:700;color:var(--gold)">' + d.label + '：</span>'
+        + '<span style="font-size:.63rem;font-weight:700;color:var(--gold)">' + icon + ' ' + d.label + '：</span>'
         + '<span style="font-size:.63rem;color:var(--muted);line-height:1.6">' + d.reason + '</span>'
         + '</div>';
     }).join('');
@@ -7449,34 +7533,25 @@ function submitScoring() {
       '<div style="font-size:.68rem;font-weight:800;color:var(--gold);margin-bottom:6px;letter-spacing:.05em">✦ 整體評語</div>'
       + '<div style="font-size:.78rem;line-height:1.8;color:var(--ink2)">' + (parsed.comment || '') + '</div>';
 
-    // 造型師建議
+    // 下次穿搭建議（VG-41：造型師建議合併，移除推薦配件）
     var adviceEl = document.getElementById('scoring-advice');
     if (parsed.advice && parsed.advice.trim()) {
       adviceEl.style.display = 'block';
       adviceEl.innerHTML =
-        '<div style="font-size:.68rem;font-weight:800;color:var(--gold);margin-bottom:6px;letter-spacing:.05em">💡 Fitto 造型師建議</div>'
+        '<div style="font-size:.68rem;font-weight:800;color:var(--gold);margin-bottom:6px;letter-spacing:.05em">💡 下次穿搭建議</div>'
         + '<div style="font-size:.76rem;line-height:1.8;color:var(--ink)">' + parsed.advice + '</div>';
     } else {
       adviceEl.style.display = 'none';
     }
 
-    // 推薦配件
-    var itemsHtml = '<div style="font-size:.68rem;font-weight:800;color:var(--gold);margin-bottom:10px;letter-spacing:.05em">🛍️ 推薦配件</div>';
-    [parsed.item1, parsed.item2, parsed.item3].filter(Boolean).forEach(function(item) {
-      var q = encodeURIComponent(item);
-      var shopUrl = 'https://www.google.com/search?q=' + q + '&tbm=shop';
-      itemsHtml += '<div style="display:flex;justify-content:space-between;align-items:center;padding:8px 10px;background:var(--bg);border:1px solid var(--border);border-radius:var(--r-sm);margin-bottom:7px">'
-        + '<span style="font-size:.76rem;color:var(--ink);font-weight:600">' + item + '</span>'
-        + '<a href="' + shopUrl + '" target="_blank" style="font-size:.6rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,var(--gold),#b8860b);border-radius:5px;padding:3px 9px;font-weight:700;white-space:nowrap">購買</a>'
-        + '</div>';
-    });
-
-    // 照片品質警告
+    // 照片品質警告（移到獨立顯示）
+    var itemsEl = document.getElementById('scoring-items');
     if (parsed.photo_quality && parsed.photo_quality.trim() && parsed.photo_quality.trim() !== '（留空）' && parsed.photo_quality.trim().length > 2) {
-      itemsHtml += '<div style="margin-top:10px;padding:8px 10px;background:rgba(201,144,74,.12);border:1px solid var(--gold);border-radius:var(--r-sm);font-size:.67rem;color:var(--gold)">⚠️ ' + parsed.photo_quality + '<br><span style="color:var(--muted)">重新拍攝可能獲得更準確的評分</span></div>';
+      itemsEl.style.display = 'block';
+      itemsEl.innerHTML = '<div style="padding:8px 10px;background:rgba(201,144,74,.12);border:1px solid var(--gold);border-radius:var(--r-sm);font-size:.67rem;color:var(--gold)">⚠️ ' + parsed.photo_quality + '<br><span style="color:var(--muted)">重新拍攝可能獲得更準確的評分</span></div>';
+    } else {
+      itemsEl.style.display = 'none';
     }
-
-    document.getElementById('scoring-items').innerHTML = itemsHtml;
 
     // 儲存歷史 & 獎勵
     saveScoringRecord(total, parsed);
@@ -7831,8 +7906,52 @@ function renderScoringHistory() {
     el.innerHTML = '<div style="text-align:center;color:var(--muted);padding:20px 0;font-size:.72rem">尚無評分記錄</div>';
     return;
   }
-  el.innerHTML = records.map(function(r, idx) {
-    var scoreColor = r.total >= 90 ? '#4CAF50' : r.total >= 80 ? 'var(--gold)' : 'var(--muted)';
+
+  // C-1: 近30天走勢迷你折線圖
+  var now = Date.now();
+  var thirtyDaysAgo = now - 30 * 24 * 60 * 60 * 1000;
+  var recent = records.filter(function(r) {
+    var d = new Date(r.date);
+    return d.getTime() >= thirtyDaysAgo;
+  }).slice().reverse(); // 時間順序
+
+  var sparkHtml = '';
+  if (recent.length >= 2) {
+    var W = 280, H = 52, pad = 6;
+    var scores = recent.map(function(r){ return r.total; });
+    var minS = Math.min.apply(null, scores), maxS = Math.max.apply(null, scores);
+    var range = maxS - minS || 1;
+    var pts = scores.map(function(s, i) {
+      var x = pad + (i / (scores.length - 1)) * (W - pad * 2);
+      var y = H - pad - ((s - minS) / range) * (H - pad * 2);
+      return x.toFixed(1) + ',' + y.toFixed(1);
+    });
+    var polyline = pts.join(' ');
+    var lastScore = scores[scores.length - 1];
+    var lastColor = lastScore >= 90 ? '#C9904A' : lastScore >= 80 ? '#4CAF50' : lastScore >= 70 ? '#9E9E9E' : '#FF9800';
+    var lastPt = pts[pts.length - 1].split(',');
+    sparkHtml = '<div style="background:var(--surface2);border:1px solid var(--border);border-radius:10px;padding:10px 12px;margin-bottom:12px">'
+      + '<div style="font-size:.6rem;font-weight:800;color:var(--muted);letter-spacing:.06em;margin-bottom:6px">📈 近 30 天分數走勢</div>'
+      + '<svg width="' + W + '" height="' + H + '" viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;display:block">'
+      + '<polyline points="' + polyline + '" fill="none" stroke="var(--gold)" stroke-width="2" stroke-linejoin="round" stroke-linecap="round" opacity=".7"/>'
+      + '<circle cx="' + lastPt[0] + '" cy="' + lastPt[1] + '" r="4" fill="' + lastColor + '"/>'
+      + '</svg>'
+      + '<div style="display:flex;justify-content:space-between;font-size:.58rem;color:var(--muted);margin-top:2px">'
+      + '<span>' + recent[0].date + '</span><span>' + recent[recent.length-1].date + '</span>'
+      + '</div>'
+      + '</div>';
+  }
+
+  // C-1: 四段分數顏色
+  function scoreColor(t) {
+    if (t >= 90) return '#C9904A';
+    if (t >= 80) return '#4CAF50';
+    if (t >= 70) return '#9E9E9E';
+    return '#FF9800';
+  }
+
+  el.innerHTML = sparkHtml + records.map(function(r) {
+    var sc = scoreColor(r.total);
     return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">'
       + '<div>'
       + '<div style="font-size:.65rem;color:var(--muted);margin-bottom:3px">' + r.date + '</div>'
@@ -7840,7 +7959,7 @@ function renderScoringHistory() {
       + '色彩 ' + r.color + ' · 版型 ' + r.silhouette + ' · 場合 ' + r.occasion + ' · 風格 ' + r.style
       + '</div>'
       + '</div>'
-      + '<div style="font-family:Inter;font-weight:900;font-size:1.6rem;color:' + scoreColor + '">' + r.total + '</div>'
+      + '<div style="font-family:Inter;font-weight:900;font-size:1.6rem;color:' + sc + '">' + r.total + '</div>'
       + '</div>';
   }).join('');
 }
