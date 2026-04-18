@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-39 · AI 智能穿搭</title>
+<title>Fitto VG-40 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -737,7 +737,7 @@ body{background:var(--bg);color:var(--ink);}
 </svg>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-39</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-40</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1201,7 +1201,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-39 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-40 · 2026.04</div>
   </div>
 </div>
 
@@ -1463,7 +1463,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-39 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-40 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -5096,13 +5096,7 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
     }
 
     // #26c: 五格 slot — 上衣 / 褲子 / 外套 / 鞋子 / 配件
-    var slotsHtml = '<div style="background:#EDE8DE;border-radius:10px;padding:8px 10px;margin-bottom:8px;flex:1">'
-      + renderSlotRow('👕', '上衣', slots.top)
-      + renderSlotRow('👖', btmLabel, slots.btm)
-      + renderSlotRow('🧥', '外套', slots.out)
-      + renderSlotRow('👟', '鞋子', slots.shoe)
-      + renderSlotRow('💍', '配件', slots.acc)
-      + '</div>';
+    var slotsHtml = '<div class="dc-slots" style="background:#EDE8DE;border-radius:10px;padding:8px 10px;margin-bottom:8px;flex:1">'      + '<div class="dc-slot" data-slot="top">'  + renderSlotRow('👕', '上衣', slots.top)  + '</div>'      + '<div class="dc-slot" data-slot="btm">'  + renderSlotRow('👖', btmLabel, slots.btm)  + '</div>'      + '<div class="dc-slot" data-slot="out">'  + renderSlotRow('🧥', '外套', slots.out)  + '</div>'      + '<div class="dc-slot" data-slot="shoe">' + renderSlotRow('👟', '鞋子', slots.shoe) + '</div>'      + '<div class="dc-slot" data-slot="acc">'  + renderSlotRow('💍', '配件', slots.acc)  + '</div>'      + '</div>';
     const aiRecItems = (d.recommend||'').split(/[,，、]/).map(function(s){ return s.trim(); }).filter(function(s){ return s.length >= 2; }).map(function(name) {
       // 若名稱末尾缺少類型關鍵字，嘗試從 ALL_TYPE_KW 補全
       var hasKw = ALL_TYPE_KW.some(function(k){ return name.indexOf(k) !== -1; });
@@ -5142,7 +5136,6 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
       <div class="dn">${d.day}</div>
       ${slotsHtml}
       <div class="dt">${d.tip}</div>
-      ${buyHtml}
       <div class="img-box" id="imgbox-${idx}" style="margin-top:auto">
         <button class="btn-gen-img" onclick="genImgSafe(${idx})">
           🎨 生成示意圖 (-2<svg width="13" height="13" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-left:1px"><defs><radialGradient id="gc-genb${idx}" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#F5D97A"/><stop offset="40%" stop-color="#C9A550"/><stop offset="100%" stop-color="#7A5E1A"/></radialGradient><radialGradient id="gc-genf${idx}" cx="42%" cy="30%" r="60%"><stop offset="0%" stop-color="#F7E090"/><stop offset="60%" stop-color="#C9A550"/><stop offset="100%" stop-color="#9A7030"/></radialGradient><radialGradient id="gc-geni${idx}" cx="40%" cy="35%" r="55%"><stop offset="0%" stop-color="#F0D870"/><stop offset="100%" stop-color="#B8922A"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gc-genb${idx})"/><circle cx="32" cy="32" r="24" fill="url(#gc-genf${idx})"/><circle cx="32" cy="32" r="20" fill="url(#gc-geni${idx})"/><rect x="20" y="37.5" width="24" height="4" rx="1.5" fill="#FFF0B0"/><path d="M20 38 L20 30 L25 35 L32 24 L39 35 L44 30 L44 38 Z" fill="#FFF0B0"/></svg>)
@@ -5150,6 +5143,17 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
       </div>
     </div>`;
   }).join('');
+
+  // ── #57 對齊各天同類別 slot 高度 ──
+  requestAnimationFrame(function() {
+    var slots = ['top','btm','out','shoe','acc'];
+    slots.forEach(function(s) {
+      var els = document.querySelectorAll('#wscroll .dc-slot[data-slot="' + s + '"]');
+      var maxH = 0;
+      els.forEach(function(el) { el.style.height = ''; maxH = Math.max(maxH, el.offsetHeight); });
+      els.forEach(function(el) { el.style.height = maxH + 'px'; });
+    });
+  });
 
   // overall_note + 配件推薦卡
   const onoteEl = document.getElementById('onote');
@@ -6597,7 +6601,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-39<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-40<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6621,7 +6625,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-39',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-40',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -7226,7 +7230,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-39)
+// 穿搭評分功能 (VG-40)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
