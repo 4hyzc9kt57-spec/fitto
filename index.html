@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-37 · AI 智能穿搭</title>
+<title>Fitto VG-38 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -737,7 +737,7 @@ body{background:var(--bg);color:var(--ink);}
 </svg>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-37</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-38</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1201,7 +1201,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-37 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-38 · 2026.04</div>
   </div>
 </div>
 
@@ -1463,7 +1463,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-37 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-38 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -4365,10 +4365,20 @@ async function requestWeekPlanJson(prompt) {
   }
   throw lastError || new Error('Gemini 回應不完整');
 }
-async function requestSingleDayPlan(basePrompt, dayLabel, usedOutfits) {
-  const avoidText = usedOutfits && usedOutfits.length
-    ? `\n前面已使用的搭配：${usedOutfits.join('；')}\n今天必須和前面不同，至少更換主要上衣、下身或外套中的一項，不要重複相同組合。`
-    : '';
+async function requestSingleDayPlan(basePrompt, dayLabel, usedItems) {
+  // #52 支援新格式（物件）與舊格式（陣列）兼容
+  let avoidText = '';
+  if(usedItems) {
+    if(Array.isArray(usedItems) && usedItems.length) {
+      avoidText = `\n前面已使用的搭配：${usedItems.join('；')}\n今天必須和前面不同，至少更換主要上衣、下身或外套中的一項，不要重複相同組合。`;
+    } else if(usedItems.all && usedItems.all.length) {
+      const lines = [];
+      if(usedItems.tops.length)  lines.push('上衣類已用：' + usedItems.tops.join('、'));
+      if(usedItems.btms.length)  lines.push('下身類已用：' + usedItems.btms.join('、'));
+      if(usedItems.shoes.length) lines.push('鞋類已用：'   + usedItems.shoes.join('、'));
+      avoidText = `\n【本週已使用單品】\n${lines.join('\n')}\n⚠️ 以上每件單品本週不可重複出現，各類別必須選用不同單品。`;
+    }
+  }
   const accNames = selectedAccs.map(id=>{ const a=ACC_SHOP_ITEMS.find(x=>x.id===id); return a?a.name:''; }).filter(Boolean);
   const accRule = accNames.length ? `\n⚠️ 必須在 outfit 中帶入以下配件（全部都要寫進去）：${accNames.join('、')}` : '';
   const prompt = `${basePrompt}${avoidText}${accRule}
@@ -4513,11 +4523,30 @@ function parseSingleDayFallback(raw, dayLabel) {
 async function requestWeekPlanByDays(basePrompt, isWeekend) {
   const dayLabels = isWeekend ? ['週六','週日'] : ['週一','週二','週三','週四','週五'];
   const days = [];
+  // #52 拆解已用單品分類清單，讓 AI 精確避開
+  const TOP_KW_CHK  = ['上衣','T恤','襯衫','毛衣','背心'];
+  const BTM_KW_CHK  = ['褲子','牛仔褲','裙子','洋裝','短褲','長褲'];
+  const SHOE_KW_CHK = ['鞋子','球鞋','皮鞋','靴子','涼鞋','休閒鞋','運動鞋','板鞋','帆布鞋'];
+  function extractUsedByCategory(daysList) {
+    const all = [], tops = [], btms = [], shoes = [];
+    daysList.forEach(function(d) {
+      if(!d.outfit) return;
+      d.outfit.split(/[＋+]/).forEach(function(part) {
+        const p = part.trim();
+        if(!p) return;
+        all.push(p);
+        if(TOP_KW_CHK.some(k=>p.indexOf(k)!==-1)) tops.push(p);
+        else if(BTM_KW_CHK.some(k=>p.indexOf(k)!==-1)) btms.push(p);
+        else if(SHOE_KW_CHK.some(k=>p.indexOf(k)!==-1)) shoes.push(p);
+      });
+    });
+    return { all, tops, btms, shoes };
+  }
   for(let i = 0; i < dayLabels.length; i++) {
     const dayLabel = dayLabels[i];
     apiLog('→ 分日生成: ' + dayLabel, 'info');
-    const usedOutfits = days.map(function(item){ return item.outfit; }).filter(Boolean);
-    days.push(await requestSingleDayPlan(basePrompt, dayLabel, usedOutfits));
+    const used = extractUsedByCategory(days);
+    days.push(await requestSingleDayPlan(basePrompt, dayLabel, used));
   }
   return {
     title: isWeekend ? '週末搭配' : '本週搭配',
@@ -4619,10 +4648,35 @@ async function genOutfit(){
   } catch(e) { /* 收藏讀取失敗不影響主流程 */ }
 
   const prompt=`你是一位擁有十年經驗的專業服裝設計師，擅長色彩搭配、材質協調與風格整合。衣櫃清單：${wj}${wardrobeProfileSection}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合規劃工作日搭配，每天考慮以下要素：\n1. 色系協調性（主色與配色的搭配邏輯）\n2. 材質相容性（避免材質風格衝突）\n3. 場合適合度（日常／工作／約會）\n4. 整體風格一致性\n5. ⚠️ 每天的上衣必須不同，同一件單品整週只能出現一次${trendSection}${accText ? '\n' + accText : ''}${recentExcludeSection}\n請優先挑選衣櫃裡明確存在的單品名稱與顏色，不要虛構新品。回覆要精簡。`;
+  // ── #53 不足類別偵測 ──
+  const TOPS_T  = ['上衣','T恤','襯衫','毛衣','背心'];
+  const BTMS_T  = ['褲子','牛仔褲','裙子','洋裝','短褲','長褲'];
+  const SHOES_T = ['鞋子','球鞋','皮鞋','靴子','涼鞋','休閒鞋','運動鞋','板鞋','帆布鞋'];
+  const topsW   = wardrobe.filter(i=>TOPS_T.includes(i.type));
+  const btmsW   = wardrobe.filter(i=>BTMS_T.includes(i.type));
+  const shoesW  = wardrobe.filter(i=>SHOES_T.includes(i.type));
+  const insuffTypes = [];
+  if(topsW.length  < 3) insuffTypes.push({cat:'上衣',  label:'上衣類'});
+  if(btmsW.length  < 3) insuffTypes.push({cat:'下身',  label:'下身（褲子／裙子）類'});
+  if(shoesW.length < 3) insuffTypes.push({cat:'鞋子',  label:'鞋類'});
+
   try{
     const isWeekend = occ.indexOf('週末') !== -1;
     const parsed = await requestWeekPlanByDays(prompt, isWeekend);
     parsed.overall_note = trendContext ? '已結合當季潮流與衣櫃現有單品逐日整理。' : '已依衣櫃現有單品逐日整理。';
+
+    // ── #53 不足時 AI 推薦補充單品 ──
+    if(insuffTypes.length > 0) {
+      const seaClean2 = sea.replace(/[🌸☀️🍂❄️]\s*/,'');
+      const insuffLabels = insuffTypes.map(t=>t.label).join('、');
+      const recPrompt = `你是時尚造型師。用戶衣櫃的【${insuffLabels}】數量不足（少於3件），無法排出不重複的一週穿搭。請針對每個不足類別，推薦2件適合${seaClean2}季、${occ}場合的單品。格式：每件單品一行，只寫「類別：顏色+名稱」，例如「上衣：白色棉質寬版T恤」。不要其他說明。`;
+      try {
+        const recRaw = await geminiText(recPrompt, 300);
+        const recLines = recRaw.split(/[\r\n]+/).map(s=>s.trim()).filter(s=>s.length>3 && s.indexOf('：')!==-1);
+        parsed._insuffRecs = recLines; // 掛在 parsed 物件上傳給 renderRes
+      } catch(re) { parsed._insuffRecs = []; }
+    }
+
     renderRes(parsed, 0, 0, occ, sea);
   }catch(e){
     apiLog('✗ 搭配生成失敗: ' + (e.message||'').substring(0,80), 'err');
@@ -5063,6 +5117,7 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
           var zq = encodeURIComponent(item + ' site:zara.com/tw');
           return '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:3px">'
             + '<span style="font-size:.6rem;color:var(--ink2);font-weight:600;min-width:0;flex-shrink:1">' + item + '</span>'
+            + '<a href="https://shopee.tw/search?keyword=' + encodeURIComponent(item) + '" target="_blank" style="font-size:.54rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#EE4D2D,#F87040);border-radius:4px;padding:2px 6px;font-weight:700;white-space:nowrap">蝦皮</a>'
             + '<a href="https://www.google.com/search?q=' + uq + '&tbm=shop" target="_blank" style="font-size:.54rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#5C6C7C,#8898A8);border-radius:4px;padding:2px 6px;font-weight:700;white-space:nowrap">UNIQLO</a>'
             + '<a href="https://www.google.com/search?q=' + mq + '&tbm=shop" target="_blank" style="font-size:.54rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#6A5B4B,#8B7A66);border-radius:4px;padding:2px 6px;font-weight:700;white-space:nowrap">MUJI</a>'
             + '<a href="https://www.google.com/search?q=' + zq + '&tbm=shop" target="_blank" style="font-size:.54rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#2C2C2C,#555);border-radius:4px;padding:2px 6px;font-weight:700;white-space:nowrap">ZARA</a>'
@@ -5070,11 +5125,31 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
           + '</div>';
         }).join('')
       + '</div>' : '';
+
+    // ── #53 衣櫃不足補充推薦區塊 ──
+    let insuffHtml = '';
+    if(r._insuffRecs && r._insuffRecs.length) {
+      insuffHtml = '<div style="margin-top:6px;padding:6px 8px;background:rgba(76,120,175,.07);border:1px solid rgba(76,120,175,.25);border-radius:8px">'
+        + '<div style="font-size:.52rem;color:#5B8FD4;font-weight:800;margin-bottom:4px">👗 衣櫃不足，建議補充</div>'
+        + r._insuffRecs.map(function(line){
+            var name = line.indexOf('：')!==-1 ? line.split('：')[1].trim() : line.trim();
+            var q  = encodeURIComponent(name + ' 購買');
+            var sq = encodeURIComponent(name);
+            return '<div style="display:flex;align-items:center;gap:4px;flex-wrap:wrap;margin-bottom:3px">'
+              + '<span style="font-size:.6rem;color:var(--ink2);font-weight:600;min-width:0;flex-shrink:1">' + name + '</span>'
+              + '<a href="https://shopee.tw/search?keyword=' + sq + '" target="_blank" style="font-size:.54rem;color:#FAF7F2;text-decoration:none;background:linear-gradient(135deg,#EE4D2D,#F87040);border-radius:4px;padding:2px 6px;font-weight:700;white-space:nowrap">蝦皮</a>'
+              + '<a href="https://www.google.com/search?q=' + q + '&tbm=shop" target="_blank" style="font-size:.54rem;color:var(--gold);text-decoration:none;background:rgba(200,160,80,.15);border-radius:4px;padding:2px 6px;font-weight:700;white-space:nowrap">Google</a>'
+              + '</div>';
+          }).join('')
+        + '</div>';
+    }
+
     return `<div class="dc" id="dc-${idx}">
       <div class="dn">${d.day}</div>
       ${slotsHtml}
       <div class="dt">${d.tip}</div>
       ${buyHtml}
+      ${insuffHtml}
       <div class="img-box" id="imgbox-${idx}" style="margin-top:auto">
         <button class="btn-gen-img" onclick="genImgSafe(${idx})">
           🎨 生成示意圖 (-2<svg width="13" height="13" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg" style="vertical-align:middle;margin-left:1px"><defs><radialGradient id="gc-genb${idx}" cx="38%" cy="32%" r="65%"><stop offset="0%" stop-color="#F5D97A"/><stop offset="40%" stop-color="#C9A550"/><stop offset="100%" stop-color="#7A5E1A"/></radialGradient><radialGradient id="gc-genf${idx}" cx="42%" cy="30%" r="60%"><stop offset="0%" stop-color="#F7E090"/><stop offset="60%" stop-color="#C9A550"/><stop offset="100%" stop-color="#9A7030"/></radialGradient><radialGradient id="gc-geni${idx}" cx="40%" cy="35%" r="55%"><stop offset="0%" stop-color="#F0D870"/><stop offset="100%" stop-color="#B8922A"/></radialGradient></defs><circle cx="32" cy="32" r="30" fill="url(#gc-genb${idx})"/><circle cx="32" cy="32" r="24" fill="url(#gc-genf${idx})"/><circle cx="32" cy="32" r="20" fill="url(#gc-geni${idx})"/><rect x="20" y="37.5" width="24" height="4" rx="1.5" fill="#FFF0B0"/><path d="M20 38 L20 30 L25 35 L32 24 L39 35 L44 30 L44 38 Z" fill="#FFF0B0"/></svg>)
@@ -6529,7 +6604,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-37<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-38<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6553,7 +6628,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-37',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-38',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -7158,7 +7233,7 @@ document.addEventListener('DOMContentLoaded', function() {
 });
 
 // ═══════════════════════════════════════
-// 穿搭評分功能 (VG-37)
+// 穿搭評分功能 (VG-38)
 // ═══════════════════════════════════════
 
 var _scoringImageB64 = null;
