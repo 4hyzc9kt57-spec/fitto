@@ -4520,7 +4520,7 @@ function parseSingleDayFallback(raw, dayLabel) {
 
   throw new Error(`${dayLabel} 有回應但格式不是系統需要的文字格式`);
 }
-async function requestWeekPlanByDays(basePrompt, isWeekend) {
+async function requestWeekPlanByDays(basePrompt, isWeekend, seaLabel) {
   const dayLabels = isWeekend ? ['週六','週日'] : ['週一','週二','週三','週四','週五'];
   const days = [];
   // #52 拆解已用單品分類清單，讓 AI 精確避開
@@ -4548,10 +4548,47 @@ async function requestWeekPlanByDays(basePrompt, isWeekend) {
     const used = extractUsedByCategory(days);
     days.push(await requestSingleDayPlan(basePrompt, dayLabel, used));
   }
+
+  // ── #55 JS 驗證重複單品，AI 重新規劃當天 ──
+  const seaClean55 = (seaLabel||'').replace(/[🌸☀️🍂❄️]\s*/,'');
+  function getCategory55(part) {
+    if(TOP_KW_CHK.some(k=>part.indexOf(k)!==-1))  return 'top';
+    if(BTM_KW_CHK.some(k=>part.indexOf(k)!==-1))  return 'btm';
+    if(SHOE_KW_CHK.some(k=>part.indexOf(k)!==-1)) return 'shoe';
+    return 'other';
+  }
+  const usedMap = { top:{}, btm:{}, shoe:{} };
+  const dupDays = new Set();
+  days.forEach(function(d, di) {
+    (d.outfit||'').split(/[＋+]/).forEach(function(part) {
+      const p = part.trim(); if(!p) return;
+      const cat = getCategory55(p);
+      if(cat === 'other') return;
+      if(!usedMap[cat][p]) usedMap[cat][p] = [];
+      usedMap[cat][p].push(di);
+      if(usedMap[cat][p].length > 1) dupDays.add(di);
+    });
+  });
+  let overallNote = '已依衣櫃現有單品逐日整理。';
+  if(dupDays.size > 0) {
+    const allUsed = [];
+    Object.keys(usedMap).forEach(function(cat){ Object.keys(usedMap[cat]).forEach(function(p){ allUsed.push(p); }); });
+    for(const di of dupDays) {
+      const d = days[di];
+      apiLog('→ #55 重複偵測，重新規劃: ' + d.day, 'info');
+      const replanPrompt = `${basePrompt}\n【本週其他天已用單品（不可重複）】\n${allUsed.join('、')}\n⚠️ 以上單品一律不可出現在今天的搭配中。\n請結合${seaClean55}季當季潮流，為【${d.day}】重新規劃一套搭配。衣櫃有的單品優先使用，衣櫃不足可自由補全（補全單品寫入 recommend 欄位）。`;
+      try {
+        const replan = await requestSingleDayPlan(replanPrompt, d.day, null);
+        days[di] = replan;
+      } catch(re) { /* 重新規劃失敗保留原搭配 */ }
+    }
+    overallNote = '已結合當季潮流重新規劃重複搭配。';
+  }
+
   return {
     title: isWeekend ? '週末搭配' : '本週搭配',
     days: days,
-    overall_note: '已依衣櫃現有單品逐日整理。'
+    overall_note: overallNote
   };
 }
 
@@ -4650,49 +4687,8 @@ async function genOutfit(){
   const prompt=`你是一位擁有十年經驗的專業服裝設計師，擅長色彩搭配、材質協調與風格整合。衣櫃清單：${wj}${wardrobeProfileSection}\n請只使用衣櫃內現有單品，為${sea.replace(/[🌸☀️🍂❄️]\s*/,'')}季、${occ}場合規劃工作日搭配，每天考慮以下要素：\n1. 色系協調性（主色與配色的搭配邏輯）\n2. 材質相容性（避免材質風格衝突）\n3. 場合適合度（日常／工作／約會）\n4. 整體風格一致性\n5. ⚠️ 每天的上衣必須不同，同一件單品整週只能出現一次${trendSection}${accText ? '\n' + accText : ''}${recentExcludeSection}\n請優先挑選衣櫃裡明確存在的單品名稱與顏色，不要虛構新品。回覆要精簡。`;
   try{
     const isWeekend = occ.indexOf('週末') !== -1;
-    const parsed = await requestWeekPlanByDays(prompt, isWeekend);
-    parsed.overall_note = trendContext ? '已結合當季潮流與衣櫃現有單品逐日整理。' : '已依衣櫃現有單品逐日整理。';
-
-    // ── #55 JS 驗證重複單品，AI 重新規劃當天 ──
-    const TOP_KW_V  = ['上衣','T恤','襯衫','毛衣','背心'];
-    const BTM_KW_V  = ['褲子','牛仔褲','裙子','洋裝','短褲','長褲'];
-    const SHOE_KW_V = ['鞋子','球鞋','皮鞋','靴子','涼鞋','休閒鞋','運動鞋','板鞋','帆布鞋'];
-    function getCategory(part) {
-      if(TOP_KW_V.some(k=>part.indexOf(k)!==-1))  return 'top';
-      if(BTM_KW_V.some(k=>part.indexOf(k)!==-1))  return 'btm';
-      if(SHOE_KW_V.some(k=>part.indexOf(k)!==-1)) return 'shoe';
-      return 'other';
-    }
-    // 收集各天各類別已用單品
-    const usedMap = { top:{}, btm:{}, shoe:{} };
-    const dupDays = new Set();
-    (parsed.days||[]).forEach(function(d, di) {
-      (d.outfit||'').split(/[＋+]/).forEach(function(part) {
-        const p = part.trim(); if(!p) return;
-        const cat = getCategory(p);
-        if(cat === 'other') return;
-        if(!usedMap[cat][p]) usedMap[cat][p] = [];
-        usedMap[cat][p].push(di);
-        if(usedMap[cat][p].length > 1) dupDays.add(di);
-      });
-    });
-    // 對重複的天重新呼叫 AI
-    if(dupDays.size > 0) {
-      const seaClean2 = sea.replace(/[🌸☀️🍂❄️]\s*/,'');
-      const allUsed = [];
-      Object.keys(usedMap).forEach(function(cat){ Object.keys(usedMap[cat]).forEach(function(p){ allUsed.push(p); }); });
-      for(const di of dupDays) {
-        const d = parsed.days[di];
-        apiLog('→ #55 重複偵測，重新規劃: ' + d.day, 'info');
-        const replanPrompt = `${basePrompt}\n【本週其他天已用單品（不可重複）】\n${allUsed.join('、')}\n⚠️ 以上單品一律不可出現在今天的搭配中。\n請結合${seaClean2}季當季潮流，為【${d.day}】重新規劃一套搭配。衣櫃有的單品優先使用，衣櫃不足可自由補全（補全單品寫入 recommend 欄位）。`;
-        try {
-          const replan = await requestSingleDayPlan(replanPrompt, d.day, null);
-          parsed.days[di] = replan;
-        } catch(re) { /* 重新規劃失敗保留原搭配 */ }
-      }
-      parsed.overall_note = '已結合當季潮流重新規劃重複搭配。';
-    }
-
+    const parsed = await requestWeekPlanByDays(prompt, isWeekend, sea);
+    if(trendContext) parsed.overall_note = '已結合當季潮流與衣櫃現有單品逐日整理。';
     renderRes(parsed, 0, 0, occ, sea);
   }catch(e){
     apiLog('✗ 搭配生成失敗: ' + (e.message||'').substring(0,80), 'err');
