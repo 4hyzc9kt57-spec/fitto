@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-42a · AI 智能穿搭</title>
+<title>Fitto VG-42b · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -166,7 +166,7 @@ header{
 .t-green{background:var(--tag-green-bg);color:var(--tag-green)}
 .t-gold{background:var(--tag-gold-bg);color:var(--tag-gold)}
 .t-blue{background:var(--tag-blue-bg);color:var(--tag-blue)}
-.t-muted{background:var(--surface3);color:var(--ink2)}
+.t-muted{background:var(--surface3);color:var(--ink2);white-space:normal;word-break:break-word;max-width:100%}
 
 .btn-del-c,.btn-edit-c{
   position:absolute;top:6px;width:24px;height:24px;border-radius:50%;
@@ -737,7 +737,7 @@ body{background:var(--bg);color:var(--ink);}
 </svg>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-42a</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-42b</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1214,7 +1214,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-42a · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-42b · 2026.04</div>
   </div>
 </div>
 
@@ -1476,7 +1476,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-42a · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-42b · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -2709,7 +2709,7 @@ async function geminiVisionScan(b64, mime) {
   var parts = (((d.candidates||[])[0]||{}).content||{}).parts||[];
   var textPart = parts.find(p=>typeof p.text==='string');
   var raw = textPart ? textPart.text.trim() : '';
-  apiLog('  掃描原文: ' + raw.substring(0,100).replace(/\n/g,' '), 'info');
+  apiLog('  掃描原文: ' + raw.substring(0,500).replace(/\n/g,' '), 'info');
   return raw;
 }
 
@@ -2853,7 +2853,16 @@ function renderW(){
       const imgHtml=i.hasPhoto&&i.thumb
         ? '<img src="'+i.thumb+'" style="width:100%;height:100%;object-fit:cover">'
         : em;
-      const noteTag=i.note ? '<span class="ctag t-muted">'+i.note+'</span>' : '';
+      // VG-42b Fix 2A: note 去除與 style 重複的詞（避免「休閒」在風格 tag 顯示過又出現在備註）
+      var cleanNote = (i.note||'').trim();
+      if(cleanNote && i.style) {
+        // 把 note 以逗號/頓號/空格拆分，過濾掉與 style 相同的詞
+        var parts = cleanNote.split(/[,，、]\s*/).map(function(p){return p.trim();}).filter(function(p){
+          return p && p !== i.style && !(p.length <= 2 && i.style.indexOf(p) >= 0);
+        });
+        cleanNote = parts.join('、');
+      }
+      const noteTag=cleanNote ? '<span class="ctag t-muted">'+cleanNote+'</span>' : '';
       card.innerHTML=
         '<div class="ci" style="background:'+bg+'">'+imgHtml+'<div class="ci-overlay"></div></div>'+
         '<div class="cb">'+
@@ -3169,7 +3178,22 @@ async function aiScanAndAppend() {
   }
   const raw = await geminiVisionScan(scanB64, scanMime);
   let items = parseMultiScanItems(raw);
-  if(items.length <= 1) {
+  // VG-42b Fix 5: 單件特寫照（長寬比 < 1.4）且已辨識出 1 件則直接接受
+  if(items.length === 1) {
+    try {
+      const aspect = await new Promise(function(resolve){
+        const img = new Image();
+        img.onload = function(){ resolve(img.height / img.width); };
+        img.onerror = function(){ resolve(1.5); };
+        img.src = 'data:' + (scanMime||'image/jpeg') + ';base64,' + scanB64;
+      });
+      if(aspect < 1.4) {
+        // 單件特寫，接受 1 件不 fallback
+      } else {
+        try { items = await fallbackMultiScanItems(); } catch(ex) {}
+      }
+    } catch(e) {}
+  } else if(items.length === 0) {
     try {
       items = await fallbackMultiScanItems();
     } catch(ex) {}
@@ -3178,7 +3202,7 @@ async function aiScanAndAppend() {
     items = [{type:'上衣',color:'白色',style:'休閒',note:'辨識失敗',backPrint:false}];
   }
   items = items.map(i=>({
-    type: i.type||'上衣', color: i.color||'白色', style: i.style||'休閒',
+    type: i.type||'上衣', color: normalizeColor(i.color), style: i.style||'休閒',
     material: i.material||'', fit: i.fit||'', note: i.note||'', placement: i.placement||'', backPrint: !!i.backPrint,
     imgPrompt: i.imgPrompt||''
   }));
@@ -3283,9 +3307,30 @@ async function aiScan(){
   }
   try{
     const raw = await geminiVisionScan(scanB64, scanMime);
-    apiLog('  辨識原文: ' + raw.substring(0,120).replace(/\n/g,' '), 'info');
+    apiLog('  辨識原文: ' + raw.substring(0,500).replace(/\n/g,' '), 'info');
     let items = parseMultiScanItems(raw);
-    if(items.length <= 1) {
+    // VG-42b Fix 5: retry 加長寬比啟發式。單件特寫照（長寬比 < 1.4）即使只回 1 件也直接接受，省 API 成本
+    const shouldRetry = await (async function(){
+      if(items.length > 1) return false; // 已多件，不需 retry
+      if(items.length === 0) return true; // 完全失敗，必須 retry
+      // 只回 1 件：看長寬比決定
+      try {
+        const aspect = await new Promise(function(resolve){
+          const img = new Image();
+          img.onload = function(){ resolve(img.height / img.width); };
+          img.onerror = function(){ resolve(1.5); }; // 讀不到當作長圖，走保險路線
+          img.src = 'data:' + (scanMime||'image/jpeg') + ';base64,' + scanB64;
+        });
+        if(aspect >= 1.4) {
+          apiLog('  長寬比 ' + aspect.toFixed(2) + '（全身照），啟動 retry', 'info');
+          return true;
+        } else {
+          apiLog('  長寬比 ' + aspect.toFixed(2) + '（單件特寫），接受 1 件結果', 'info');
+          return false;
+        }
+      } catch(e) { return true; }
+    })();
+    if(shouldRetry && items.length <= 1) {
       apiLog('  結果不足，retry中…', 'info');
       try {
         const raw2 = await geminiVisionScan(scanB64, scanMime);
@@ -3293,7 +3338,7 @@ async function aiScan(){
         if(items2.length > items.length) items = items2;
       } catch(e) {}
     }
-    if(items.length <= 1) {
+    if(shouldRetry && items.length <= 1) {
       apiLog('  啟動文字備援', 'info');
       try { items = await fallbackMultiScanItems(); } catch(e) {}
     }
@@ -3308,7 +3353,7 @@ async function aiScan(){
     // 正規化每件 — 保留細分種類名稱，加入 placement、box_2d
     items = items.map(i=>({
       type: i.type||'上衣',
-      color: i.color||'白色',
+      color: normalizeColor(i.color),
       style: i.style||'休閒',
       material: i.material||'',
       fit: i.fit||'',
@@ -3389,6 +3434,36 @@ const TYPE_OPTIONS = ['上衣','T恤','襯衫','毛衣','外套','夾克','褲�
 const COLOR_OPTIONS = ['白色','米白','淺灰','灰色','深灰','黑色','淺藍','深藍','卡其','棕色','紅色','酒紅','粉色','綠色','橄欖綠','花紋/條紋'];
 const STYLE_OPTIONS = ['休閒','正式','商務','運動','韓系','簡約','街頭'];
 
+// VG-42b Fix 1: normalize AI 回傳的顏色到 COLOR_OPTIONS，處理「卡其」↔「卡其色」等變體
+function normalizeColor(c) {
+  if(!c) return '白色';
+  const s = String(c).trim();
+  if(COLOR_OPTIONS.includes(s)) return s;
+  // 去掉「色」字後再比對
+  const noSuffix = s.replace(/色$/, '');
+  for(const opt of COLOR_OPTIONS) {
+    const optNoSuffix = opt.replace(/色$/, '');
+    if(optNoSuffix === noSuffix || opt === noSuffix + '色') return opt;
+  }
+  // fuzzy：互相包含
+  for(const opt of COLOR_OPTIONS) {
+    const optNoSuffix = opt.replace(/色$/, '');
+    if(s.includes(optNoSuffix) || optNoSuffix.includes(noSuffix)) return opt;
+  }
+  // 常見同義詞
+  const synonyms = {'沙':'卡其','米色':'米白','象牙':'米白','咖啡':'棕色','咖啡色':'棕色','海軍':'深藍','駝':'卡其','駝色':'卡其','藏青':'深藍'};
+  if(synonyms[s]) return synonyms[s];
+  return '白色';
+}
+// VG-42b Fix 1: 組 prompt 時自動補「色」字尾（避免 normalize 後的「卡其」出現在 prompt 中）
+function colorForPrompt(c) {
+  if(!c) return '白色';
+  const s = String(c).trim();
+  if(/[色紅白灰藍綠黑黃橘紫粉棕黃]$/.test(s)) return s;
+  if(s === '花紋/條紋') return s;
+  return s + '色';
+}
+
 function buildItemImgPrompt(item, avatarDesc) {
   // 衣物類型分組
   const isAcc = /帽|包|鞋|靴|涼鞋|墨鏡|圍巾|項鍊|手環|手錶|手鍊|腰帶|絲巾|領帶|胸針|耳環|戒指/.test(item.type);
@@ -3409,11 +3484,12 @@ function buildItemImgPrompt(item, avatarDesc) {
   }
 
   const poseDesc = item.backPrint ? BACK_POSE : POSES[0];
-  const itemFullDesc = `${item.color} ${item.type}${item.note ? '，' + item.note : ''}（風格：${item.style}）${isShorts ? '，very short hemline, micro-length, above mid-thigh, trendy streetwear cut' : ''}`;
+  const colorStr = colorForPrompt(item.color);
+  const itemFullDesc = `${colorStr} ${item.type}${item.note ? '，' + item.note : ''}（風格：${item.style}）${isShorts ? '，very short hemline, micro-length, above mid-thigh, trendy streetwear cut' : ''}`;
 
   let prompt;
   if(isAcc) {
-    prompt = `High-end fashion magazine photo. ${avatarDesc||'Asian person'}. Pose: ${poseDesc}. The person is wearing a ${item.color} ${item.type}${item.note?', '+item.note:''}. Accessory placement: ${placementNote}. The ${item.type} must be prominently and clearly visible in the photo. Clean minimal studio background, professional lighting, full body shot, sharp focus on the accessory, Vogue-quality photography, 4K.`;
+    prompt = `High-end fashion magazine photo. ${avatarDesc||'Asian person'}. Pose: ${poseDesc}. The person is wearing a ${colorStr} ${item.type}${item.note?', '+item.note:''}. Accessory placement: ${placementNote}. The ${item.type} must be prominently and clearly visible in the photo. Clean minimal studio background, professional lighting, full body shot, sharp focus on the accessory, Vogue-quality photography, 4K.`;
   } else {
     prompt = `High-end fashion magazine editorial photo. ${avatarDesc||'Asian person'}. Pose: ${poseDesc}. Outfit: ${itemFullDesc}. ${item.backPrint?'Show back of garment clearly with graphic print visible.':''} Clean minimal background, professional studio lighting, sharp focus on clothing, full body front view, Vogue-quality photography, 4K detail.`;
   }
@@ -3426,7 +3502,7 @@ function buildItemImgPromptFromAI(item, avatarDesc) {
   const aiDesc = item.aiItemPrompt || '';
   const fullDesc = aiDesc
     ? aiDesc
-    : `${item.color} ${item.type}${item.note ? ', ' + item.note : ''}`;
+    : `${colorForPrompt(item.color)} ${item.type}${item.note ? ', ' + item.note : ''}`;
   return `High-end fashion magazine editorial photo. ${avatarDesc||'Asian person'}. Pose: ${poseDesc}. Outfit: ${fullDesc}. ${item.backPrint?'Show back of garment clearly with graphic print visible.':''} Clean minimal background, professional studio lighting, sharp focus on clothing, full body front view, Vogue-quality photography, 4K detail.`;
 }
 
@@ -5287,20 +5363,50 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
     '秋': [{n:'皮革托特包',q:'leather tote bag 2026'},{n:'踝靴',q:'ankle boots autumn 2026'},{n:'棒球帽',q:'baseball cap 2026'},{n:'針織圍巾',q:'knit scarf autumn 2026'},{n:'麂皮樂福鞋',q:'suede loafers 2026'},{n:'皮革腰帶',q:'leather belt autumn 2026'}],
     '冬': [{n:'羊毛圍巾',q:'wool scarf 2026'},{n:'切爾西靴',q:'chelsea boots 2026'},{n:'迷你包',q:'mini bag winter 2026'},{n:'皮革手套',q:'leather gloves winter 2026'},{n:'毛帽',q:'beanie winter 2026'},{n:'厚底靴',q:'chunky boots 2026'}],
   };
-  // 每次隨機取 3 個，避免每次都一樣
+  // 每次隨機取 3 個，避免每次都一樣（pool fallback）
   var _pool = (accPool[seaCleanNote] || accPool['春']).slice();
   for(var _i=_pool.length-1;_i>0;_i--){var _j=Math.floor(Math.random()*(_i+1));var _t=_pool[_i];_pool[_i]=_pool[_j];_pool[_j]=_t;}
   const accList = _pool.slice(0,3);
-  const accHtml = `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)">
-    <div style="font-size:.58rem;font-weight:800;color:var(--gold);letter-spacing:.06em;margin-bottom:5px">🛍 本季配件推薦</div>
+  const buildAccHtml = function(list, isAi){
+    return `<div style="margin-top:8px;padding-top:8px;border-top:1px solid rgba(255,255,255,.08)">
+    <div style="font-size:.58rem;font-weight:800;color:var(--gold);letter-spacing:.06em;margin-bottom:5px">🛍 本季配件推薦${isAi?' · AI 推薦':''}</div>
     <div style="display:flex;gap:6px;flex-wrap:wrap">
-      ${accList.map(a=>`<a href="https://www.google.com/search?q=${encodeURIComponent(a.q)}&tbm=shop" target="_blank" style="font-size:.6rem;color:var(--ink2);text-decoration:none;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:4px 9px;display:inline-flex;align-items:center;gap:3px">🔗 ${a.n}</a>`).join('')}
+      ${list.map(a=>`<a href="https://www.google.com/search?q=${encodeURIComponent(a.q)}&tbm=shop" target="_blank" style="font-size:.6rem;color:var(--ink2);text-decoration:none;background:var(--surface2);border:1px solid var(--border2);border-radius:6px;padding:4px 9px;display:inline-flex;align-items:center;gap:3px">🔗 ${a.n}</a>`).join('')}
     </div>
     <div style="font-size:.5rem;color:var(--muted);margin-top:4px;opacity:.6">點擊連結到 Google 選購 · 連結不含業配</div>
   </div>`;
-  onoteEl.innerHTML = `<span style="font-size:.7rem;color:var(--ink2);line-height:1.6">${baseNote}</span>${accHtml}`;
+  };
+  // 先以 pool 預設立刻渲染
+  onoteEl.innerHTML = `<span style="font-size:.7rem;color:var(--ink2);line-height:1.6">${baseNote}</span>${buildAccHtml(accList, false)}`;
   document.getElementById('rcard').classList.add('show');
   lastRes={...r,occ,sea,at:new Date().toLocaleDateString('zh-TW')};
+
+  // VG-42b Fix 2B/3: 背景呼叫 AI 動態推薦配件，成功後替換 pool 結果
+  (function(){
+    const gk = localStorage.getItem('fitto_gemini_key')||'';
+    if(!gk) return; // 無 key 就保留 pool
+    const outfitSummary = (Array.isArray(r.days) ? r.days.map(function(d){return (d.day||'')+':'+(d.outfit||'');}).join(' / ') : (r.outfit||''))
+      .toString().replace(/\n/g,' ').substring(0, 300);
+    const year = new Date().getFullYear();
+    const accPrompt = `你是時尚編輯。以下是使用者本週${seaCleanNote||'春'}季的穿搭規劃：${outfitSummary}
+請根據這個穿搭與${year}年${seaCleanNote||'春'}季當季潮流，推薦3個最適合的配件（包包/鞋/帽/墨鏡/圍巾/腰帶擇一優先）。
+只輸出 JSON 陣列格式：[{"n":"中文配件名6字內","q":"英文 Google shopping 搜尋關鍵字含 ${year}"},{"n":"...","q":"..."},{"n":"...","q":"..."}]
+不要加前言、說明、markdown。`;
+    geminiText(accPrompt, 200).then(function(raw){
+      const cleaned = String(raw||'').replace(/```json|```/gi,'').trim();
+      const m = cleaned.match(/\[[\s\S]*\]/);
+      if(!m) return;
+      try {
+        const arr = JSON.parse(m[0]);
+        if(Array.isArray(arr) && arr.length >= 1) {
+          const aiList = arr.slice(0,3).map(function(a){return {n:String(a.n||'').substring(0,12), q:String(a.q||'').substring(0,80)};}).filter(function(a){return a.n && a.q;});
+          if(aiList.length && onoteEl && document.getElementById('rcard').classList.contains('show')) {
+            onoteEl.innerHTML = `<span style="font-size:.7rem;color:var(--ink2);line-height:1.6">${baseNote}</span>${buildAccHtml(aiList, true)}`;
+          }
+        }
+      } catch(e) { /* 保留 pool 結果 */ }
+    }).catch(function(){ /* 保留 pool 結果 */ });
+  })();
 }
 
 
@@ -6722,7 +6828,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-42a<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-42b<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6746,7 +6852,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-42a',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-42b',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
