@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-42 · AI 智能穿搭</title>
+<title>Fitto VG-42a · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -737,7 +737,7 @@ body{background:var(--bg);color:var(--ink);}
 </svg>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-42</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-42a</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -916,7 +916,6 @@ body{background:var(--bg);color:var(--ink);}
       <button class="btn-save" id="bsave" onclick="saveOutfit()">🔖 收藏這週工作搭配</button>
     </div>
   </div>
-  </div><!-- /工作日旗艦大卡 wrapper -->
 
   <!-- B-2 一件變整套（原：潮流搭配） -->
   <div class="card" id="section-trend" style="margin-top:14px">
@@ -1215,7 +1214,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-42 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-42a · 2026.04</div>
   </div>
 </div>
 
@@ -1477,7 +1476,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-42 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-42a · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -2699,7 +2698,7 @@ async function geminiVisionScan(b64, mime) {
     body:JSON.stringify({
       contents:[{role:'user',parts:[{inlineData:{mimeType:mime,data:b64}},{text:prompt}]}],
       generationConfig:{
-        maxOutputTokens:1500,
+        maxOutputTokens:2500,
         temperature:0
       }
     })
@@ -3242,15 +3241,18 @@ function cropImageByBox(imgEl, bbox, maxSize) {
 }
 
 function buildScanPrompt() {
-  return `你是服裝辨識 AI，擅長精準描述服裝細節以利後續生圖使用。你的任務是列出照片中「所有可見單品」，絕對不能只列一件。
+  return `你是服裝辨識 AI，必須列出照片中「每一件可見的獨立單品」。一件單品就是一筆獨立的 JSON object，絕對不能把整張照片當成一件。
 
 強制規則（違反即錯誤）：
 1. 只要照片中看得到人的下半身，「下身單品（褲子/裙子）」必須出現在輸出中
 2. 只要照片中看得到鞋子，「鞋子」必須出現在輸出中
-3. 全身照或四分之三身照：上衣＋下身＋鞋子三筆為最低要求
+3. 全身照或四分之三身照：上衣＋下身＋鞋子三筆為最低要求。
+   ⚠️ 絕對禁止：用一個巨大的 box_2d（例如 [0,0,1000,1000] 或接近全圖範圍）把整張照片當成「一件」輸出。每件單品的 box_2d 必須緊貼該單品邊緣，互不涵蓋對方
 4. 半身照（腰部以上）：至少列出上衣，若有帽子/項鍊/外套也要列
 5. 禁止只輸出一件——即使畫面模糊，也要根據可見部分推斷並列出
-6. 每件獨立一筆，type 用細分名：T恤/牛仔褲/牛仔短褲/短褲/球鞋/皮夾克/棒球帽等。若下身為短褲，type 必須用「短褲」或「牛仔短褲」，長度寫在 note 中：超短款(hot pants/micro shorts)、中短款(mid-thigh)、膝上款(above knee)
+6. 每件獨立一筆，每筆必填 type + box_2d：
+   - type：細分名（T恤/牛仔褲/牛仔短褲/短褲/球鞋/皮夾克/棒球帽等）。若下身為短褲，type 必須用「短褲」或「牛仔短褲」，長度寫在 note 中：超短款(hot pants/micro shorts)、中短款(mid-thigh)、膝上款(above knee)
+   - box_2d：[y_min, x_min, y_max, x_max]，使用 0-1000 的整數（normalized 到照片尺寸，y 軸由上往下遞增，x 軸由左往右遞增）。必須緊貼此單品邊緣，不可框住整張或其他單品。配件（項鍊/手環/墨鏡）的 box_2d 可以是小範圍
 7. color【極重要】只能選：白色/米白/淺灰/灰色/深灰/黑色/淺藍/深藍/卡其/棕色/紅色/酒紅/粉色/綠色/橄欖綠/花紋條紋。請仔細觀察照片中的實際顏色，不要預設。若有圖案/印花則選「花紋條紋」
 8. style 只能選：休閒/正式/商務/運動/韓系/簡約/街頭
 9. material 只能選：棉/麻/牛仔/針織/皮革/雪紡/聚酯纖維/混紡/其他
@@ -3259,10 +3261,11 @@ function buildScanPrompt() {
 12. placement 穿戴位置英文（鞋子 worn on feet，帽子 worn on head）
 13. backPrint 上衣背面有大圖案則 true
 14. imgPrompt 必填：用英文詳細描述此單品，格式參考：「[color] [material] [fit] [type], [detail description], [style] style」
-15. box_2d 必填：此單品在照片中的 bounding box，格式為 [y_min, x_min, y_max, x_max]，使用 0-1000 的整數（normalized 到照片尺寸）。y 軸由上往下遞增，x 軸由左往右遞增。必須緊貼單品邊緣，不要包含其他物件
 
-只輸出 JSON 陣列，不加任何說明，最多8筆：
-[{"type":"皮夾克","color":"棕色","style":"街頭","material":"皮革","fit":"修身","note":"棕色機車皮夾克，金屬拉鍊細節","placement":"","backPrint":false,"imgPrompt":"brown leather fitted motorcycle jacket, silver zipper details, biker style","box_2d":[120,180,520,820]},{"type":"T恤","color":"白色","style":"休閒","material":"棉","fit":"正常","note":"白色短袖印花T恤","placement":"","backPrint":false,"imgPrompt":"white cotton regular-fit T-shirt, graphic print, casual style","box_2d":[200,250,500,750]},{"type":"牛仔褲","color":"深藍","style":"休閒","material":"牛仔","fit":"修身","note":"深藍修身直筒牛仔褲","placement":"","backPrint":false,"imgPrompt":"dark blue denim slim-fit straight jeans, casual style","box_2d":[500,280,850,720]},{"type":"球鞋","color":"白色","style":"休閒","material":"其他","fit":"正常","note":"白色低筒運動球鞋","placement":"worn on feet","backPrint":false,"imgPrompt":"white low-top sneakers, clean minimal design, casual style","box_2d":[850,300,980,700]}]`;
+範例（全身穿搭照的標準輸出。注意每件有獨立、互不涵蓋的 box_2d，項鍊示範配件的小範圍框）：
+[{"type":"皮夾克","color":"棕色","style":"街頭","material":"皮革","fit":"修身","note":"棕色機車皮夾克，金屬拉鍊細節","placement":"","backPrint":false,"imgPrompt":"brown leather fitted motorcycle jacket, silver zipper details, biker style","box_2d":[100,150,550,850]},{"type":"T恤","color":"白色","style":"休閒","material":"棉","fit":"正常","note":"白色短袖印花T恤","placement":"","backPrint":false,"imgPrompt":"white cotton regular-fit T-shirt, graphic print, casual style","box_2d":[200,280,480,720]},{"type":"牛仔褲","color":"深藍","style":"休閒","material":"牛仔","fit":"修身","note":"深藍修身直筒牛仔褲","placement":"","backPrint":false,"imgPrompt":"dark blue denim slim-fit straight jeans, casual style","box_2d":[530,300,880,720]},{"type":"球鞋","color":"白色","style":"休閒","material":"其他","fit":"正常","note":"白色低筒運動球鞋","placement":"worn on feet","backPrint":false,"imgPrompt":"white low-top sneakers, clean minimal design, casual style","box_2d":[880,340,980,680]},{"type":"項鍊","color":"淺灰","style":"簡約","material":"其他","fit":"正常","note":"銀色細鍊短項鍊","placement":"worn on neck","backPrint":false,"imgPrompt":"silver thin short necklace, minimal design","box_2d":[160,430,220,570]}]
+
+只輸出 JSON 陣列，不加任何說明，最多8筆。`;
 }
 
 async function aiScan(){
@@ -6719,7 +6722,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-42<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-42a<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6743,7 +6746,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-42',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-42a',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
