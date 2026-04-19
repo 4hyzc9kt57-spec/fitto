@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-40 · AI 智能穿搭</title>
+<title>Fitto VG-42 · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -737,7 +737,7 @@ body{background:var(--bg);color:var(--ink);}
 </svg>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-40</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-42</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -855,29 +855,6 @@ body{background:var(--bg);color:var(--ink);}
 <div class="view" id="view-styling">
   <div class="phd"><h1>搭配</h1><p>AI 規劃穿搭，讓每天都好看</p></div>
   <div class="warn" id="wfew">⚠️ 請先到「衣櫃」新增至少 3 件衣物再生成搭配</div>
-
-  <!-- B-1 次要卡並列（點擊 scroll 到對應完整操作區） -->
-  <div style="display:flex;gap:10px;margin-bottom:14px">
-    <div onclick="document.getElementById('section-trend').scrollIntoView({behavior:'smooth'})"
-      style="flex:1;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r);padding:14px 12px;cursor:pointer;transition:border-color .2s"
-      onmouseenter="this.style.borderColor='var(--gold)'" onmouseleave="this.style.borderColor='var(--border2)'">
-      <div style="font-size:.8rem;font-weight:800;color:var(--ink);margin-bottom:4px">🔥 一件變整套</div>
-      <div style="font-size:.6rem;color:var(--muted);line-height:1.6;margin-bottom:8px">選一件單品，AI 搭配整套</div>
-      <div style="font-size:.58rem;color:var(--ink2);line-height:1.7">
-        <span style="color:#4CAF7D;font-weight:700">✓</span> 搜尋當季潮流<br>
-        <span style="color:#4CAF7D;font-weight:700">✓</span> 推薦可購買單品
-      </div>
-      <div style="margin-top:8px;font-size:.58rem;color:var(--gold);font-weight:800;background:rgba(200,160,80,.12);border:1px solid rgba(200,160,80,.3);border-radius:8px;padding:2px 8px;display:inline-block">4 🪙</div>
-    </div>
-    <div onclick="document.getElementById('section-custom').scrollIntoView({behavior:'smooth'})"
-      style="flex:1;background:var(--surface);border:1.5px solid var(--border2);border-radius:var(--r);padding:14px 12px;cursor:pointer;transition:border-color .2s"
-      onmouseenter="this.style.borderColor='var(--gold)'" onmouseleave="this.style.borderColor='var(--border2)'">
-      <div style="font-size:.8rem;font-weight:800;color:var(--ink);margin-bottom:4px">🧍 我的 AI 模特兒</div>
-      <div style="font-size:.6rem;color:var(--muted);line-height:1.6;margin-bottom:8px">用你的頭像試穿搭配</div>
-      <div id="mini-avatar-preview" style="font-size:1.5rem;margin-bottom:4px">👤</div>
-      <div style="font-size:.58rem;color:var(--gold);font-weight:700">點我試穿 →</div>
-    </div>
-  </div>
 
   <!-- B-1 工作日搭配旗艦大卡 -->
   <div class="card" style="background:linear-gradient(135deg,#2A1F0A,#3D2B10);border:1.5px solid rgba(201,144,74,.5)">
@@ -1238,7 +1215,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-40 · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-42 · 2026.04</div>
   </div>
 </div>
 
@@ -1500,7 +1477,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-40 · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-42 · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -1828,7 +1805,7 @@ function buyExpansion(add, cost, tier) {
   }
   if(!spendCoin(cost,'衣櫃擴充')) return;
   if(tier === 'unlimited') {
-    wardrobeLimit = 99999;
+    wardrobeLimit = 500;
   } else {
     wardrobeLimit += add;
     if(tier) { owned.push(tier); localStorage.setItem('fitto_exp_owned', JSON.stringify(owned)); }
@@ -3210,6 +3187,60 @@ async function aiScanAndAppend() {
   window._scanItems = window._scanItems.concat(items);
 }
 
+// VG-42: 將 AI 回傳的 bbox 正規化為 [y0, x0, y1, x1]（0-1 浮點）
+// 支援三種格式：0-1000 整數（Google 標準）、0-1 浮點（舊版）、像素值
+function normalizeBoundingBox(box, imgW, imgH) {
+  if(!Array.isArray(box) || box.length !== 4) return null;
+  var nums = box.map(function(v){ return typeof v === 'number' ? v : parseFloat(v); });
+  if(nums.some(isNaN)) return null;
+  var maxVal = Math.max.apply(null, nums);
+  var y0, x0, y1, x1;
+  if(maxVal <= 1) {
+    // 0-1 浮點格式
+    y0 = nums[0]; x0 = nums[1]; y1 = nums[2]; x1 = nums[3];
+  } else if(maxVal <= 1000) {
+    // 0-1000 整數格式（Google 標準）
+    y0 = nums[0]/1000; x0 = nums[1]/1000; y1 = nums[2]/1000; x1 = nums[3]/1000;
+  } else {
+    // 像素格式
+    if(!imgW || !imgH) return null;
+    y0 = nums[0]/imgH; x0 = nums[1]/imgW; y1 = nums[2]/imgH; x1 = nums[3]/imgW;
+  }
+  // 外擴 5% 避免貼邊切傷單品
+  var dy = (y1 - y0) * 0.05, dx = (x1 - x0) * 0.05;
+  y0 = Math.max(0, y0 - dy); x0 = Math.max(0, x0 - dx);
+  y1 = Math.min(1, y1 + dy); x1 = Math.min(1, x1 + dx);
+  // 驗證：裁切區域必須有效且合理
+  if(y1 <= y0 || x1 <= x0) return null;
+  if((y1 - y0) < 0.02 || (x1 - x0) < 0.02) return null; // 區域太小
+  return {y0: y0, x0: x0, y1: y1, x1: x1};
+}
+
+// VG-42: 依 bbox 裁切影像並輸出 thumb base64
+// bbox 為 null 時 fallback 整張縮圖
+function cropImageByBox(imgEl, bbox, maxSize) {
+  maxSize = maxSize || 300;
+  var sx, sy, sw, sh;
+  if(bbox) {
+    sx = bbox.x0 * imgEl.width;
+    sy = bbox.y0 * imgEl.height;
+    sw = (bbox.x1 - bbox.x0) * imgEl.width;
+    sh = (bbox.y1 - bbox.y0) * imgEl.height;
+    // 若裁切後短邊太小（< 80px），fallback 整張縮圖
+    if(Math.min(sw, sh) < 80) {
+      sx = 0; sy = 0; sw = imgEl.width; sh = imgEl.height;
+    }
+  } else {
+    sx = 0; sy = 0; sw = imgEl.width; sh = imgEl.height;
+  }
+  var ratio = Math.min(maxSize/sw, maxSize/sh, 1);
+  var dw = Math.round(sw * ratio), dh = Math.round(sh * ratio);
+  var canvas = document.createElement('canvas');
+  canvas.width = dw; canvas.height = dh;
+  canvas.getContext('2d').drawImage(imgEl, sx, sy, sw, sh, 0, 0, dw, dh);
+  return canvas.toDataURL('image/jpeg', 0.7);
+}
+
 function buildScanPrompt() {
   return `你是服裝辨識 AI，擅長精準描述服裝細節以利後續生圖使用。你的任務是列出照片中「所有可見單品」，絕對不能只列一件。
 
@@ -3228,9 +3259,10 @@ function buildScanPrompt() {
 12. placement 穿戴位置英文（鞋子 worn on feet，帽子 worn on head）
 13. backPrint 上衣背面有大圖案則 true
 14. imgPrompt 必填：用英文詳細描述此單品，格式參考：「[color] [material] [fit] [type], [detail description], [style] style」
+15. box_2d 必填：此單品在照片中的 bounding box，格式為 [y_min, x_min, y_max, x_max]，使用 0-1000 的整數（normalized 到照片尺寸）。y 軸由上往下遞增，x 軸由左往右遞增。必須緊貼單品邊緣，不要包含其他物件
 
 只輸出 JSON 陣列，不加任何說明，最多8筆：
-[{"type":"皮夾克","color":"棕色","style":"街頭","material":"皮革","fit":"修身","note":"棕色機車皮夾克，金屬拉鍊細節","placement":"","backPrint":false,"imgPrompt":"brown leather fitted motorcycle jacket, silver zipper details, biker style"},{"type":"T恤","color":"白色","style":"休閒","material":"棉","fit":"正常","note":"白色短袖印花T恤","placement":"","backPrint":false,"imgPrompt":"white cotton regular-fit T-shirt, graphic print, casual style"},{"type":"牛仔褲","color":"深藍","style":"休閒","material":"牛仔","fit":"修身","note":"深藍修身直筒牛仔褲","placement":"","backPrint":false,"imgPrompt":"dark blue denim slim-fit straight jeans, casual style"},{"type":"牛仔短褲","color":"淺藍","style":"街頭","material":"牛仔","fit":"oversized","note":"淺藍超短牛仔短褲，破損設計，褲管極短","placement":"","backPrint":false,"imgPrompt":"light blue denim micro shorts, very short inseam, distressed raw hem, above mid-thigh length, streetwear style"},{"type":"球鞋","color":"白色","style":"休閒","material":"其他","fit":"正常","note":"白色低筒運動球鞋","placement":"worn on feet","backPrint":false,"imgPrompt":"white low-top sneakers, clean minimal design, casual style"}]`;
+[{"type":"皮夾克","color":"棕色","style":"街頭","material":"皮革","fit":"修身","note":"棕色機車皮夾克，金屬拉鍊細節","placement":"","backPrint":false,"imgPrompt":"brown leather fitted motorcycle jacket, silver zipper details, biker style","box_2d":[120,180,520,820]},{"type":"T恤","color":"白色","style":"休閒","material":"棉","fit":"正常","note":"白色短袖印花T恤","placement":"","backPrint":false,"imgPrompt":"white cotton regular-fit T-shirt, graphic print, casual style","box_2d":[200,250,500,750]},{"type":"牛仔褲","color":"深藍","style":"休閒","material":"牛仔","fit":"修身","note":"深藍修身直筒牛仔褲","placement":"","backPrint":false,"imgPrompt":"dark blue denim slim-fit straight jeans, casual style","box_2d":[500,280,850,720]},{"type":"球鞋","color":"白色","style":"休閒","material":"其他","fit":"正常","note":"白色低筒運動球鞋","placement":"worn on feet","backPrint":false,"imgPrompt":"white low-top sneakers, clean minimal design, casual style","box_2d":[850,300,980,700]}]`;
 }
 
 async function aiScan(){
@@ -3270,7 +3302,7 @@ async function aiScan(){
       detail.backPrint = false;
       items = [detail];
     }
-    // 正規化每件 — 保留細分種類名稱，加入 placement
+    // 正規化每件 — 保留細分種類名稱，加入 placement、box_2d
     items = items.map(i=>({
       type: i.type||'上衣',
       color: i.color||'白色',
@@ -3280,7 +3312,8 @@ async function aiScan(){
       note: i.note||'',
       placement: i.placement||'',
       backPrint: !!i.backPrint,
-      imgPrompt: i.imgPrompt||''
+      imgPrompt: i.imgPrompt||'',
+      box_2d: Array.isArray(i.box_2d) ? i.box_2d : null
     }));
     renderMultiScanResult(items);
   }catch(e){
@@ -3433,20 +3466,23 @@ function confirmSingleScanItem(i) {
     note:item.note||'', placement:item.placement||'', backPrint:!!item.backPrint,
     hasPhoto:false, imgPrompt:prebuiltPrompt, aiItemPrompt:item.imgPrompt||''};
 
-  // 用原圖縮圖（同 confirmMultiScan 邏輯）
+  // 用原圖 + bbox 裁切單品縮圖（VG-42 bbox 功能）
   if(scanB64) {
     const fullDataUrl = 'data:' + (scanMime||'image/jpeg') + ';base64,' + scanB64;
     const imgEl = new Image();
-    imgEl.onload = (function(wItem){ return function(){
-      const canvas = document.createElement('canvas');
-      const MAX = 300;
-      const ratio = Math.min(MAX/imgEl.width, MAX/imgEl.height, 1);
-      canvas.width = imgEl.width*ratio; canvas.height = imgEl.height*ratio;
-      canvas.getContext('2d').drawImage(imgEl,0,0,canvas.width,canvas.height);
-      wItem.thumb = canvas.toDataURL('image/jpeg', 0.7);
-      wItem.hasPhoto = true;
+    imgEl.onload = (function(wItem, bbox){ return function(){
+      const normBox = normalizeBoundingBox(bbox, imgEl.width, imgEl.height);
+      try {
+        wItem.thumb = cropImageByBox(imgEl, normBox, 300);
+        wItem.hasPhoto = true;
+        if(normBox) wItem.box_2d = bbox; // 保存原始 bbox 供未來重算
+      } catch(e) {
+        apiLog('✗ bbox 裁切失敗，fallback 整張: ' + (e.message||'').substring(0,50), 'err');
+        wItem.thumb = cropImageByBox(imgEl, null, 300);
+        wItem.hasPhoto = true;
+      }
       persist(); renderW();
-    }; })(w);
+    }; })(w, item.box_2d || null);
     imgEl.src = fullDataUrl;
     w.thumb = null; w.hasPhoto = false;
   } else {
@@ -3499,20 +3535,22 @@ function confirmMultiScan() {
     // Fix ②：縮圖改用 SVG 色塊 + emoji，而非整張人物照壓縮
     const bg = COLORS[item.color] || '#1A3326';
     const em = EMOJIS[item.type] || '🧺';
-    // 優先用辨識時的原圖縮圖（壓縮後存 thumb）
+    // VG-42：使用 bbox 裁切每個單品的獨立縮圖
     if(scanB64) {
       const fullDataUrl = 'data:' + (scanMime||'image/jpeg') + ';base64,' + scanB64;
       const imgEl = new Image();
-      imgEl.onload = (function(wItem){ return function(){
-        const canvas = document.createElement('canvas');
-        const MAX = 300;
-        const ratio = Math.min(MAX/imgEl.width, MAX/imgEl.height, 1);
-        canvas.width = imgEl.width*ratio; canvas.height = imgEl.height*ratio;
-        canvas.getContext('2d').drawImage(imgEl,0,0,canvas.width,canvas.height);
-        wItem.thumb = canvas.toDataURL('image/jpeg', 0.7);
-        wItem.hasPhoto = true;
+      imgEl.onload = (function(wItem, bbox){ return function(){
+        const normBox = normalizeBoundingBox(bbox, imgEl.width, imgEl.height);
+        try {
+          wItem.thumb = cropImageByBox(imgEl, normBox, 300);
+          wItem.hasPhoto = true;
+          if(normBox) wItem.box_2d = bbox;
+        } catch(e) {
+          wItem.thumb = cropImageByBox(imgEl, null, 300);
+          wItem.hasPhoto = true;
+        }
         persist(); renderW();
-      }; })(w);
+      }; })(w, item.box_2d || null);
       imgEl.src = fullDataUrl;
       w.thumb = null; w.hasPhoto = false; // 先暫存，onload後更新
     } else {
@@ -6681,7 +6719,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-40<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-42<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6705,7 +6743,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-40',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-42',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -7160,7 +7198,7 @@ function switchWardrobe(id) {
     var vip = vipWardrobes.find(function(v){ return v.id === id; });
     if(vip) {
       wardrobe = vip.items ? vip.items.slice() : [];
-      wardrobeLimit = 99999;
+      wardrobeLimit = 500;
     }
   }
 
@@ -7287,7 +7325,7 @@ document.addEventListener('DOMContentLoaded', function() {
     // 恢復上次使用的衣櫃
     if(activeWardrobeId !== 'main') {
       var vip = vipWardrobes.find(function(v){ return v.id === activeWardrobeId; });
-      if(vip){ wardrobe = vip.items || []; wardrobeLimit = 99999; }
+      if(vip){ wardrobe = vip.items || []; wardrobeLimit = 500; }
       else { activeWardrobeId = 'main'; localStorage.setItem('fitto_active_wardrobe','main'); }
     }
     renderW();
@@ -7848,7 +7886,7 @@ function drawScoringRadar(scores) {
 
 function saveScoringRecord(total, parsed) {
   var records = JSON.parse(localStorage.getItem('fitto_scoring') || '[]');
-  records.unshift({
+  var rec = {
     date: new Date().toLocaleDateString('zh-TW'),
     total: total,
     color: parseInt(parsed.color_score) || 0,
@@ -7856,7 +7894,41 @@ function saveScoringRecord(total, parsed) {
     occasion: parseInt(parsed.occasion_score) || 0,
     style: parseInt(parsed.style_score) || 0,
     comment: parsed.comment || ''
-  });
+  };
+  // VG-42 C-1: 存穿搭縮圖（100px，JPEG 0.6）
+  try {
+    if(_scoringImageB64) {
+      var srcDataUrl = 'data:' + (_scoringImageMime || 'image/jpeg') + ';base64,' + _scoringImageB64;
+      var imgEl = new Image();
+      imgEl.src = srcDataUrl;
+      if(imgEl.complete && imgEl.width > 0) {
+        var MAX = 100;
+        var ratio = Math.min(MAX/imgEl.width, MAX/imgEl.height, 1);
+        var canvas = document.createElement('canvas');
+        canvas.width = Math.round(imgEl.width*ratio);
+        canvas.height = Math.round(imgEl.height*ratio);
+        canvas.getContext('2d').drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+        rec.thumb = canvas.toDataURL('image/jpeg', 0.6);
+      } else {
+        // 非同步載入後補寫
+        imgEl.onload = function(){
+          try {
+            var MAX = 100;
+            var ratio = Math.min(MAX/imgEl.width, MAX/imgEl.height, 1);
+            var canvas = document.createElement('canvas');
+            canvas.width = Math.round(imgEl.width*ratio);
+            canvas.height = Math.round(imgEl.height*ratio);
+            canvas.getContext('2d').drawImage(imgEl, 0, 0, canvas.width, canvas.height);
+            var recs = JSON.parse(localStorage.getItem('fitto_scoring') || '[]');
+            if(recs[0]) { recs[0].thumb = canvas.toDataURL('image/jpeg', 0.6);
+              localStorage.setItem('fitto_scoring', JSON.stringify(recs));
+              renderScoringHistory(); }
+          } catch(e) {}
+        };
+      }
+    }
+  } catch(e) { /* 縮圖失敗不影響主流程 */ }
+  records.unshift(rec);
   if (records.length > 20) records = records.slice(0, 20);
   localStorage.setItem('fitto_scoring', JSON.stringify(records));
 }
@@ -7952,14 +8024,19 @@ function renderScoringHistory() {
 
   el.innerHTML = sparkHtml + records.map(function(r) {
     var sc = scoreColor(r.total);
-    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center">'
-      + '<div>'
+    // VG-42 C-1: 有縮圖就顯示
+    var thumbHtml = r.thumb
+      ? '<img src="' + r.thumb + '" style="width:52px;height:52px;border-radius:8px;object-fit:cover;border:1px solid var(--border2);flex-shrink:0" alt="">'
+      : '';
+    return '<div style="background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:12px 14px;margin-bottom:8px;display:flex;justify-content:space-between;align-items:center;gap:12px">'
+      + (thumbHtml ? thumbHtml : '')
+      + '<div style="flex:1;min-width:0">'
       + '<div style="font-size:.65rem;color:var(--muted);margin-bottom:3px">' + r.date + '</div>'
       + '<div style="font-size:.72rem;color:var(--ink2);line-height:1.5">'
       + '色彩 ' + r.color + ' · 版型 ' + r.silhouette + ' · 場合 ' + r.occasion + ' · 風格 ' + r.style
       + '</div>'
       + '</div>'
-      + '<div style="font-family:Inter;font-weight:900;font-size:1.6rem;color:' + sc + '">' + r.total + '</div>'
+      + '<div style="font-family:Inter;font-weight:900;font-size:1.6rem;color:' + sc + ';flex-shrink:0">' + r.total + '</div>'
       + '</div>';
   }).join('');
 }
