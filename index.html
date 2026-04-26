@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
-<title>Fitto VG-42d · AI 智能穿搭</title>
+<title>Fitto VG-42e · AI 智能穿搭</title>
 
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Noto+Sans+TC:wght@400;500;700&display=swap');
@@ -738,7 +738,7 @@ body{background:var(--bg);color:var(--ink);}
 </svg>
 
 <header>
-<div class="logo">Fitto <span class="logo-badge">VG-42d</span></div>
+<div class="logo">Fitto <span class="logo-badge">VG-42e</span></div>
   <div style="display:flex;gap:8px;align-items:center">
     <!-- 髮型快速切換 -->
     <div class="hair-quick-btn" id="hair-quick-btn" onclick="toggleHairPanel()" title="切換髮型">💇</div>
@@ -1215,7 +1215,7 @@ body{background:var(--bg);color:var(--ink);}
       <div class="tf-reset" onclick="event.stopPropagation();copyLog()" style="color:#4CAF7D">📋 複製</div>
       <div class="tf-reset" onclick="event.stopPropagation();openDeploy()" style="color:var(--gold)">🚀 部署</div>
     </div>
-    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-42d · 2026.04</div>
+    <div style="font-size:0.5rem;color:var(--border2);letter-spacing:0.05em;text-align:center;margin-top:4px">Fitto VG-42e · 2026.04</div>
   </div>
 </div>
 
@@ -1477,7 +1477,7 @@ body{background:var(--bg);color:var(--ink);}
   <input type="password" class="lock-input" id="lock-pw" placeholder="••••••" onkeydown="if(event.key==='Enter')checkPw()">
   <div class="lock-error" id="lock-err">❌ 密碼錯誤，請再試一次</div>
   <button class="lock-btn" onclick="checkPw()">進入 Fitto</button>
-<div class="lock-footer">Fitto VG-42d · Gemini Powered · 2026.04</div>
+<div class="lock-footer">Fitto VG-42e · Gemini Powered · 2026.04</div>
 </div>
 
 <!-- 整合個人設定 MODAL -->
@@ -2694,7 +2694,7 @@ async function geminiVisionScan(b64, mime) {
   if(!key) throw new Error('請先設定 Gemini Key');
   apiLog('→ 多件掃描 vision', 'prompt');
   const prompt = buildScanPrompt();
-  // VG-42d Fix 4: 15 秒 timeout，避免 API 無回應卡住使用者
+  // VG-42e Fix 4: 15 秒 timeout，避免 API 無回應卡住使用者
   const controller = new AbortController();
   const timeoutId = setTimeout(function(){ controller.abort(); }, 15000);
   var res;
@@ -2866,7 +2866,7 @@ function renderW(){
       const imgHtml=i.hasPhoto&&i.thumb
         ? '<img src="'+i.thumb+'" style="width:100%;height:100%;object-fit:cover">'
         : em;
-      // VG-42d Fix 2A: note 去除與 style 重複的詞（避免「休閒」在風格 tag 顯示過又出現在備註）
+      // VG-42e Fix 2A: note 去除與 style 重複的詞（避免「休閒」在風格 tag 顯示過又出現在備註）
       var cleanNote = (i.note||'').trim();
       if(cleanNote && i.style) {
         // 把 note 以逗號/頓號/空格拆分，過濾掉與 style 相同的詞
@@ -3191,7 +3191,7 @@ async function aiScanAndAppend() {
   }
   const raw = await geminiVisionScan(scanB64, scanMime);
   let items = parseMultiScanItems(raw);
-  // VG-42d Fix 5: 單件特寫照（長寬比 < 1.4）且已辨識出 1 件則直接接受
+  // VG-42e Fix 5: 單件特寫照（長寬比 < 1.4）且已辨識出 1 件則直接接受
   if(items.length === 1) {
     try {
       const aspect = await new Promise(function(resolve){
@@ -3322,7 +3322,7 @@ async function aiScan(){
     const raw = await geminiVisionScan(scanB64, scanMime);
     apiLog('  辨識原文: ' + raw.substring(0,500).replace(/\n/g,' '), 'info');
     let items = parseMultiScanItems(raw);
-    // VG-42d Fix 5: retry 加長寬比啟發式。單件特寫照（長寬比 < 1.4）即使只回 1 件也直接接受，省 API 成本
+    // VG-42e Fix 5: retry 加長寬比啟發式。單件特寫照（長寬比 < 1.4）即使只回 1 件也直接接受，省 API 成本
     const shouldRetry = await (async function(){
       if(items.length > 1) return false; // 已多件，不需 retry
       if(items.length === 0) return true; // 完全失敗，必須 retry
@@ -3447,7 +3447,7 @@ const TYPE_OPTIONS = ['上衣','T恤','襯衫','毛衣','外套','夾克','褲�
 const COLOR_OPTIONS = ['白色','米白','淺灰','灰色','深灰','黑色','淺藍','深藍','卡其','棕色','紅色','酒紅','粉色','綠色','橄欖綠','花紋/條紋'];
 const STYLE_OPTIONS = ['休閒','正式','商務','運動','韓系','簡約','街頭'];
 
-// VG-42d Fix 1: normalize AI 回傳的顏色到 COLOR_OPTIONS，處理「卡其」↔「卡其色」等變體
+// VG-42e Fix 1: normalize AI 回傳的顏色到 COLOR_OPTIONS，處理「卡其」↔「卡其色」等變體
 function normalizeColor(c) {
   if(!c) return '白色';
   const s = String(c).trim();
@@ -3468,7 +3468,7 @@ function normalizeColor(c) {
   if(synonyms[s]) return synonyms[s];
   return '白色';
 }
-// VG-42d Fix 1: 組 prompt 時自動補「色」字尾（避免 normalize 後的「卡其」出現在 prompt 中）
+// VG-42e Fix 1: 組 prompt 時自動補「色」字尾（避免 normalize 後的「卡其」出現在 prompt 中）
 function colorForPrompt(c) {
   if(!c) return '白色';
   const s = String(c).trim();
@@ -3498,7 +3498,7 @@ function buildItemImgPrompt(item, avatarDesc) {
 
   const poseDesc = item.backPrint ? BACK_POSE : POSES[0];
   const colorStr = colorForPrompt(item.color);
-  const itemFullDesc = `${colorStr} ${item.type}${item.note ? '，' + item.note : ''}（風格：${item.style}）${isShorts ? '，very short hemline, micro-length, above mid-thigh, trendy streetwear cut' : ''}`;
+  const itemFullDesc = `${colorStr} ${item.type}${item.note ? '，' + item.note : ''}（風格：${item.style}）${isShorts ? '，EXTREMELY short hemline, micro-mini length, hemline at the very top of the thigh right below the hip crease, NOT below mid-thigh, high-waisted cut' : ''}`;
 
   let prompt;
   if(isAcc) {
@@ -4156,8 +4156,7 @@ priceRange: 新購預估NT$總價，無需新購則留空`;
           <div style="font-size:.58rem;font-weight:800;color:var(--gold);letter-spacing:.08em">🔥 ${year}年${seaLabel}季</div>
           <div style="font-size:.6rem;font-weight:800;color:#FAF7F2;background:linear-gradient(135deg,#7B5E2A,#C9904A);border-radius:10px;padding:2px 8px">${rec.styleLabel}</div>
         </div>
-        ${ruleTagsHtml ? '<div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:10px">' + ruleTagsHtml + '</div>' : ''}
-        <div style="font-size:.62rem;color:var(--muted);margin-bottom:10px;padding:5px 8px;background:rgba(200,160,80,.08);border-radius:6px">${rec.trendContext}</div>
+        ${rec.trendContext ? `<div style="font-size:.62rem;color:var(--muted);margin-bottom:10px;padding:5px 8px;background:rgba(200,160,80,.08);border-radius:6px">${rec.trendContext}</div>` : ''}
         <div style="background:var(--surface2);border-radius:8px;padding:10px 12px;margin-bottom:8px">
           <div style="font-size:.56rem;font-weight:800;color:var(--muted);margin-bottom:6px">✦ 完整穿搭（共 ${verifiedOutfitTags.length} 件）${nonWardrobeCount > 0 ? '<span style="color:var(--red);margin-left:6px">🛍 ' + nonWardrobeCount + ' 件需購買</span>' : '<span style="color:var(--green);margin-left:6px">全部來自衣櫃</span>'}</div>
           <div style="display:flex;flex-wrap:wrap;gap:4px;margin-bottom:6px">${outfitTagsHtml}</div>
@@ -5188,8 +5187,15 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
       var bracketHtml = bracketNote
         ? '<div style="font-size:.52rem;color:var(--muted);padding-left:26px;margin-top:1px;opacity:.75">・' + bracketNote + '</div>'
         : '';
-      // #17: 衣櫃同類型多件時的備註區分
-      var wardrobeHtml = (!bracketNote && inWrd && wardrobeNote)
+      // VG-42e Fix 3: wardrobeNote 若與品名高度相似（去空白後包含關係），不顯示以免重複
+      var cleanPartText = partText.replace(/\s/g,'');
+      var cleanWNote = wardrobeNote.replace(/\s/g,'');
+      var noteIsDuplicate = cleanWNote.length > 0 && (
+        cleanPartText.indexOf(cleanWNote) !== -1 ||
+        cleanWNote.indexOf(cleanPartText) !== -1 ||
+        (cleanWNote.length >= 4 && cleanPartText.indexOf(cleanWNote.substring(0, Math.floor(cleanWNote.length * 0.8))) !== -1)
+      );
+      var wardrobeHtml = (!bracketNote && inWrd && wardrobeNote && !noteIsDuplicate)
         ? '<div style="font-size:.52rem;color:var(--muted);padding-left:26px;margin-top:1px;opacity:.75">・' + wardrobeNote + '</div>'
         : '';
 
@@ -5396,7 +5402,7 @@ function renderRes(r,it,ot,occ,sea,isDemo=false,sourceLabel=''){
   document.getElementById('rcard').classList.add('show');
   lastRes={...r,occ,sea,at:new Date().toLocaleDateString('zh-TW')};
 
-  // VG-42d Fix 2B/3: 背景呼叫 AI 動態推薦配件，成功後替換 pool 結果
+  // VG-42e Fix 2B/3: 背景呼叫 AI 動態推薦配件，成功後替換 pool 結果
   (function(){
     const gk = localStorage.getItem('fitto_gemini_key')||'';
     if(!gk) return; // 無 key 就保留 pool
@@ -6838,7 +6844,7 @@ button:disabled{background:#333;cursor:not-allowed}
 </head>
 <body>
 <h2>🚀 Fitto Deploy</h2>
-<p>點下方按鈕將 Fitto VG-42d<br>部署到 GitHub Pages</p>
+<p>點下方按鈕將 Fitto VG-42e<br>部署到 GitHub Pages</p>
 <div class="status info" id="st">準備就緒</div>
 <button id="btn" onclick="deploy()">開始部署</button>
 <script>
@@ -6862,7 +6868,7 @@ async function deploy() {
     var r2 = await fetch('https://api.github.com/repos/4hyzc9kt57-spec/fitto/contents/index.html',{
       method:'PUT',
       headers:{'Authorization':'token '+TOKEN,'Accept':'application/vnd.github.v3+json','Content-Type':'application/json'},
-      body:JSON.stringify({message:'Deploy Fitto VG-42d',content:b64,sha:d1.sha,branch:'main'})
+      body:JSON.stringify({message:'Deploy Fitto VG-42e',content:b64,sha:d1.sha,branch:'main'})
     });
     var d2 = await r2.json();
     if(d2.commit){
@@ -7732,7 +7738,7 @@ function generateScoringCard(photoSrc, scores, total, dims) {
   var DPR = 2;
   var W = 400, H = 640;
   canvas.width = W * DPR; canvas.height = H * DPR;
-  // VG-42d Fix 3: 自適應比例，不鎖定 px，讓 CSS max-width:100% + height:auto 控制顯示大小
+  // VG-42e Fix 3: 自適應比例，不鎖定 px，讓 CSS max-width:100% + height:auto 控制顯示大小
   canvas.style.width = '100%';
   canvas.style.height = 'auto';
   var ctx = canvas.getContext('2d');
